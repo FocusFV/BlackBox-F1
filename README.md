@@ -1,24 +1,31 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./dashboard/public/tag-logo.png" width="200">
-    <img alt="f1-dash" src="./dashboard/public/tag-logo.png" width="200">
+    <!-- Usamos tu logo principal de BlackBox-F1 para la cabecera -->
+    <source media="(prefers-color-scheme: dark)" srcset="./dashboard/public/logoprincipal.png" width="280">
+    <img alt="BlackBox-F1" src="./dashboard/public/logoprincipal.png" width="280">
   </picture>
 </p>
 
-<h1 align="center">Real-time Formula 1 telemetry and timing</h1>
+<h1 align="center">BlackBox-F1</h1>
 
-## f1-dash
+<p align="center">
+  <strong>Telemetría y tiempos de Formula 1 en vivo, con una interfaz moderna y optimizada en español.</strong>
+</p>
 
-A real-time F1 dashboard that shows the leader board, tires, gaps, laps, mini sectors and much more.
+---
 
-## Contributing
+## 🏎️ Acerca del Proyecto
 
-I really appreciate your interest in contributing to this project. I recommend checking out the GitHub issues marked as "Good First Issue" to get started. Also, please read [`CONTRIBUTING.md`](CONTRIBUTING.md) to learn how to contribute and set up f1-dash on your local machine for development.
+**BlackBox-F1** es una evolución estética y de rendimiento basada en la arquitectura Open Source de `f1-dash`. Este proyecto nace con el objetivo de ofrecer una plataforma completamente traducida al español, con un diseño pulido de alto impacto visual y un backend reestructurado para garantizar estabilidad absoluta durante las sesiones del campeonato.
 
-## Supporting
+### Características principales:
+* 📊 **Tabla de posiciones y tiempos en tiempo real**: Datos precisos de vueltas, compuestos de neumáticos y deltas.
+* ⚡ **Algoritmo de localización por minisectores**: Estimación inteligente de la posición aproximada de los monoplazas en pista para sortear las restricciones de los servicios oficiales.
+* 🦀 **Backend robusto en Rust**: Procesamiento de datos ultra rápido montado sobre contenedores Docker.
+* 🎨 **Interfaz inmersiva**: Diseño adaptado con estética de fibra de carbono, transparencias de tipo vidrio esmerilado y optimización para monitores de alta resolución.
 
-If you'd like to support this project and help me dedicate more time to it, you can [buy me a coffee](https://www.buymeacoffee.com/slowlydev).
+---
 
-## Notice
+## 🛠️ Desarrollo Local
 
-This project/website is unofficial and is not associated in any way with the Formula 1 companies. F1, FORMULA ONE, FORMULA 1, FIA FORMULA ONE WORLD CHAMPIONSHIP, GRAND PRIX and related marks are trade marks of Formula One Licensing B.V.
+Este proyecto utiliza una infraestructura dividida en microservicios gestionada por **Docker**. Para levantar la plataforma en tu entorno local para desarrollo, parate en la raíz del repositorio y ejecutá:
