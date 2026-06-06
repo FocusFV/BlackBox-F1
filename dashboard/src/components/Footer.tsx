@@ -1,149 +1,89 @@
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 
-import Button from "@/components/ui/Button";
-import ScrollHint from "@/components/ScrollHint";
-import Footer from "@/components/Footer"; // Aseguramos que levante tu nuevo footer centrado
+// Tu archivo definitivo de marca personal
+import logoFocus from "public/FocusFVLogo.png"; 
 
-import icon from "public/logoprincipal.png";
-import mosaicoEquipos from "public/equiposf1.png";
-
-export default function Home() {
+export default function Footer() {
 	return (
-		// El contenedor principal mantiene la fibra de carbono simulada cubriendo el 100% de la pantalla
-		<div 
-			className="min-h-screen w-full text-neutral-200 relative overflow-hidden"
-			style={{
-				backgroundImage: `
-					radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,0.97)),
-					linear-gradient(45deg, #111 25%, transparent 25%), 
-					linear-gradient(-45deg, #111 25%, transparent 25%), 
-					linear-gradient(45deg, transparent 75%, #111 75%), 
-					linear-gradient(-45deg, transparent 75%, #111 75%)
-				`,
-				backgroundSize: "100% 100%, 8px 8px, 8px 8px, 8px 8px, 8px 8px",
-				backgroundColor: "#050505"
-			}}
-		>
+		// Volamos cualquier fondo sólido. Hacemos el contenedor 100% transparente para que la fibra de carbono y el mosaico pasen de largo por abajo.
+		<footer className="mt-12 mb-8 border-t border-zinc-900/40 pt-8 text-sm text-zinc-500 tracking-wide font-medium relative z-10 w-full flex flex-col items-center bg-transparent">
 			
-			{/* TU CONFIGURACIÓN PERFECTA DE MOSAICO (A 10 GRADOS Y 1500PX) */}
-			<div className="absolute inset-0 z-0 opacity-10 overflow-hidden flex items-center justify-center">
-				<div 
-					className="absolute"
-					style={{
-						top: "50%",
-						left: "50%",
-						width: "300vw",
-						height: "300vh",
-						backgroundImage: `url(${mosaicoEquipos.src})`,
-						backgroundRepeat: "repeat",
-						backgroundSize: "1500px auto", 
-						transform: "translate(-70%, -50%) rotate(10deg)",
-					}}
-				/>
-			</div>
-
-			{/* Destello de luz oro de fondo */}
-			<div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-amber-500/[0.04] blur-[150px] rounded-full pointer-events-none z-0" />
-
-			{/* HERO PRINCIPAL */}
-			<section className="relative z-10 flex h-screen w-full flex-col items-center pt-20 sm:justify-center sm:pt-0 max-w-6xl mx-auto px-6 sm:px-16">
+			{/* CONTENEDOR DE TEXTOS CON OPACIDAD GENERAL PARA QUE SE INTEGREN AL FONDO */}
+			<div className="opacity-60 hover:opacity-90 transition-opacity duration-300 flex flex-col items-center w-full">
 				
-				{/* Contenedor del logo principal ampliado y con efecto pulse */}
-				<div className="w-full max-w-[460px] drop-shadow-[0_0_30px_rgba(245,158,11,0.18)] animate-pulse [animation-duration:4s] hover:scale-105 hover:drop-shadow-[0_0_45px_rgba(245,158,11,0.3)] transition duration-500 flex justify-center select-none">
-					<Image 
-						src={icon} 
-						alt="BlackBox-F1 tag logo" 
-						className="w-full h-auto object-contain" 
-						priority 
-					/>
-				</div>
-
-				<h1 className="my-14 text-center text-4xl sm:text-6xl font-black uppercase tracking-tight text-zinc-100 leading-tight">
-					Telemetría y Tiempos de <br />
-					<span className="bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(245,158,11,0.15)]">
-						Formula 1 en Vivo
-					</span>
-				</h1>
-
-				{/* BOTONES */}
-				<div className="flex flex-wrap justify-center gap-4 z-20">
-					<Link href="/dashboard">
-						<Button className="rounded-xl! border border-transparent bg-gradient-to-r from-amber-500 to-amber-400 text-neutral-950 px-6 py-3.5 font-black uppercase tracking-widest text-xs shadow-[0_4px_20px_rgba(245,158,11,0.15)] transition duration-200 hover:from-amber-400 hover:to-amber-300 hover:shadow-[0_4px_25px_rgba(245,158,11,0.25)] hover:-translate-y-0.5">
-							Ir al Dashboard
-						</Button>
-					</Link>
-
-					<Link href="/schedule">
-						<Button className="rounded-xl! border border-zinc-800 bg-zinc-900/30 text-neutral-200 px-6 py-3.5 font-bold uppercase tracking-widest text-xs backdrop-blur-sm transition duration-200 hover:border-amber-500/40 hover:text-amber-400 hover:bg-amber-500/[0.02] hover:-translate-y-0.5">
-							Ver Calendario
-						</Button>
-					</Link>
-				</div>
-
-				<ScrollHint />
-			</section>
-
-			{/* SECCIONES INFORMATIVAS: ¡AHORA MEDIO TRANSPARENTES CON EFECTO VIDRIO! */}
-			{/* Cambiamos el fondo opaco por bg-zinc-950/20 y metemos backdrop-blur-md para que el mosaico pase por detrás */}
-			<div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6 pb-12 max-w-6xl mx-auto px-6 sm:px-16">
-				
-				{/* Tarjeta 1 */}
-				<section className="bg-zinc-950/20 backdrop-blur-md p-6 rounded-2xl border border-zinc-900/60 shadow-lg transition duration-300 hover:border-zinc-700/80 hover:bg-zinc-950/30">
-					<h2 className="mb-3 text-lg font-black uppercase tracking-wider text-amber-500 flex items-center gap-2">
-						<span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-						¿Qué es BlackBox-F1?
-					</h2>
-					<p className="text-sm text-zinc-400 leading-relaxed font-medium">
-						BlackBox-F1 es una evolución estética y funcional inspirada en el proyecto original f1-dash. Nace con el objetivo de ofrecer una interfaz completamente traducida al español, con un diseño pulido, moderno y optimizado para los fanáticos de la Formula 1. Te permite seguir la telemetría y los tiempos oficiales en tiempo real, con datos de vueltas, sectores y neumáticos en una experiencia visual superadora.
-					</p>
-				</section>
-
-				{/* Tarjeta 2 */}
-				<section className="bg-zinc-950/20 backdrop-blur-md p-6 rounded-2xl border border-zinc-900/60 shadow-lg transition duration-300 hover:border-zinc-700/80 hover:bg-zinc-950/30">
-					<h2 className="mb-3 text-lg font-black uppercase tracking-wider text-amber-500 flex items-center gap-2">
-						<span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-						¿Cómo se calcula la posición en pista?
-					</h2>
-					<div className="space-y-3 text-sm text-zinc-400 leading-relaxed font-medium">
-						<p>
-							Debido a las restricciones actuales en el acceso a las métricas de ubicación posicional por parte de los servicios oficiales, en BlackBox-F1 adaptamos la arquitectura del backend para procesar la información mediante un sistema inteligente de **minisectores**.
+				{/* FILA DE ENLACES TOTALMENTE CENTRADA */}
+				<div className="mb-4 flex flex-col items-center gap-3 border-b border-zinc-900/30 pb-4 w-full">
+					<div className="flex flex-wrap justify-center items-center text-center gap-x-6 gap-y-2">
+						<p className="text-zinc-400">
+							Evolución Open Source basada en el proyecto original de <TextLink website="https://slowly.dev">Slowly</TextLink>.
 						</p>
-						<p className="border-t border-zinc-900/40 pt-2 text-zinc-400/90">
-							Este algoritmo estima de manera aproximada la localización de los monoplazas en el circuito. Aunque no es una telemetría por satélite milimétrica, otorga una referencia visual sumamente fiel de la progresión y las batallas en pista durante la carrera.
+						
+						<p>
+							Código y refactorización en <TextLink website="https://github.com/FocusFV/BlackBox-F1">GitHub</TextLink>.
+						</p>
+
+						<p>
+							¿Te copa el proyecto? <TextLink website="https://buymeacoffee.com/focusfv">Invitame un café</TextLink>.
+						</p>
+
+						<p>
+							¿Necesitás una mano? {" "}
+							<Link className="text-amber-500/80 hover:text-amber-400 transition font-semibold" href="/help">
+								Soporte y Ayuda
+							</Link>.
 						</p>
 					</div>
-				</section>
 
-				{/* Tarjeta 3 */}
-				<section className="bg-zinc-950/20 backdrop-blur-md p-6 rounded-2xl border border-zinc-900/60 shadow-lg transition duration-300 hover:border-zinc-700/80 hover:bg-zinc-950/30">
-					<h2 className="mb-3 text-lg font-black uppercase tracking-wider text-amber-500 flex items-center gap-2">
-						<span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-						Origen y Reestructuración
-					</h2>
-					<p className="text-sm text-zinc-400 leading-relaxed font-medium">
-						Esta plataforma es una version refactorizada que toma la sólida base Open Source de f1-dash y la lleva a un nuevo nivel de rendimiento local. Mientras el desarrollo original se mantiene bajo mantenimiento básico, en BlackBox-F1 integramos un backend robusto en Rust montado sobre contenedores Docker para garantizar estabilidad absoluta y respuestas instantáneas en cada sesión.
+					{/* VERSIÓN DEL SOFTWARE */}
+					<div className="text-xs text-zinc-500 font-mono bg-zinc-900/20 px-2 py-0.5 rounded border border-zinc-900/40 mt-1">
+						v{process.env.version || "4.0.3-rust"}[cite: 1]
+					</div>
+				</div>
+
+				{/* DESCLÁIMER OFICIAL DE F1 (Más sutil todavía para que no compita visualmente) */}
+				<div className="text-xs text-zinc-600 leading-relaxed max-w-4xl text-center px-4 mb-2">
+					<p>
+						Este sitio web es de carácter independiente, no oficial y no se encuentra vinculado, asociado ni patrocinado de ninguna forma por las empresas del grupo Formula 1[cite: 1]. F1, FORMULA ONE, FORMULA 1, FIA FORMULA ONE WORLD CHAMPIONSHIP, GRAND PRIX y sus logotipos relacionados son marcas comerciales registradas propiedad de Formula One Licensing B.V[cite: 1].
 					</p>
-				</section>
-
-				{/* Tarjeta 4 */}
-				<section className="bg-zinc-950/20 backdrop-blur-md p-6 rounded-2xl border border-zinc-900/60 shadow-lg transition duration-300 hover:border-zinc-700/80 hover:bg-zinc-950/30">
-					<h2 className="mb-3 text-lg font-black uppercase tracking-wider text-amber-500 flex items-center gap-2">
-						<span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-						¿Qué es lo próximo?
-					</h2>
-					<p className="text-sm text-zinc-400 leading-relaxed font-medium">
-						El rediseño de la interfaz es solo el punto de partida. La meta de BlackBox-F1 es continuar tuneando la visualización de datos, incorporando componentes personalizados para la telemetría histórica y mejorando las herramientas de sincronización de transmisión. Iremos desplegando optimizaciones continuas en el panel de control para que ver las carreras del campeonato sea una experiencia totalmente inmersiva.
-					</p>
-				</section>
-
+				</div>
 			</div>
 
-			{/* RENDERIZADO DEL FOOTER INTEGRADO */}
-			<div className="max-w-6xl mx-auto px-6 sm:px-16 w-full">
-				<Footer />
+			{/* FIRMA DEL DESARROLLADOR: FULL COLOR, DESTACADA Y SIN OPACIDAD DE BASE */}
+			<div className="mt-6 pt-6 border-t border-zinc-900/40 flex flex-col items-center justify-center gap-3 w-full">
+				<span className="text-[11px] tracking-[0.3em] uppercase text-zinc-600 font-black">
+					Desarrollado y Optimizado por
+				</span>
+				
+				<Link 
+					href="https://github.com/FocusFV" 
+					target="_blank" 
+					className="hover:scale-105 transition duration-300 mt-1 block"
+				>
+					{/* Tu logo full color, con un brillo nítido y el resplandor que se intensifica al pasar el mouse */}
+					<Image 
+						src={logoFocus} 
+						alt="FocusFV Desarrollador" 
+						width={380} 
+						height={110} 
+						className="h-24 w-auto object-contain brightness-110 drop-shadow-[0_0_25px_rgba(245,158,11,0.15)] hover:brightness-125 hover:drop-shadow-[0_0_40px_rgba(245,158,11,0.4)] transition duration-300 select-none"
+					/>
+				</Link>
 			</div>
 
-		</div>
+		</footer>
 	);
 }
+
+type TextLinkProps = {
+	website: string;
+	children: string;
+};
+
+const TextLink = ({ website, children }: TextLinkProps) => {
+	return (
+		<a className="text-amber-500/80 hover:text-amber-400 transition-colors duration-150 font-semibold" target="_blank" href={website}>
+			{children}
+		</a>
+	);
+};

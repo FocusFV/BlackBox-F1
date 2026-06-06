@@ -65,20 +65,22 @@ export default function Home() {
 					</span>
 				</h1>
 
-				{/* BOTONES */}
-				<div className="flex flex-wrap justify-center gap-4 z-20">
-					<Link href="/dashboard">
-						<Button className="rounded-xl! border border-transparent bg-gradient-to-r from-amber-500 to-amber-400 text-neutral-950 px-6 py-3.5 font-black uppercase tracking-widest text-xs shadow-[0_4px_20px_rgba(245,158,11,0.15)] transition duration-200 hover:from-amber-400 hover:to-amber-300 hover:shadow-[0_4px_25px_rgba(245,158,11,0.25)] hover:-translate-y-0.5">
-							Ir al Dashboard
-						</Button>
-					</Link>
+				{/* BOTONES TUNED */}
+<div className="flex flex-wrap justify-center gap-4 z-20">
+	{/* Le clavamos prefetch={false} para que Docker no se tilde compilando el dashboard antes de tiempo */}
+	<Link href="/dashboard" prefetch={false}>
+		<Button className="rounded-xl! border border-transparent bg-gradient-to-r from-amber-500 to-amber-400 text-neutral-950 px-6 py-3.5 font-black uppercase tracking-widest text-xs shadow-[0_4px_20px_rgba(245,158,11,0.15)] transition duration-200 hover:from-amber-400 hover:to-amber-300 hover:shadow-[0_4px_25px_rgba(245,158,11,0.25)] hover:-translate-y-0.5">
+			Ir al Dashboard
+		</Button>
+	</Link>
 
-					<Link href="/schedule">
-						<Button className="rounded-xl! border border-zinc-800 bg-zinc-900/30 text-neutral-200 px-6 py-3.5 font-bold uppercase tracking-widest text-xs backdrop-blur-sm transition duration-200 hover:border-amber-500/40 hover:text-amber-400 hover:bg-amber-500/[0.02] hover:-translate-y-0.5">
-							Ver Calendario
-						</Button>
-					</Link>
-				</div>
+	{/* Lo mismo acá, así desactivamos el bendito /schedule que te congelaba el servidor */}
+	<Link href="/schedule" prefetch={false}>
+		<Button className="rounded-xl! border border-zinc-800 bg-zinc-900/30 text-neutral-200 px-6 py-3.5 font-bold uppercase tracking-widest text-xs backdrop-blur-sm transition duration-200 hover:border-amber-500/40 hover:text-amber-400 hover:bg-amber-500/[0.02] hover:-translate-y-0.5">
+			Ver Calendario
+		</Button>
+	</Link>
+</div>
 
 				<ScrollHint />
 			</section>
