@@ -14,35 +14,36 @@ type Props = {
 export default function Layout({ children }: Props) {
     return (
         <>
-            <nav className="sticky top-0 left-0 z-10 flex h-12 w-full items-center justify-between gap-4 border-b border-red-600 p-2 px-4 backdrop-blur-lg bg-zinc-950/70">
+            {/* Barra de navegación superior fija en toda la pantalla */}
+            <nav className="sticky top-0 left-0 z-10 flex h-12 w-full items-center justify-between gap-4 border-b border-zinc-700 p-2 px-4 backdrop-blur-lg bg-zinc-950/70">
                 <div className="flex gap-4 font-medium text-zinc-200">
                     <Link className="transition duration-100 hover:text-red-500 active:scale-95" href="/">
-                        Home
+                        Página Principal
                     </Link>
                     <Link className="transition duration-100 hover:text-red-500 active:scale-95" href="/dashboard">
-                        Dashboard
+                        Panel
                     </Link>
                     <Link className="transition duration-100 hover:text-red-500 active:scale-95" href="/schedule">
-                        Schedule
+                        Calendario
                     </Link>
                     <Link className="transition duration-100 hover:text-red-500 active:scale-95" href="/help">
-                        Help
+                        Ayuda
                     </Link>
                 </div>
 
                 <div className="hidden items-center gap-4 pr-2 sm:flex text-zinc-200">
                     <Link
                         className="flex items-center gap-2 transition duration-100 hover:text-red-500 active:scale-95"
-                        href="https://www.buymeacoffee.com/slowlydev"
+                        href="https://buymeacoffee.com/focusfv"
                         target="_blank"
                     >
                         <Image src={coffeeIcon} alt="Buy Me A Coffee" width={20} height={20} />
-                        <span>Coffee</span>
+                        <span>Un Cafe?</span>
                     </Link>
 
                     <Link
                         className="flex items-center gap-2 transition duration-100 hover:text-red-500 active:scale-95"
-                        href="https://github.com/slowlydev/f1-dash"
+                        href="https://github.com/FocusFV/BlackBox-F1"
                         target="_blank"
                     >
                         <Image src={githubIcon} alt="GitHub" width={20} height={20} />
@@ -51,10 +52,14 @@ export default function Layout({ children }: Props) {
                 </div>
             </nav>
 
-            <main className="container mx-auto max-w-(--breakpoint-lg) px-4">
+            {/* Contenedor principal sin límites para que el fondo de la home ocupe el 100% de la pantalla */}
+            <main className="w-full">
                 {children}
 
-                <Footer />
+                {/* El footer se mantiene contenido y centrado de forma elegante */}
+                <div className="container mx-auto max-w-(--breakpoint-lg) px-4">
+                    <Footer />
+                </div>
             </main>
         </>
     );

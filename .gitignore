@@ -10,3 +10,5 @@ compose.env
 
 # data
 *.data.*
+
+.vercel

@@ -19,95 +19,88 @@ import wetTireIcon from "public/tires/wet.svg";
 export default function HelpPage() {
 	return (
 		<div>
-			<h1 className="my-4 text-3xl">Help Page</h1>
+			<h1 className="my-4 text-3xl">Página de Ayuda</h1>
 
-			<p>This page explains some core features and UI elements of f1-dash.</p>
+			<p>Esta página explica algunas de las funciones principales y elementos de la interfaz de f1-dash.</p>
 
-			<h2 className="my-4 text-2xl">Colors</h2>
+			<h2 className="my-4 text-2xl">Colores</h2>
 
 			<p>
-				A core element in the UI of f1-dash, inspired by official Formula 1 graphics, is the color-coding system used
-				for lap times, sector times, mini sectors, and gaps. Each color has a meaning in the context of lap times,
-				sector times, or mini sectors.
+				Un elemento central en la interfaz de f1-dash, inspirado en los gráficos oficiales de la Fórmula 1, es el sistema de codificación por colores utilizado para los tiempos de vuelta, tiempos de sector, mini sectores y diferencias. Cada color tiene un significado específico en este contexto.
 			</p>
 
 			<div className="my-4 flex flex-col">
 				<div className="flex gap-1">
 					<p className="flex items-center gap-1">
-						<span className="size-4 rounded-md bg-white" /> White
+						<span className="size-4 rounded-md bg-white" /> Blanco
 					</p>
-					<p>Last lap time</p>
+					<p>Tiempo de la última vuelta</p>
 				</div>
 
 				<div className="flex gap-1">
 					<p className="flex items-center gap-1 text-yellow-500">
-						<span className="size-4 rounded-md bg-amber-400" /> Yellow
+						<span className="size-4 rounded-md bg-amber-400" /> Amarillo
 					</p>
-					<p>Slower than personal best</p>
+					<p>Más lento que su mejor marca personal</p>
 				</div>
 
 				<div className="flex gap-1">
 					<p className="flex items-center gap-1 text-emerald-500">
-						<span className="size-4 rounded-md bg-emerald-500" /> Green
+						<span className="size-4 rounded-md bg-emerald-500" /> Verde
 					</p>
-					<p>Personal best</p>
+					<p>Mejor marca personal (récord personal)</p>
 				</div>
 
 				<div className="flex gap-1">
 					<p className="flex items-center gap-1 text-violet-500">
-						<span className="size-4 rounded-md bg-violet-500" /> Purple
+						<span className="size-4 rounded-md bg-violet-500" /> Violeta
 					</p>
-					<p>Overall best</p>
+					<p>Mejor marca general (récord de la sesión)</p>
 				</div>
 
 				<div className="flex gap-1">
 					<p className="flex items-center gap-1 text-blue-500">
-						<span className="size-4 rounded-md bg-blue-500" /> Blue
+						<span className="size-4 rounded-md bg-blue-500" /> Azul
 					</p>
-					<p>Driver in the pit lane</p>
+					<p>Piloto en la calle de boxes (pit lane)</p>
 				</div>
 			</div>
 
 			<Note>
-				Only mini sectors use the yellow color. Using yellow for all drivers not improving their lap times would make
-				the UI look cluttered, as many text elements would be yellow simultaneously.
+				Solo los mini sectores usan el color amarillo. Usar amarillo para todos los pilotos que no mejoran sus tiempos haría que la interfaz se vea muy cargada, ya que habría demasiados elementos de texto amarillos al mismo tiempo.
 			</Note>
 
-			<h2 className="my-4 text-2xl">Leaderboard</h2>
+			<h2 className="my-4 text-2xl">Clasificación (Leaderboard)</h2>
 
 			<p className="mb-4">
-				The leaderboard shows all the drivers of the ongoing session. Depending on the driver&apos;s status and the
-				session&apos;s progression, some drivers may have a colored background.
+				La tabla de posiciones muestra a todos los pilotos de la sesión actual. Dependiendo del estado del piloto y del progreso de la sesión, algunos pueden aparecer con un fondo de color.
 			</p>
 
 			<div className="grid grid-cols-1 gap-x-4 divide-y divide-zinc-800 sm:grid-cols-3 sm:divide-y-0">
 				<div>
-					<p className="rounded-md bg-violet-800/30 p-2">Driver has a purple background</p>
-					<p className="p-2">Driver has the fastest overall lap time</p>
+					<p className="rounded-md bg-violet-800/30 p-2">Piloto con fondo violeta</p>
+					<p className="p-2">El piloto tiene el tiempo de vuelta más rápido de toda la sesión</p>
 				</div>
 
 				<div className="pt-4 sm:pt-0">
-					<p className="rounded-md border p-2 opacity-50">Driver is a bit transparent</p>
-					<p className="p-2">Driver has crashed or retired from the session</p>
+					<p className="rounded-md border p-2 opacity-50">Piloto un poco transparente</p>
+					<p className="p-2">El piloto chocó, abandonó o quedó fuera de la sesión</p>
 				</div>
 
 				<div className="pt-4 sm:pt-0">
-					<p className="rounded-md bg-red-800/30 p-2">Driver has a red background</p>
-					<p className="p-2">Driver is in the danger zone during qualifying</p>
+					<p className="rounded-md bg-red-800/30 p-2">Piloto con fondo rojo</p>
+					<p className="p-2">Piloto en zona de eliminación durante la clasificación (qualy)</p>
 				</div>
 			</div>
 
-			<h2 className="my-4 text-2xl">DRS & PIT Status</h2>
+			<h2 className="my-4 text-2xl">Estado de DRS y PIT</h2>
 
 			<p className="mb-4">
-				Each driver in the leaderboard has a DRS and PIT status indicator. It shows whether a driver has no DRS, is less
-				than 1 second behind the driver ahead (and has DRS from the detection zone), has DRS active, or is in the pit
-				lane or leaving it.
+				Cada piloto en la tabla cuenta con un indicador de estado de DRS y PIT. Muestra si el piloto no tiene DRS, si está a menos de 1 segundo del auto de adelante (y es elegible para activarlo tras pasar por la zona de detección), si tiene el DRS activo, o si se encuentra entrando o saliendo de boxes.
 			</p>
 
 			<p className="mb-4">
-				Overall it gives you a quick overview if the driver is going into the pits and might drop a few places behind or
-				if the driver has DRS and a chance to overtake the driver ahead.
+				En general, te da un vistazo rápido para saber si un piloto va a entrar a boxes y podría perder posiciones, o si viene con DRS activo y tiene chances claras de sobrepaso.
 			</p>
 
 			<div className="mb-4 flex flex-col gap-4">
@@ -116,7 +109,7 @@ export default function HelpPage() {
 						<DriverDRS on={false} possible={false} inPit={false} pitOut={false} />
 					</div>
 
-					<p>Off: No DRS (default)</p>
+					<p>Apagado: Sin DRS (por defecto)</p>
 				</div>
 
 				<div className="flex items-center gap-2">
@@ -124,7 +117,7 @@ export default function HelpPage() {
 						<DriverDRS on={false} possible={true} inPit={false} pitOut={false} />
 					</div>
 
-					<p>Possible: Eligible for DRS in the next zone</p>
+					<p>Posible: Elegible para activar DRS en la próxima zona</p>
 				</div>
 
 				<div className="flex items-center gap-2">
@@ -132,7 +125,7 @@ export default function HelpPage() {
 						<DriverDRS on={true} possible={false} inPit={false} pitOut={false} />
 					</div>
 
-					<p>Active: DRS is active</p>
+					<p>Activo: El DRS está abierto / activado</p>
 				</div>
 
 				<div className="flex items-center gap-2">
@@ -140,15 +133,15 @@ export default function HelpPage() {
 						<DriverDRS on={false} possible={false} inPit={true} pitOut={false} />
 					</div>
 
-					<p>PIT: In the pit lane or leaving</p>
+					<p>PIT: En la calle de boxes o saliendo de ella</p>
 				</div>
 			</div>
 
-			<h2 className="my-4 text-2xl">Tires</h2>
+			<h2 className="my-4 text-2xl">Neumáticos (Tires)</h2>
 
 			<p className="mb-4">
-				We also show the different tires a driver can use and how many laps they have done on them. <br />
-				In this example, the driver has a soft tire which is 12 laps old and he pitted one time.
+				También mostramos los diferentes compuestos que usa cada piloto y cuántas vueltas dieron con ellos. <br />
+				En este ejemplo, el piloto lleva un neumático blando (soft) que tiene 12 vueltas de uso y realizó una parada en boxes.
 			</p>
 
 			<div className="mb-4">
@@ -160,77 +153,73 @@ export default function HelpPage() {
 				/>
 			</div>
 
-			<p className="mb-4">These are the different icons for the different tire compounds:</p>
+			<p className="mb-4">Estos son los diferentes íconos para cada tipo de compuesto:</p>
 
 			<div className="mb-4 flex flex-wrap gap-4">
 				<div className="flex items-center gap-2">
-					<Image src={softTireIcon} alt="soft" className="size-8" />
-					<p>Soft</p>
+					<Image src={softTireIcon} alt="blando" className="size-8" />
+					<p>Blando (Soft)</p>
 				</div>
 
 				<div className="flex items-center gap-2">
-					<Image src={mediumTireIcon} alt="medium" className="size-8" />
-					<p>Medium</p>
+					<Image src={mediumTireIcon} alt="medio" className="size-8" />
+					<p>Medio (Medium)</p>
 				</div>
 
 				<div className="flex items-center gap-2">
-					<Image src={hardTireIcon} alt="hard" className="size-8" />
-					<p>Hard</p>
+					<Image src={hardTireIcon} alt="duro" className="size-8" />
+					<p>Duro (Hard)</p>
 				</div>
 
 				<div className="flex items-center gap-2">
-					<Image src={interTireIcon} alt="intermediate" className="size-8" />
-					<p>Intermediate</p>
+					<Image src={interTireIcon} alt="intermedio" className="size-8" />
+					<p>Intermedio (Intermediate)</p>
 				</div>
 
 				<div className="flex items-center gap-2">
-					<Image src={wetTireIcon} alt="wet" className="size-8" />
-					<p>Wet</p>
+					<Image src={wetTireIcon} alt="lluvia" className="size-8" />
+					<p>Lluvia extrema (Wet)</p>
 				</div>
 
 				<div className="flex items-center gap-2">
-					<Image src={unknownTireIcon} alt="unknown" className="size-8" />
-					<p>Unknown</p>
+					<Image src={unknownTireIcon} alt="desconocido" className="size-8" />
+					<p>Desconocido</p>
 				</div>
 			</div>
 
 			<Note className="mb-4">
-				Sometimes the tire type is unknown. This can happen at the beginning of a session or when something goes wrong.
+				A veces el tipo de compuesto figura como desconocido. Esto puede pasar al inicio de una sesión o cuando hay algún inconveniente con la lectura de datos.
 			</Note>
 
-			<h2 className="my-4 text-2xl">Delay Control</h2>
+			<h2 className="my-4 text-2xl">Control de Retraso (Delay Control)</h2>
 
 			<p className="mb-4">
-				When using f1-dash while watching on TV, F1TV, or your favorite streaming platform, you may notice that f1-dash
-				updates much earlier than your stream. This can make exciting race events less interesting, as you see them on
-				f1-dash before experiencing them on your stream. This is where the delay control comes in.
+				Al usar f1-dash mientras mirás la carrera en la tele, F1TV o tu plataforma de streaming favorita, vas a notar que f1-dash se actualiza mucho antes que tu transmisión. Esto le puede sacar emoción a las carreras, ya que te enterás de los eventos clave antes de verlos en pantalla. Para solucionar esto existe el control de retraso.
 			</p>
 
 			<p className="mb-4">
-				With delay control, you can set a delay in seconds to make f1-dash update later than it normally would. So
-				setting a 30-second delay will cause f1-dash to update 30 seconds later than it normally would.
+				Con el control de retraso podés configurar una pausa en segundos para que f1-dash se actualice más tarde de lo habitual. Por ejemplo, si ponés un retraso de 30 segundos, la app va a procesar los datos con 30 segundos de demora.
 				<br />
-				You can use this to sync your stream with f1-dash.
+				Podés usar esta función para sincronizar perfectamente tu transmisión con el dashboard.
 			</p>
 
 			<Note className="mb-4">
-				Currently you can only set a delay that is the time you have been on the dashboard page. So 30s on a 20s page
-				visit makes you wait 10s until playback of the updates resumes. (This will be changed in the future)
+				Actualmente, solo podés configurar un retraso equivalente al tiempo que llevás dentro de la página. Por ejemplo, si configurás 30s de delay en una página que visitás hace 20s, vas a tener que esperar 10s hasta que se reanude la reproducción de datos. (Esto se modificará en el futuro).
 			</Note>
 
-			<h3 className="my-4 text-xl">What to look for when syncing?</h3>
+			<h3 className="my-4 text-xl">¿En qué fijarse para sincronizar?</h3>
 
 			<ul className="list ml-6 list-disc">
 				<li>
-					Start of a new lap <span className="text-zinc-500">(race)</span>
+					El inicio de una nueva vuelta <span className="text-zinc-500">(en carrera)</span>
 				</li>
 				<li>
-					Session clock <span className="text-zinc-500">(practice, qualifying)</span>
+					El reloj de la sesión <span className="text-zinc-500">(en prácticas libres y clasificación)</span>
 				</li>
-				<li>If available mini sectors</li>
+				<li>Los cambios en los mini sectores, si están disponibles</li>
 			</ul>
 
-			<h2 className="my-4 text-2xl">Driver Pedals</h2>
+			<h2 className="my-4 text-2xl">Pedales del Piloto</h2>
 
 			<div className="mb-4 flex flex-col gap-4">
 				<div className="flex items-center gap-6">
@@ -239,7 +228,7 @@ export default function HelpPage() {
 					</div>
 
 					<p>
-						Shows if the driver is braking <span className="text-zinc-500">(on / off)</span>
+						Muestra si el piloto está frenando <span className="text-zinc-500">(encendido / apagado)</span>
 					</p>
 				</div>
 
@@ -249,7 +238,7 @@ export default function HelpPage() {
 					</div>
 
 					<p>
-						Shows how much the driver is pressing the throttle pedal <span className="text-zinc-500">(0-100%)</span>
+						Muestra qué tanto está pisando el pedal del acelerador <span className="text-zinc-500">(0-100%)</span>
 					</p>
 				</div>
 
@@ -259,37 +248,37 @@ export default function HelpPage() {
 					</div>
 
 					<p>
-						Shows the engine&apos;s RPM <span className="text-zinc-500">(0 - 15&apos;000)</span>
+						Muestra las revoluciones por minuto del motor (RPM) <span className="text-zinc-500">(0 - 15.000)</span>
 					</p>
 				</div>
 			</div>
 
-			<h2 className="my-4 text-2xl">Weather</h2>
+			<h2 className="my-4 text-2xl">Clima (Weather)</h2>
 
 			<div className="mb-4 flex flex-col gap-2">
 				<div className="flex flex-row items-center gap-2">
 					<TemperatureComplication value={39} label="TRC" />
-					<p>This shows the current track temperature.</p>
+					<p>Muestra la temperatura actual de la superficie de la pista.</p>
 				</div>
 
 				<div className="flex flex-row items-center gap-2">
-					<TemperatureComplication value={26} label="AIR" />
-					<p>This shows the current air temperature.</p>
-				</div>
+				<TemperatureComplication value={39} label="TRC" />
+				<p>Muestra la temperatura actual de la superficie de la pista.</p>
+			</div>
 
 				<div className="flex flex-row items-center gap-2">
-					<HumidityComplication value={36} />
-					<p>This shows the current humidity.</p>
-				</div>
+				<TemperatureComplication value={26} label="AIR" />
+				<p>Muestra la temperatura actual del ambiente (aire).</p>
+			</div>
 
 				<div className="flex flex-row items-center gap-2">
 					<RainComplication rain={true} />
-					<p>This shows if it&apos;s raining or not.</p>
+					<p>Muestra si está lloviendo en el circuito o no.</p>
 				</div>
 
 				<div className="flex flex-row items-center gap-2">
 					<WindSpeedComplication speed={2.9} directionDeg={250} />
-					<p>This shows the current wind speed in m/s and cardinal direction.</p>
+					<p>Muestra la velocidad actual del viento en m/s y su dirección según los puntos cardinales.</p>
 				</div>
 			</div>
 		</div>

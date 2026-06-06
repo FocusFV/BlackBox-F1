@@ -4,7 +4,6 @@ import pack from "./package.json" with { type: "json" };
 
 import "@/env";
 
-// Forzamos el modo standalone para que Docker encuentre la carpeta al compilar
 const output = "standalone";
 const compress = process.env.NEXT_NO_COMPRESS === "1";
 
@@ -43,12 +42,12 @@ const config: NextConfig = {
 	},
 	headers: async () => frameDisableHeaders,
 
-	// --- INYECTAMOS ESTO PARA ARREGLAR EL CTRL + S EN WINDOWS ---
+	// Mantenemos tu regla de polling para que el Ctrl + S reaccione al toque en Windows
 	webpack: (config, { dev }) => {
 		if (dev) {
 			config.watchOptions = {
-				poll: 1000,           // Revisa cambios de Windows cada 1 segundo obligatoriamente
-				aggregateTimeout: 300, // Nos da un changüí de 300ms al guardar para procesar todo junto
+				poll: 1000,
+				aggregateTimeout: 300,
 			};
 		}
 		return config;
