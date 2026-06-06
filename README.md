@@ -28,4 +28,13 @@
 
 ## 🛠️ Desarrollo Local
 
-Este proyecto utiliza una infraestructura dividida en microservicios gestionada por **Docker**. Para levantar la plataforma en tu entorno local para desarrollo, parate en la raíz del repositorio y ejecutá:
+Este proyecto utiliza una infraestructura dividida en microservicios gestionada por **Docker**.
+
+🤝 Contribuciones
+Cualquier feedback, reporte de errores o sugerencia de diseño es más que bienvenido para seguir tuneando la plataforma. Si querés meter mano en el código o proponer una mejora visual, te invito a revisar los Issues del repositorio o enviar un Pull Request.
+
+☕ Soporte y Apoyo
+Si te copa el proyecto, el rediseño de la interfaz y el laburo de optimización que le venimos metiendo para mejorar la experiencia de las carreras, podés bancar el desarrollo invitándome un café:
+
+⚠️ Nota Legal / Notice
+Este sitio web es de carácter independiente, no oficial y no se encuentra vinculado, asociado ni patrocinado de ninguna forma por las empresas del grupo Formula 1. F1, FORMULA ONE, FORMULA 1, FIA FORMULA ONE WORLD CHAMPIONSHIP, GRAND PRIX y sus logotipos relacionados son marcas comerciales registradas propiedad de Formula One Licensing B.V.
