@@ -1,0 +1,32 @@
+services:
+  api:
+    image: ghcr.io/slowlydev/f1-dash-api:latest
+    ports:
+      - 4020:80
+    environment:
+      - RUST_LOG=api=debug
+      - ADDRESS=0.0.0.0:80
+      - ORIGIN=http://localhost:3001
+
+  realtime:
+    image: ghcr.io/slowlydev/f1-dash-realtime:latest
+    ports:
+      - 4200:80
+    environment:
+      - RUST_LOG=realtime=debug
+      - ADDRESS=0.0.0.0:80
+      - ORIGIN=http://localhost:3001
+
+  web:
+    image: node:24-alpine
+    working_dir: /app
+    ports:
+      - 3001:3000
+    volumes:
+      - ./dashboard:/app
+    environment:
+      - NEXT_PUBLIC_LIVE_URL=http://localhost:4200
+      - API_URL=http://api:80
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+    command: sh -c "corepack enable && yarn install --no-immutable && npx next dev --webpack"

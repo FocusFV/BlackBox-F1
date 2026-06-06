@@ -1,0 +1,16 @@
+#! kustomization.yaml
+# Generated code, do not edit
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+    - 0-f1-dash-main-namespace.yaml
+    - api-deployment.yaml
+    - api-expose.yaml
+    - api-service.yaml
+    - default-network-policy.yaml
+    - realtime-deployment.yaml
+    - realtime-expose.yaml
+    - realtime-service.yaml
+    - web-deployment.yaml
+    - web-expose.yaml
+    - web-service.yaml

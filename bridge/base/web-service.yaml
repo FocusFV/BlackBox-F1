@@ -1,0 +1,19 @@
+#! web-service.yaml
+# Generated code, do not edit
+apiVersion: v1
+kind: Service
+metadata:
+    name: web-published
+    namespace: f1-dash-main
+    labels:
+        com.docker.compose.project: f1-dash-main
+        com.docker.compose.service: web
+spec:
+    selector:
+        com.docker.compose.project: f1-dash-main
+        com.docker.compose.service: web
+    ports:
+        - name: web-3000
+          port: 3000
+          protocol: TCP
+          targetPort: web-3000

@@ -1,0 +1,17 @@
+FROM node:24-alpine
+WORKDIR /app
+
+# Copiamos solo lo necesario para instalar dependencias primero
+COPY package*.json yarn.lock .yarnrc.yml ./
+
+RUN corepack enable
+
+# Instalamos sin inmutabilidad para que genere un entorno feliz
+RUN yarn install --no-immutable
+
+# Copiamos el resto de las cosas
+COPY . .
+
+EXPOSE 3000
+
+ENTRYPOINT ["yarn", "dev"]

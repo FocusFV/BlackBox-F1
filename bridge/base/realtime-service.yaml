@@ -1,0 +1,21 @@
+#! realtime-service.yaml
+# Generated code, do not edit
+apiVersion: v1
+kind: Service
+metadata:
+    name: realtime-published
+    namespace: f1-dash-main
+    labels:
+        com.docker.compose.project: f1-dash-main
+        com.docker.compose.service: realtime
+spec:
+    selector:
+        com.docker.compose.project: f1-dash-main
+        com.docker.compose.service: realtime
+    ports:
+        - name: realtime-4000
+          port: 4000
+          protocol: TCP
+          targetPort: realtime-80
+
+# check if there is at least one published port

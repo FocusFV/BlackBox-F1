@@ -1,0 +1,37 @@
+#! web-deployment.yaml
+# Generated code, do not edit
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: web
+    namespace: f1-dash-main
+    labels:
+        com.docker.compose.project: f1-dash-main
+        com.docker.compose.service: web
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            com.docker.compose.project: f1-dash-main
+            com.docker.compose.service: web
+    strategy:
+        type: Recreate
+    template:
+        metadata:
+            labels:
+                com.docker.compose.project: f1-dash-main
+                com.docker.compose.service: web
+                com.docker.compose.network.default: "true"
+        spec:
+            containers:
+                - name: web
+                  image: ghcr.io/slowlydev/f1-dash:latest
+                  imagePullPolicy: IfNotPresent
+                  env:
+                    - name: API_URL
+                      value: "http://localhost:4010"
+                    - name: NEXT_PUBLIC_LIVE_URL
+                      value: "http://localhost:4000"
+                  ports:
+                    - name: web-3000
+                      containerPort: 3000
