@@ -5,11 +5,10 @@ import { useDataStore } from "@/stores/useDataStore";
 import NumberDiff from "@/components/NumberDiff";
 import Image from "next/image";
 
-// Tipados rápidos para la API externa de respaldo
 type ExternalDriver = {
 	position: string;
 	points: string;
-	Driver: { firstName: string; lastName: string; code: string };
+	Driver: { givenName: string; familyName: string; code: string };
 	Constructor: { name: string; constructorId: string };
 };
 
@@ -19,24 +18,63 @@ type ExternalTeam = {
 	Constructor: { name: string; constructorId: string };
 };
 
+// Diccionario para asociar las siglas de los pilotos con el código de su país (para las banderas)
+const driverNationalityMap: { [key: string]: string } = {
+	COL: "ar", // Franco Colapinto 🇦🇷
+	VER: "nl", // Max Verstappen 🇳🇱
+	HAM: "gb", // Lewis Hamilton 🇬🇧
+	RUS: "gb", // George Russell 🇬🇧
+	LEC: "mc", // Charles Leclerc 🇲🇨
+	SAI: "es", // Carlos Sainz 🇪🇸
+	NOR: "gb", // Lando Norris 🇬🇧
+	PIA: "au", // Oscar Piastri 🇦🇺
+	ALB: "th", // Alexander Albon 🇹🇭
+	GAS: "fr", // Pierre Gasly 🇫🇷
+	OCO: "fr", // Esteban Ocon 🇫🇷
+	HUL: "de", // Nico Hulkenberg 🇩🇪
+	TSU: "jp", // Yuki Tsunoda 🇯🇵
+	RIC: "au", // Daniel Ricciardo 🇦🇺
+	BOT: "fi", // Valtteri Bottas 🇫🇮
+	ZHO: "cn", // Guanyu Zhou 🇨🇳
+	MAG: "dk", // Kevin Magnussen 🇩🇰
+	STR: "ca", // Lance Stroll 🇨🇦
+	ALO: "es", // Fernando Alonso 🇪🇸
+	PER: "mx", // Sergio Pérez 🇲🇽
+	BEA: "gb", // Oliver Bearman 🇬🇧
+	HAD: "fr", // Isack Hadjar 🇫🇷
+	BOR: "it", // Gabriel Bortoleto 🇧🇷 (usa 'br' si corresponde, puse it/br según licencia)
+	LIN: "us", // Jak Crawford / Lindblad 🇺🇸/🇬🇧
+};
+
+// Función para limpiar el ID del constructor externo y que matchee con tus SVG locales
+const getLocalTeamLogoPath = (constructorId: string) => {
+	// Reemplazamos guiones bajos por guiones medios para coincidir con tu sistema
+	const cleanId = constructorId.replace("_", "-").toLowerCase();
+	
+	// Casos especiales de mapeo si la API externa difiere de tu nombre de archivo
+	if (cleanId === "alpine") return "/team-logos/alpine-f1-team.svg";
+	if (cleanId === "rb") return "/team-logos/rb-f1-team.svg";
+	if (cleanId === "haas") return "/team-logos/haas-f1-team.svg";
+	if (cleanId === "aston-martin") return "/team-logos/aston-martin.svg";
+	if (cleanId === "cadillac") return "/team-logos/cadillac-f1-team.svg";
+
+	return `/team-logos/${cleanId}.svg`;
+};
+
 export default function Standings() {
-	// 1. Intentamos agarrar los datos en vivo de tu servidor en Render
 	const driverStandingsLive = useDataStore((state) => state.state?.ChampionshipPrediction?.Drivers);
 	const teamStandingsLive = useDataStore((state) => state.state?.ChampionshipPrediction?.Teams);
 	const driversLive = useDataStore((state) => state.state?.DriverList);
 
-	// 2. Estados para guardar el Plan B (API externa) si el de arriba viene vacío
 	const [extDrivers, setExtDrivers] = useState<ExternalDriver[] | null>(null);
 	const [extTeams, setExtTeams] = useState<ExternalTeam[] | null>(null);
 	const [loadingBackup, setLoadingBackup] = useState(false);
 
-	// 3. Si no hay datos en vivo (porque es qualy o prácticas), vamos a buscar el campeonato real a internet
 	useEffect(() => {
 		if (!driverStandingsLive || !teamStandingsLive) {
 			const fetchBackupStandings = async () => {
 				setLoadingBackup(true);
 				try {
-					// Consultamos la API global actual de la temporada 2026
 					const resDrivers = await fetch("https://api.jolpi.ca/ergast/f1/2026/driverStandings.json");
 					const dataDrivers = await resDrivers.json();
 					const dList = dataDrivers?.MRData?.StandingsTable?.StandingsLists[0]?.DriverStandings;
@@ -57,7 +95,6 @@ export default function Standings() {
 		}
 	}, [driverStandingsLive, teamStandingsLive]);
 
-	// Condición para mostrar el esqueleto de carga
 	const showDriversSkeleton = !driverStandingsLive && loadingBackup && !extDrivers;
 	const showTeamsSkeleton = !teamStandingsLive && loadingBackup && !extTeams;
 
@@ -70,35 +107,61 @@ export default function Standings() {
 					{showDriversSkeleton &&
 						new Array(20).fill("").map((_, index) => <SkeletonItem key={`driver.loading.${index}`} />)}
 
-					{/* CASO A: Renderizamos los datos predictivos EN VIVO (Solo en Carrera) */}
+					{/* CASO A: Datos en vivo (En Carrera) */}
 					{driverStandingsLive && driversLive &&
 						Object.values(driverStandingsLive)
 							.sort((a, b) => a.PredictedPosition - b.PredictedPosition)
 							.map((driver) => {
 								const driverDetails = driversLive[driver.RacingNumber];
 								if (!driverDetails) return null;
+								const countryCode = driverNationalityMap[driverDetails.Tla];
+
 								return (
 									<div className="grid p-2 items-center" style={{ gridTemplateColumns: "2rem 2rem auto 4rem 4rem" }} key={driver.RacingNumber}>
 										<NumberDiff old={driver.CurrentPosition} current={driver.PredictedPosition} />
 										<p className="font-semibold">{driver.PredictedPosition}</p>
-										<p>{driverDetails.FirstName} {driverDetails.LastName}</p>
+										<div className="flex items-center gap-2">
+											{countryCode && (
+												<img
+													src={`https://flagcdn.com/w20/${countryCode}.png`}
+													alt="Bandera"
+													className="w-5 h-auto rounded-sm object-cover"
+												/>
+											)}
+											<p>{driverDetails.FirstName} {driverDetails.LastName}</p>
+										</div>
 										<p className="font-medium text-zinc-300">{driver.PredictedPoints} pts</p>
 										<NumberDiff old={driver.PredictedPoints} current={driver.CurrentPoints} />
 									</div>
 								);
 							})}
 
-					{/* CASO B: Renderizamos el campeonato RESPALDO REAL (Fuera de carrera / Qualy) */}
+					{/* CASO B: Datos de respaldo (Qualy / Prácticas) */}
 					{!driverStandingsLive && extDrivers &&
-						extDrivers.map((driver) => (
-							<div className="grid p-2 items-center" style={{ gridTemplateColumns: "2rem 2rem auto 4rem 4rem" }} key={driver.Driver.code}>
-								<div className="w-4 h-4 text-zinc-600 text-xs text-center">-</div>
-								<p className="font-semibold">{driver.position}</p>
-								<p>{driver.Driver.firstName} {driver.Driver.lastName}</p>
-								<p className="font-medium text-zinc-300">{driver.points} pts</p>
-								<div className="w-4 h-4 text-zinc-600 text-xs text-center">-</div>
-							</div>
-						))}
+						extDrivers.map((driver) => {
+							const driverCode = driver.Driver.code || "F1";
+							const countryCode = driverNationalityMap[driverCode];
+
+							return (
+								<div className="grid p-2 items-center" style={{ gridTemplateColumns: "2rem 2rem auto 4rem 4rem" }} key={driver.Driver.code || driver.Driver.familyName}>
+									<div className="w-4 h-4 text-zinc-600 text-xs text-center">-</div>
+									<p className="font-semibold">{driver.position}</p>
+									<div className="flex items-center gap-2">
+										<span className="text-xs font-bold text-zinc-500 bg-zinc-800 px-1 rounded w-9 text-center">{driverCode}</span>
+										{countryCode && (
+											<img
+												src={`https://flagcdn.com/w20/${countryCode}.png`}
+												alt="Bandera"
+												className="w-5 h-3 rounded-sm object-cover"
+											/>
+										)}
+										<p>{driver.Driver.givenName} {driver.Driver.familyName}</p>
+									</div>
+									<p className="font-medium text-zinc-300">{driver.points} pts</p>
+									<div className="w-4 h-4 text-zinc-600 text-xs text-center">-</div>
+								</div>
+							);
+						})}
 				</div>
 			</div>
 
@@ -109,7 +172,7 @@ export default function Standings() {
 					{showTeamsSkeleton &&
 						new Array(10).fill("").map((_, index) => <SkeletonItem key={`team.loading.${index}`} />)}
 
-					{/* CASO A: Renderizamos los datos predictivos EN VIVO (Solo en Carrera) */}
+					{/* CASO A: Datos en vivo (En Carrera) */}
 					{teamStandingsLive &&
 						Object.values(teamStandingsLive)
 							.sort((a, b) => a.PredictedPosition - b.PredictedPosition)
@@ -130,13 +193,23 @@ export default function Standings() {
 								</div>
 							))}
 
-					{/* CASO B: Renderizamos el campeonato RESPALDO REAL (Fuera de carrera / Qualy) */}
+					{/* CASO B: Datos de respaldo (Mapeo de logos corregido) */}
 					{!teamStandingsLive && extTeams &&
 						extTeams.map((team) => (
 							<div className="grid p-2 items-center" style={{ gridTemplateColumns: "2rem 2rem 2rem auto 4rem 4rem" }} key={team.Constructor.constructorId}>
 								<div className="w-4 h-4 text-zinc-600 text-xs text-center">-</div>
 								<p className="font-semibold">{team.position}</p>
-								<div className="w-6 h-6 bg-zinc-800 rounded-full flex items-center justify-center text-[10px] text-zinc-500 font-bold">F1</div>
+								<div className="w-6 h-6 relative flex items-center justify-center">
+									<img
+										src={getLocalTeamLogoPath(team.Constructor.constructorId)}
+										alt={team.Constructor.name}
+										className="w-6 h-6 object-contain rounded-sm"
+										onError={(e) => {
+											// Fallback por si falta algún escudo nuevo en tu carpeta local
+											(e.currentTarget as HTMLImageElement).src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='%2327272a'/></svg>";
+										}}
+									/>
+								</div>
 								<p>{team.Constructor.name}</p>
 								<p className="font-medium text-zinc-300">{team.points} pts</p>
 								<div className="w-4 h-4 text-zinc-600 text-xs text-center">-</div>
