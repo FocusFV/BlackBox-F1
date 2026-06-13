@@ -29,7 +29,7 @@ const driverNationalityMap: { [key: string]: string } = {
 	LAW: "nz", ANT: "it"
 };
 
-// 2. Colores EXACTOS vinculados a las escuderías oficiales de tu captura image_c4935e.jpg
+// 2. Colores oficiales de la Parrilla 2026 corregidos y sin duplicados
 const driverTeamColorMap: { [key: string]: { bg: string; text: string } } = {
 	// McLaren (Naranja)
 	NOR: { bg: "#ff8700", text: "#ffffff" },
@@ -42,6 +42,8 @@ const driverTeamColorMap: { [key: string]: { bg: string; text: string } } = {
 	// Red Bull (Azul Oscuro)
 	VER: { bg: "#061d43", text: "#ffffff" },
 	HAD: { bg: "#061d43", text: "#ffffff" },
+	LIN: { bg: "#061d43", text: "#ffffff" },
+	PER: { bg: "#061d43", text: "#ffffff" },
 	
 	// Mercedes (Turquesa/Celeste)
 	RUS: { bg: "#00d2be", text: "#ffffff" },
@@ -58,17 +60,17 @@ const driverTeamColorMap: { [key: string]: { bg: string; text: string } } = {
 	// Haas (Rojo de la lona/Gris oscuro)
 	BEA: { bg: "#e10600", text: "#ffffff" },
 	OCO: { bg: "#e10600", text: "#ffffff" },
+	MAG: { bg: "#373737", text: "#ffffff" },
 	
 	// RB F1 Team (Azul brillante)
 	LAW: { bg: "#4b77ff", text: "#ffffff" },
-	LIN: { bg: "#4b77ff", text: "#ffffff" },
+	TSU: { bg: "#4b77ff", text: "#ffffff" },
 	
 	// Williams (Azul Eléctrico)
 	ALB: { bg: "#005aff", text: "#ffffff" },
 	SAI: { bg: "#005aff", text: "#ffffff" },
 	
 	// Cadillac (Negro de fondo de la lona / Blanco)
-	PER: { bg: "#27272a", text: "#ffffff" },
 	BOT: { bg: "#27272a", text: "#ffffff" },
 	
 	// Audi (Gris oscuro / Negro)
@@ -76,7 +78,13 @@ const driverTeamColorMap: { [key: string]: { bg: string; text: string } } = {
 	BOR: { bg: "#1f1f1f", text: "#ffffff" },
 };
 
-// 3. Componente buscador inteligente para tus logos locales de la carpeta public/team-logos/
+// Colores de los constructores vinculados a sus IDs externos para las barras de progreso y bordes
+const constructorColorMap: { [key: string]: string } = {
+	mercedes: "#00d2be", ferrari: "#e10600", mclaren: "#ff8700", red_bull: "#061d43",
+	alpine: "#ff00ff", rb: "#4b77ff", haas: "#e10600", williams: "#005aff",
+	aston_martin: "#006f62", audi: "#1f1f1f", cadillac: "#27272a"
+};
+
 const TeamLogo = ({ teamName }: { teamName: string }) => {
 	const cleanName = teamName.toLowerCase();
 	const [fallbackIndex, setFallbackIndex] = useState(0);
@@ -142,7 +150,6 @@ export default function Standings() {
 				} catch (err) {
 					console.error(err);
 				} finally {
-					// Corregido acá de "final" a "finally"
 					setLoadingBackup(false);
 				}
 			};
@@ -158,151 +165,133 @@ export default function Standings() {
 
 	return (
 		<div className="grid h-full grid-cols-1 gap-6 p-4 lg:grid-cols-2 bg-black text-white">
-			{/* SECCIÓN CAMPEONATO DE PILOTOS */}
+			{/* CAMPEONATO DE PILOTOS UNIFICADO */}
 			<div className="flex flex-col h-full bg-zinc-950/40 border border-zinc-900 rounded-2xl p-5 backdrop-blur-xl">
 				<h2 className="text-xl font-bold tracking-wide mb-6 uppercase text-zinc-400 border-b border-zinc-900 pb-3">
 					🏁 Campeonato de Pilotos
 				</h2>
 
 				<div className="flex flex-col gap-2.5 overflow-y-auto pr-1">
-					{showDriversSkeleton && new Array(10).fill("").map((_, i) => <SkeletonItem key={i} />)}
+					{showDriversSkeleton && new Array(12).fill("").map((_, i) => <SkeletonItem key={i} />)}
 
-					{!driverStandingsLive && extDrivers && (
-						<>
-							{/* TOP 3 DE PILOTOS */}
-							<div className="grid grid-cols-3 gap-3 mb-4">
-								{extDrivers.slice(0, 3).map((driver, index) => {
-									const badgeColor = driverTeamColorMap[driver.Driver.code] || { bg: "#27272a" };
-									const isFav = favoriteDrivers.includes(driver.Driver.code);
-									return (
-										<motion.div
-											initial={{ opacity: 0, y: 20 }}
-											animate={{ opacity: 1, y: 0 }}
-											transition={{ delay: index * 0.1 }}
-											key={`podium-${driver.Driver.code}`}
-											className={`relative flex flex-col items-center justify-between p-4 rounded-xl border border-zinc-800/40 bg-zinc-900/30 backdrop-blur-md text-center h-40 ${
-												isFav ? "shadow-[0_0_20px_rgba(255,0,255,0.15)] border-pink-500/30" : ""
-											}`}
-										>
-											<span className="absolute top-2 left-3 text-xs font-black opacity-30 text-zinc-400">#0{driver.position}</span>
-											<span className="text-2xl mt-2">{index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}</span>
-											<div className="flex flex-col items-center mt-1">
-												<span className="text-xs font-black tracking-wider px-2 py-0.5 rounded" style={{ backgroundColor: badgeColor.bg }}>
-													{driver.Driver.code || "F1"}
-												</span>
-												<p className="text-xs font-medium truncate max-w-[95px] mt-1.5 text-zinc-200">
-													{driver.Driver.familyName}
-												</p>
-											</div>
-											<p className="text-sm font-bold tracking-tight text-white">{driver.points} <span className="text-[10px] text-zinc-500">PTS</span></p>
-										</motion.div>
-									);
-								})}
-							</div>
+					{!driverStandingsLive && extDrivers &&
+						extDrivers.map((driver, index) => {
+							const driverCode = driver.Driver.code || "F1";
+							const countryCode = driverNationalityMap[driverCode];
+							const badgeColor = driverTeamColorMap[driverCode] || { bg: "#27272a" };
+							const ptsPercent = (parseFloat(driver.points) / maxDriverPoints) * 100;
+							const isFav = favoriteDrivers.includes(driverCode);
 
-							{/* RESTO DE LA PARRILLA DE PILOTOS (4° al 20°) */}
-							{extDrivers.slice(3).map((driver, index) => {
-								const driverCode = driver.Driver.code || "F1";
-								const countryCode = driverNationalityMap[driverCode];
-								const badgeColor = driverTeamColorMap[driverCode] || { bg: "#27272a" };
-								const ptsPercent = (parseFloat(driver.points) / maxDriverPoints) * 100;
-								const isFav = favoriteDrivers.includes(driverCode);
+							const renderPosition = () => {
+								if (driver.position === "1") return <span className="text-xl">🥇</span>;
+								if (driver.position === "2") return <span className="text-xl">🥈</span>;
+								if (driver.position === "3") return <span className="text-xl">🥉</span>;
+								return <p className="font-black text-sm text-zinc-200">#{driver.position}</p>;
+							};
 
-								return (
-									<motion.div
-										initial={{ opacity: 0, x: 15 }}
-										animate={{ opacity: 1, x: 0 }}
-										transition={{ delay: index * 0.03 + 0.3 }}
-										className={`relative grid items-center p-3 rounded-xl bg-zinc-900/20 backdrop-blur-md border border-zinc-900 hover:border-zinc-800/80 transition-all ${
-											isFav ? "shadow-[0_0_15px_rgba(255,0,255,0.1)] border-pink-500/20 bg-zinc-900/40" : ""
-										}`}
-										style={{
-											gridTemplateColumns: "2.5rem auto 5rem",
-											borderLeft: `4px solid ${badgeColor.bg}`
-										}}
-										key={driver.Driver.code || driver.Driver.familyName}
-									>
-										<div className="absolute inset-0 bg-zinc-800/5 rounded-r-xl pointer-events-none overflow-hidden">
-											<div className="h-full opacity-10 transition-all duration-500" style={{ width: `${ptsPercent}%`, backgroundColor: badgeColor.bg }} />
-										</div>
+							return (
+								<motion.div
+									initial={{ opacity: 0, x: 15 }}
+									animate={{ opacity: 1, x: 0 }}
+									transition={{ delay: index * 0.02 }}
+									className={`relative grid items-center p-3 rounded-xl bg-zinc-900/20 backdrop-blur-md border border-zinc-900 hover:border-zinc-800/80 transition-all ${
+										isFav ? "shadow-[0_0_20px_rgba(255,0,255,0.15)] border-pink-500/40 bg-zinc-900/40" : ""
+									}`}
+									style={{
+										gridTemplateColumns: "2.5rem auto 5rem",
+										borderLeft: `4px solid ${badgeColor.bg}`
+									}}
+									key={driver.Driver.code || driver.Driver.familyName}
+								>
+									<div className="absolute inset-0 bg-zinc-800/5 rounded-r-xl pointer-events-none overflow-hidden">
+										<div className={`h-full transition-all duration-500 ${isFav ? 'opacity-20' : 'opacity-10'}`} style={{ width: `${ptsPercent}%`, backgroundColor: badgeColor.bg }} />
+									</div>
 
-										<p className="font-black text-sm text-zinc-500 text-center">#{driver.position}</p>
-										
-										<div className="flex items-center gap-3 z-10">
-											<span className="text-[11px] font-black tracking-wider px-1.5 py-0.5 rounded text-center min-w-9" style={{ backgroundColor: badgeColor.bg }}>
-												{driverCode}
-											</span>
-											{countryCode && (
-												<img src={`https://flagcdn.com/w20/${countryCode}.png`} alt="Bandera" className="w-4.5 h-auto rounded-sm opacity-90 shadow-sm" />
-											)}
-											<p className="text-sm font-medium text-zinc-200">{driver.Driver.givenName} {driver.Driver.familyName}</p>
-										</div>
+									<div className="flex justify-center">{renderPosition()}</div>
+									
+									<div className="flex items-center gap-3 z-10">
+										<span className="text-[11px] font-black tracking-wider px-1.5 py-0.5 rounded text-center min-w-9" style={{ backgroundColor: badgeColor.bg, color: badgeColor.text }}>
+											{driverCode}
+										</span>
+										{countryCode && (
+											<img src={`https://flagcdn.com/w20/${countryCode}.png`} alt="Bandera" className="w-4.5 h-auto rounded-sm opacity-90 shadow-sm" />
+										)}
+										<p className="text-sm font-medium text-zinc-200">{driver.Driver.givenName} {driver.Driver.familyName}</p>
+									</div>
 
-										<p className="font-bold text-right text-sm tracking-tight text-zinc-100 z-10">
-											{driver.points} <span className="text-[10px] text-zinc-500 font-normal">pts</span>
-										</p>
-									</motion.div>
-								);
-							})}
-						</>
-					)}
+									<p className="font-bold text-right text-sm tracking-tight text-zinc-100 z-10">
+										{driver.points} <span className="text-[10px] text-zinc-500 font-normal">pts</span>
+									</p>
+								</motion.div>
+							);
+						})}
 				</div>
 			</div>
 
-			{/* SECCIÓN CAMPEONATO DE CONSTRUCTORES */}
+			{/* CAMPEONATO DE CONSTRUCTORES CON PODIO CONTROLADO */}
 			<div className="flex flex-col h-full bg-zinc-950/40 border border-zinc-900 rounded-2xl p-5 backdrop-blur-xl">
 				<h2 className="text-xl font-bold tracking-wide mb-6 uppercase text-zinc-400 border-b border-zinc-900 pb-3">
 					🛠️ Campeonato de Constructores
 				</h2>
 
 				<div className="flex flex-col gap-2.5 overflow-y-auto pr-1">
-					{showTeamsSkeleton && new Array(5).fill("").map((_, i) => <SkeletonItem key={i} />)}
+					{showTeamsSkeleton && new Array(8).fill("").map((_, i) => <SkeletonItem key={i} />)}
 
 					{!teamStandingsLive && extTeams && (
 						<>
-							{/* TOP 3 CONSTRUCTORES */}
+							{/* TOP 3 CONSTRUCTORES JERARQUIZADO */}
 							<div className="grid grid-cols-3 gap-3 mb-4">
-								{extTeams.slice(0, 3).map((team, index) => (
-									<motion.div
-										initial={{ opacity: 0, y: 20 }}
-										animate={{ opacity: 1, y: 0 }}
-										transition={{ delay: index * 0.1 }}
-										key={`podium-team-${team.Constructor.constructorId}`}
-										className="relative flex flex-col items-center justify-between p-4 rounded-xl border border-zinc-800/40 bg-zinc-900/30 backdrop-blur-md text-center h-40"
-									>
-										<span className="absolute top-2 left-3 text-xs font-black opacity-30 text-zinc-400">#0{team.position}</span>
-										<span className="text-2xl mt-2">{index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}</span>
-										<div className="flex flex-col items-center mt-1">
-											<TeamLogo teamName={team.Constructor.name} />
-											<p className="text-xs font-bold truncate max-w-[95px] mt-2 text-zinc-200">
-												{team.Constructor.name}
-											</p>
-										</div>
-										<p className="text-sm font-bold tracking-tight text-white">{team.points} <span className="text-[10px] text-zinc-500">PTS</span></p>
-									</motion.div>
-								))}
+								{extTeams.slice(0, 3).map((team, index) => {
+									const shadowStyles = 
+										index === 0 ? "shadow-[0_0_20px_rgba(234,179,8,0.08)] border-yellow-500/30" : 
+										index === 1 ? "shadow-[0_0_20px_rgba(226,232,240,0.06)] border-slate-400/20" : 
+										"shadow-[0_0_20px_rgba(180,83,9,0.05)] border-amber-700/20";
+
+									return (
+										<motion.div
+											initial={{ opacity: 0, y: 20 }}
+											animate={{ opacity: 1, y: 0 }}
+											transition={{ delay: index * 0.08 }}
+											key={`podium-team-${team.Constructor.constructorId}`}
+											className={`relative flex flex-col items-center justify-between p-4 rounded-xl border bg-zinc-900/30 backdrop-blur-md text-center h-40 ${shadowStyles}`}
+										>
+											<span className="absolute top-2 left-3 text-xs font-black text-zinc-100 opacity-90">#0{team.position}</span>
+											<span className="text-2xl mt-2">{index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}</span>
+											<div className="flex flex-col items-center mt-1">
+												<TeamLogo teamName={team.Constructor.name} />
+												<p className="text-xs font-bold truncate max-w-[95px] mt-2 text-zinc-200">
+													{team.Constructor.name}
+												</p>
+											</div>
+											<p className="text-sm font-bold tracking-tight text-white">{team.points} <span className="text-[10px] text-zinc-500">PTS</span></p>
+										</motion.div>
+									);
+								})}
 							</div>
 
-							{/* RESTO DE LA PARRILLA DE CONSTRUCTORES (4° al 11°) */}
+							{/* RESTO DE LA PARRILLA DE CONSTRUCTORES CON BORDES DE COLOR */}
 							{extTeams.slice(3).map((team, index) => {
 								const ptsPercent = (parseFloat(team.points) / maxTeamPoints) * 100;
+								const cId = team.Constructor.constructorId.toLowerCase();
+								const teamBorderColor = constructorColorMap[cId] || "#3f3f46";
 
 								return (
 									<motion.div
 										initial={{ opacity: 0, x: 15 }}
 										animate={{ opacity: 1, x: 0 }}
-										transition={{ delay: index * 0.04 + 0.3 }}
-										className="relative grid items-center p-3 rounded-xl bg-zinc-900/20 backdrop-blur-md border border-zinc-900 hover:border-zinc-800/80 transition-all border-l-4 border-l-zinc-700"
+										transition={{ delay: index * 0.03 + 0.2 }}
+										className="relative grid items-center p-3 rounded-xl bg-zinc-900/20 backdrop-blur-md border border-zinc-900 hover:border-zinc-800/80 transition-all"
 										style={{
 											gridTemplateColumns: "2.5rem 2.5rem auto 5rem",
+											borderLeft: `4px solid ${teamBorderColor}`
 										}}
 										key={team.Constructor.constructorId}
 									>
 										<div className="absolute inset-0 bg-zinc-800/5 rounded-r-xl pointer-events-none overflow-hidden">
-											<div className="h-full opacity-5 transition-all duration-500 bg-white" style={{ width: `${ptsPercent}%` }} />
+											<div className="h-full opacity-10 transition-all duration-500" style={{ width: `${ptsPercent}%`, backgroundColor: teamBorderColor }} />
 										</div>
 
-										<p className="font-black text-sm text-zinc-500 text-center">#{team.position}</p>
+										<p className="font-black text-sm text-zinc-200 text-center">#{team.position}</p>
 										
 										<div className="w-6 h-6 relative flex items-center justify-center z-10">
 											<TeamLogo teamName={team.Constructor.name} />
