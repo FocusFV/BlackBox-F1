@@ -18,7 +18,7 @@ type ExternalTeam = {
 	Constructor: { name: string; constructorId: string };
 };
 
-// Diccionario de banderas de los países
+// 1. Diccionario de banderas de los países
 const driverNationalityMap: { [key: string]: string } = {
 	COL: "ar", VER: "nl", HAM: "gb", RUS: "gb", LEC: "mc", SAI: "es",
 	NOR: "gb", PIA: "au", ALB: "th", GAS: "fr", OCO: "fr", HUL: "de",
@@ -27,51 +27,74 @@ const driverNationalityMap: { [key: string]: string } = {
 	LAW: "nz", ANT: "it"
 };
 
-// Paleta de colores EXACTA basada en tu captura 2
+// 2. Colores EXACTOS extraídos de tu Captura 2 (F1 2026)
 const driverTeamColorMap: { [key: string]: { bg: string; text: string } } = {
-	ANT: { bg: "#00d2be", text: "#ffffff" }, // Mercedes (Turquesa claro)
+	ANT: { bg: "#00d2be", text: "#ffffff" }, // Mercedes (Turquesa/Celeste)
 	RUS: { bg: "#00d2be", text: "#ffffff" }, // Mercedes
 	HAM: { bg: "#e10600", text: "#ffffff" }, // Ferrari (Rojo)
 	LEC: { bg: "#e10600", text: "#ffffff" }, // Ferrari
-	NOR: { bg: "#ff8700", text: "#ffffff" }, // McLaren (Naranja)
+	NOR: { bg: "#ff8700", text: "#ffffff" }, // McLaren (Papaya/Naranja)
 	PIA: { bg: "#ff8700", text: "#ffffff" }, // McLaren
-	VER: { bg: "#061d43", text: "#ffffff" }, // Red Bull (Azul oscuro oscuro)
+	VER: { bg: "#061d43", text: "#ffffff" }, // Red Bull (Azul oscuro)
 	HAD: { bg: "#061d43", text: "#ffffff" }, // Red Bull
 	LIN: { bg: "#061d43", text: "#ffffff" }, // Red Bull
 	PER: { bg: "#061d43", text: "#ffffff" }, // Red Bull
-	LAW: { bg: "#4b77ff", text: "#ffffff" }, // RB F1 Team (Azul eléctrico)
+	LAW: { bg: "#4b77ff", text: "#ffffff" }, // RB F1 Team (Azul brillante)
 	TSU: { bg: "#4b77ff", text: "#ffffff" }, // RB F1 Team
-	GAS: { bg: "#0078b4", text: "#ffffff" }, // Alpine (Azul Francia)
-	OCO: { bg: "#b6babd", text: "#000000" }, // Haas (Gris claro/medio)
-	BEA: { bg: "#787878", text: "#ffffff" }, // Haas (Gris oscuro)
-	MAG: { bg: "#787878", text: "#ffffff" }, // Haas
-	COL: { bg: "#005aff", text: "#ffffff" }, // Williams (Azul marino)
+	GAS: { bg: "#ff00ff", text: "#ffffff" }, // Alpine (Fucsia/Rosa de tu captura 2)
+	OCO: { bg: "#373737", text: "#ffffff" }, // Haas (Gris oscuro/Grafito)
+	BEA: { bg: "#373737", text: "#ffffff" }, // Haas
+	MAG: { bg: "#373737", text: "#ffffff" }, // Haas
+	COL: { bg: "#005aff", text: "#ffffff" }, // Williams (Azul Francia/Eléctrico) 🇦🇷
 	ALB: { bg: "#005aff", text: "#ffffff" }, // Williams
 	SAI: { bg: "#005aff", text: "#ffffff" }, // Williams
-	BOR: { bg: "#a50021", text: "#ffffff" }, // Sauber/Audi (Bordó oscuro)
-	HUL: { bg: "#a50021", text: "#ffffff" }, // Sauber/Audi
-	BOT: { bg: "#a50021", text: "#ffffff" }, // Sauber/Audi
-	ALO: { bg: "#006f62", text: "#ffffff" }, // Aston Martin (Verde oscuro)
+	ALO: { bg: "#006f62", text: "#ffffff" }, // Aston Martin (Verde esmeralda)
 	STR: { bg: "#006f62", text: "#ffffff" }, // Aston Martin
+	HUL: { bg: "#e10600", text: "#ffffff" }, // Audi (Rojo sólido de tu captura 2)
+	BOR: { bg: "#e10600", text: "#ffffff" }, // Audi
+	BOT: { bg: "#e10600", text: "#ffffff" }, // Audi
 };
 
-// Función limpia para enganchar tus archivos locales de la carpeta public/team-logos/
-const getLocalTeamLogoPath = (constructorId: string) => {
-	const cleanId = constructorId.replace("_", "-").toLowerCase();
-	
-	if (cleanId.includes("mercedes")) return "/team-logos/mercedes.svg";
-	if (cleanId.includes("ferrari")) return "/team-logos/ferrari.svg";
-	if (cleanId.includes("mclaren")) return "/team-logos/mclaren.svg";
-	if (cleanId.includes("red-bull") || cleanId === "red_bull") return "/team-logos/red-bull.svg";
-	if (cleanId.includes("alpine")) return "/team-logos/alpine-f1-team.svg";
-	if (cleanId === "rb" || cleanId.includes("racing") || cleanId.includes("bulls")) return "/team-logos/rb-f1-team.svg";
-	if (cleanId.includes("haas")) return "/team-logos/haas-f1-team.svg";
-	if (cleanId.includes("williams")) return "/team-logos/williams.svg";
-	if (cleanId.includes("aston")) return "/team-logos/aston-martin.svg";
-	if (cleanId.includes("audi") || cleanId.includes("sauber")) return "/team-logos/audi.svg";
-	if (cleanId.includes("cadillac")) return "/team-logos/cadillac-f1-team.svg";
+// 3. Componente inteligente para evitar que falle cualquier logo local
+const TeamLogo = ({ teamName }: { teamName: string }) => {
+	const cleanName = teamName.toLowerCase();
+	const [fallbackIndex, setFallbackIndex] = useState(0);
 
-	return `/team-logos/${cleanId}.svg`;
+	const fallbacks: string[] = [];
+
+	if (cleanName.includes("red bull")) {
+		fallbacks.push("/team-logos/red-bull.svg", "/team-logos/red-bull-racing.svg", "/team-logos/redbull.svg");
+	} else if (cleanName.includes("alpine")) {
+		fallbacks.push("/team-logos/alpine-f1-team.svg", "/team-logos/alpine.svg");
+	} else if (cleanName.includes("rb f1") || cleanName === "rb" || cleanName.includes("bulls")) {
+		fallbacks.push("/team-logos/rb-f1-team.svg", "/team-logos/rb.svg", "/team-logos/visa-cash-app-rb.svg");
+	} else if (cleanName.includes("haas")) {
+		fallbacks.push("/team-logos/haas-f1-team.svg", "/team-logos/haas.svg");
+	} else if (cleanName.includes("audi") || cleanName.includes("sauber")) {
+		fallbacks.push("/team-logos/audi.svg", "/team-logos/kick-sauber.svg", "/team-logos/sauber.svg");
+	} else if (cleanName.includes("cadillac")) {
+		fallbacks.push("/team-logos/cadillac-f1-team.svg", "/team-logos/cadillac.svg");
+	} else if (cleanName.includes("aston")) {
+		fallbacks.push("/team-logos/aston-martin.svg");
+	} else {
+		fallbacks.push(`/team-logos/${cleanName.replaceAll(" ", "-")}.svg`);
+	}
+
+	// Icono neutro final por si de verdad borraste el archivo
+	fallbacks.push("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='8' fill='%233f3f46'/></svg>");
+
+	return (
+		<img
+			src={fallbacks[fallbackIndex]}
+			alt={teamName}
+			className="w-6 h-6 object-contain"
+			onError={() => {
+				if (fallbackIndex < fallbacks.length - 1) {
+					setFallbackIndex(fallbackIndex + 1);
+				}
+			}}
+		/>
+	);
 };
 
 export default function Standings() {
@@ -134,7 +157,7 @@ export default function Standings() {
 										<NumberDiff old={driver.CurrentPosition} current={driver.PredictedPosition} />
 										<p className="font-semibold">{driver.PredictedPosition}</p>
 										<div className="flex items-center gap-2">
-											<span className="text-xs font-bold px-1.5 py-0.5 rounded text-center w-10 transition-colors" style={{ backgroundColor: badgeColor.bg, color: badgeColor.text }}>
+											<span className="text-xs font-bold px-1.5 py-0.5 rounded text-center w-10" style={{ backgroundColor: badgeColor.bg, color: badgeColor.text }}>
 												{driverDetails.Tla}
 											</span>
 											{countryCode && (
@@ -204,21 +227,14 @@ export default function Standings() {
 								</div>
 							))}
 
-					{/* CASO B: Respaldo */}
+					{/* CASO B: Respaldo con Componente Autocorrector de Logos */}
 					{!teamStandingsLive && extTeams &&
 						extTeams.map((team) => (
 							<div className="grid p-2 items-center" style={{ gridTemplateColumns: "2rem 2rem 2rem auto 4rem 4rem" }} key={team.Constructor.constructorId}>
 								<div className="w-4 h-4 text-zinc-600 text-xs text-center">-</div>
 								<p className="font-semibold">{team.position}</p>
 								<div className="w-6 h-6 relative flex items-center justify-center">
-									<img
-										src={getLocalTeamLogoPath(team.Constructor.constructorId)}
-										alt={team.Constructor.name}
-										className="w-6 h-6 object-contain"
-										onError={(e) => {
-											(e.currentTarget as HTMLImageElement).src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='8' fill='%233f3f46'/></svg>";
-										}}
-									/>
+									<TeamLogo teamName={team.Constructor.name} />
 								</div>
 								<p>{team.Constructor.name}</p>
 								<p className="font-medium text-zinc-300">{team.points} pts</p>
