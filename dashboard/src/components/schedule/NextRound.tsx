@@ -34,8 +34,11 @@ export default async function NextRound() {
 		);
 	}
 
+	// FIX CLAVE: Comparamos en base a UTC estricto para no saltear eventos activos
 	const nextSession = next.sessions.filter((s) => utc(s.start) > utc() && s.kind.toLowerCase() !== "race")[0];
-	const nextRace = next.sessions.find((s) => s.kind.toLowerCase() == "race");
+	
+	// FIX CLAVE: Solo tomamos la carrera si su tiempo de finalización no ha pasado en UTC
+	const nextRace = next.sessions.find((s) => s.kind.toLowerCase() === "race" && utc(s.end) > utc());
 
 	return (
 		<div className="grid grid-cols-1 gap-6 sm:grid-cols-2">

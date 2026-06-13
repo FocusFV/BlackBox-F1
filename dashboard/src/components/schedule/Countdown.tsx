@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { duration, now, utc } from "moment";
+import { duration, utc } from "moment"; // Cambiamos 'now' por 'utc'
 
 import type { Session } from "@/types/schedule.type";
 
@@ -13,30 +13,12 @@ type Props = {
 };
 
 const countryTranslation: Record<string, string> = {
-	Australia: "Australia",
-	Austria: "Austria",
-	Azerbaijan: "Azerbaiyán",
-	Bahrain: "Bahréin",
-	Belgium: "Bélgica",
-	Brazil: "Brasil",
-	Canada: "Canadá",
-	China: "China",
-	Spain: "España",
-	France: "Francia",
-	"Great Britain": "Gran Bretaña",
-	"United Kingdom": "Reino Unido",
-	Germany: "Alemania",
-	Hungary: "Hungría",
-	Italy: "Italia",
-	Japan: "Japón",
-	"Saudi Arabia": "Arabia Saudita",
-	Mexico: "México",
-	Monaco: "Mónaco",
-	Netherlands: "Países Bajos",
-	Portugal: "Portugal",
-	Qatar: "Catar",
-	Singapore: "Singapur",
-	"United Arab Emirates": "Emiratos Árabes Unidos",
+	Australia: "Australia", Austria: "Austria", Azerbaijan: "Azerbaiyán", Bahrain: "Bahréin",
+	Belgium: "Bélgica", Brazil: "Brasil", Canada: "Canadá", China: "China", Spain: "España",
+	France: "Francia", "Great Britain": "Gran Bretaña", "United Kingdom": "Reino Unido",
+	Germany: "Alemania", Hungary: "Hungría", Italy: "Italia", Japan: "Japón",
+	"Saudi Arabia": "Arabia Saudita", Mexico: "México", Monaco: "Mónaco", Netherlands: "Países Bajos",
+	Portugal: "Portugal", Qatar: "Catar", Singapore: "Singapur", "United Arab Emirates": "Emiratos Árabes Unidos",
 	"United States": "Estados Unidos",
 };
 
@@ -50,11 +32,12 @@ export default function Countdown({ next, type, countryName }: Props) {
 
 	useEffect(() => {
 		const animateNextFrame = () => {
-			const diff = duration(nextMoment.diff(now()));
-			const days = parseInt(diff.asDays().toString());
+			// FIX CLAVE: Comparamos usando utc() en vez de now() para sincronizar relojes con Vercel
+			const diff = duration(nextMoment.diff(utc()));
+			const daysVal = Math.floor(diff.asDays());
 
 			if (diff.asSeconds() > 0) {
-				setDuration([days, diff.hours(), diff.minutes(), diff.seconds()]);
+				setDuration([daysVal, diff.hours(), diff.minutes(), diff.seconds()]);
 			} else {
 				setDuration([0, 0, 0, 0]);
 			}
@@ -92,14 +75,7 @@ export default function Countdown({ next, type, countryName }: Props) {
 				<div className="grid auto-cols-max grid-flow-col gap-5 text-3xl font-mono font-black tracking-tighter">
 					<div className="text-center min-w-12">
 						{days != undefined && days != null ? (
-							<motion.p
-								className="text-neutral-100 drop-shadow-[0_2px_8px_rgba(255,255,255,0.05)]"
-								key={days}
-								initial={{ y: -6, opacity: 0 }}
-								animate={{ y: 0, opacity: 1 }}
-								exit={{ y: 6, opacity: 0 }}
-								transition={{ duration: 0.15 }}
-							>
+							<motion.p className="text-neutral-100" key={days} initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 6, opacity: 0 }} transition={{ duration: 0.15 }}>
 								{days}
 							</motion.p>
 						) : (
@@ -110,14 +86,7 @@ export default function Countdown({ next, type, countryName }: Props) {
 
 					<div className="text-center min-w-12">
 						{hours != undefined && hours != null ? (
-							<motion.p
-								className="text-neutral-100 drop-shadow-[0_2px_8px_rgba(255,255,255,0.05)]"
-								key={hours}
-								initial={{ y: -6, opacity: 0 }}
-								animate={{ y: 0, opacity: 1 }}
-								exit={{ y: 6, opacity: 0 }}
-								transition={{ duration: 0.15 }}
-							>
+							<motion.p className="text-neutral-100" key={hours} initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 6, opacity: 0 }} transition={{ duration: 0.15 }}>
 								{hours}
 							</motion.p>
 						) : (
@@ -128,14 +97,7 @@ export default function Countdown({ next, type, countryName }: Props) {
 
 					<div className="text-center min-w-12">
 						{minutes != undefined && minutes != null ? (
-							<motion.p
-								className="text-neutral-100 drop-shadow-[0_2px_8px_rgba(255,255,255,0.05)]"
-								key={minutes}
-								initial={{ y: -6, opacity: 0 }}
-								animate={{ y: 0, opacity: 1 }}
-								exit={{ y: 6, opacity: 0 }}
-								transition={{ duration: 0.15 }}
-							>
+							<motion.p className="text-neutral-100" key={minutes} initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 6, opacity: 0 }} transition={{ duration: 0.15 }}>
 								{minutes}
 							</motion.p>
 						) : (
@@ -146,14 +108,7 @@ export default function Countdown({ next, type, countryName }: Props) {
 
 					<div className="text-center min-w-12">
 						{seconds != undefined && seconds != null ? (
-							<motion.p
-								className="text-amber-400 font-extrabold drop-shadow-[0_0_12px_rgba(245,158,11,0.25)]"
-								key={seconds}
-								initial={{ y: -6, opacity: 0 }}
-								animate={{ y: 0, opacity: 1 }}
-								exit={{ y: 6, opacity: 0 }}
-								transition={{ duration: 0.12 }}
-							>
+							<motion.p className="text-amber-400 font-extrabold" key={seconds} initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 6, opacity: 0 }} transition={{ duration: 0.12 }}>
 								{String(seconds).padStart(2, "0")}
 							</motion.p>
 						) : (
