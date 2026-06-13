@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 
-const title = "f1-dash | Formula 1 live timing";
+const title = "FocusFV | F1 Live Dashboard";
 const description =
-	"Experience live telemetry and timing data from Formula 1 races. Get insights into leaderboards, tire choices, gaps, lap times, sector times, team radios, and more.";
+	"Telemetría y tiempos en vivo de Fórmula 1 en tiempo real. Seguí las posiciones, neumáticos, brechas, vueltas, radios de equipo y más.";
 
-const url = "https://f1-dash.com";
+const url = "https://blackbox-f1.vercel.app";
 
 export const metadata: Metadata = {
 	generator: "Next.js",
@@ -14,17 +14,18 @@ export const metadata: Metadata = {
 	title,
 	description,
 
-	icons: "https://f1-dash.com/favicon.png",
+	// Usamos el favicon local de tu carpeta public
+	icons: "/favicon.png",
 
 	openGraph: {
 		title,
 		description,
 		url,
 		type: "website",
-		siteName: "F1 Realtime Dashboard",
+		siteName: "FocusFV F1 Dashboard",
 		images: [
 			{
-				alt: "Realtime Formula 1 Dashboard",
+				alt: "FocusFV Formula 1 Dashboard",
 				url: `${url}/og-image.png`,
 				width: 1200,
 				height: 630,
@@ -33,15 +34,15 @@ export const metadata: Metadata = {
 	},
 
 	twitter: {
-		site: "@Slowlydev",
+		site: "@FocusFV",
 		title,
 		description,
-		creator: "@Slowlydev",
+		creator: "@FocusFV",
 		card: "summary_large_image",
 		images: [
 			{
-				url: `${url}/twitter-image.png`,
-				alt: "Realtime Formula 1 Dashboard",
+				url: `${url}/og-image.png`, // Usamos la misma para twitter
+				alt: "FocusFV Formula 1 Dashboard",
 				width: 1200,
 				height: 630,
 			},
@@ -52,15 +53,15 @@ export const metadata: Metadata = {
 
 	referrer: "strict-origin-when-cross-origin",
 
-	keywords: ["Formula 1", "f1 dashboard", "realtime telemetry", "f1 timing", "live updates"],
+	keywords: ["Formula 1", "f1 dashboard", "telemetria en vivo", "tiempos f1", "colapinto alpine"],
 
-	creator: "Slowlydev",
-	publisher: "Slowlydev",
-	authors: [{ name: "Slowlydev", url: "https://slowly.dev" }],
+	creator: "FocusFV",
+	publisher: "FocusFV",
+	authors: [{ name: "FocusFV", url: "https://blackbox-f1.vercel.app" }],
 
 	appleWebApp: {
 		capable: true,
-		title: "f1-dash",
+		title: "FocusFV F1",
 		statusBarStyle: "black-translucent",
 	},
 
@@ -74,10 +75,6 @@ export const metadata: Metadata = {
 
 	alternates: {
 		canonical: url,
-	},
-
-	verification: {
-		google: "hKv0h7XtWgQ-pVNVKpwwb2wcCC2f0tBQ1X1IcDX50hg",
 	},
 
 	manifest: "/manifest.json",

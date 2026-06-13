@@ -25,7 +25,7 @@ const liveTimingItems = [
 	},
 	{
 		href: "/dashboard/standings",
-		name: "Clasificación",
+		name: "Campeonatos",
 	},
 	{
 		href: "/dashboard/weather",
