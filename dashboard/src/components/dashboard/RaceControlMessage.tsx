@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { utc } from "moment";
 import Image from "next/image";
 import clsx from "clsx";
+import { useEffect, useState } from "react";
 
 import type { Message } from "@/types/state.type";
 
@@ -25,6 +26,34 @@ export function RaceControlMessage({ msg, gmtOffset }: Props) {
 	const localTime = utc(msg.Utc).local().format("HH:mm:ss");
 	const trackTime = utc(toTrackTime(msg.Utc, gmtOffset)).format("HH:mm");
 
+	const [translatedText, setTranslatedText] = useState(msg.Message);
+	const [isLoading, setIsLoading] = useState(false);
+
+	useEffect(() => {
+		const translateMessage = async () => {
+			if (!msg.Message) return;
+			setIsLoading(true);
+			try {
+				const res = await fetch(
+					"https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=es&dt=t&q=" +
+						encodeURIComponent(msg.Message)
+				);
+				const data = await res.json();
+				
+				if (data && data[0] && data[0][0] && data[0][0][0]) {
+					setTranslatedText(data[0][0][0]);
+				}
+			} catch (error) {
+				console.error("Error al traducir el mensaje de Race Control:", error);
+				setTranslatedText(msg.Message);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		translateMessage();
+	}, [msg.Message]);
+
 	return (
 		<motion.li
 			layout="position"
@@ -36,7 +65,7 @@ export function RaceControlMessage({ msg, gmtOffset }: Props) {
 				<div className="flex items-center gap-1 text-sm leading-none text-zinc-500">
 					{msg.Lap && (
 						<>
-							<p>Lap {msg.Lap}</p>
+							<p>Vuelta {msg.Lap}</p>
 							{"·"}
 						</>
 					)}
@@ -47,7 +76,7 @@ export function RaceControlMessage({ msg, gmtOffset }: Props) {
 					</time>
 				</div>
 
-				<p className="text-sm">{msg.Message}</p>
+				<p className={clsx("text-sm, transition-opacity", { "opacity-50": isLoading })}>{translatedText}</p>
 			</div>
 
 			{msg.Flag && msg.Flag !== "CLEAR" && (

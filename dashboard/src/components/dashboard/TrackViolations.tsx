@@ -32,7 +32,7 @@ export default function TrackViolations() {
 				if (!carNr) return acc;
 
 				if (acc[carNr] === undefined) {
-					acc[carNr] = 1;
+					acc[acc[carNr] = 1] = 1;
 				} else {
 					const newValue = acc[carNr] + 1;
 					acc[carNr] = newValue;
@@ -49,7 +49,7 @@ export default function TrackViolations() {
 		<div className="flex flex-col gap-0.5">
 			{violationDrivers && violationDrivers.length < 1 && (
 				<div className="flex h-96 w-full flex-col items-center justify-center">
-					<p className="text-gray-500">No violations yet</p>
+					<p className="text-gray-500">Sin infracciones por ahora</p>
 				</div>
 			)}
 

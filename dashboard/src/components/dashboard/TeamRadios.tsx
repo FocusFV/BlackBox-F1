@@ -16,8 +16,6 @@ export default function TeamRadios() {
 
 	const basePath = `https://livetiming.formula1.com/static/${sessionPath}`;
 
-	// TODO add notice that we only show 20
-
 	return (
 		<ul className="flex flex-col gap-2">
 			{!teamRadios && new Array(6).fill("").map((_, index) => <SkeletonMessage key={`radio.loading.${index}`} />)}

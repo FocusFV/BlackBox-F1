@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
 
 import type { PositionCar, TimingDataDriver } from "@/types/state.type";
-import type { Map, TrackPosition } from "@/types/map.type";
+import type { Map as MapType, TrackPosition } from "@/types/map.type";
 
 import { fetchMap } from "@/lib/fetchMap";
 
@@ -19,13 +19,9 @@ import {
 	rotate,
 } from "@/lib/map";
 
-// This is basically fearlessly copied from
-// https://github.com/tdjsnelling/monaco
-
 const SPACE = 1000;
 const ROTATION_FIX = 90;
 
-// Function to calculate driver position based on their segment progress
 function getDriverPosition(
 	timingDriver: TimingDataDriver | undefined,
 	originalTrackPoints: { x: number; y: number }[] | null,
@@ -34,11 +30,9 @@ function getDriverPosition(
 		return null;
 	}
 
-	// Get all segments from all sectors
 	const allSegments = timingDriver.Sectors.flatMap((sector) => sector.Segments);
 
 	if (allSegments.length === 0) {
-		// No segments available, position at start/finish line
 		return {
 			Status: "OnTrack",
 			X: originalTrackPoints[0].x,
@@ -47,8 +41,6 @@ function getDriverPosition(
 		};
 	}
 
-	// Find the furthest segment with a meaningful status
-	// Status values: 0 = not started, 1 = in progress, 2+ = completed
 	let furthestSegmentIndex = -1;
 	for (let i = allSegments.length - 1; i >= 0; i--) {
 		const status = allSegments[i].Status;
@@ -58,7 +50,6 @@ function getDriverPosition(
 		}
 	}
 
-	// If no completed segments found, check for any segment with status 0 (current segment)
 	if (furthestSegmentIndex === -1) {
 		for (let i = 0; i < allSegments.length; i++) {
 			if (allSegments[i].Status !== undefined) {
@@ -68,26 +59,19 @@ function getDriverPosition(
 		}
 	}
 
-	// Still no segments found, default to start
 	if (furthestSegmentIndex === -1) {
 		furthestSegmentIndex = 0;
 	}
 
-	// Calculate position index based on segment progress
-	// Add small offset for in-progress segments to show forward movement
 	const baseRatio = furthestSegmentIndex / Math.max(allSegments.length - 1, 1);
 	const currentSegmentStatus = allSegments[furthestSegmentIndex]?.Status || 0;
 
-	// Add fractional progress within current segment if it's in progress (status 1)
 	const segmentProgress = currentSegmentStatus === 1 ? 0.5 : 0;
 	const segmentSize = 1 / Math.max(allSegments.length, 1);
 	const adjustedRatio = baseRatio + segmentProgress * segmentSize;
 
 	const positionIndex = Math.floor(adjustedRatio * (originalTrackPoints.length - 1));
-
-	// Ensure we don't go out of bounds
 	const safeIndex = Math.min(Math.max(positionIndex, 0), originalTrackPoints.length - 1);
-
 	const trackPoint = originalTrackPoints[safeIndex];
 
 	return {
@@ -112,7 +96,6 @@ export default function Map({ filter }: Props) {
 	const showCornerNumbers = useSettingsStore((state) => state.showCornerNumbers);
 	const favoriteDrivers = useSettingsStore((state) => state.favoriteDrivers);
 
-	// const positions = useDataStore((state) => state.positions);
 	const drivers = useDataStore((state) => state?.state?.DriverList);
 	const trackStatus = useDataStore((state) => state?.state?.TrackStatus);
 	const timingDrivers = useDataStore((state) => state?.state?.TimingData);
@@ -176,7 +159,6 @@ export default function Map({ filter }: Props) {
 			const dy = rotatedPoints[3].y - rotatedPoints[0].y;
 			const startAngle = Math.atan2(dy, dx) * (180 / Math.PI);
 
-			// Store original track points for position calculation
 			const originalPoints = mapJson.x.map((x, index) => ({ x, y: mapJson.y[index] }));
 
 			setCenter([centerX, centerY]);
@@ -288,7 +270,6 @@ export default function Map({ filter }: Props) {
 
 							const driverPosition = getDriverPosition(timingDriver, originalTrackPoints);
 
-							// Skip rendering if we can't determine position
 							if (!driverPosition) return null;
 
 							return (
@@ -330,13 +311,10 @@ type CarDotProps = {
 	name: string;
 	color: string | undefined;
 	favoriteDriver: boolean;
-
 	pit: boolean;
 	hidden: boolean;
-
 	pos: PositionCar;
 	rotation: number;
-
 	centerX: number;
 	centerY: number;
 };

@@ -17,13 +17,13 @@ export default function DriverViolations({ driver, driverViolations, driversTimi
 
 			<div className="flex flex-col justify-around text-sm leading-none text-zinc-600">
 				<p>
-					{driverViolations} Violation{driverViolations > 1 ? "s" : ""}
-					{driverViolations > 4 && <span> - {Math.round(driverViolations / 5) * 5}s Penalty</span>}
+					{driverViolations} {driverViolations > 1 ? "Infracciones" : "Infracción"}
+					{driverViolations > 4 && <span> - {Math.round(driverViolations / 5) * 5}s de Sanción</span>}
 				</p>
 				{driverViolations > 4 && driversTiming && (
 					<p>
 						{calculatePosition(Math.round(driverViolations / 5) * 5, driver.RacingNumber, driversTiming)}
-						th after penalty
+						° después de la sanción
 					</p>
 				)}
 			</div>
