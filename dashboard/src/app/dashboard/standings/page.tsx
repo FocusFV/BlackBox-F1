@@ -18,7 +18,7 @@ type ExternalTeam = {
 	Constructor: { name: string; constructorId: string };
 };
 
-// Diccionario de banderas de los pilotos
+// Diccionario de banderas de los países
 const driverNationalityMap: { [key: string]: string } = {
 	COL: "ar", VER: "nl", HAM: "gb", RUS: "gb", LEC: "mc", SAI: "es",
 	NOR: "gb", PIA: "au", ALB: "th", GAS: "fr", OCO: "fr", HUL: "de",
@@ -27,65 +27,51 @@ const driverNationalityMap: { [key: string]: string } = {
 	LAW: "nz", ANT: "it"
 };
 
-// Mapeo de colores oficiales por sigla de piloto
+// Paleta de colores EXACTA basada en tu captura 2
 const driverTeamColorMap: { [key: string]: { bg: string; text: string } } = {
-	ANT: { bg: "#27f4d2", text: "#000000" }, // Mercedes
-	HAM: { bg: "#e8002d", text: "#ffffff" }, // Ferrari
-	RUS: { bg: "#27f4d2", text: "#000000" }, // Mercedes
-	LEC: { bg: "#e8002d", text: "#ffffff" }, // Ferrari
-	PIA: { bg: "#ff8000", text: "#000000" }, // McLaren
-	NOR: { bg: "#ff8000", text: "#000000" }, // McLaren
-	VER: { bg: "#3671c6", text: "#ffffff" }, // Red Bull
-	GAS: { bg: "#ff87bc", text: "#000000" }, // Alpine
-	HAD: { bg: "#3671c6", text: "#ffffff" }, // Red Bull (Junior/Reserva)
-	LAW: { bg: "#6692ff", text: "#ffffff" }, // RB F1 Team
-	BEA: { bg: "#e8002d", text: "#ffffff" }, // Haas / Ferrari
-	COL: { bg: "#37bedd", text: "#000000" }, // Williams 🇦🇷
-	LIN: { bg: "#3671c6", text: "#ffffff" }, // Red Bull / Compitiendo
-	SAI: { bg: "#b6babd", text: "#000000" }, // Williams / Ajustado
-	ALB: { bg: "#37bedd", text: "#000000" }, // Williams
-	OCO: { bg: "#2293d1", text: "#ffffff" }, // Haas / Aston
-	BOR: { bg: "#6692ff", text: "#ffffff" }, // RB / Sauber
-	ALO: { bg: "#229971", text: "#ffffff" }, // Aston Martin
-	HUL: { bg: "#b6babd", text: "#000000" }, // Kick Sauber / Audi
-	PER: { bg: "#3671c6", text: "#ffffff" }, // Red Bull
-	TSU: { bg: "#6692ff", text: "#ffffff" }, // RB F1 Team
-	MAG: { bg: "#b6babd", text: "#000000" }, // Haas
-	STR: { bg: "#229971", text: "#ffffff" }, // Aston Martin
-	BOT: { bg: "#7a0016", text: "#ffffff" }, // Audi / Sauber
+	ANT: { bg: "#00d2be", text: "#ffffff" }, // Mercedes (Turquesa claro)
+	RUS: { bg: "#00d2be", text: "#ffffff" }, // Mercedes
+	HAM: { bg: "#e10600", text: "#ffffff" }, // Ferrari (Rojo)
+	LEC: { bg: "#e10600", text: "#ffffff" }, // Ferrari
+	NOR: { bg: "#ff8700", text: "#ffffff" }, // McLaren (Naranja)
+	PIA: { bg: "#ff8700", text: "#ffffff" }, // McLaren
+	VER: { bg: "#061d43", text: "#ffffff" }, // Red Bull (Azul oscuro oscuro)
+	HAD: { bg: "#061d43", text: "#ffffff" }, // Red Bull
+	LIN: { bg: "#061d43", text: "#ffffff" }, // Red Bull
+	PER: { bg: "#061d43", text: "#ffffff" }, // Red Bull
+	LAW: { bg: "#4b77ff", text: "#ffffff" }, // RB F1 Team (Azul eléctrico)
+	TSU: { bg: "#4b77ff", text: "#ffffff" }, // RB F1 Team
+	GAS: { bg: "#0078b4", text: "#ffffff" }, // Alpine (Azul Francia)
+	OCO: { bg: "#b6babd", text: "#000000" }, // Haas (Gris claro/medio)
+	BEA: { bg: "#787878", text: "#ffffff" }, // Haas (Gris oscuro)
+	MAG: { bg: "#787878", text: "#ffffff" }, // Haas
+	COL: { bg: "#005aff", text: "#ffffff" }, // Williams (Azul marino)
+	ALB: { bg: "#005aff", text: "#ffffff" }, // Williams
+	SAI: { bg: "#005aff", text: "#ffffff" }, // Williams
+	BOR: { bg: "#a50021", text: "#ffffff" }, // Sauber/Audi (Bordó oscuro)
+	HUL: { bg: "#a50021", text: "#ffffff" }, // Sauber/Audi
+	BOT: { bg: "#a50021", text: "#ffffff" }, // Sauber/Audi
+	ALO: { bg: "#006f62", text: "#ffffff" }, // Aston Martin (Verde oscuro)
+	STR: { bg: "#006f62", text: "#ffffff" }, // Aston Martin
 };
 
-// Mapeo de escuderías a sus colores
-const constructorColorMap: { [key: string]: { bg: string; text: string } } = {
-	mercedes: { bg: "#27f4d2", text: "#000000" },
-	ferrari: { bg: "#e8002d", text: "#ffffff" },
-	mclaren: { bg: "#ff8000", text: "#000000" },
-	red_bull: { bg: "#3671c6", text: "#ffffff" },
-	alpine: { bg: "#ff87bc", text: "#000000" },
-	rb: { bg: "#6692ff", text: "#ffffff" },
-	haas: { bg: "#b6babd", text: "#000000" },
-	williams: { bg: "#37bedd", text: "#000000" },
-	aston_martin: { bg: "#229971", text: "#ffffff" },
-	audi: { bg: "#7a0016", text: "#ffffff" },
-	cadillac: { bg: "#e5e7eb", text: "#000000" },
-};
+// Función limpia para enganchar tus archivos locales de la carpeta public/team-logos/
+const getLocalTeamLogoPath = (constructorId: string) => {
+	const cleanId = constructorId.replace("_", "-").toLowerCase();
+	
+	if (cleanId.includes("mercedes")) return "/team-logos/mercedes.svg";
+	if (cleanId.includes("ferrari")) return "/team-logos/ferrari.svg";
+	if (cleanId.includes("mclaren")) return "/team-logos/mclaren.svg";
+	if (cleanId.includes("red-bull") || cleanId === "red_bull") return "/team-logos/red-bull.svg";
+	if (cleanId.includes("alpine")) return "/team-logos/alpine-f1-team.svg";
+	if (cleanId === "rb" || cleanId.includes("racing") || cleanId.includes("bulls")) return "/team-logos/rb-f1-team.svg";
+	if (cleanId.includes("haas")) return "/team-logos/haas-f1-team.svg";
+	if (cleanId.includes("williams")) return "/team-logos/williams.svg";
+	if (cleanId.includes("aston")) return "/team-logos/aston-martin.svg";
+	if (cleanId.includes("audi") || cleanId.includes("sauber")) return "/team-logos/audi.svg";
+	if (cleanId.includes("cadillac")) return "/team-logos/cadillac-f1-team.svg";
 
-// Función para obtener los logos vectoriales
-const getTeamLogoUrl = (constructorId: string) => {
-	const cleanId = constructorId.toLowerCase();
-	
-	if (cleanId.includes("red_bull") || cleanId.includes("red-bull")) return "https://media.formula1.com/content/dam/fom-website/teams/2026/red-bull-racing.png";
-	if (cleanId.includes("alpine")) return "https://media.formula1.com/content/dam/fom-website/teams/2026/alpine.png";
-	if (cleanId === "rb" || cleanId.includes("racing") || cleanId.includes("bulls")) return "https://media.formula1.com/content/dam/fom-website/teams/2026/rb.png";
-	if (cleanId.includes("haas")) return "https://media.formula1.com/content/dam/fom-website/teams/2026/haas.png";
-	if (cleanId.includes("aston")) return "https://media.formula1.com/content/dam/fom-website/teams/2026/aston-martin.png";
-	if (cleanId.includes("williams")) return "https://media.formula1.com/content/dam/fom-website/teams/2026/williams.png";
-	if (cleanId.includes("ferrari")) return "https://media.formula1.com/content/dam/fom-website/teams/2026/ferrari.png";
-	if (cleanId.includes("mclaren")) return "https://media.formula1.com/content/dam/fom-website/teams/2026/mclaren.png";
-	if (cleanId.includes("mercedes")) return "https://media.formula1.com/content/dam/fom-website/teams/2026/mercedes.png";
-	if (cleanId.includes("audi") || cleanId.includes("sauber")) return "https://media.formula1.com/content/dam/fom-website/teams/2026/sauber.png";
-	
-	return `/team-logos/${cleanId.replace("_", "-")}.svg`;
+	return `/team-logos/${cleanId}.svg`;
 };
 
 export default function Standings() {
@@ -133,7 +119,7 @@ export default function Standings() {
 					{showDriversSkeleton &&
 						new Array(20).fill("").map((_, index) => <SkeletonItem key={`driver.loading.${index}`} />)}
 
-					{/* CASO A: Datos en vivo en carrera */}
+					{/* CASO A: En carrera */}
 					{driverStandingsLive && driversLive &&
 						Object.values(driverStandingsLive)
 							.sort((a, b) => a.PredictedPosition - b.PredictedPosition)
@@ -148,7 +134,7 @@ export default function Standings() {
 										<NumberDiff old={driver.CurrentPosition} current={driver.PredictedPosition} />
 										<p className="font-semibold">{driver.PredictedPosition}</p>
 										<div className="flex items-center gap-2">
-											<span className="text-xs font-bold px-1.5 py-0.5 rounded text-center w-10" style={{ backgroundColor: badgeColor.bg, color: badgeColor.text }}>
+											<span className="text-xs font-bold px-1.5 py-0.5 rounded text-center w-10 transition-colors" style={{ backgroundColor: badgeColor.bg, color: badgeColor.text }}>
 												{driverDetails.Tla}
 											</span>
 											{countryCode && (
@@ -162,12 +148,12 @@ export default function Standings() {
 								);
 							})}
 
-					{/* CASO B: Datos de respaldo en Qualy / Libres */}
+					{/* CASO B: Qualy / Libres */}
 					{!driverStandingsLive && extDrivers &&
 						extDrivers.map((driver) => {
 							const driverCode = driver.Driver.code || "F1";
 							const countryCode = driverNationalityMap[driverCode];
-							const badgeColor = driverTeamColorMap[driverCode] || constructorColorMap[driver.Constructor.constructorId] || { bg: "#27272a", text: "#ffffff" };
+							const badgeColor = driverTeamColorMap[driverCode] || { bg: "#27272a", text: "#ffffff" };
 
 							return (
 								<div className="grid p-2 items-center" style={{ gridTemplateColumns: "2rem 2rem auto 4rem 4rem" }} key={driver.Driver.code || driver.Driver.familyName}>
@@ -204,7 +190,6 @@ export default function Standings() {
 							.map((team) => (
 								<div className="grid p-2 items-center" style={{ gridTemplateColumns: "2rem 2rem 2rem auto 4rem 4rem" }} key={team.TeamName}>
 									<NumberDiff old={team.CurrentPosition} current={team.PredictedPosition} />
-									{/* PARCHE PROLIJO AQUÍ: Quitamos la propiedad inexistente position */}
 									<p className="font-semibold">{team.PredictedPosition}</p>
 									<Image
 										src={`/team-logos/${team.TeamName.replaceAll(" ", "-").toLowerCase()}.svg`}
@@ -227,11 +212,11 @@ export default function Standings() {
 								<p className="font-semibold">{team.position}</p>
 								<div className="w-6 h-6 relative flex items-center justify-center">
 									<img
-										src={getTeamLogoUrl(team.Constructor.constructorId)}
+										src={getLocalTeamLogoPath(team.Constructor.constructorId)}
 										alt={team.Constructor.name}
-										className="w-6 h-6 object-contain rounded-sm"
+										className="w-6 h-6 object-contain"
 										onError={(e) => {
-											(e.currentTarget as HTMLImageElement).src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='%2327272a'/></svg>";
+											(e.currentTarget as HTMLImageElement).src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='8' fill='%233f3f46'/></svg>";
 										}}
 									/>
 								</div>
