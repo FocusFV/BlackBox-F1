@@ -18,7 +18,7 @@ type ExternalTeam = {
 	Constructor: { name: string; constructorId: string };
 };
 
-// Diccionario para asociar las siglas de los pilotos con el código de su país (para las banderas)
+// Diccionario de banderas actualizado
 const driverNationalityMap: { [key: string]: string } = {
 	COL: "ar", // Franco Colapinto 🇦🇷
 	VER: "nl", // Max Verstappen 🇳🇱
@@ -42,21 +42,29 @@ const driverNationalityMap: { [key: string]: string } = {
 	PER: "mx", // Sergio Pérez 🇲🇽
 	BEA: "gb", // Oliver Bearman 🇬🇧
 	HAD: "fr", // Isack Hadjar 🇫🇷
-	BOR: "it", // Gabriel Bortoleto 🇧🇷 (usa 'br' si corresponde, puse it/br según licencia)
-	LIN: "us", // Jak Crawford / Lindblad 🇺🇸/🇬🇧
+	BOR: "br", // Gabriel Bortoleto 🇧🇷
+	LIN: "us", // Arvid Lindblad 🇺🇸
+	LAW: "nz", // Liam Lawson 🇳🇿 ¡Agregado!
+	ANT: "it", // Andrea Kimi Antonelli 🇮🇹
 };
 
-// Función para limpiar el ID del constructor externo y que matchee con tus SVG locales
+// Función de mapeo de logos ultra robusta
 const getLocalTeamLogoPath = (constructorId: string) => {
-	// Reemplazamos guiones bajos por guiones medios para coincidir con tu sistema
+	// Reemplazamos guiones bajos por guiones medios para estandarizar
 	const cleanId = constructorId.replace("_", "-").toLowerCase();
 	
-	// Casos especiales de mapeo si la API externa difiere de tu nombre de archivo
-	if (cleanId === "alpine") return "/team-logos/alpine-f1-team.svg";
-	if (cleanId === "rb") return "/team-logos/rb-f1-team.svg";
-	if (cleanId === "haas") return "/team-logos/haas-f1-team.svg";
-	if (cleanId === "aston-martin") return "/team-logos/aston-martin.svg";
-	if (cleanId === "cadillac") return "/team-logos/cadillac-f1-team.svg";
+	// Mapeo uno a uno según los nombres estándar de los archivos de F1
+	if (cleanId.includes("alpine")) return "/team-logos/alpine-f1-team.svg";
+	if (cleanId.includes("red-bull") || cleanId === "red_bull") return "/team-logos/red-bull.svg";
+	if (cleanId === "rb" || cleanId.includes("racing-bulls") || cleanId.includes("vcarb")) return "/team-logos/rb-f1-team.svg";
+	if (cleanId.includes("haas")) return "/team-logos/haas-f1-team.svg";
+	if (cleanId.includes("aston-martin")) return "/team-logos/aston-martin.svg";
+	if (cleanId.includes("cadillac")) return "/team-logos/cadillac-f1-team.svg";
+	if (cleanId.includes("audi") || cleanId.includes("sauber")) return "/team-logos/audi.svg";
+	if (cleanId.includes("williams")) return "/team-logos/williams.svg";
+	if (cleanId.includes("ferrari")) return "/team-logos/ferrari.svg";
+	if (cleanId.includes("mclaren")) return "/team-logos/mclaren.svg";
+	if (cleanId.includes("mercedes")) return "/team-logos/mercedes.svg";
 
 	return `/team-logos/${cleanId}.svg`;
 };
@@ -107,7 +115,7 @@ export default function Standings() {
 					{showDriversSkeleton &&
 						new Array(20).fill("").map((_, index) => <SkeletonItem key={`driver.loading.${index}`} />)}
 
-					{/* CASO A: Datos en vivo (En Carrera) */}
+					{/* CASO A: En Carrera (Predicciones) */}
 					{driverStandingsLive && driversLive &&
 						Object.values(driverStandingsLive)
 							.sort((a, b) => a.PredictedPosition - b.PredictedPosition)
@@ -136,7 +144,7 @@ export default function Standings() {
 								);
 							})}
 
-					{/* CASO B: Datos de respaldo (Qualy / Prácticas) */}
+					{/* CASO B: Respaldo (Qualy / Libres) */}
 					{!driverStandingsLive && extDrivers &&
 						extDrivers.map((driver) => {
 							const driverCode = driver.Driver.code || "F1";
@@ -172,7 +180,7 @@ export default function Standings() {
 					{showTeamsSkeleton &&
 						new Array(10).fill("").map((_, index) => <SkeletonItem key={`team.loading.${index}`} />)}
 
-					{/* CASO A: Datos en vivo (En Carrera) */}
+					{/* CASO A: En Carrera */}
 					{teamStandingsLive &&
 						Object.values(teamStandingsLive)
 							.sort((a, b) => a.PredictedPosition - b.PredictedPosition)
@@ -193,7 +201,7 @@ export default function Standings() {
 								</div>
 							))}
 
-					{/* CASO B: Datos de respaldo (Mapeo de logos corregido) */}
+					{/* CASO B: Respaldo */}
 					{!teamStandingsLive && extTeams &&
 						extTeams.map((team) => (
 							<div className="grid p-2 items-center" style={{ gridTemplateColumns: "2rem 2rem 2rem auto 4rem 4rem" }} key={team.Constructor.constructorId}>
@@ -205,7 +213,6 @@ export default function Standings() {
 										alt={team.Constructor.name}
 										className="w-6 h-6 object-contain rounded-sm"
 										onError={(e) => {
-											// Fallback por si falta algún escudo nuevo en tu carpeta local
 											(e.currentTarget as HTMLImageElement).src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='%2327272a'/></svg>";
 										}}
 									/>
