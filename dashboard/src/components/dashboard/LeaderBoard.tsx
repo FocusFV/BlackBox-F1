@@ -53,14 +53,14 @@ const TableHeaders = () => {
 					: "5.5rem 3.5rem 5.5rem 4rem 5rem 5.5rem auto",
 			}}
 		>
-			<p>Position</p>
+			<p>Posición</p>
 			<p>DRS</p>
-			<p>Tire</p>
+			<p>Neumático</p>
 			<p>Info</p>
-			<p>Gap</p>
-			<p>LapTime</p>
-			<p>Sectors</p>
-			{carMetrics && <p>Car Metrics</p>}
+			<p>Diferencia</p>
+			<p>Tiempo de Vuelta</p>
+			<p>Sectores</p>
+			{carMetrics && <p>Datos del Auto</p>}
 		</div>
 	);
 };
