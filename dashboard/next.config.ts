@@ -42,17 +42,6 @@ const config: NextConfig = {
 	},
 	headers: async () => frameDisableHeaders,
 
-	// EL TÚNEL SECRETO PARA LIQUIDAR EL CORS DEL REALTIME EN RENDER
-	async rewrites() {
-		return [
-			{
-				source: '/api-proxy/:path*',
-				destination: 'https://blackbox-f1-realtime.onrender.com/:path*',
-			},
-		];
-	},
-
-	// Mantenemos tu regla de polling para que el Ctrl + S reaccione al toque en Windows
 	webpack: (config, { dev }) => {
 		if (dev) {
 			config.watchOptions = {
