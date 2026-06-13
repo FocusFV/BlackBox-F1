@@ -11,21 +11,12 @@ export default function Standings() {
 
 	const drivers = useDataStore((state) => state.state?.DriverList);
 
-	const isRace = useDataStore((state) => state.state?.SessionInfo?.Type === "Race");
-
-	if (!isRace) {
-		return (
-			<div className="flex h-full w-full flex-col items-center justify-center">
-				<p>championship standings unavailable</p>
-				<p className="text-sm text-zinc-500">currently only available during a race</p>
-			</div>
-		);
-	}
+	// Volamos el bloqueo de "isRace" para que renderice siempre la tabla del campeonato mundial
 
 	return (
 		<div className="grid h-full grid-cols-1 divide-y divide-zinc-800 lg:grid-cols-2 lg:divide-x lg:divide-y-0">
 			<div className="h-full p-4">
-				<h2 className="text-xl">Driver Championship Standings</h2>
+				<h2 className="text-xl mb-4 font-medium">Campeonato de Pilotos</h2>
 
 				<div className="divide flex flex-col divide-y divide-zinc-800">
 					{!driverStandings &&
@@ -44,20 +35,20 @@ export default function Standings() {
 
 								return (
 									<div
-										className="grid p-2"
+										className="grid p-2 items-center"
 										style={{
 											gridTemplateColumns: "2rem 2rem auto 4rem 4rem",
 										}}
 										key={driver.RacingNumber}
 									>
 										<NumberDiff old={driver.CurrentPosition} current={driver.PredictedPosition} />
-										<p>{driver.PredictedPosition}</p>
+										<p className="font-semibold">{driver.PredictedPosition}</p>
 
 										<p>
 											{driverDetails.FirstName} {driverDetails.LastName}
 										</p>
 
-										<p>{driver.PredictedPoints}</p>
+										<p className="font-medium text-zinc-300">{driver.PredictedPoints} pts</p>
 
 										<NumberDiff old={driver.PredictedPoints} current={driver.CurrentPoints} />
 									</div>
@@ -67,7 +58,7 @@ export default function Standings() {
 			</div>
 
 			<div className="h-full p-4">
-				<h2 className="text-xl">Team Championship Standings</h2>
+				<h2 className="text-xl mb-4 font-medium">Campeonato de Constructores</h2>
 
 				<div className="divide flex flex-col divide-y divide-zinc-800">
 					{!teamStandings && new Array(10).fill("").map((_, index) => <SkeletonItem key={`team.loading.${index}`} />)}
@@ -77,14 +68,14 @@ export default function Standings() {
 							.sort((a, b) => a.PredictedPosition - b.PredictedPosition)
 							.map((team) => (
 								<div
-									className="grid p-2"
+									className="grid p-2 items-center"
 									style={{
 										gridTemplateColumns: "2rem 2rem 2rem auto 4rem 4rem",
 									}}
 									key={team.TeamName}
 								>
 									<NumberDiff old={team.CurrentPosition} current={team.PredictedPosition} />
-									<p>{team.PredictedPosition}</p>
+									<p className="font-semibold">{team.PredictedPosition}</p>
 
 									<Image
 										src={`/team-logos/${team.TeamName.replaceAll(" ", "-").toLowerCase()}.${"svg"}`}
@@ -96,7 +87,7 @@ export default function Standings() {
 
 									<p>{team.TeamName}</p>
 
-									<p>{team.PredictedPoints}</p>
+									<p className="font-medium text-zinc-300">{team.PredictedPoints} pts</p>
 
 									<NumberDiff old={team.PredictedPoints} current={team.CurrentPoints} />
 								</div>

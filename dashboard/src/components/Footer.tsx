@@ -56,7 +56,7 @@ export default function Footer() {
 				</span>
 				
 				<Link 
-					href="https://github.com/FocusFV" 
+					href="https://focusfv.vercel.app/" 
 					target="_blank" 
 					className="hover:scale-105 transition duration-300 mt-1 block"
 				>
