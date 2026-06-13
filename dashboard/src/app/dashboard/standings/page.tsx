@@ -27,35 +27,54 @@ const driverNationalityMap: { [key: string]: string } = {
 	LAW: "nz", ANT: "it"
 };
 
-// 2. Colores EXACTOS extraídos de tu Captura 2 (F1 2026)
+// 2. Colores EXACTOS vinculados a las escuderías oficiales de tu captura image_c4935e.jpg
 const driverTeamColorMap: { [key: string]: { bg: string; text: string } } = {
-	ANT: { bg: "#00d2be", text: "#ffffff" }, // Mercedes (Turquesa/Celeste)
-	RUS: { bg: "#00d2be", text: "#ffffff" }, // Mercedes
-	HAM: { bg: "#e10600", text: "#ffffff" }, // Ferrari (Rojo)
-	LEC: { bg: "#e10600", text: "#ffffff" }, // Ferrari
-	NOR: { bg: "#ff8700", text: "#ffffff" }, // McLaren (Papaya/Naranja)
-	PIA: { bg: "#ff8700", text: "#ffffff" }, // McLaren
-	VER: { bg: "#061d43", text: "#ffffff" }, // Red Bull (Azul oscuro)
-	HAD: { bg: "#061d43", text: "#ffffff" }, // Red Bull
-	LIN: { bg: "#061d43", text: "#ffffff" }, // Red Bull
-	PER: { bg: "#061d43", text: "#ffffff" }, // Red Bull
-	LAW: { bg: "#4b77ff", text: "#ffffff" }, // RB F1 Team (Azul brillante)
-	TSU: { bg: "#4b77ff", text: "#ffffff" }, // RB F1 Team
-	GAS: { bg: "#ff00ff", text: "#ffffff" }, // Alpine (Fucsia/Rosa de tu captura 2)
-	OCO: { bg: "#373737", text: "#ffffff" }, // Haas (Gris oscuro/Grafito)
-	BEA: { bg: "#373737", text: "#ffffff" }, // Haas
-	MAG: { bg: "#373737", text: "#ffffff" }, // Haas
-	COL: { bg: "#005aff", text: "#ffffff" }, // Williams (Azul Francia/Eléctrico) 🇦🇷
-	ALB: { bg: "#005aff", text: "#ffffff" }, // Williams
-	SAI: { bg: "#005aff", text: "#ffffff" }, // Williams
-	ALO: { bg: "#006f62", text: "#ffffff" }, // Aston Martin (Verde esmeralda)
-	STR: { bg: "#006f62", text: "#ffffff" }, // Aston Martin
-	HUL: { bg: "#e10600", text: "#ffffff" }, // Audi (Rojo sólido de tu captura 2)
-	BOR: { bg: "#e10600", text: "#ffffff" }, // Audi
-	BOT: { bg: "#e10600", text: "#ffffff" }, // Audi
+	// McLaren (Naranja)
+	NOR: { bg: "#ff8700", text: "#ffffff" },
+	PIA: { bg: "#ff8700", text: "#ffffff" },
+	
+	// Ferrari (Rojo)
+	LEC: { bg: "#e10600", text: "#ffffff" },
+	HAM: { bg: "#e10600", text: "#ffffff" },
+	
+	// Red Bull (Azul Oscuro)
+	VER: { bg: "#061d43", text: "#ffffff" },
+	HAD: { bg: "#061d43", text: "#ffffff" },
+	
+	// Mercedes (Turquesa/Celeste)
+	RUS: { bg: "#00d2be", text: "#ffffff" },
+	ANT: { bg: "#00d2be", text: "#ffffff" },
+	
+	// Aston Martin (Verde)
+	ALO: { bg: "#006f62", text: "#ffffff" },
+	STR: { bg: "#006f62", text: "#ffffff" },
+	
+	// Alpine (Fucsia/Rosa) -> ¡Franco a Alpine! 🇦🇷
+	GAS: { bg: "#ff00ff", text: "#ffffff" },
+	COL: { bg: "#ff00ff", text: "#ffffff" },
+	
+	// Haas (Rojo de la lona/Gris oscuro)
+	BEA: { bg: "#e10600", text: "#ffffff" },
+	OCO: { bg: "#e10600", text: "#ffffff" },
+	
+	// RB F1 Team (Azul brillante)
+	LAW: { bg: "#4b77ff", text: "#ffffff" },
+	LIN: { bg: "#4b77ff", text: "#ffffff" },
+	
+	// Williams (Azul Eléctrico)
+	ALB: { bg: "#005aff", text: "#ffffff" },
+	SAI: { bg: "#005aff", text: "#ffffff" },
+	
+	// Cadillac (Negro de fondo de la lona / Blanco)
+	PER: { bg: "#27272a", text: "#ffffff" },
+	BOT: { bg: "#27272a", text: "#ffffff" },
+	
+	// Audi (Gris oscuro / Negro)
+	HUL: { bg: "#1f1f1f", text: "#ffffff" },
+	BOR: { bg: "#1f1f1f", text: "#ffffff" },
 };
 
-// 3. Componente inteligente para evitar que falle cualquier logo local
+// 3. Componente buscador inteligente para tus logos locales de la carpeta public/team-logos/
 const TeamLogo = ({ teamName }: { teamName: string }) => {
 	const cleanName = teamName.toLowerCase();
 	const [fallbackIndex, setFallbackIndex] = useState(0);
@@ -80,7 +99,6 @@ const TeamLogo = ({ teamName }: { teamName: string }) => {
 		fallbacks.push(`/team-logos/${cleanName.replaceAll(" ", "-")}.svg`);
 	}
 
-	// Icono neutro final por si de verdad borraste el archivo
 	fallbacks.push("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='8' fill='%233f3f46'/></svg>");
 
 	return (
@@ -171,7 +189,7 @@ export default function Standings() {
 								);
 							})}
 
-					{/* CASO B: Qualy / Libres */}
+					{/* CASO B: Respaldo (Qualy / Prácticas) */}
 					{!driverStandingsLive && extDrivers &&
 						extDrivers.map((driver) => {
 							const driverCode = driver.Driver.code || "F1";
@@ -227,7 +245,7 @@ export default function Standings() {
 								</div>
 							))}
 
-					{/* CASO B: Respaldo con Componente Autocorrector de Logos */}
+					{/* CASO B: Respaldo */}
 					{!teamStandingsLive && extTeams &&
 						extTeams.map((team) => (
 							<div className="grid p-2 items-center" style={{ gridTemplateColumns: "2rem 2rem 2rem auto 4rem 4rem" }} key={team.Constructor.constructorId}>
