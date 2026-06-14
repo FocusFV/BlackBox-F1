@@ -1,9 +1,8 @@
 import { connection } from "next/server";
+import { utc } from "moment";
 
 import Round from "@/components/schedule/Round";
-
 import type { Round as RoundType } from "@/types/schedule.type";
-
 import { env } from "@/env";
 
 export const getSchedule = async () => {
@@ -33,7 +32,11 @@ export default async function Schedule() {
 		);
 	}
 
-	const next = schedule.filter((round) => !round.over)[0];
+	// FIX DEFINITIVO: Buscamos el próximo basándonos en la fecha real de la carrera en UTC, no en el flag "over" de la API
+	const next = schedule.find((round) => {
+		const raceSession = round.sessions.find((s) => s.kind.toLowerCase() === "race");
+		return raceSession ? utc(raceSession.end) > utc() : !round.over;
+	}) || schedule.filter((round) => !round.over)[0];
 
 	return (
 		<div className="mb-20 grid grid-cols-1 gap-6 md:grid-cols-2">

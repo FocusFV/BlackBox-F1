@@ -5,7 +5,6 @@ import { now, utc } from "moment";
 import clsx from "clsx";
 
 import type { Round as RoundType } from "@/types/schedule.type";
-
 import { groupSessionByDay } from "@/lib/groupSessionByDay";
 import { formatDayRange, formatMonth } from "@/lib/dateFormatter";
 import Flag from "@/components/Flag";
@@ -16,69 +15,27 @@ type Props = {
 };
 
 const countryCodeMap: Record<string, string> = {
-	Australia: "aus",
-	Austria: "aut",
-	Azerbaijan: "aze",
-	Bahrain: "brn",
-	Belgium: "bel",
-	Brazil: "bra",
-	Canada: "can",
-	China: "chn",
-	Spain: "esp",
-	France: "fra",
-	"Great Britain": "gbr",
-	"United Kingdom": "gbr",
-	Germany: "ger",
-	Hungary: "hun",
-	Italy: "ita",
-	Japan: "jpn",
-	"Saudi Arabia": "ksa",
-	Mexico: "mex",
-	Monaco: "mon",
-	Netherlands: "ned",
-	Portugal: "por",
-	Qatar: "qat",
-	Singapore: "sgp",
-	"United Arab Emirates": "uae",
-	"United States": "usa",
+	Australia: "aus", Austria: "aut", Azerbaijan: "aze", Bahrain: "brn",
+	Belgium: "bel", Brazil: "bra", Canada: "can", China: "chn", Spain: "esp",
+	France: "fra", "Great Britain": "gbr", "United Kingdom": "gbr", Germany: "ger",
+	Hungary: "hun", Italy: "ita", Japan: "jpn", "Saudi Arabia": "ksa",
+	Mexico: "mex", Monaco: "mon", Netherlands: "ned", Portugal: "por",
+	Qatar: "qat", Singapore: "sgp", "United Arab Emirates": "uae", "United States": "usa",
 };
 
 const countryTranslation: Record<string, string> = {
-	Australia: "Australia",
-	Austria: "Austria",
-	Azerbaijan: "Azerbaiyán",
-	Bahrain: "Bahréin",
-	Belgium: "Bélgica",
-	Brazil: "Brasil",
-	Canada: "Canadá",
-	China: "China",
-	Spain: "España",
-	France: "Francia",
-	"Great Britain": "Gran Bretaña",
-	"United Kingdom": "Reino Unido",
-	Germany: "Alemania",
-	Hungary: "Hungría",
-	Italy: "Italia",
-	Japan: "Japón",
-	"Saudi Arabia": "Arabia Saudita",
-	Mexico: "México",
-	Monaco: "Mónaco",
-	Netherlands: "Países Bajos",
-	Portugal: "Portugal",
-	Qatar: "Catar",
-	Singapore: "Singapur",
-	"United Arab Emirates": "Emiratos Árabes Unidos",
+	Australia: "Australia", Austria: "Austria", Azerbaijan: "Azerbaiyán", Bahrain: "Bahréin",
+	Belgium: "Bélgica", Brazil: "Brasil", Canada: "Canadá", China: "China", Spain: "España",
+	France: "Francia", "Great Britain": "Gran Bretaña", "United Kingdom": "Reino Unido",
+	Germany: "Alemania", Hungary: "Hungría", Italy: "Italia", Japan: "Japón",
+	"Saudi Arabia": "Arabia Saudita", Mexico: "México", Monaco: "Mónaco", Netherlands: "Países Bajos",
+	Portugal: "Portugal", Qatar: "Catar", Singapore: "Singapur", "United Arab Emirates": "Emiratos Árabes Unidos",
 	"United States": "Estados Unidos",
 };
 
 const dayTranslation: Record<string, string> = {
-	monday: "Lunes",
-	tuesday: "Martes",
-	wednesday: "Miércoles",
-	thursday: "Jueves",
-	friday: "Viernes",
-	saturday: "Sábado",
-	sunday: "Domingo",
+	monday: "Lunes", tuesday: "Martes", wednesday: "Miércoles", thursday: "Jueves",
+	friday: "Viernes", saturday: "Sábado", sunday: "Domingo",
 };
 
 export default function Round({ round, nextName }: Props) {
@@ -90,7 +47,10 @@ export default function Round({ round, nextName }: Props) {
 		setMounted(true);
 	}, []);
 
-	// Buscamos cuál es exactamente el ID de la sesión que viene de forma cronológica
+	// FIX DEFINITIVO: Calculamos de forma real si el GP ya terminó basándonos en la sesión de carrera
+	const raceSession = round.sessions.find((s) => s.kind.toLowerCase() === "race");
+	const isRoundOver = raceSession ? utc(raceSession.end) < utc() : round.over;
+
 	const upcomingSession = round.sessions.filter((s) => utc(s.start) > utc())[0];
 
 	return (
@@ -98,7 +58,7 @@ export default function Round({ round, nextName }: Props) {
 			className={clsx(
 				"bg-gradient-to-b from-zinc-900 via-neutral-950 to-black p-6 rounded-2xl border border-zinc-800/60 transition-all duration-300 shadow-xl",
 				"hover:border-amber-500/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.07)] hover:-translate-y-0.5",
-				round.over && "opacity-35 hover:opacity-60 hover:border-zinc-700"
+				isRoundOver && "opacity-35 hover:opacity-60 hover:border-zinc-700"
 			)}
 		>
 			{/* Cabecera */}
@@ -122,7 +82,7 @@ export default function Round({ round, nextName }: Props) {
 							)}
 						</>
 					)}
-					{round.over && (
+					{isRoundOver && (
 						<span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 bg-zinc-900/50 px-2 py-0.5 rounded border border-zinc-800/40">
 							Terminado
 						</span>
@@ -152,8 +112,7 @@ export default function Round({ round, nextName }: Props) {
 
 							<div className="flex flex-col gap-3.5 mt-1">
 								{day.sessions.map((session, j) => {
-									const isPast = !round.over && utc(session.end).isBefore(now());
-									// ¿Es esta la sesión que se viene?
+									const isPast = utc(session.end).isBefore(utc());
 									const isNextTarget = upcomingSession && upcomingSession.start === session.start && upcomingSession.kind === session.kind;
 									
 									return (
