@@ -7,11 +7,14 @@ import Round from "@/components/schedule/Round";
 import { env } from "@/env";
 import type { Round as RoundType } from "@/types/schedule.type";
 
+// LINEA MÁGICA DE CONTROL: Obliga a Vercel a ejecutar este archivo en vivo en cada visita
+export const dynamic = "force-dynamic";
+
 // Traemos el calendario completo para rescatar la carrera real
 export const getScheduleBackup = async () => {
 	try {
 		const scheduleReq = await fetch(`${env.API_URL}/api/schedule`, {
-			cache: "no-store",
+			cache: "no-store", // Evita la caché a nivel fetch
 		});
 		const schedule: RoundType[] = await scheduleReq.json();
 		return schedule;
@@ -33,7 +36,7 @@ export default async function NextRound() {
 		);
 	}
 
-	// BYPASS PREMIUM: Buscamos en el calendario completo cuál es la primera ronda activa
+	// BYPASS: Buscamos en el calendario completo cuál es la primera ronda activa
 	const next = schedule.find((round) => {
 		const raceSession = round.sessions.find((s) => s.kind.toLowerCase() === "race");
 		const endTime = raceSession ? utc(raceSession.end) : utc(round.end).endOf("day");
@@ -48,19 +51,15 @@ export default async function NextRound() {
 		);
 	}
 
-	// Buscamos las sesiones internas del evento rescatado
 	const nextSession = next.sessions.filter((s) => utc(s.start) > utc() && s.kind.toLowerCase() !== "race")[0];
 
-	// CORREGIDO ACÁ: Cambiamos 'round.end' por 'next.end' para solucionar el error de TypeScript
 	const nextRace = next.sessions.find((s) => s.kind.toLowerCase() === "race") || 
 					 { start: next.end, end: next.end, kind: "race" };
 
-	// Si no tiene cargada la sesión de carrera (como pasa con España), le forzamos la fecha límite para el cronómetro
 	const finalRaceSession = next.sessions.find((s) => s.kind.toLowerCase() === "race") 
 		? next.sessions.find((s) => s.kind.toLowerCase() === "race")!
 		: { start: next.start, end: next.end, kind: "race" };
 
-	// Evaluamos si el domingo ya pasó cronológicamente
 	const isRaceOver = utc(finalRaceSession.end) < utc();
 
 	return (
