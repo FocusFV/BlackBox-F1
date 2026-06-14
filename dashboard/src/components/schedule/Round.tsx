@@ -47,9 +47,11 @@ export default function Round({ round, nextName }: Props) {
 		setMounted(true);
 	}, []);
 
-	// FIX DEFINITIVO: Calculamos de forma real si el GP ya terminó basándonos en la sesión de carrera
+	// BLINDAJE: Si la API no mandó la carrera, calculamos si el fin de semana ya terminó usando round.end completo
 	const raceSession = round.sessions.find((s) => s.kind.toLowerCase() === "race");
-	const isRoundOver = raceSession ? utc(raceSession.end) < utc() : round.over;
+	const isRoundOver = raceSession 
+		? utc(raceSession.end) < utc() 
+		: utc(round.end).endOf("day") < utc();
 
 	const upcomingSession = round.sessions.filter((s) => utc(s.start) > utc())[0];
 
@@ -71,7 +73,7 @@ export default function Round({ round, nextName }: Props) {
 					
 					{round.name === nextName && (
 						<>
-							{utc().isBetween(utc(round.start), utc(round.end)) ? (
+							{utc().isBetween(utc(round.start), utc(round.end).endOf("day")) ? (
 								<span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-950/40 px-2.5 py-1 rounded-md border border-emerald-500/30 animate-pulse">
 									● En Vivo
 								</span>

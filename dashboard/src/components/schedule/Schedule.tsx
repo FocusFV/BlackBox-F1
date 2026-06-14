@@ -32,10 +32,11 @@ export default async function Schedule() {
 		);
 	}
 
-	// FIX DEFINITIVO: Buscamos el próximo basándonos en la fecha real de la carrera en UTC, no en el flag "over" de la API
+	// BLINDAJE: Si no encuentra la sesión 'race', usa round.end (fin del evento) + 24hs para cubrir el domingo entero
 	const next = schedule.find((round) => {
 		const raceSession = round.sessions.find((s) => s.kind.toLowerCase() === "race");
-		return raceSession ? utc(raceSession.end) > utc() : !round.over;
+		const endTime = raceSession ? utc(raceSession.end) : utc(round.end).endOf("day");
+		return endTime > utc();
 	}) || schedule.filter((round) => !round.over)[0];
 
 	return (
