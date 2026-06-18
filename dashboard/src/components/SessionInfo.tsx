@@ -22,8 +22,12 @@ export default function SessionInfo() {
 	const clock = useDataStore((state) => state.state?.ExtrapolatedClock);
 	const session = useDataStore((state) => state.state?.SessionInfo);
 	const timingData = useDataStore((state) => state.state?.TimingData);
+	const lapCount = useDataStore((state) => state.state?.LapCount);
 
 	const delay = useSettingsStore((state) => state.delay);
+
+	// 🔒 Lógica de Parque Cerrado automática por fin de carrera
+	const isParcFerme = !session || (!!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps); 
 
 	const timeRemaining =
 		!!clock && !!clock.Remaining
@@ -35,6 +39,21 @@ export default function SessionInfo() {
 					).format("HH:mm:ss")
 				: clock.Remaining
 			: undefined;
+
+	// 🏁 Si estamos en Parque Cerrado, mostramos una interfaz limpia y apagada
+	if (isParcFerme) {
+		return (
+			<div className="flex items-center gap-2">
+				<div className="text-2xl">🏁</div>
+				<div className="flex flex-col justify-center">
+					<h1 className="truncate text-sm leading-none font-medium text-zinc-400 uppercase tracking-wider">
+						Motores Apagados
+					</h1>
+					<p className="text-2xl leading-none font-extrabold text-zinc-600 mt-1">00:00:00</p>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="flex items-center gap-2">

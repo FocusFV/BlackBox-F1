@@ -1,3 +1,5 @@
+"use client";
+
 import TemperatureComplication from "./complications/Temperature";
 import HumidityComplication from "./complications/Humidity";
 import WindSpeedComplication from "./complications/WindSpeed";
@@ -7,6 +9,16 @@ import { useDataStore } from "@/stores/useDataStore";
 
 export default function DataWeatherInfo() {
 	const weather = useDataStore((state) => state.state?.WeatherData);
+	const session = useDataStore((state) => state.state?.SessionInfo);
+	const lapCount = useDataStore((state) => state.state?.LapCount);
+
+	// 🔒 Lógica de Parque Cerrado automática por fin de carrera
+	const isParcFerme = !session || (!!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps); 
+
+	// Si estamos en Parque Cerrado, limpiamos el medio de la barra para que no joda
+	if (isParcFerme) {
+		return null;
+	}
 
 	return (
 		<div className="flex justify-between gap-4">

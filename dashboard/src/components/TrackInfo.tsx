@@ -3,12 +3,20 @@
 import clsx from "clsx";
 
 import { useDataStore } from "@/stores/useDataStore";
-
 import { getTrackStatusMessage } from "@/lib/getTrackStatusMessage";
 
 export default function TrackInfo() {
 	const lapCount = useDataStore((state) => state.state?.LapCount);
 	const track = useDataStore((state) => state.state?.TrackStatus);
+	const session = useDataStore((state) => state.state?.SessionInfo);
+
+	// 🔒 Lógica de Parque Cerrado automática por fin de carrera
+	const isParcFerme = !session || (!!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps); 
+
+	// Si está apagado, tampoco dibujamos nada a la derecha
+	if (isParcFerme) {
+		return null;
+	}
 
 	const currentTrackStatus = getTrackStatusMessage(track?.Status ? parseInt(track?.Status) : undefined);
 
