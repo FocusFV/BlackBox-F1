@@ -21,6 +21,7 @@ type Props = {
 	position: number;
 	driver: Driver;
 	timingDriver: TimingDataDriver;
+	teamColor?: string; // 🌟 LE AGREGAMOS EL '?' ACÁ PARA HACERLA OPCIONAL
 };
 
 const hasDRS = (drs: number) => drs > 9;
@@ -39,7 +40,7 @@ const inDangerZone = (position: number, sessionPart: number) => {
 	}
 };
 
-export default function Driver({ driver, timingDriver, position }: Props) {
+export default function Driver({ driver, timingDriver, position, teamColor }: Props) {
 	const sessionPart = useDataStore((state) => state.state?.TimingData?.SessionPart);
 	const timingStatsDriver = useDataStore((state) => state.state?.TimingStats?.Lines[driver.RacingNumber]);
 	const appTimingDriver = useDataStore((state) => state.state?.TimingAppData?.Lines[driver.RacingNumber]);
@@ -69,7 +70,8 @@ export default function Driver({ driver, timingDriver, position }: Props) {
 						: "5.5rem 3.5rem 5.5rem 4rem 5rem 5.5rem auto",
 				}}
 			>
-				<DriverTag className="min-w-full!" short={driver.Tla} teamColor={driver.TeamColour} position={position} />
+				{/* 🌟 Usamos la prop teamColor que viene desde LeaderBoard */}
+				<DriverTag className="min-w-full!" short={driver.Tla} teamColor={teamColor || `#${driver.TeamColour}` || "#A1A1AA"} position={position} />
 				<DriverDRS
 					on={carData ? hasDRS(carData[45]) : false}
 					possible={carData ? possibleDRS(carData[45]) : false}

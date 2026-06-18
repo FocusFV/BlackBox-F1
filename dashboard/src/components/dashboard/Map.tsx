@@ -19,6 +19,28 @@ import {
 	rotate,
 } from "@/lib/map";
 
+// 🌟 DICCIONARIO LOCAL PREMIUM (Garantiza consistencia absoluta de colores 2026)
+const PREMIUM_COLORS: Record<string, string> = {
+	mercedes: "#27F4D2",
+	red_bull: "#3671C6",
+	ferrari: "#E8002D",
+	mclaren: "#FF8000",
+	aston_martin: "#229971",
+	alpine: "#0093CC",
+	williams: "#64C4FF",
+	vcarb: "#6692FF", 
+	sauber: "#52E252", 
+	haas: "#B6BABD",
+	audi: "#F51B4F", 
+	cadillac: "#FFFFFF"
+};
+
+const getTeamColor = (teamName: string | undefined, fallbackHex: string | undefined): string => {
+	if (!teamName) return fallbackHex ? `#${fallbackHex}` : "#A1A1AA";
+	const formattedName = teamName.toLowerCase().replace(/\s+/g, "_");
+	return PREMIUM_COLORS[formattedName] || (fallbackHex ? `#${fallbackHex}` : "#A1A1AA");
+};
+
 const SPACE = 1000;
 const ROTATION_FIX = 90;
 
@@ -272,12 +294,15 @@ export default function Map({ filter }: Props) {
 
 							if (!driverPosition) return null;
 
+							// 🌟 CALCULO PREMIUM: Interceptamos el color real antes de mandarlo a la burbuja
+							const calculatedColor = getTeamColor(driver.TeamName, driver.TeamColour);
+
 							return (
 								<CarDot
 									key={`map.driver.${driver.RacingNumber}`}
 									favoriteDriver={favoriteDrivers.length > 0 ? favoriteDrivers.includes(driver.RacingNumber) : false}
 									name={driver.Tla}
-									color={driver.TeamColour}
+									color={calculatedColor} // Enviamos el color definitivo listo
 									pit={pit}
 									hidden={hidden}
 									pos={driverPosition}
@@ -309,7 +334,7 @@ const CornerNumber: React.FC<CornerNumberProps> = ({ number, x, y }) => {
 
 type CarDotProps = {
 	name: string;
-	color: string | undefined;
+	color: string; // Convertido a string obligatorio
 	favoriteDriver: boolean;
 	pit: boolean;
 	hidden: boolean;
@@ -329,7 +354,8 @@ const CarDot = ({ pos, name, color, favoriteDriver, pit, hidden, rotation, cente
 			style={{
 				transition: "all 1s linear",
 				transform,
-				...(color && { fill: `#${color}` }),
+				// 🌟 PINTADO SEGURO: Usamos 'color' directo porque ya viene formateado con su '#' desde arriba
+				fill: color,
 			}}
 		>
 			<circle id={`map.driver.circle`} r={120} />
