@@ -18,9 +18,16 @@ export default function SidenavButton({ className, onClick }: Props) {
 			animate={{ scale: 1, opacity: 1 }}
 			exit={{ scale: 0, opacity: 0 }}
 			whileTap={{ scale: 0.9 }}
-			className={clsx("flex size-12 cursor-pointer items-center justify-center", className)}
+			// 🏎️ Reducimos el tamaño a algo sutil para la cabecera (size-7)
+			className={clsx("flex size-7 cursor-pointer items-center justify-center transition-opacity hover:opacity-80", className)}
 		>
-			<Image src={sidebarIcon} alt="sidebar icon" loading="eager" />
+			<Image 
+				src={sidebarIcon} 
+				alt="sidebar icon" 
+				loading="eager" 
+				// 🪐 FILTRO MAESTRO: Transforma el SVG blanco original a Oro Puro de forma nativa
+				style={{ filter: 'brightness(0) saturate(100%) invert(69%) sepia(50%) saturate(1466%) hue-rotate(3deg) brightness(98%) contrast(93%)' }}
+			/>
 		</motion.button>
 	);
 }

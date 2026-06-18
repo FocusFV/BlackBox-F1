@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "cheerio": "^1.2.0"
+    "cheerio": "^1.2.0",
+    "lucide-react": "^1.21.0"
   }
 }
