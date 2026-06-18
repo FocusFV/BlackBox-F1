@@ -48,14 +48,30 @@ pub async fn start(state_service: StateService, tx: Sender<String>) -> Result<()
 }
 
 pub fn cors_layer() -> Result<CorsLayer, Error> {
-    let origin = env::var("ORIGIN").unwrap_or_else(|_| "https://f1-dash.com".to_string());
+    // 1. Levantamos los orígenes configurados en producción (o el fallback original)
+    let origin_env = env::var("ORIGIN").unwrap_or_else(|_| "https://f1-dash.com".to_string());
 
-    let origins = origin
+    // 2. Parseamos los orígenes de producción
+    let mut origins = origin_env
         .split(';')
         .filter_map(|o| HeaderValue::from_str(o).ok())
         .collect::<Vec<HeaderValue>>();
 
+    // 3. 🌟 PASAPORTE VIP LOCAL: Le metemos el localhost predeterminado de Next.js
+    if let Ok(local_origin) = HeaderValue::from_str("http://localhost:3000") {
+        if !origins.contains(&local_origin) {
+            origins.push(local_origin);
+        }
+    }
+
+    // Nota: Agregamos Method::POST y Method::OPTIONS por si las moscas para evitar preflights molestos
     Ok(CorsLayer::new()
         .allow_origin(origins)
-        .allow_methods([Method::GET, Method::CONNECT]))
+        .allow_methods([
+            Method::GET, 
+            Method::POST, 
+            Method::OPTIONS, 
+            Method::CONNECT
+        ])
+        .allow_headers(tower_http::cors::Any))
 }

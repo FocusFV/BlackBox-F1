@@ -26,3 +26,4 @@ CMD [ "/api" ]
 FROM alpine:3 AS realtime
 COPY --from=builder /usr/src/app/target/release/realtime .
 CMD [ "/realtime" ]
+# force rebuild local CORS
