@@ -4,14 +4,13 @@ import { useEffect, useState } from "react";
 import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { motion } from "motion/react";
-import NumberDiff from "@/components/NumberDiff";
-import Image from "next/image";
+import clsx from "clsx";
 
 type ExternalDriver = {
 	position: string;
 	points: string;
-	Driver: { givenName: string; familyName: string; code: string };
-	Constructor: { name: string; constructorId: string };
+	Driver: { givenName: string; familyName: string; code: string; nationality: string; permanentNumber?: string };
+	Constructors: Array<{ name: string; constructorId: string }>;
 };
 
 type ExternalTeam = {
@@ -20,65 +19,48 @@ type ExternalTeam = {
 	Constructor: { name: string; constructorId: string };
 };
 
-// 1. Diccionario de banderas de los países
-const driverNationalityMap: { [key: string]: string } = {
-	COL: "ar", VER: "nl", HAM: "gb", RUS: "gb", LEC: "mc", SAI: "es",
-	NOR: "gb", PIA: "au", ALB: "th", GAS: "fr", OCO: "fr", HUL: "de",
-	TSU: "jp", RIC: "au", BOT: "fi", ZHO: "cn", MAG: "dk", STR: "ca",
-	ALO: "es", PER: "mx", BEA: "gb", HAD: "fr", BOR: "br", LIN: "us",
-	LAW: "nz", ANT: "it"
+const nationalityToCountryCode: { [key: string]: string } = {
+	argentinian: "ar", argentine: "ar",
+	british: "gb", dutch: "nl", monegasque: "mc", spanish: "es",
+	australian: "au", thai: "th", french: "fr", german: "de", japanese: "jp",
+	finnish: "fi", chinese: "cn", danish: "dk", canadian: "ca", mexican: "mx",
+	brazilian: "br", american: "us", italian: "it", austrian: "at", 
+	belgian: "be", swiss: "ch", swedish: "se", russian: "ru", polish: "pl", 
+	indian: "in", indonesian: "id", venezuelan: "ve", colombian: "co",
+	newzealander: "nz", malaysian: "my", czech: "cz", southafrican: "za",
+	irish: "ie", hungarian: "hu", portuguese: "pt", danemark: "dk"
 };
 
-// 2. Colores oficiales de la Parrilla 2026 corregidos y sin duplicados
+// 🌟 DICCIONARIO NUEVO: Para forzar el nombre real del equipo en 2026 usando el código del piloto
+const driverToTeamNameMap: { [key: string]: string } = {
+	NOR: "McLaren", PIA: "McLaren",
+	LEC: "Ferrari", HAM: "Ferrari", 
+	VER: "Red Bull Racing", HAD: "Red Bull Racing",
+	RUS: "Mercedes", ANT: "Mercedes",
+	ALO: "Aston Martin", STR: "Aston Martin",
+	GAS: "Alpine", COL: "Alpine", 
+	MAG: "Haas", OCO: "Haas", BEA: "Haas",
+	LAW: "Racing Bulls", TSU: "Racing Bulls", LIN: "Racing Bulls",
+	ALB: "Williams", SAI: "Williams",
+	BOT: "Cadillac F1 Team", PER: "Cadillac F1 Team",
+	HUL: "Audi F1 Team", BOR: "Audi F1 Team"
+};
+
 const driverTeamColorMap: { [key: string]: { bg: string; text: string } } = {
-	// McLaren (Naranja)
-	NOR: { bg: "#ff8700", text: "#ffffff" },
-	PIA: { bg: "#ff8700", text: "#ffffff" },
-	
-	// Ferrari (Rojo)
-	LEC: { bg: "#e10600", text: "#ffffff" },
-	HAM: { bg: "#e10600", text: "#ffffff" },
-	
-	// Red Bull (Azul Oscuro)
-	VER: { bg: "#061d43", text: "#ffffff" },
-	HAD: { bg: "#061d43", text: "#ffffff" },
-	LIN: { bg: "#061d43", text: "#ffffff" },
-	PER: { bg: "#061d43", text: "#ffffff" },
-	
-	// Mercedes (Turquesa/Celeste)
-	RUS: { bg: "#00d2be", text: "#ffffff" },
-	ANT: { bg: "#00d2be", text: "#ffffff" },
-	
-	// Aston Martin (Verde)
-	ALO: { bg: "#006f62", text: "#ffffff" },
-	STR: { bg: "#006f62", text: "#ffffff" },
-	
-	// Alpine (Fucsia/Rosa) -> ¡Franco a Alpine! 🇦🇷
-	GAS: { bg: "#ff00ff", text: "#ffffff" },
-	COL: { bg: "#ff00ff", text: "#ffffff" },
-	
-	// Haas (Rojo de la lona/Gris oscuro)
-	BEA: { bg: "#e10600", text: "#ffffff" },
-	OCO: { bg: "#e10600", text: "#ffffff" },
-	MAG: { bg: "#373737", text: "#ffffff" },
-	
-	// RB F1 Team (Azul brillante)
-	LAW: { bg: "#4b77ff", text: "#ffffff" },
-	TSU: { bg: "#4b77ff", text: "#ffffff" },
-	
-	// Williams (Azul Eléctrico)
-	ALB: { bg: "#005aff", text: "#ffffff" },
-	SAI: { bg: "#005aff", text: "#ffffff" },
-	
-	// Cadillac (Negro de fondo de la lona / Blanco)
-	BOT: { bg: "#27272a", text: "#ffffff" },
-	
-	// Audi (Gris oscuro / Negro)
-	HUL: { bg: "#1f1f1f", text: "#ffffff" },
-	BOR: { bg: "#1f1f1f", text: "#ffffff" },
+	NOR: { bg: "#ff8700", text: "#ffffff" }, PIA: { bg: "#ff8700", text: "#ffffff" },
+	LEC: { bg: "#e10600", text: "#ffffff" }, HAM: { bg: "#e10600", text: "#ffffff" },
+	VER: { bg: "#061d43", text: "#ffffff" }, HAD: { bg: "#061d43", text: "#ffffff" },
+	LIN: { bg: "#061d43", text: "#ffffff" }, PER: { bg: "#061d43", text: "#ffffff" },
+	RUS: { bg: "#00d2be", text: "#ffffff" }, ANT: { bg: "#00d2be", text: "#ffffff" },
+	ALO: { bg: "#006f62", text: "#ffffff" }, STR: { bg: "#006f62", text: "#ffffff" },
+	GAS: { bg: "#ff00ff", text: "#ffffff" }, COL: { bg: "#ff00ff", text: "#ffffff" },
+	BEA: { bg: "#e10600", text: "#ffffff" }, OCO: { bg: "#e10600", text: "#ffffff" },
+	MAG: { bg: "#373737", text: "#ffffff" }, LAW: { bg: "#4b77ff", text: "#ffffff" },
+	TSU: { bg: "#4b77ff", text: "#ffffff" }, ALB: { bg: "#005aff", text: "#ffffff" },
+	SAI: { bg: "#005aff", text: "#ffffff" }, BOT: { bg: "#27272a", text: "#ffffff" },
+	HUL: { bg: "#1f1f1f", text: "#ffffff" }, BOR: { bg: "#1f1f1f", text: "#ffffff" },
 };
 
-// Colores de los constructores vinculados a sus IDs externos para las barras de progreso y bordes
 const constructorColorMap: { [key: string]: string } = {
 	mercedes: "#00d2be", ferrari: "#e10600", mclaren: "#ff8700", red_bull: "#061d43",
 	alpine: "#ff00ff", rb: "#4b77ff", haas: "#e10600", williams: "#005aff",
@@ -109,7 +91,7 @@ const TeamLogo = ({ teamName }: { teamName: string }) => {
 	}
 	fallbacks.push("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='8' fill='%233f3f46'/></svg>");
 
-	const isDarkLogo = cleanName.includes("audi") || cleanName.includes("cadillac") || cleanName.includes("sauber");
+	const isDarkLogo = cleanName.includes("audi") || cleanName.includes("cadillac") || cleanName.includes("sauber") || cleanName.includes("renault") || cleanName.includes("mclaren");
 
 	return (
 		<img
@@ -124,189 +106,246 @@ const TeamLogo = ({ teamName }: { teamName: string }) => {
 };
 
 export default function Standings() {
+	const [year, setYear] = useState(2026);
+
 	const driverStandingsLive = useDataStore((state) => state.state?.ChampionshipPrediction?.Drivers);
 	const teamStandingsLive = useDataStore((state) => state.state?.ChampionshipPrediction?.Teams);
-	const driversLive = useDataStore((state) => state.state?.DriverList);
 	const favoriteDrivers = useSettingsStore((state) => state.favoriteDrivers);
 
-	const [extDrivers, setExtDrivers] = useState<ExternalDriver[] | null>(null);
-	const [extTeams, setExtTeams] = useState<ExternalTeam[] | null>(null);
+	const [extDrivers, setExtDrivers] = useState<any[]>([]);
+	const [extTeams, setExtTeams] = useState<any[]>([]);
 	const [loadingBackup, setLoadingBackup] = useState(false);
 
+	const availableYears = Array.from({ length: 2026 - 2000 + 1 }, (_, i) => 2026 - i);
+
+	const shouldFetchData = year !== 2026 || !driverStandingsLive || !teamStandingsLive;
+
 	useEffect(() => {
-		if (!driverStandingsLive || !teamStandingsLive) {
+		if (shouldFetchData) {
 			const fetchBackupStandings = async () => {
 				setLoadingBackup(true);
 				try {
-					const resDrivers = await fetch("https://api.jolpi.ca/ergast/f1/2026/driverStandings.json");
+					const resDrivers = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/driverStandings.json`);
 					const dataDrivers = await resDrivers.json();
 					const dList = dataDrivers?.MRData?.StandingsTable?.StandingsLists[0]?.DriverStandings;
-					if (dList) setExtDrivers(dList);
+					setExtDrivers(dList || []);
 
-					const resTeams = await fetch("https://api.jolpi.ca/ergast/f1/2026/constructorStandings.json");
+					const resTeams = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/constructorStandings.json`);
 					const dataTeams = await resTeams.json();
 					const tList = dataTeams?.MRData?.StandingsTable?.StandingsLists[0]?.ConstructorStandings;
-					if (tList) setExtTeams(tList);
+					setExtTeams(tList || []);
 				} catch (err) {
 					console.error(err);
+					setExtDrivers([]);
+					setExtTeams([]);
 				} finally {
 					setLoadingBackup(false);
 				}
 			};
 			fetchBackupStandings();
+		} else {
+			setExtDrivers([]);
+			setExtTeams([]);
 		}
-	}, [driverStandingsLive, teamStandingsLive]);
+	}, [year, driverStandingsLive, teamStandingsLive]);
 
-	const maxDriverPoints = extDrivers && extDrivers.length > 0 ? parseFloat(extDrivers[0].points) : 300;
-	const maxTeamPoints = extTeams && extTeams.length > 0 ? parseFloat(extTeams[0].points) : 500;
+	const driversListSource: any[] = (year === 2026 && driverStandingsLive) 
+		? (Array.isArray(driverStandingsLive) ? driverStandingsLive : Object.values(driverStandingsLive)).sort((a: any, b: any) => parseInt(a.position) - parseInt(b.position))
+		: extDrivers;
 
-	const showDriversSkeleton = !driverStandingsLive && loadingBackup && !extDrivers;
-	const showTeamsSkeleton = !teamStandingsLive && loadingBackup && !extTeams;
+	const teamsListSource: any[] = (year === 2026 && teamStandingsLive) 
+		? (Array.isArray(teamStandingsLive) ? teamStandingsLive : Object.values(teamStandingsLive)).sort((a: any, b: any) => parseInt(a.position) - parseInt(b.position))
+		: extTeams;
+
+	const maxDriverPoints = driversListSource && driversListSource.length > 0 ? parseFloat(driversListSource[0].points) : 300;
+	const maxTeamPoints = teamsListSource && teamsListSource.length > 0 ? parseFloat(teamsListSource[0].points) : 500;
+
+	const showDriversSkeleton = loadingBackup && (!driversListSource || driversListSource.length === 0);
+	const showTeamsSkeleton = loadingBackup && (!teamsListSource || teamsListSource.length === 0);
 
 	return (
-		<div className="grid h-full grid-cols-1 gap-6 p-4 lg:grid-cols-2 bg-black text-white">
-			{/* CAMPEONATO DE PILOTOS UNIFICADO */}
-			<div className="flex flex-col h-full bg-zinc-950/40 border border-zinc-900 rounded-2xl p-5 backdrop-blur-xl">
-				<h2 className="text-xl font-bold tracking-wide mb-6 uppercase text-zinc-400 border-b border-zinc-900 pb-3">
-					🏁 Campeonato de Pilotos
-				</h2>
+		<div className="flex flex-col gap-4 p-4 bg-black text-white h-full font-mono">
+			<div className="grid grid-cols-1 gap-6 lg:grid-cols-2 flex-1 w-full max-w-full overflow-hidden">
+				
+				{/* CAMPEONATO DE PILOTOS */}
+				<div className="flex flex-col h-full bg-zinc-950/40 border border-zinc-900 rounded-2xl p-5 backdrop-blur-xl overflow-hidden max-w-full">
+					<h2 className="text-sm font-bold tracking-widest mb-6 uppercase text-zinc-400 border-b border-zinc-900 pb-3 flex justify-between items-center w-full">
+						<span>🏁 Campeonato de Pilotos</span>
+						
+						<div className="relative">
+							<select 
+								value={year} 
+								onChange={(e) => setYear(Number(e.target.value))}
+								className="appearance-none bg-zinc-950/90 border border-amber-400/60 rounded-lg py-1 pl-2.5 pr-7 text-[11px] font-black uppercase tracking-widest text-white-500 hover:border-amber-500/30 transition-all outline-none cursor-pointer"
+							>
+								{availableYears.map((y) => (
+									<option key={y} value={y} className="bg-zinc-950 text-zinc-400 font-mono">
+										AÑO: {y}
+									</option>
+								))}
+							</select>
+							<div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-amber-500/60 text-[16px]">
+								▼
+							</div>
+						</div>
+					</h2>
 
-				<div className="flex flex-col gap-2.5 overflow-y-auto pr-1">
-					{showDriversSkeleton && new Array(12).fill("").map((_, i) => <SkeletonItem key={i} />)}
+					<div className="flex flex-col gap-2.5 overflow-y-auto pr-1 no-scrollbar flex-1 max-w-full">
+						{showDriversSkeleton && new Array(12).fill("").map((_, i) => <SkeletonItem key={i} />)}
 
-					{!driverStandingsLive && extDrivers &&
-						extDrivers.map((driver, index) => {
-							const driverCode = driver.Driver.code || "F1";
-							const countryCode = driverNationalityMap[driverCode];
-							const badgeColor = driverTeamColorMap[driverCode] || { bg: "#27272a" };
+						{driversListSource && driversListSource.map((driver: any, index: number) => {
+							const driverCode = driver.Driver?.code || driver.code || driver.Driver?.familyName?.slice(0, 3).toUpperCase() || "F1";
+							
+							const driverNationality = (driver.Driver?.nationality || driver.nationality || "").toLowerCase().replace(/\s+/g, "");
+							const countryCode = nationalityToCountryCode[driverNationality];
+
+							// 🌟 FIJACIÓN DEFINITIVA DE ESCUDERÍAS: Si es 2026, usa el mapa de mapeo estático por código, sino va a la API externa
+							const historicTeamName = year === 2026 
+								? (driverToTeamNameMap[driverCode] || "F1 Team")
+								: (driver.Constructors && driver.Constructors[0] ? driver.Constructors[0].name : "F1 Team");
+
+							const badgeColor = driverTeamColorMap[driverCode] || { bg: "#27272a", text: "#ffffff" };
 							const ptsPercent = (parseFloat(driver.points) / maxDriverPoints) * 100;
-							const isFav = favoriteDrivers.includes(driverCode);
+							const isFav = year === 2026 && favoriteDrivers?.includes(driverCode);
 
 							const renderPosition = () => {
-								if (driver.position === "1") return <span className="text-xl">🥇</span>;
-								if (driver.position === "2") return <span className="text-xl">🥈</span>;
-								if (driver.position === "3") return <span className="text-xl">🥉</span>;
-								return <p className="font-black text-sm text-zinc-200">#{driver.position}</p>;
+								if (String(driver.position) === "1") return <span className="text-xl">🥇</span>;
+								if (String(driver.position) === "2") return <span className="text-xl">🥈</span>;
+								if (String(driver.position) === "3") return <span className="text-xl">🥉</span>;
+								return <p className="font-black text-xs text-zinc-500 text-center w-5">#{driver.position}</p>;
 							};
+
+							const givenName = driver.Driver?.givenName || driver.firstName || "";
+							const familyName = driver.Driver?.familyName || driver.lastName || "Piloto";
 
 							return (
 								<motion.div
-									initial={{ opacity: 0, x: 15 }}
+									initial={{ opacity: 0, x: 12 }}
 									animate={{ opacity: 1, x: 0 }}
-									transition={{ delay: index * 0.02 }}
-									className={`relative grid items-center p-3 rounded-xl bg-zinc-900/20 backdrop-blur-md border border-zinc-900 hover:border-zinc-800/80 transition-all ${
-										isFav ? "shadow-[0_0_20px_rgba(255,0,255,0.15)] border-pink-500/40 bg-zinc-900/40" : ""
-									}`}
+									transition={{ duration: 0.15 }}
+									className={clsx(
+										"relative grid items-center p-3 rounded-xl bg-zinc-900/20 border border-zinc-900 hover:border-zinc-800/80 transition-all h-14 max-w-full",
+										isFav && "shadow-[0_0_20px_rgba(255,0,255,0.15)] border-pink-500/40 bg-zinc-900/40"
+									)}
 									style={{
 										gridTemplateColumns: "2.5rem auto 5rem",
 										borderLeft: `4px solid ${badgeColor.bg}`
 									}}
-									key={driver.Driver.code || driver.Driver.familyName}
+									key={`${year}-${driverCode}-${index}`}
 								>
 									<div className="absolute inset-0 bg-zinc-800/5 rounded-r-xl pointer-events-none overflow-hidden">
-										<div className={`h-full transition-all duration-500 ${isFav ? 'opacity-20' : 'opacity-10'}`} style={{ width: `${ptsPercent}%`, backgroundColor: badgeColor.bg }} />
+										<div className={clsx("h-full transition-all duration-500", isFav ? 'opacity-20' : 'opacity-10')} style={{ width: `${ptsPercent}%`, backgroundColor: badgeColor.bg }} />
 									</div>
 
-									<div className="flex justify-center">{renderPosition()}</div>
+									<div className="flex justify-center items-center">{renderPosition()}</div>
 									
-									<div className="flex items-center gap-3 z-10">
+									<div className="flex items-center gap-3 z-10 min-w-0 truncate">
 										<span className="text-[11px] font-black tracking-wider px-1.5 py-0.5 rounded text-center min-w-9" style={{ backgroundColor: badgeColor.bg, color: badgeColor.text }}>
 											{driverCode}
 										</span>
+										
 										{countryCode && (
-											<img src={`https://flagcdn.com/w20/${countryCode}.png`} alt="Bandera" className="w-4.5 h-auto rounded-sm opacity-90 shadow-sm" />
+											<img src={`https://flagcdn.com/w20/${countryCode}.png`} alt="" className="w-5 h-auto rounded-sm opacity-90 shadow-sm flex-shrink-0" />
 										)}
-										<p className="text-sm font-medium text-zinc-200">{driver.Driver.givenName} {driver.Driver.familyName}</p>
+										<div className="flex flex-col min-w-0">
+											<p className="text-xs font-bold text-zinc-200 truncate uppercase">
+												{givenName ? givenName[0] + '.' : ''} {familyName}
+											</p>
+											<p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider truncate">
+												{historicTeamName}
+											</p>
+										</div>
 									</div>
 
-									<p className="font-bold text-right text-sm tracking-tight text-zinc-100 z-10">
-										{driver.points} <span className="text-[10px] text-zinc-500 font-normal">pts</span>
+									<p className="font-black text-right text-xs tracking-tight text-zinc-100 z-10 uppercase">
+										{driver.points} <span className="text-[11px] text-zinc-500 font-normal">pts</span>
 									</p>
 								</motion.div>
 							);
 						})}
+					</div>
 				</div>
-			</div>
 
-			{/* CAMPEONATO DE CONSTRUCTORES CON PODIO CONTROLADO */}
-			<div className="flex flex-col h-full bg-zinc-950/40 border border-zinc-900 rounded-2xl p-5 backdrop-blur-xl">
-				<h2 className="text-xl font-bold tracking-wide mb-6 uppercase text-zinc-400 border-b border-zinc-900 pb-3">
-					🛠️ Campeonato de Constructores
-				</h2>
+				{/* CAMPEONATO DE CONSTRUCTORES */}
+				<div className="flex flex-col h-full bg-zinc-950/40 border border-zinc-900 rounded-2xl p-5 backdrop-blur-xl overflow-hidden max-w-full">
+					<h2 className="text-sm font-bold tracking-widest mb-6 uppercase text-zinc-400 border-b border-zinc-900 pb-3 flex justify-between items-center w-full">
+						<span>🛠️ Campeonato de Constructores</span>
+						<span className="text-[12px] px-2 py-0.5 bg-zinc-900 text-white-800/40 rounded border border-amber-400/60">TEMPORADA {year}</span>
+					</h2>
 
-				<div className="flex flex-col gap-2.5 overflow-y-auto pr-1">
-					{showTeamsSkeleton && new Array(8).fill("").map((_, i) => <SkeletonItem key={i} />)}
+					<div className="flex flex-col gap-2.5 overflow-y-auto pr-1 no-scrollbar flex-1 max-w-full">
+						{showTeamsSkeleton && new Array(8).fill("").map((_, i) => <SkeletonItem key={i} />)}
 
-					{!teamStandingsLive && extTeams && (
-						<>
-							{/* TOP 3 CONSTRUCTORES JERARQUIZADO */}
-							<div className="grid grid-cols-3 gap-3 mb-4">
-								{extTeams.slice(0, 3).map((team, index) => {
-									const shadowStyles = 
-										index === 0 ? "shadow-[0_0_20px_rgba(234,179,8,0.08)] border-yellow-500/30" : 
-										index === 1 ? "shadow-[0_0_20px_rgba(226,232,240,0.06)] border-slate-400/20" : 
-										"shadow-[0_0_20px_rgba(180,83,9,0.05)] border-amber-700/20";
+						{teamsListSource && teamsListSource.length > 0 && (
+							<>
+								<div className="flex gap-2 mb-2 w-full justify-between items-center min-w-0">
+									{teamsListSource.slice(0, 3).map((team: any, index: number) => {
+										const shadowStyles = 
+											index === 0 ? "shadow-[0_0_20px_rgba(234,179,8,0.05)] border-yellow-500/20" : 
+											index === 1 ? "shadow-[0_0_20px_rgba(226,232,240,0.03)] border-slate-400/10" : 
+											"shadow-[0_0_20px_rgba(180,83,9,0.02)] border-amber-700/10";
+
+										const teamName = team.Constructor?.name || team.name || "Escudería";
+
+										return (
+											<motion.div
+												initial={{ opacity: 0, y: 12 }}
+												animate={{ opacity: 1, y: 0 }}
+												key={`podium-team-${year}-${team.Constructor?.constructorId || index}-${index}`}
+												className={clsx("relative flex-1 flex flex-col items-center justify-between p-2 rounded-xl border bg-zinc-900/10 backdrop-blur-md text-center h-36 min-w-0 overflow-hidden", shadowStyles)}
+											>
+												<span className="absolute top-2 left-3 text-[9px] font-black text-zinc-500">#0{team.position}</span>
+												<span className="text-xl mt-1">{index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}</span>
+												<div className="flex flex-col items-center mt-1 min-w-0 w-full">
+													<TeamLogo teamName={teamName} />
+													<p className="text-[9px] font-black truncate w-full mt-2 text-zinc-300 uppercase px-1">
+														{teamName}
+													</p>
+												</div>
+												<p className="text-[11px] font-black tracking-tight text-white uppercase">{team.points} <span className="text-[8px] text-zinc-500 font-normal">PTS</span></p>
+											</motion.div>
+										);
+									})}
+								</div>
+
+								{teamsListSource.slice(3).map((team: any, index: number) => {
+									const ptsPercent = (parseFloat(team.points) / maxTeamPoints) * 100;
+									const cId = team.Constructor?.constructorId?.toLowerCase() || team.constructorId?.toLowerCase() || "";
+									const teamBorderColor = constructorColorMap[cId] || "#3f3f46";
+									const teamName = team.Constructor?.name || team.name || "Escudería";
 
 									return (
 										<motion.div
-											initial={{ opacity: 0, y: 20 }}
-											animate={{ opacity: 1, y: 0 }}
-											transition={{ delay: index * 0.08 }}
-											key={`podium-team-${team.Constructor.constructorId}`}
-											className={`relative flex flex-col items-center justify-between p-4 rounded-xl border bg-zinc-900/30 backdrop-blur-md text-center h-40 ${shadowStyles}`}
+											initial={{ opacity: 0, x: 12 }}
+											animate={{ opacity: 1, x: 0 }}
+											className="relative grid items-center p-3 rounded-xl bg-zinc-900/20 backdrop-blur-md border border-zinc-900 hover:border-zinc-800/80 transition-all h-14 max-w-full"
+											style={{
+												gridTemplateColumns: "2.5rem 2.5rem auto 5rem",
+												borderLeft: `4px solid ${teamBorderColor}`
+											}}
+											key={`${year}-${cId}-${index}`}
 										>
-											<span className="absolute top-2 left-3 text-xs font-black text-zinc-100 opacity-90">#0{team.position}</span>
-											<span className="text-2xl mt-2">{index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}</span>
-											<div className="flex flex-col items-center mt-1">
-												<TeamLogo teamName={team.Constructor.name} />
-												<p className="text-xs font-bold truncate max-w-[95px] mt-2 text-zinc-200">
-													{team.Constructor.name}
-												</p>
+											<div className="absolute inset-0 bg-zinc-800/5 rounded-r-xl pointer-events-none overflow-hidden">
+												<div className="h-full opacity-10 transition-all duration-500" style={{ width: `${ptsPercent}%`, backgroundColor: teamBorderColor }} />
 											</div>
-											<p className="text-sm font-bold tracking-tight text-white">{team.points} <span className="text-[10px] text-zinc-500">PTS</span></p>
+
+											<p className="font-black text-xs text-zinc-500 text-center">#{team.position}</p>
+											
+											<div className="w-6 h-6 relative flex items-center justify-center z-10 flex-shrink-0">
+												<TeamLogo teamName={teamName} />
+											</div>
+
+											<p className="text-xs font-black text-zinc-200 z-10 pl-2 uppercase truncate">{teamName}</p>
+
+											<p className="font-black text-right text-xs tracking-tight text-zinc-100 z-10 uppercase">
+												{team.points} <span className="text-[9px] text-zinc-500 font-normal">pts</span>
+											</p>
 										</motion.div>
 									);
 								})}
-							</div>
-
-							{/* RESTO DE LA PARRILLA DE CONSTRUCTORES CON BORDES DE COLOR */}
-							{extTeams.slice(3).map((team, index) => {
-								const ptsPercent = (parseFloat(team.points) / maxTeamPoints) * 100;
-								const cId = team.Constructor.constructorId.toLowerCase();
-								const teamBorderColor = constructorColorMap[cId] || "#3f3f46";
-
-								return (
-									<motion.div
-										initial={{ opacity: 0, x: 15 }}
-										animate={{ opacity: 1, x: 0 }}
-										transition={{ delay: index * 0.03 + 0.2 }}
-										className="relative grid items-center p-3 rounded-xl bg-zinc-900/20 backdrop-blur-md border border-zinc-900 hover:border-zinc-800/80 transition-all"
-										style={{
-											gridTemplateColumns: "2.5rem 2.5rem auto 5rem",
-											borderLeft: `4px solid ${teamBorderColor}`
-										}}
-										key={team.Constructor.constructorId}
-									>
-										<div className="absolute inset-0 bg-zinc-800/5 rounded-r-xl pointer-events-none overflow-hidden">
-											<div className="h-full opacity-10 transition-all duration-500" style={{ width: `${ptsPercent}%`, backgroundColor: teamBorderColor }} />
-										</div>
-
-										<p className="font-black text-sm text-zinc-200 text-center">#{team.position}</p>
-										
-										<div className="w-6 h-6 relative flex items-center justify-center z-10">
-											<TeamLogo teamName={team.Constructor.name} />
-										</div>
-
-										<p className="text-sm font-medium text-zinc-200 z-10 pl-1">{team.Constructor.name}</p>
-
-										<p className="font-bold text-right text-sm tracking-tight text-zinc-100 z-10">
-											{team.points} <span className="text-[10px] text-zinc-500 font-normal">pts</span>
-										</p>
-									</motion.div>
-								);
-							})}
-						</>
-					)}
+							</>
+						)}
+					</div>
 				</div>
 			</div>
 		</div>
@@ -315,6 +354,6 @@ export default function Standings() {
 
 const SkeletonItem = () => {
 	return (
-		<div className="h-11 w-full animate-pulse rounded-xl bg-zinc-900/50 border border-zinc-900" />
+		<div className="h-14 w-full animate-pulse rounded-xl bg-zinc-900/50 border border-zinc-900" />
 	);
 };
