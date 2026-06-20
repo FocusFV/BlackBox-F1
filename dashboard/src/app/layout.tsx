@@ -1,6 +1,9 @@
 import { type ReactNode } from "react";
 import Script from "next/script";
 
+// 🌟 PASO 2: Clavamos el import de Vercel acá arriba
+import { Analytics } from "@vercel/analytics/react";
+
 import "@/styles/globals.css";
 
 import { env } from "@/env";
@@ -31,7 +34,12 @@ export default function RootLayout({ children }: Props) {
 			</head>
 
 			<body>
-				<OledModeProvider>{children}</OledModeProvider>
+				<OledModeProvider>
+					{children}
+				</OledModeProvider>
+
+				{/* 🌟 PASO 2 COMPLETADO: Lo metemos acá abajo, adentro del body */}
+				<Analytics />
 			</body>
 		</html>
 	);
