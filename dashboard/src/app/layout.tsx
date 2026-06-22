@@ -2,7 +2,7 @@ import { type ReactNode } from "react";
 import Script from "next/script";
 
 // 🌟 PASO 2: Clavamos el import de Vercel acá arriba
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics } from "@vercel/analytics/next";
 
 import "@/styles/globals.css";
 
