@@ -51,16 +51,17 @@ const categoriesMenu: MenuCategory[] = [
 	{
 		titulo: "ANÁLISIS",
 		items: [
-			{ href: "/dashboard/weather", name: "Radar Clima", icon: CloudSun },
-			{ href: "/dashboard/standings", name: "Clasificación FIA", icon: Trophy },
+			{ href: "/dashboard/weather", name: "El Clima", icon: CloudSun },
+			{ href: "/dashboard/standings", name: "Campeonatos FIA", icon: Trophy },
+			{ href: "/streams", name: "Feed Satelital", icon: Radio },
 		]
 	},
 	{
 		titulo: "SISTEMA",
 		items: [
-			{ href: "/dashboard/settings", name: "Ingeniería / Ajustes", icon: Settings },
+			{ href: "/dashboard/settings", name: "Ajustes", icon: Settings },
 			{ href: "/schedule", name: "Calendario GP", icon: Calendar },
-			{ href: "/help", name: "Soporte Central", icon: HelpCircle, target: "_blank" },
+			{ href: "/help", name: "Ayuda", icon: HelpCircle, target: "_blank" },
 		]
 	},
 	{
