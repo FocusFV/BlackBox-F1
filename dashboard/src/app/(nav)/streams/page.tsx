@@ -19,6 +19,7 @@ export default function StreamsPage() {
 	const [activeTab, setActiveTab] = useState<keyof typeof STREAMS_CONFIG>("FOX");
 	// 🪄 ESTADO MÁGICO: Bypass secreto para saltar el bloqueo cuando vos quieras
 	const [bypass, setBypass] = useState<boolean>(false);
+	const [clickCount, setClickCount] = useState<number>(0);
 
 	// Monitoreo del store de Zustand
 	const trackStatus = useDataStore((state) => state.state?.TrackStatus?.Status);
@@ -46,21 +47,36 @@ export default function StreamsPage() {
 
 	const isLive = checkTimeWindow();
 
-	// 🛑 CASO 1: MOTORES APAGADOS (Bóveda cerrada al público y bots)
+	// 🛑 CASO 1: MOTORES APAGADOS (El candado premium es la puerta de acceso secreta)
 	if (!isLive && !bypass) {
+		// Función de triple toque rápido
+		const handleSecretClick = () => {
+			setClickCount((prev) => {
+				const nextCount = prev + 1;
+				if (nextCount >= 3) {
+					setBypass(true);
+					return 0;
+				}
+				// Si deja de tocar por 1 segundo, reseteamos el contador
+				setTimeout(() => setClickCount(0), 1000);
+				return nextCount;
+			});
+		};
+
 		return (
 			<div className="pt-4 w-full mx-auto px-4 sm:px-6 font-mono text-white select-none h-[80vh] flex flex-col items-center justify-center">
 				<div className="max-w-md w-full border border-zinc-900 bg-[#0c0a05]/20 backdrop-blur-md p-8 rounded-3xl text-center flex flex-col items-center shadow-[0_20px_50px_rgba(0,0,0,0.7)] animate-fade-in">
 					
-					<div className="w-12 h-12 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center mb-4 text-zinc-500">
-						<ShieldAlert className="w-6 h-6" />
+					{/* 🤫 EL ACCESO MÁGICO: Ahora con onClick común (3 toques rápidos) para que ande en el celu */}
+					<div 
+						onClick={handleSecretClick}
+						className="w-14 h-14 rounded-2xl bg-gradient-to-b from-zinc-900 to-zinc-950 border border-amber-500/20 hover:border-amber-500/50 flex items-center justify-center mb-6 text-amber-500/70 hover:text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.05)] hover:shadow-[0_0_30px_rgba(245,158,11,0.15)] transition-all duration-300 cursor-pointer active:scale-95 group"
+						title="Acceso de Ingeniería"
+					>
+						<ShieldAlert className="w-6 h-6 transition-transform group-hover:scale-110 duration-300" />
 					</div>
 
-					{/* 🤫 EL HUEVO DE PASCUA: Doble click exacto acá y saltás el bloqueo de horario */}
-					<span 
-						onDoubleClick={() => setBypass(true)}
-						className="text-[10px] font-black text-amber-500/60 uppercase tracking-widest animate-pulse mb-2 cursor-default active:opacity-50 select-none"
-					>
+					<span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-2">
 						// FEED SATELITAL: INACTIVO
 					</span>
 					
@@ -71,16 +87,6 @@ export default function StreamsPage() {
 					<p className="text-zinc-500 text-xs font-sans mt-3 leading-relaxed">
 						La señal de video en vivo se habilita de forma automática <span className="text-zinc-300 font-bold">30 minutos antes</span> de la sesión y se interrumpe 30 minutos después de la bandera a cuadros.
 					</p>
-
-					<div className="w-full h-[1px] bg-zinc-900 my-5" />
-
-					<Link 
-						href="/schedule" 
-						className="w-full inline-flex items-center justify-center gap-2 text-xs font-black bg-zinc-900 border border-zinc-800 hover:border-amber-500/30 text-zinc-300 hover:text-amber-400 active:scale-95 transition-all py-3 rounded-xl uppercase tracking-wider"
-					>
-						<Calendar className="w-4 h-4" />
-						<span>Consultar Horarios GP</span>
-					</Link>
 				</div>
 			</div>
 		);
@@ -157,7 +163,7 @@ export default function StreamsPage() {
 					}`}
 				>
 					<img src="/colapinto.png" alt="Colapinto" className="h-6 w-auto object-contain rounded-sm" />
-					<span>Onboard Colapinto #43</span>
+					<span>Onboard Colapinto</span>
 				</button>
 
 				<button
@@ -169,7 +175,7 @@ export default function StreamsPage() {
 					}`}
 				>
 					<img src="/max.png" alt="Verstappen" className="h-6 w-auto object-contain" />
-					<span>Onboard Max #1</span>
+					<span>Onboard Max</span>
 				</button>
 
 				<button
