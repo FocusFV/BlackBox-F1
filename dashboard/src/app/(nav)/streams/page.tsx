@@ -7,12 +7,12 @@ import { Calendar, ShieldAlert } from "lucide-react";
 
 // 🏎️ CONFIGURACIÓN DE LOS 5 FEEDS SATELITALES
 const STREAMS_CONFIG = {
-	FOX: "https://stream-xhd.com/live1.php?stream=fox1ar",
-	DISNEY: "https://stream-xhd.com/live1.php?stream=disney5",
-	DAZN: "https://streamx996.one/global1.php?channel=daznf1",
-	COLAPINTO: "https://streamx996.one/global2.php?stream=disney2",
-	VERSTAPPEN: "https://streamx996.one/global2.php?stream=disney3",
-	GENERAL: "https://streamtpday1.xyz/global2.php?stream=disney4",
+	FOX: "https://streamx-hd.com/live1.php?stream=fox1ar",
+	DISNEY: "https://streamx-hd.com/live1.php?stream=disney2",
+	DAZN: "https://streamx-hd.com/live1.php?stream=daznf1",
+	COLAPINTO: "https://streamx-hd.com/live1.php?stream=disney5",
+	VERSTAPPEN: "https://streamx-hd.com/live1.php?stream=disney6",
+	GENERAL: "https://streamx-hd.com/live1.php?stream=disney3",
 };
 
 export default function StreamsPage() {
@@ -175,7 +175,7 @@ export default function StreamsPage() {
 					}`}
 				>
 					<img src="/max.png" alt="Verstappen" className="h-6 w-auto object-contain" />
-					<span>Onboard Max</span>
+					<span>Onboard Norris</span>
 				</button>
 
 				<button
