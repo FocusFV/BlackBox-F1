@@ -21,32 +21,40 @@ import {
 	rotate,
 } from "@/lib/map";
 
-// 🏎️ DICCIONARIO FocusFV COMPLETO 2026 (22 Pilotos Oficiales actualizados)
+// 🏎️ DICCIONARIO FocusFV OFICIAL 2026
 const TEAM_COLORS_2026: Record<string, { bg: string; text: string }> = {
-	NOR: { bg: "#ff8700", text: "#ffffff" },
-	PIA: { bg: "#ff8700", text: "#ffffff" },
+	VER: { bg: "#00b3ff", text: "#ffffff" },
+	HAD: { bg: "#00b3ff", text: "#ffffff" },
+	RUS: { bg: "#00ffdf", text: "#ffffff" },
+	ANT: { bg: "#00ffdf", text: "#ffffff" },
+	VES: { bg: "#00ffdf", text: "#ffffff" },
 	LEC: { bg: "#e10600", text: "#ffffff" },
 	HAM: { bg: "#e10600", text: "#ffffff" },
-	VER: { bg: "#061d43", text: "#ffffff" },
-	HAD: { bg: "#061d43", text: "#ffffff" },
-	LIN: { bg: "#061d43", text: "#ffffff" },
-	PER: { bg: "#061d43", text: "#ffffff" },
-	RUS: { bg: "#00d2be", text: "#ffffff" },
-	ANT: { bg: "#00d2be", text: "#ffffff" },
-	ALO: { bg: "#006f62", text: "#ffffff" },
-	STR: { bg: "#006f62", text: "#ffffff" },
+	ZHO: { bg: "#e10600", text: "#ffffff" },
+	GIO: { bg: "#e10600", text: "#ffffff" },
+	NOR: { bg: "#ff8700", text: "#ffffff" },
+	PIA: { bg: "#ff8700", text: "#ffffff" },
+	OWA: { bg: "#ff8700", text: "#ffffff" },
+	FOR: { bg: "#ff8700", text: "#ffffff" },
+	ALO: { bg: "#00ffb7", text: "#ffffff" },
+	STR: { bg: "#00ffb7", text: "#ffffff" },
+	CRA: { bg: "#00ffb7", text: "#ffffff" },
+	VAN: { bg: "#00ffb7", text: "#ffffff" },
 	GAS: { bg: "#ff00ff", text: "#ffffff" },
 	COL: { bg: "#ff00ff", text: "#ffffff" },
-	BEA: { bg: "#e10600", text: "#ffffff" },
-	OCO: { bg: "#e10600", text: "#ffffff" },
-	MAG: { bg: "#373737", text: "#ffffff" },
-	LAW: { bg: "#4b77ff", text: "#ffffff" },
-	TSU: { bg: "#4b77ff", text: "#ffffff" },
-	ALB: { bg: "#005aff", text: "#ffffff" },
-	SAI: { bg: "#005aff", text: "#ffffff" },
-	BOT: { bg: "#27272a", text: "#ffffff" },
-	HUL: { bg: "#1f1f1f", text: "#ffffff" },
-	BOR: { bg: "#1f1f1f", text: "#ffffff" },
+	ARO: { bg: "#ff00ff", text: "#ffffff" },
+	MAI: { bg: "#ff00ff", text: "#ffffff" },
+	MAG: { bg: "#f3f4f6", text: "#ffffff" },
+	DOO: { bg: "#f3f4f6", text: "#ffffff" },
+	HIR: { bg: "#f3f4f6", text: "#ffffff" },
+	SAI: { bg: "#0040ff", text: "#ffffff" },
+	ALB: { bg: "#0040ff", text: "#ffffff" },
+	BRO: { bg: "#0040ff", text: "#ffffff" },
+	HUL: { bg: "#bdff00", text: "#ffffff" },
+	BOR: { bg: "#bdff00", text: "#ffffff" },
+	PER: { bg: "#ffcc00", text: "#ffffff" },
+	BOT: { bg: "#ffcc00", text: "#ffffff" },
+	HER: { bg: "#ffcc00", text: "#ffffff" },
 };
 
 const SPACE = 1000;
@@ -66,8 +74,6 @@ function getDriverPositionAndAngle(
 	if (!rotatedPoints || rotatedPoints.length === 0) return null;
 
 	const carSeed = timingDriver ? (parseInt(timingDriver.RacingNumber) || 10) : 10;
-	
-	// Distribución fina y escalonada de velocidad para simular sobrepasos reales entre los 22 coches
 	const speedFactor = 1 + ((carSeed % 7) * 0.025); 
 	const progress = ((timeOffset * speedFactor) + (carSeed * 0.045)) % 1;
 
@@ -92,7 +98,6 @@ export default function Map({ filter }: { filter?: string[] }) {
 	const rawDrivers = useDataStore((state) => state?.state?.DriverList);
 	const rawTiming = useDataStore((state) => state?.state?.TimingData);
 
-	// 🌟 GRILLA COMPLETA COMPATIBLE DE 22 PILOTOS
 	const mockDrivers = useMemo(() => {
 		const tlas = Object.keys(TEAM_COLORS_2026);
 		const list: any = {};
@@ -112,8 +117,9 @@ export default function Map({ filter }: { filter?: string[] }) {
 		return { Lines: lines };
 	}, [mockDrivers]);
 
-	const drivers = rawDrivers && Object.keys(rawDrivers).length > 0 ? rawDrivers : mockDrivers;
-	const timingDrivers = rawTiming && Object.keys(rawTiming.Lines || {}).length > 0 ? rawTiming : mockTiming;
+	// 🏁 SWITCH EN VIVO: Si no hay datos reales en pista, no renderiza la simulación mock
+	const drivers = rawDrivers && Object.keys(rawDrivers).length > 0 ? rawDrivers : null;
+	const timingDrivers = rawTiming && Object.keys(rawTiming.Lines || {}).length > 0 ? rawTiming : null;
 
 	const trackStatus = useDataStore((state) => state?.state?.TrackStatus);
 	const raceControlMessages = useDataStore((state) => state?.state?.RaceControlMessages?.Messages ?? undefined);
@@ -204,19 +210,40 @@ export default function Map({ filter }: { filter?: string[] }) {
 		<svg viewBox={`${minX} ${minY} ${widthX} ${widthY}`} className="h-full w-full xl:max-h-screen" xmlns="http://www.w3.org/2000/svg">
 			
 			<defs>
+				{/* 🏁 TEXTURA 1: Bandera a cuadros */}
 				<pattern id="checkered" width="40" height="40" patternUnits="userSpaceOnUse">
 					<rect width="20" height="20" fill="#000" />
 					<rect x="20" width="20" height="20" fill="#fff" />
 					<rect y="20" width="20" height="20" fill="#fff" />
 					<rect x="20" y="20" width="20" height="20" fill="#000" />
 				</pattern>
+
+				{/* 🌐 TEXTURA 2: Grilla HUD digital de fondo de plano técnico */}
+				<pattern id="hud-grid" width="400" height="400" patternUnits="userSpaceOnUse">
+					<path d="M 400 0 L 0 0 0 400" fill="none" stroke="#ffffff" strokeWidth="4" opacity="0.015" />
+				</pattern>
+
+				{/* 💥 FILTRO: Efecto de brillo de luz neón satelital */}
+				<filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+					<feGaussianBlur stdDeviation="35" result="blur" />
+					<feMerge>
+						<feMergeNode in="blur" />
+						<feMergeNode in="SourceGraphic" />
+					</feMerge>
+				</filter>
 			</defs>
+
+			{/* CAPA DE FONDO: Cuadrícula HUD técnica */}
+			<rect x={minX} y={minY} width={widthX} height={widthY} fill="url(#hud-grid)" />
 
 			<path className="stroke-zinc-950" strokeWidth={340} strokeLinejoin="round" fill="transparent" d={`M${points[0].x},${points[0].y} ${points.map((point) => `L${point.x},${point.y}`).join(" ")}`} />
 			
-			{renderedSectors.map((sector) => (
-				<path key={`map.sector.${sector.number}`} className={sector.color} strokeWidth={sector.strokeWidth} strokeLinecap="round" strokeLinejoin="round" fill="transparent" d={sector.d} style={sector.pulse ? { animation: `${sector.pulse * 100}ms linear infinite pulse` } : {}} />
-			))}
+			{/* CAPA DE PISTA: Renderizada con filtro neón para darle volumen de energía */}
+			<g filter="url(#neon-glow)">
+				{renderedSectors.map((sector) => (
+					<path key={`map.sector.${sector.number}`} className={sector.color} strokeWidth={sector.strokeWidth} strokeLinecap="round" strokeLinejoin="round" fill="transparent" d={sector.d} style={sector.pulse ? { animation: `${sector.pulse * 100}ms linear infinite pulse` } : {}} />
+				))}
+			</g>
 			
 			{finishLine && (
 				<rect
@@ -235,7 +262,7 @@ export default function Map({ filter }: { filter?: string[] }) {
 				<text key={`corner.${corner.number}`} x={corner.labelPos.x} y={corner.labelPos.y} className="fill-zinc-600 font-mono font-black select-none" fontSize={240}>{corner.number}</text>
 			))}
 
-			{centerX && centerY && drivers && timingDrivers && (
+			{centerX && centerY && drivers && timingDrivers && Object.keys(drivers).length > 0 && (
 				<>
 					{Object.values(drivers).reverse().filter((driver: any) => (filter ? filter.includes(driver.RacingNumber) : true)).map((driver: any) => {
 						const timingDriver = timingDrivers?.Lines[driver.RacingNumber];
@@ -243,7 +270,6 @@ export default function Map({ filter }: { filter?: string[] }) {
 						const data = getDriverPositionAndAngle(timingDriver, points, timeOffset);
 						if (!data) return null;
 
-						// Le inyectamos la paleta de tu mapeo de objetos de forma segura
 						const colorConfig = TEAM_COLORS_2026[driver.Tla] || { bg: "#ffffff", text: "#ffffff" };
 						const isFav = favoriteDrivers.includes(driver.RacingNumber);
 
@@ -273,30 +299,98 @@ const CarObject = ({ x, y, name, colors, angle, favorite, pit, hidden }: any) =>
 			className={clsx("transition-transform duration-150 ease-linear", { "opacity-40": pit }, { "opacity-0!": hidden })} 
 			style={{ transform: `translateX(${x}px) translateY(${y}px)` }}
 		>
-			{favorite && <circle r={320} fill="none" stroke="#22d3ee" strokeWidth={35} className="animate-pulse" />}
+			{/* 🏎️ MONOPLAZA 2026 PREMIUM (Silueta con Curvas Orgánicas Redondeadas) */}
+			<g transform={`rotate(${angle + 90})`} style={{ transition: "transform 0.16s linear" }}>
+				{/* Ejes de suspensión delantera y trasera estilizados */}
+				<rect x="-120" y="-175" width="240" height="10" fill="#444" rx="2" />
+				<rect x="-130" y="145" width="260" height="12" fill="#444" rx="2" />
 
-			{/* 🏎️ AUTO VECTORIAL ORIENTADO (Escalado un 25% más grande para mayor presencia) */}
-			<g transform={`rotate(${angle + 90})`} style={{ transition: "transform 0.16s linear", scale: "1.25" }}>
-				<rect x="-80" y="80" width="160" height="30" fill="#111" rx="5" />
-				<path d="M -50 80 L -40 -20 L -20 -60 L 20 -60 L 40 -20 L 50 80 Z" fill="#18181b" />
-				<path d="M -30 60 L -25 -40 L 0 -90 L 25 -40 L 30 60 Z" fill={colors.bg} stroke="#111" strokeWidth={10} />
-				<rect x="-90" y="-85" width="180" height="20" fill="#111" rx="4" />
-				<rect x="-115" y="-80" width="30" height="55" fill="#000" rx="6" />
-				<rect x="85" y="-80" width="30" height="55" fill="#000" rx="6" />
-				<rect x="-120" y="30" width="40" height="65" fill="#000" rx="8" />
-				<rect x="80" y="30" width="40" height="65" fill="#000" rx="8" />
-				<rect x="-10" y="10" width="20" height="15" fill="#facc15" />
+				{/* Alerón Trasero Masivo */}
+				<rect x="-140" y="215" width="280" height="50" fill="#222" rx="4" stroke="#111" strokeWidth={8} />
+				<rect x="-110" y="225" width="220" height="22" fill={colors.bg} rx="2" />
+
+				{/* Pontones y Carrocería Base REDONDEADOS */}
+				<path 
+					d="M -45 190 
+					   Q -75 60 -65 -40 
+					   Q -55 -160 -20 -160 
+					   L 20 -160 
+					   Q 55 -160 65 -40 
+					   Q 75 60 45 190 Z" 
+					fill="#222" 
+					stroke="#111" 
+					strokeWidth={10} 
+				/>
+
+				{/* Chasis Central Afilado (Color oficial de la escudería) */}
+				<path d="M -25 180 L -22 -60 L -10 -270 L 10 -270 L 22 -60 L 25 180 Z" fill={colors.bg} stroke="#111" strokeWidth={12} />
+
+				{/* Alerón Delantero Estilizado en Flecha */}
+				<path d="M -110 -220 L 0 -290 L 110 -220 L 110 -195 L 0 -245 L -110 -195 Z" fill={colors.bg} stroke="#111" strokeWidth={10} />
+
+				{/* Cockpit Redondeado en forma de Gota */}
+				<path 
+					d="M -15 45 
+					   Q -22 15 -20 -20 
+					   Q -18 -55 0 -55 
+					   Q 18 -55 20 -20 
+					   Q 22 15 15 45 Z" 
+					fill="#111" 
+					stroke="#333" 
+					strokeWidth={6} 
+				/>
+				
+				{/* Casco y Protección del Piloto Integrada */}
+				<circle cx="0" cy="-10" r="10" fill="#444" />
+				<rect x="-4" y="10" width="8" height="25" fill="#111" rx="3" />
+
+				{/* Gomas Delanteras con contorno gris claro */}
+				<rect x="-205" y="-220" width="55" height="110" fill="#18181b" rx="18" stroke="#555555" strokeWidth={10} />
+				<rect x="150" y="-220" width="55" height="110" fill="#18181b" rx="18" stroke="#555555" strokeWidth={10} />
+
+				{/* Gomas Traseras de Competición con contorno gris claro */}
+				<rect x="-215" y="95" width="65" height="135" fill="#18181b" rx="20" stroke="#555555" strokeWidth={10} />
+				<rect x="150" y="95" width="65" height="135" fill="#18181b" rx="20" stroke="#555555" strokeWidth={10} />
 			</g>
 
-			{/* 🏷️ PANEL HUD FLOTANTE CALIBRADO (Fondo oscuro, texto chico con el color de la escudería) */}
-			<g transform="translate(140, -110)">
-				{/* Volvemos al fondo oscuro translúcido con borde del equipo para contraste absoluto */}
-				<rect x="-20" y="-55" width="150" height="70" fill="#09090b" rx="10" stroke={colors.bg} strokeWidth={15} opacity="0.95" />
+			{/* 🏷️ PANEL HUD DE PILOTO COMPACTO */}
+			<g transform="translate(150, -180)">
+				<rect x="-20" y="-55" width="160" height="70" fill="#000000" rx="10" stroke={colors.bg} strokeWidth={14} opacity="0.95" />
 				
-				{/* 🌟 CAMBIO PREMIUM: Nombre un poco más chico (fontSize 340) teñido con el color de la escudería (colors.bg) */}
-				<text x="55" y="-6" fontWeight="900" fontSize={340} fill={colors.bg} textAnchor="middle" className="font-mono tracking-tighter">
+				<text 
+					x="60" 
+					y="2" 
+					fontWeight="950" 
+					fontSize={320} 
+					fill={colors.bg} 
+					stroke="#000000"
+					strokeWidth="20px"
+					paintOrder="stroke"
+					textAnchor="middle" 
+					className="font-mono tracking-tighter"
+				>
 					{name}
 				</text>
+
+				{/* ⭐ DETALLE PREMIUM: Estrellita dorada flotante animada si es piloto favorito */}
+				{favorite && (
+					<g transform="translate(115, -60)" className="animate-pulse">
+						{/* Sombra negra de fondo para la estrella */}
+						<path 
+							d="M 0,-25 L 7,-7 L 25,-6 L 11,6 L 15,24 L 0,14 L -15,24 L -11,6 L -25,-6 L -7,-7 Z" 
+							fill="#000000" 
+							stroke="#000000" 
+							strokeWidth="8"
+						/>
+						{/* Estrella Dorada HUD */}
+						<path 
+							d="M 0,-25 L 7,-7 L 25,-6 L 11,6 L 15,24 L 0,14 L -15,24 L -11,6 L -25,-6 L -7,-7 Z" 
+							fill="#ffd700" 
+							stroke="#ff9900" 
+							strokeWidth="3"
+						/>
+					</g>
+				)}
 			</g>
 		</g>
 	);

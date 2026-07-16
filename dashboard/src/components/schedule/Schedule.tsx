@@ -99,9 +99,13 @@ export default async function Schedule() {
 		return utc(round.end) > utc();
 	}) || schedule[schedule.length - 1];
 
+	// 🛡️ FILTRO ANTI-DUPLICADOS: Excluimos de la grilla de abajo el GP que ya se luce arriba
+	const cleanSchedule = schedule.filter((round) => round.name !== next?.name);
+
 	return (
 		<div className="space-y-6 mb-20">
-			<RoundListClient schedule={schedule} nextName={next?.name} />
+			{/* Pasamos el array filtrado para evitar la superposición en el frontend */}
+			<RoundListClient schedule={cleanSchedule} nextName={next?.name} />
 		</div>
 	);
 }
