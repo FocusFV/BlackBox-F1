@@ -31,8 +31,8 @@ export default function Countdown({ next, type, countryName }: Props) {
 	const requestRef = useRef<number | null>(null);
 
 	useEffect(() => {
-		const animateNextFrame = () => {
-			// FIX CLAVE: Comparamos usando utc() en vez de now() para sincronizar relojes con Vercel
+		// 🚀 INYECCIÓN DE ARRANQUE INMEDIATO: Calculamos el tiempo en el acto
+		const calculateTime = () => {
 			const diff = duration(nextMoment.diff(utc()));
 			const daysVal = Math.floor(diff.asDays());
 
@@ -41,7 +41,13 @@ export default function Countdown({ next, type, countryName }: Props) {
 			} else {
 				setDuration([0, 0, 0, 0]);
 			}
+		};
 
+		// Ejecutamos al toque en el render inicial para evitar el efecto de parpadeo gris
+		calculateTime();
+
+		const animateNextFrame = () => {
+			calculateTime();
 			requestRef.current = requestAnimationFrame(animateNextFrame);
 		};
 

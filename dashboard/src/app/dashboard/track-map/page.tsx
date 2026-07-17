@@ -17,7 +17,7 @@ const driverTeamColorMap: { [key: string]: string } = {
 	NOR: "#ff8700", PIA: "#ff8700",
 	LEC: "#e10600", HAM: "#e10600", BEA: "#e10600",
 	// 🔵 Red Bull / VCARB alternativos: Azules cyan ultra brillantes para que resalten sobre negro
-	VER: "#2ab4ff", HAD: "#2ab4ff", PER: "#00d2ff", LIN: "#00d2ff",
+	VER: "#2ab4ff", HAD: "#2ab4ff", PER: "#f0f0f0", LIN: "#00d2ff",
 	RUS: "#00d2be", ANT: "#00d2be",
 	ALO: "#00ffc4", STR: "#00ffc4", // Aston Martin tirando a verde aqua brillante
 	GAS: "#ff00ff", COL: "#ff00ff", OCO: "#ff00ff",
@@ -25,8 +25,8 @@ const driverTeamColorMap: { [key: string]: string } = {
 	MAG: "#f0f0f0",
 	LAW: "#4b77ff", TSU: "#4b77ff",
 	ALB: "#005aff", SAI: "#005aff",
-	// 🟢 Kick Sauber / Audi / Otros: Verde lima flúor e internacional para que explote en la pantalla
-	BOT: "#bfff00", HUL: "#bfff00", BOR: "#bfff00",
+	// Sauber / Audi / Otros: Verde lima flúor e internacional para que explote en la pantalla
+	BOT: "#f0f0f0", HUL: "#bfff00", BOR: "#bfff00",
 };
 
 export default function TrackMap() {
