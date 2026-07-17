@@ -45,14 +45,15 @@ export default function StreamsPage() {
 
 	// Conexión directa con tu API de Rust en Render
 	useEffect(() => {
-		fetch("/api/streams-config")
+		// 🏎️ Cambiá "tu-app-rust" por el subdominio real que te da Render para BlackBox-F1
+		fetch("https://blackbox-f1.onrender.com/api/streams-config")
 			.then((res) => {
 				if (!res.ok) throw new Error("Error en la respuesta del pit-wall");
 				return res.json();
 			})
 			.then((data) => {
 				if (data && data.disney7 && data.disney8) {
-					setFirebaseStreams(data); // Inyecta los pilotos reales de Render en tu UI
+					setFirebaseStreams(data);
 				}
 			})
 			.catch((err) => console.error("⚠️ Error leyendo telemetría desde Render:", err));
