@@ -15,7 +15,8 @@ export default async function SchedulePage() {
 	const activeRace = useDataStore.getState().state?.SessionInfo?.Meeting?.Name || "Gran Premio";
 
 	return (
-		<div className="pt-4 w-full mx-auto px-4 sm:px-6 font-mono text-white select-none">
+		/* 🟢 CORREGIDO: Eliminamos 'select-none' para devolver el control y el clic normal a toda la interfaz */
+		<div className="pt-4 w-full mx-auto px-4 sm:px-6 font-mono text-white">
 			
 			{/* 🏁 CONDICIÓN DE EMBRAGUE INTERACTIVA: Si hay carrera, anulamos el resto */}
 			{isLive ? (
@@ -53,11 +54,10 @@ export default async function SchedulePage() {
 							<span className="text-[10px] bg-zinc-800 px-2 py-0.5 rounded text-amber-400 font-bold">PU 2026</span>
 						</div>
 						
-						{/* Embebemos un reproductor de streaming de audio real (podés cambiar el src por tu canal de radio favorito de F1) */}
 						<audio 
 							controls 
 							className="w-full accent-emerald-500 h-9 rounded-lg"
-							src="https://stream.publicbroadcasting.net/production/mp3/kcur/local-kcur-993740.mp3" // Stream de prueba, poné el de tu radio preferida
+							src="https://stream.publicbroadcasting.net/production/mp3/kcur/local-kcur-993740.mp3"
 						>
 							Tu navegador no soporta el elemento de reproducción de audio.
 						</audio>

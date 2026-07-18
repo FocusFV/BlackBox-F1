@@ -30,17 +30,30 @@ export default function Countdown({ next, type, countryName }: Props) {
 	const nextMoment = utc(next.start);
 	const requestRef = useRef<number | null>(null);
 
+	// Usamos un ref auxiliar para controlar los valores reales en cada frame sin causar re-renders
+	const currentValuesRef = useRef<string>("");
+
 	useEffect(() => {
-		// 🚀 INYECCIÓN DE ARRANQUE INMEDIATO: Calculamos el tiempo en el acto
 		const calculateTime = () => {
 			const diff = duration(nextMoment.diff(utc()));
 			const daysVal = Math.floor(diff.asDays());
 
-			if (diff.asSeconds() > 0) {
-				setDuration([daysVal, diff.hours(), diff.minutes(), diff.seconds()]);
-			} else {
-				setDuration([0, 0, 0, 0]);
+			const nextDays = diff.asSeconds() > 0 ? daysVal : 0;
+			const nextHours = diff.asSeconds() > 0 ? diff.hours() : 0;
+			const nextMinutes = diff.asSeconds() > 0 ? diff.minutes() : 0;
+			const nextSeconds = diff.asSeconds() > 0 ? diff.seconds() : 0;
+
+			// Creamos un string único con el tiempo actual (ej: "4-12-30-55")
+			const timeString = `${nextDays}-${nextHours}-${nextMinutes}-${nextSeconds}`;
+
+			// 🟢 CORRECCIÓN CLAVE: Si el string es idéntico, frenamos el frame antes de tocar a React
+			if (currentValuesRef.current === timeString) {
+				return; 
 			}
+
+			// Si cambió, guardamos la nueva marca y actualizamos el estado
+			currentValuesRef.current = timeString;
+			setDuration([nextDays, nextHours, nextMinutes, nextSeconds]);
 		};
 
 		// Ejecutamos al toque en el render inicial para evitar el efecto de parpadeo gris
@@ -52,8 +65,13 @@ export default function Countdown({ next, type, countryName }: Props) {
 		};
 
 		requestRef.current = requestAnimationFrame(animateNextFrame);
-		return () => (requestRef.current ? cancelAnimationFrame(requestRef.current) : void 0);
-	}, [nextMoment]);
+		
+		return () => {
+			if (requestRef.current) cancelAnimationFrame(requestRef.current);
+		};
+	// 🟢 FIX DE DEPENDENCIAS: Escuchamos el string primitivo del inicio de la sesión. 
+	// Moment no va a poder romper el bucle ahora porque el string no cambia de referencia.
+	}, [next.start, nextMoment]);
 
 	const actionText = (() => {
 		const kind = next.kind.toLowerCase();
