@@ -4,32 +4,29 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useDataStore } from "@/stores/useDataStore";
 import { Lock, Unlock } from "lucide-react";
-// 🔌 Descomentá estas líneas cuando enganches la base de datos de tu app:
-// import { ref, onValue } from "firebase/database";
-// import { db } from "@/lib/firebase"; 
 
 // 🏎️ DICCIONARIO DE ESTILOS FOCUSFV PARA ONBOARDS DINÁMICOS
 const PILOTOS_CONFIG: Record<string, { name: string; border: string; shadow: string; logo: string }> = {
 	// Mercedes
-	RUS: { name: "Onboard Russell", border: "border-cyan-400 hover:border-cyan-500", shadow: "shadow-[0_10px_25px_rgba(34,211,238,0.25)]", logo: "/mercedes.png" },
-	ANT: { name: "Onboard Antonelli", border: "border-cyan-400 hover:border-cyan-500", shadow: "shadow-[0_10px_25px_rgba(34,211,238,0.25)]", logo: "/mercedes.png" },
+	RUS: { name: "Onboard Russell", border: "border-cyan-400 hover:border-cyan-500", shadow: "shadow-[0_10px_25px_rgba(34,211,238,0.25)]", logo: "/george.png" },
+	ANT: { name: "Onboard Antonelli", border: "border-cyan-400 hover:border-cyan-500", shadow: "shadow-[0_10px_25px_rgba(34,211,238,0.25)]", logo: "/kimi.png" },
 	
 	// Ferrari
-	LEC: { name: "Onboard Leclerc", border: "border-red-500 hover:border-red-600", shadow: "shadow-[0_10px_25px_rgba(220,38,38,0.25)]", logo: "/ferrari.png" },
-	HAM: { name: "Onboard Hamilton", border: "border-red-500 hover:border-red-600", shadow: "shadow-[0_10px_25px_rgba(220,38,38,0.25)]", logo: "/ferrari.png" },
+	LEC: { name: "Onboard Leclerc", border: "border-red-500 hover:border-red-600", shadow: "shadow-[0_10px_25px_rgba(220,38,38,0.25)]", logo: "/leclerc.png" },
+	HAM: { name: "Onboard Hamilton", border: "border-red-500 hover:border-red-600", shadow: "shadow-[0_10px_25px_rgba(220,38,38,0.25)]", logo: "/hamilton.png" },
 	
 	// Red Bull Racing
-	VER: { name: "Onboard Verstappen", border: "border-blue-500 hover:border-blue-600", shadow: "shadow-[0_10px_25px_rgba(37,99,235,0.25)]", logo: "/redbull.png" },
+	VER: { name: "Onboard Verstappen", border: "border-blue-500 hover:border-blue-600", shadow: "shadow-[0_10px_25px_rgba(37,99,235,0.25)]", logo: "/max.png" },
 	
 	// McLaren
 	NOR: { name: "Onboard Norris", border: "border-orange-400 hover:border-orange-500", shadow: "shadow-[0_10px_25px_rgba(249,115,22,0.25)]", logo: "/norris.png" },
-	PIA: { name: "Onboard Piastri", border: "border-orange-400 hover:border-orange-500", shadow: "shadow-[0_10px_25px_rgba(249,115,22,0.25)]", logo: "/norris.png" },
+	PIA: { name: "Onboard Piastri", border: "border-orange-400 hover:border-orange-500", shadow: "shadow-[0_10px_25px_rgba(249,115,22,0.25)]", logo: "/piastri.png" },
 	
 	// Aston Martin
-	ALO: { name: "Onboard Alonso", border: "border-emerald-600 hover:border-emerald-700", shadow: "shadow-[0_10px_25px_rgba(5,150,105,0.25)]", logo: "/aston.png" },
+	ALO: { name: "Onboard Alonso", border: "border-emerald-600 hover:border-emerald-700", shadow: "shadow-[0_10px_25px_rgba(5,150,105,0.25)]", logo: "/alonso.png" },
 	
 	// Williams
-	SAI: { name: "Onboard Sainz", border: "border-blue-600 hover:border-blue-700", shadow: "shadow-[0_10px_25px_rgba(29,78,216,0.25)]", logo: "/williams.png" },
+	SAI: { name: "Onboard Sainz", border: "border-blue-600 hover:border-blue-700", shadow: "shadow-[0_10px_25px_rgba(29,78,216,0.25)]", logo: "/sainz.png" },
 };
 
 export default function StreamsPage() {
@@ -37,16 +34,15 @@ export default function StreamsPage() {
 	const [clickCount, setClickCount] = useState<number>(0);
 	const [isUnlocking, setIsUnlocking] = useState<boolean>(false);
 
-	// 📱 CONTROL REMOTO DESDE RENDER: Sincroniza los pilotos mutables
+	// 📱 CONTROL REMOTO DESDE RENDER: Sincroniza los pilotos mutables (Una sola declaración limpia)
 	const [firebaseStreams, setFirebaseStreams] = useState({
-		disney7: "RUS", // Backup por si falla la red
+		disney7: "RUS", 
 		disney8: "HAM"  
 	});
 
-	// Conexión directa con tu API de Rust en Render
+	// 🔌 CONEXIÓN CON BACKEND EN RENDER
 	useEffect(() => {
-		// 🏎️ Cambiá "tu-app-rust" por el subdominio real que te da Render para BlackBox-F1
-		fetch("https://blackbox-f1.onrender.com/api/streams-config")
+		fetch("https://blackboxf1.onrender.com/api/streams-config")
 			.then((res) => {
 				if (!res.ok) throw new Error("Error en la respuesta del pit-wall");
 				return res.json();
@@ -73,16 +69,6 @@ export default function StreamsPage() {
 	};
 
 	const [activeTab, setActiveTab] = useState<keyof typeof STREAMS_CONFIG>("FOX");
-
-	// Conexión en tiempo real con Firebase
-	useEffect(() => {
-		// 🔌 Descomentá esto cuando lo tengas subido:
-		// const streamRef = ref(db, "live_onboards");
-		// return onValue(streamRef, (snapshot) => {
-		// 	const data = snapshot.val();
-		// 	if (data) setFirebaseStreams(data);
-		// });
-	}, []);
 
 	// Monitoreo del store de Zustand
 	const trackStatus = useDataStore((state) => state.state?.TrackStatus?.Status);
@@ -137,7 +123,7 @@ export default function StreamsPage() {
 					<span className="text-[11px] font-black text-zinc-600 uppercase tracking-widest mb-2">// FEED SATELITAL: INACTIVO</span>
 					<h2 className="text-xl font-black uppercase tracking-tight text-zinc-200">MOTORES APAGADOS</h2>
 					<p className="text-zinc-500 text-xs font-sans mt-3 leading-relaxed">
-						La señal de video en vivo se habilita automáticamente <span className="text-zinc-300 font-bold">30 minutes antes</span> de la sesión.
+						La señal de video en vivo se habilita automáticamente <span className="text-zinc-300 font-bold">30 minutos antes</span> de la sesión.
 					</p>
 				</div>
 			</div>
@@ -179,7 +165,7 @@ export default function StreamsPage() {
 				/>
 			</div>
 
-			{/* 🎛️ TABLERO DE CONTROL MULTICANAL (DISEÑO AJUSTADO A 9 BOTONES) */}
+			{/* 🎛️ TABLERO DE CONTROL MULTICANAL */}
 			<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-8">
 				
 				{/* FOX SPORTS */}
@@ -224,7 +210,7 @@ export default function StreamsPage() {
 					<span className="font-black text-[11px] uppercase tracking-widest text-center mt-auto">Onboard General</span>
 				</button>
 
-				{/* 📡 DISNEY 7 (MUTABLE DESDE FIREBASE) */}
+				{/* 📡 DISNEY 7 (MUTABLE DESDE RENDER BACKEND) */}
 				{(() => {
 					const tla = firebaseStreams.disney7 || "RUS"; 
 					const style = PILOTOS_CONFIG[tla] || { name: `Disney 7 (${tla})`, border: "border-zinc-900", shadow: "", logo: "/onboard.png" };
@@ -241,7 +227,7 @@ export default function StreamsPage() {
 					);
 				})()}
 
-				{/* 📡 DISNEY 8 (MUTABLE DESDE FIREBASE) */}
+				{/* 📡 DISNEY 8 (MUTABLE DESDE RENDER BACKEND) */}
 				{(() => {
 					const tla = firebaseStreams.disney8 || "HAM"; 
 					const style = PILOTOS_CONFIG[tla] || { name: `Disney 8 (${tla})`, border: "border-zinc-900", shadow: "", logo: "/onboard.png" };
