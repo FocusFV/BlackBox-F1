@@ -15,8 +15,13 @@ export default function Page() {
 	
 	const session = dataStore.state?.SessionInfo;
 	const lapCount = dataStore.state?.LapCount;
+	// 📡 Traemos el estado oficial que manda la API
+	const sessionStatus = dataStore.state?.SessionStatus?.Status;
 	
-	const isParcFerme = !session || (!!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps);
+	// 🔒 EL FIX DE BOXES: Usamos los tipos lícitos ("Ends" y "Finalised") para no romper TS.
+	// Solo bloquea si la sesión terminó de verdad o si se completaron las vueltas de la carrera.
+	const isParcFerme = sessionStatus === "Ends" || sessionStatus === "Finalised" || 
+		(!!session && session.Name === "Race" && !!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps);
 
 	return (
 		<div className="flex w-full flex-col gap-4 bg-zinc-950 text-zinc-100 min-h-screen">

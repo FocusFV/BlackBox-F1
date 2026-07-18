@@ -98,6 +98,11 @@ export const ParcFerme: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [hasSprint, setHasSprint] = useState(false);
 
+	// 📡 Lógica inversa limpia para TS: está activo si hay sesión y NO está terminada
+	const sessionStatus = useDataStore((state) => state.state?.SessionStatus?.Status);
+	const session = useDataStore((state) => state.state?.SessionInfo);
+	const isLive = !!session && sessionStatus !== "Ends" && sessionStatus !== "Finalised";
+
 	// 1. TELEMETRÍA OFICIAL
 	useEffect(() => {
 		async function fetchSessionData() {
@@ -166,16 +171,20 @@ export const ParcFerme: React.FC = () => {
 	return (
 		<div className="flex flex-col gap-6 p-4 text-white w-full items-center">
 			
-			{/* 🏆 PÍLDORA CENTRAL */}
+			{/* 🏆 PÍLDORA CENTRAL DINÁMICA CORREGIDA */}
 			<div className="flex justify-center w-full select-none">
 				<div className="flex items-center gap-4 px-6 py-4 bg-zinc-950/60 border border-zinc-900 rounded-xl shadow-[0_4px_25px_rgba(0,0,0,0.6)] lg:w-6/12 w-full justify-center">
-					<span className="text-xl animate-pulse flex-shrink-0 drop-shadow-[0_0_8px_rgba(250,204,21,0.4)]">🔒</span>
+					<span className={`text-xl animate-pulse flex-shrink-0 ${isLive ? "drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]" : "drop-shadow-[0_0_8px_rgba(250,204,21,0.4)]"}`}>
+						{isLive ? "🟢" : "🔒"}
+					</span>
 					<div className="font-mono text-center">
-						<h2 className="text-sm md:text-base font-black uppercase tracking-widest bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 text-transparent bg-clip-text">
-							Régimen de Parque Cerrado
+						<h2 className={`text-sm md:text-base font-black uppercase tracking-widest bg-gradient-to-r ${isLive ? "from-red-400 via-orange-400 to-yellow-500" : "from-amber-200 via-yellow-400 to-amber-500"} text-transparent bg-clip-text`}>
+							{isLive ? "¡Bandera Verde en Pista!" : "Régimen de Parque Cerrado"}
 						</h2>
 						<p className="text-[11px] md:text-xs text-zinc-400 font-medium uppercase tracking-wide mt-1 leading-normal max-w-md">
-							Telemetría en tiempo real bloqueada. Acceso disponible al inicio de la próxima sesión oficial.
+							{isLive 
+								? "La sesión está corriendo en vivo ahora mismo. Dirigite al centro de comandos para ver el Live-HUD."
+								: "Telemetría en tiempo real bloqueada. Acceso disponible al inicio de la próxima sesión oficial."}
 						</p>
 					</div>
 				</div>
@@ -184,7 +193,6 @@ export const ParcFerme: React.FC = () => {
 			{/* GRILLA DE CONTENIDO CENTRADA */}
 			<div className="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full justify-center">
 				
-				{/* TU TABLA ORIGINAL CON EL ANCHO DE SIEMPRE (COL-SPAN-6) PERO CENTRADA */}
 				<div className="lg:col-start-4 lg:col-span-6 flex flex-col bg-zinc-950/40 border border-zinc-900 rounded-2xl p-4 backdrop-blur-xl max-w-full">
 					<div className="flex flex-col gap-3 mb-4 border-b border-zinc-900 pb-3">
 						<div className="flex items-center justify-between">

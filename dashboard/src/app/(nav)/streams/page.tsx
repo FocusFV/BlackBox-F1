@@ -80,8 +80,16 @@ export default function StreamsPage() {
 		if (!sessionInfo?.StartDate || !sessionInfo?.EndDate) return false;
 
 		const now = Date.now();
-		const startTime = new Date(sessionInfo.StartDate).getTime();
-		const endTime = new Date(sessionInfo.EndDate).getTime();
+		
+		// 🛠️ FIX RÁPIDO: Forzamos a que las fechas se parseen como UTC puro
+		const parseUTC = (dateStr: string) => {
+			// Si la fecha no termina en 'Z', se la agregamos para indicarle a JS que es UTC
+			const cleanStr = dateStr.endsWith("Z") ? dateStr : `${dateStr}Z`;
+			return new Date(cleanStr).getTime();
+		};
+
+		const startTime = parseUTC(sessionInfo.StartDate);
+		const endTime = parseUTC(sessionInfo.EndDate);
 		const THIRTY_MINUTES = 1800000; 
 
 		return now >= (startTime - THIRTY_MINUTES) && now <= (endTime + THIRTY_MINUTES);
