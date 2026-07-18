@@ -145,6 +145,9 @@ export const ParcFerme: React.FC = () => {
 						const isFinished = statusStr.includes("Finished") || statusStr.includes("Lap") || isTimeBased;
 						const isDNF = !isFinished;
 
+						// ⏱️ PARCHE DE HORARIO/TIEMPO: Nos aseguramos de limpiar los strings o dejar el mejor tiempo de la sesión
+						const rawTime = r.Q3 || r.Q2 || r.Q1 || "S/T";
+						
 						return {
 							pos: r.position,
 							number: r.number || r.Driver.permanentNumber || "0",
@@ -153,7 +156,7 @@ export const ParcFerme: React.FC = () => {
 							team: r.Constructor.name,
 							constructorId: r.Constructor.constructorId,
 							isDNF: isDNF,
-							rightData: isTimeBased ? (r.Q3 || r.Q2 || r.Q1 || "S/T") : (isDNF ? `DNF / ${statusStr.toUpperCase()}` : `${r.points} pts`)
+							rightData: isTimeBased ? rawTime : (isDNF ? `DNF / ${statusStr.toUpperCase()}` : `${r.points} pts`)
 						};
 					});
 					setResults(fetchedResults);

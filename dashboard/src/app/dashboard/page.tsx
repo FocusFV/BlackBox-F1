@@ -15,29 +15,31 @@ export default function Page() {
 	
 	const session = dataStore.state?.SessionInfo;
 	const lapCount = dataStore.state?.LapCount;
-	// 📡 Traemos el estado oficial que manda la API
 	const sessionStatus = dataStore.state?.SessionStatus?.Status;
 	
-	// 🔒 EL FIX DE BOXES: Usamos los tipos lícitos ("Ends" y "Finalised") para no romper TS.
-	// Solo bloquea si la sesión terminó de verdad o si se completaron las vueltas de la carrera.
-	const isParcFerme = sessionStatus === "Ends" || sessionStatus === "Finalised" || 
-		(!!session && session.Name === "Race" && !!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps);
+	// 🏎️ MODO MOTORES APAGADOS / PARQUE CERRADO BLINDADO
+	// Si no hay sesión en el store (Offline), si la API manda estado de cierre ("Ends"/"Finalised"),
+	// o si ya se completaron todas las vueltas programadas, la telemetría se guarda en boxes.
+	const isOfflineOrFerme = !session || 
+		sessionStatus === "Ends" || 
+		sessionStatus === "Finalised" || 
+		(session.Name === "Race" && !!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps);
 
 	return (
 		<div className="flex w-full flex-col gap-4 bg-zinc-950 text-zinc-100 min-h-screen">
 			
 			{/* CONTENIDO PRINCIPAL */}
-			{isParcFerme ? (
+			{isOfflineOrFerme ? (
 				<div className="flex flex-col gap-6 w-full">
-					{/* El candado elegante en el centro */}
+					{/* El candado premium con el historial del GP anterior */}
 					<ParcFerme />
 					
-					{/* 📺 CAROUSEL PREMIUM DE VIDEOS: Resúmenes en vivo */}
+					{/* 📺 Feed oficial de YouTube con los mejores momentos */}
 					<YouTubeFeed />
 				</div>
 			) : (
 				<>
-					{/* Panel en vivo normal (Líderes, mapa, radios...) */}
+					{/* HUD de comando en vivo (Solo visible con Bandera Verde / Motores Encendidos) */}
 					<div className="flex w-full flex-col gap-2 2xl:flex-row">
 						<div className="overflow-x-auto">
 							<LeaderBoard />
