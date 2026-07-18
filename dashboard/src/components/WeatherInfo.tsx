@@ -11,9 +11,14 @@ export default function DataWeatherInfo() {
 	const weather = useDataStore((state) => state.state?.WeatherData);
 	const session = useDataStore((state) => state.state?.SessionInfo);
 	const lapCount = useDataStore((state) => state.state?.LapCount);
+	// 📡 Telemetría oficial del estado de la sesión
+	const sessionStatus = useDataStore((state) => state.state?.SessionStatus?.Status);
 
-	// 🔒 Lógica de Parque Cerrado automática por fin de carrera
-	const isParcFerme = !session || (!!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps); 
+	// 🔒 Lógica de Parque Cerrado automática sincronizada con el dashboard
+	const isParcFerme = !session || 
+		sessionStatus === "Ends" || 
+		sessionStatus === "Finalised" || 
+		(!!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps); 
 
 	// Si estamos en Parque Cerrado, limpiamos el medio de la barra para que no joda
 	if (isParcFerme) {

@@ -9,9 +9,14 @@ export default function TrackInfo() {
 	const lapCount = useDataStore((state) => state.state?.LapCount);
 	const track = useDataStore((state) => state.state?.TrackStatus);
 	const session = useDataStore((state) => state.state?.SessionInfo);
+	// 📡 Telemetría oficial del estado de la sesión
+	const sessionStatus = useDataStore((state) => state.state?.SessionStatus?.Status);
 
-	// 🔒 Lógica de Parque Cerrado automática por fin de carrera
-	const isParcFerme = !session || (!!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps); 
+	// 🔒 Lógica de Parque Cerrado automática sincronizada con el dashboard
+	const isParcFerme = !session || 
+		sessionStatus === "Ends" || 
+		sessionStatus === "Finalised" || 
+		(!!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps); 
 
 	// Si está apagado, tampoco dibujamos nada a la derecha
 	if (isParcFerme) {

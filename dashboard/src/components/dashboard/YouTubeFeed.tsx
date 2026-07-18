@@ -97,7 +97,27 @@ export function YouTubeFeed() {
         }
     };
 
-    if (loading || videos.length === 0) return null;
+    // 🏎️ PARCHE DE BOXES: Si la API da cero resultados en local, metemos placeholders ficticios para ver el diseño
+    const tieneVideos = videos.length > 0;
+    const mostrarPlaceholder = !loading && !tieneVideos;
+
+    const videosADesplegar = tieneVideos 
+        ? videos 
+        : (mostrarPlaceholder 
+            ? [
+                { id: "mock-1", title: "[Placeholder] FP1 & FP2 Highlights", thumbnail: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=500", publishedAt: "Local", embedUrl: "", weight: 1 },
+                { id: "mock-2", title: "[Placeholder] Qualifying Highlights", thumbnail: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=500", publishedAt: "Local", embedUrl: "", weight: 5 }
+              ]
+            : []
+          );
+
+    if (loading) {
+        return (
+            <div className="h-32 flex items-center justify-center text-zinc-500 font-mono text-[10px] uppercase tracking-widest animate-pulse w-full">
+                Buscando transmisiones oficiales...
+            </div>
+        );
+    }
 
     return (
         <div className="w-full px-2 mt-6 relative group/feed">
@@ -145,7 +165,8 @@ export function YouTubeFeed() {
                     ref={scrollContainerRef}
                     className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth pb-4 snap-x snap-mandatory w-full"
                 >
-                    {videos.map((video) => (
+                    {/* 🏎️ Mapeamos la variable inteligente que tolera placeholders en local */}
+                    {videosADesplegar.map((video) => (
                         <VideoCard key={video.id} video={video} />
                     ))}
 

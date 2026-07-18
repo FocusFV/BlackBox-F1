@@ -23,11 +23,16 @@ export default function SessionInfo() {
 	const session = useDataStore((state) => state.state?.SessionInfo);
 	const timingData = useDataStore((state) => state.state?.TimingData);
 	const lapCount = useDataStore((state) => state.state?.LapCount);
+	// 📡 Telemetría oficial del estado de la sesión
+	const sessionStatus = useDataStore((state) => state.state?.SessionStatus?.Status);
 
 	const delay = useSettingsStore((state) => state.delay);
 
-	// 🔒 Lógica de Parque Cerrado automática por fin de carrera
-	const isParcFerme = !session || (!!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps); 
+	// 🔒 Lógica de Parque Cerrado automática sincronizada con el dashboard
+	const isParcFerme = !session || 
+		sessionStatus === "Ends" || 
+		sessionStatus === "Finalised" || 
+		(!!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps); 
 
 	const timeRemaining =
 		!!clock && !!clock.Remaining
