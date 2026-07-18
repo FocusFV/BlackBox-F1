@@ -15,12 +15,8 @@ export default function Page() {
 
 	const session = dataStore.state?.SessionInfo;
 	const lapCount = dataStore.state?.LapCount;
-	// 📡 Traemos el estado oficial que manda la API
 	const sessionStatus = dataStore.state?.SessionStatus?.Status;
 
-	// 🏎️ MODO MOTORES APAGADOS / PARQUE CERRADO BLINDADO
-	// Si no hay sesión en el store (Offline), si la API manda estado de cierre ("Ends"/"Finalised"),
-	// o si ya se completaron todas las vueltas programadas, la telemetría se guarda en boxes.
 	const isOfflineOrFerme = !session || 
 		sessionStatus === "Ends" || 
 		sessionStatus === "Finalised" || 
@@ -29,40 +25,11 @@ export default function Page() {
 	return (
 		<div className="flex w-full flex-col gap-4 px-4 py-4 text-zinc-100">
 
-			{/* CONTENIDO PRINCIPAL */}
-			{isOfflineOrFerme ? (
-				<div className="flex flex-col gap-6 w-full">
-					{/* El candado premium con el historial del GP anterior */}
-					<ParcFerme />
-
-					{/* 📺 Feed oficial de YouTube con los mejores momentos */}
-					<YouTubeFeed />
-				</div>
-			) : (
-				<>
-					{/* HUD de comando en vivo (Solo visible con Bandera Verde / Motores Encendidos) */}
-					<div className="flex w-full flex-col gap-2 2xl:flex-row">
-						<div className="overflow-x-auto">
-							<LeaderBoard />
-						</div>
-						<div className="flex-1 2xl:max-h-[50rem]">
-							<Map />
-						</div>
-					</div>
-
-					<div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
-						<div>
-							<RaceControl />
-						</div>
-						<div>
-							<TeamRadios />
-						</div>
-						<div>
-							<TrackViolations />
-						</div>
-					</div>
-				</>
-			)}
+			{/* 🧪 BYPASS DE PRUEBA: Forzamos el render para ver si el componente responde */}
+			<div className="flex flex-col gap-6 w-full">
+				<ParcFerme />
+				<YouTubeFeed />
+			</div>
 
 			<Footer />
 		</div>
