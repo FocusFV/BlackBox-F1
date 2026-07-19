@@ -15,9 +15,10 @@ interface YouTubeVideo {
 
 export function YouTubeFeed() {
     // 🏎️ Nos suscribimos al nombre del GP sin "grand prix"
+    // 🏎️ Forzamos el nombre para testear el feed de videos sí o sí
     const gpName = useDataStore((state) => {
         const name = state.state?.SessionInfo?.Meeting?.Name;
-        if (!name) return ""; 
+        if (!name) return "Belgian"; // 👈 Si el simulador no manda nada, le clavamos "Belgian" de prepo
         return name.replace(/grand prix/gi, "").trim();
     });
 
