@@ -40,11 +40,21 @@ impl YouTubeService {
     }
 
     pub async fn get_videos(&self, gp_name: &str) -> Vec<YouTubeVideo> {
-        let api_key = std::env::var("YOUTUBE_API_KEY")
+        // 🏎️ Intentamos leer de todos lados, y si no, le clavamos tu key real de prepo
+        let mut api_key = std::env::var("YOUTUBE_API_KEY")
             .or_else(|_| std::env::var("NEXT_PUBLIC_YOUTUBE_API_KEY"))
             .unwrap_or_default();
             
+        if api_key.is_empty() {
+            // 🚨 REEMPLAZÁ LAS COMILLAS CON TU CLAVE REAL DE GOOGLE CLOUD
+            api_key = "TU_API_KEY_REAL_DE_GOOGLE_CLOUD_ACA".to_string();
+        }
+            
+        println!("LOG-DEBUG: gp_name recibido en Rust = '{}'", gp_name);
+        println!("LOG-DEBUG: api_key en uso longitud = {}", api_key.len());
+        
         if api_key.is_empty() || gp_name.is_empty() {
+            println!("LOG-DEBUG: Freno de mano activado por datos vacios.");
             return Vec::new();
         }
 
