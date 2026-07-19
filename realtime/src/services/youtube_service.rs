@@ -40,7 +40,6 @@ impl YouTubeService {
     }
 
     pub async fn get_videos(&self, gp_name: &str) -> Vec<YouTubeVideo> {
-        // 🏎️ Probamos con el nombre estándar de backend: YOUTUBE_API_KEY
         let api_key = std::env::var("YOUTUBE_API_KEY")
             .or_else(|_| std::env::var("NEXT_PUBLIC_YOUTUBE_API_KEY"))
             .unwrap_or_default();
@@ -80,7 +79,6 @@ impl YouTubeService {
     async fn fetch_from_youtube(&self, gp_name: &str, api_key: &str) -> Result<Vec<YouTubeVideo>, Error> {
         let current_year = 2026; 
         
-        // 🎯 QUERY LIMPIA Y DIRECTA: Si gp_name ya dice "formula 1", no repetimos palabras
         let query = if gp_name.contains("formula") || gp_name.contains("f1") {
             format!("{} Highlights {}", gp_name, current_year)
         } else {
@@ -127,3 +125,4 @@ impl YouTubeService {
         mapped_videos.truncate(5);
         Ok(mapped_videos)
     }
+}
