@@ -20,7 +20,6 @@ mod current;
 mod drivers;
 mod health;
 mod realtime;
-mod videos; // 👈 Módulo registrado formalmente como los demás
 
 pub struct Context {
     pub state_service: StateService,
@@ -47,7 +46,8 @@ pub async fn start(state_service: StateService, tx: Sender<String>) -> Result<()
         .route("/api/current", get(current::current_state))
         .route("/api/drivers", get(drivers::drivers))
         .route("/api/connections", get(connections::current_connections))
-        .route("/api/videos", get(videos::get_cached_videos)) // 👈 Ruta modular
+        // 🏎️ Colocamos el handler local directamente aquí
+        .route("/api/videos", get(get_cached_videos)) 
         .with_state(context)
         .layer(cors)
         .into_make_service();
@@ -57,6 +57,21 @@ pub async fn start(state_service: StateService, tx: Sender<String>) -> Result<()
     axum::serve(TcpListener::bind(addr).await?, app).await?;
 
     Ok(())
+}
+
+// 🎯 El Handler metido acá adentro, visible para todo Axum
+pub async fn get_cached_videos(State(ctx): State<Arc<Context>>) -> impl IntoResponse {
+    let gp_name = match ctx.state_service.get_state().await {
+        Ok(state) => state.pointer("/SessionInfo/Meeting/Name")
+            .and_then(|v| v.as_str())
+            .unwrap_or_default()
+            .to_string(),
+        Err(_) => String::new(),
+    };
+
+    let videos = ctx.youtube_service.get_videos(&gp_name).await;
+    
+    (StatusCode::OK, axum::Json(videos))
 }
 
 pub fn cors_layer() -> Result<CorsLayer, Error> {
