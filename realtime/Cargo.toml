@@ -21,3 +21,7 @@ tokio-stream = { version = "0.1.17", features = ["sync"] }
 tower-http = { version = "0.6.4", features = ["cors"] }
 tracing = "0.1.41"
 async-stream = "0.3.6"
+
+# 🏎️ Los nuevos propulsores para el caché de YouTube
+reqwest = { version = "0.12", features = ["json"] }
+urlencoding = "2.1.3"
