@@ -54,14 +54,14 @@ impl YouTubeService {
         {
             let cache = self.cache.read().await;
             if let Some(last_fetch) = cache.last_fetch {
-                // Si es el mismo GP y no pasó el tiempo, entregamos el caché al toque
-                if cache.last_gp == clean_gp && last_fetch.elapsed() < cache_duration {
+                // Si es el mismo GP, no pasó el tiempo Y no está vacío, entregamos el caché al toque
+                if cache.last_gp == clean_gp && last_fetch.elapsed() < cache_duration && !cache.videos.is_empty() {
                     return cache.videos.clone();
                 }
             }
         }
 
-        // 📡 Si falló el caché o cambió de GP, vamos a boxes (YouTube)
+        // 📡 Si falló el caché, cambió de GP o estaba vacío, vamos a boxes (YouTube)
         match self.fetch_from_youtube(&clean_gp, &api_key).await {
             Ok(fresh_videos) => {
                 let mut cache = self.cache.write().await;
@@ -72,7 +72,7 @@ impl YouTubeService {
             }
             Err(e) => {
                 eprintln!("Error buscando videos en YT: {}", e);
-                // Si la API falla (por cuota), devolvemos lo que tengamos en memoria para no dejar la pantalla en blanco
+                // Si la API falla, devolvemos lo que tengamos en memoria para no romper nada
                 let cache = self.cache.read().await;
                 cache.videos.clone()
             }
@@ -89,7 +89,15 @@ impl YouTubeService {
             api_key
         );
 
-        let res = self.client.get(&url).send().await?.json::<Value>().await?;
+        let response = self.client.get(&url).send().await?;
+        
+        // 🚨 Si Google nos tira un error, leemos el texto y lo mandamos al log de Render
+        if !response.status().is_success() {
+            let err_text = response.text().await.unwrap_or_default();
+            return Err(anyhow::anyhow!("Google API Error: {}", err_text));
+        }
+
+        let res = response.json::<Value>().await?;
         let mut mapped_videos = Vec::new();
 
         if let Some(items) = res.get("items").and_then(|i| i.as_array()) {
