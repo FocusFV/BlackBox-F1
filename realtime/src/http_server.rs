@@ -60,15 +60,19 @@ pub async fn start(state_service: StateService, tx: Sender<String>) -> Result<()
     Ok(())
 }
 
-// 🎯 El Handler metido acá adentro, visible para todo Axum
 pub async fn get_cached_videos(State(ctx): State<Arc<Context>>) -> impl IntoResponse {
-    let gp_name = match ctx.state_service.get_state().await {
+    let mut gp_name = match ctx.state_service.get_state().await {
         Ok(state) => state.pointer("/SessionInfo/Meeting/Name")
             .and_then(|v| v.as_str())
             .unwrap_or_default()
             .to_string(),
         Err(_) => String::new(),
     };
+
+    // 🏎️ Si no hay una carrera activa en el estado, le clavamos una búsqueda fija para que devuelva videos sí o sí
+    if gp_name.is_empty() {
+        gp_name = "Formula 1".to_string();
+    }
 
     let videos = ctx.youtube_service.get_videos(&gp_name).await;
     
