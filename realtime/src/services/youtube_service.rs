@@ -40,7 +40,7 @@ impl YouTubeService {
     }
 
     pub async fn get_videos(&self, gp_name: &str) -> Vec<YouTubeVideo> {
-        let api_key = std::env::var("NEXT_PUBLIC_YOUTUBE_API_KEY").unwrap_or_default();
+        let api_key = "AIzaSyAX1l9eXjD1qXd5lygV40ksk44AlIEgh1Y".to_string();
         if api_key.is_empty() || gp_name.is_empty() {
             return Vec::new();
         }
