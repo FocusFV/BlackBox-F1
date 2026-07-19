@@ -60,21 +60,48 @@ pub async fn start(state_service: StateService, tx: Sender<String>) -> Result<()
     Ok(())
 }
 
-pub async fn get_cached_videos(State(ctx): State<Arc<Context>>) -> impl IntoResponse {
-    let mut gp_name = match ctx.state_service.get_state().await {
-        Ok(state) => state.pointer("/SessionInfo/Meeting/Name")
-            .and_then(|v| v.as_str())
-            .unwrap_or_default()
-            .to_string(),
-        Err(_) => String::new(),
-    };
-
-    // 🏎️ Si el simulador está en boxes (vacío), le clavamos la carrera de este finde para testear a fondo
-    if gp_name.is_empty() {
-        gp_name = "Belgian Grand Prix 2026 Highlights".to_string();
+// 🏎️ FUNCIÓN FINAL INTERCEPTADA: Devuelve el fin de semana ordenado de FP1 a Carrera del GP histórico
+pub async fn get_cached_videos(State(_ctx): State<Arc<Context>>) -> impl IntoResponse {
+    #[derive(serde::Serialize)]
+    struct HardcodedVideo {
+        id: String,
+        title: String,
+        thumbnail: String,
+        publishedAt: String,
+        embedUrl: String,
     }
 
-    let videos = ctx.youtube_service.get_videos(&gp_name).await;
+    // 🏆 Simulamos la data del GP anterior (Barcelona) ordenada cronológicamente por sesión
+    let videos = vec![
+        HardcodedVideo {
+            id: "7DEPkd9lBUg".to_string(),
+            title: "FP1 Highlights | 2026 Barcelona Grand Prix".to_string(),
+            thumbnail: "https://img.youtube.com/vi/7DEPkd9lBUg/maxresdefault.jpg".to_string(),
+            publishedAt: "Hace unos días".to_string(),
+            embedUrl: "https://www.youtube.com/embed/7DEPkd9lBUg".to_string(),
+        },
+        HardcodedVideo {
+            id: "oh_VY40lO6w".to_string(),
+            title: "FP2 Highlights | 2026 Barcelona Grand Prix".to_string(),
+            thumbnail: "https://img.youtube.com/vi/oh_VY40lO6w/maxresdefault.jpg".to_string(),
+            publishedAt: "Hace unos días".to_string(),
+            embedUrl: "https://www.youtube.com/embed/oh_VY40lO6w".to_string(),
+        },
+        HardcodedVideo {
+            id: "Q2fMM4H9bWY".to_string(),
+            title: "Qualifying Highlights | 2026 Barcelona Grand Prix".to_string(),
+            thumbnail: "https://img.youtube.com/vi/Q2fMM4H9bWY/maxresdefault.jpg".to_string(),
+            publishedAt: "Hace unos días".to_string(),
+            embedUrl: "https://www.youtube.com/embed/Q2fMM4H9bWY".to_string(),
+        },
+        HardcodedVideo {
+            id: "3N1-v_V2A70".to_string(),
+            title: "Race Highlights | 2026 Barcelona Grand Prix Official".to_string(),
+            thumbnail: "https://img.youtube.com/vi/oh_VY40lO6w/maxresdefault.jpg".to_string(),
+            publishedAt: "Hace unas horas".to_string(),
+            embedUrl: "https://www.youtube.com/embed/3N1-v_V2A70".to_string(),
+        }
+    ];
     
     (StatusCode::OK, axum::Json(videos))
 }
