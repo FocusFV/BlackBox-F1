@@ -38,8 +38,11 @@ export function YouTubeFeed() {
 
             setLoading(true);
             
-            // 🔍 QUERY RELAJADA: Buscamos general de F1 con el nombre del GP para asegurar capturar el canal oficial
-            const query = encodeURIComponent(`F1 Highlights ${gpName}`);
+            setLoading(true);
+            
+            // 🏎️ QUERY DINÁMICA DE TEMPORADA: Forzamos el año actual para barrer videos viejos de otras temporadas
+            const currentYear = new Date().getFullYear(); // Esto te clava 2026 automáticamente
+            const query = encodeURIComponent(`F1 Highlights ${gpName} ${currentYear}`);
             const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&maxResults=15&order=relevance&type=video&key=${apiKey}`;
 
             try {
