@@ -30,8 +30,9 @@ export function YouTubeFeed() {
         async function fetchLiveVideos() {
             setLoading(true);
             
-            // 👑 USAMOS TU VARIABLE DE ENTORNO DINÁMICA O TU NUEVO RENDER DIRECTO
-            const baseUrl = process.env.NEXT_PUBLIC_LIVE_URL || "https://blackbox-f1-realtime-docker.onrender.com";
+            // 👑 DETECTAMOS SI ESTAMOS EN LOCAL O EN PRODUCCIÓN
+            const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
+            const baseUrl = process.env.NEXT_PUBLIC_LIVE_URL || (isLocal ? "http://localhost:3000" : "https://blackbox-f1-realtime-docker.onrender.com");
             const url = `${baseUrl.replace(/\/$/, "")}/api/videos`;
 
             try {
