@@ -46,8 +46,9 @@ pub async fn start(state_service: StateService, tx: Sender<String>) -> Result<()
         .route("/api/current", get(current::current_state))
         .route("/api/drivers", get(drivers::drivers))
         .route("/api/connections", get(connections::current_connections))
-        // 🏎️ Colocamos el handler local directamente aquí
         .route("/api/videos", get(get_cached_videos)) 
+        // 🎯 La ruta fantasma para probar a Render:
+        .route("/api/test", get(prueba_render)) 
         .with_state(context)
         .layer(cors)
         .into_make_service();
@@ -72,6 +73,11 @@ pub async fn get_cached_videos(State(ctx): State<Arc<Context>>) -> impl IntoResp
     let videos = ctx.youtube_service.get_videos(&gp_name).await;
     
     (StatusCode::OK, axum::Json(videos))
+}
+
+// Función temporal para romperle el hielo a Render
+pub async fn prueba_render() -> &'static str {
+    "RUST CACHE EN VIVO - SAPEEEE"
 }
 
 pub fn cors_layer() -> Result<CorsLayer, Error> {
