@@ -102,20 +102,15 @@ impl YouTubeService {
 
         if let Some(items) = res.get("items").and_then(|i| i.as_array()) {
             for item in items {
-                let title = item.pointer("/snippet/title").and_then(|t| t.as_str()).unwrap_or_default().to_lowercase();
-                
-                // 🏎️ Mismos filtros flexibles que dejamos en tu frontend
-                let is_f1 = !title.contains("f2") && !title.contains("f3") && !title.contains("formula 2") && !title.contains("formula 3");
-                let is_not_game = !title.contains("f1 24") && !title.contains("f1 23") && !title.contains("gameplay") && !title.contains("career mode");
+                // 🔓 SACAMOS LOS FILTROS PARA VER QUÉ LLEGA REALMENTE DE GOOGLE
+                let video_id = item.pointer("/id/videoId").and_then(|id| id.as_str()).unwrap_or_default().to_string();
+                let video_title = item.pointer("/snippet/title").and_then(|t| t.as_str()).unwrap_or_default().to_string();
+                let thumbnail = item.pointer("/snippet/thumbnails/high/url")
+                    .or_else(|| item.pointer("/snippet/thumbnails/default/url"))
+                    .and_then(|u| u.as_str()).unwrap_or_default().to_string();
+                let published_at = item.pointer("/snippet/publishedAt").and_then(|p| p.as_str()).unwrap_or_default().to_string();
 
-                if is_f1 && is_not_game {
-                    let video_id = item.pointer("/id/videoId").and_then(|id| id.as_str()).unwrap_or_default().to_string();
-                    let video_title = item.pointer("/snippet/title").and_then(|t| t.as_str()).unwrap_or_default().to_string();
-                    let thumbnail = item.pointer("/snippet/thumbnails/high/url")
-                        .or_else(|| item.pointer("/snippet/thumbnails/default/url"))
-                        .and_then(|u| u.as_str()).unwrap_or_default().to_string();
-                    let published_at = item.pointer("/snippet/publishedAt").and_then(|p| p.as_str()).unwrap_or_default().to_string();
-
+                if !video_id.is_empty() {
                     mapped_videos.push(YouTubeVideo {
                         id: video_id.clone(),
                         title: video_title,
