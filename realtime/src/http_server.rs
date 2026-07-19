@@ -59,9 +59,9 @@ pub async fn start(state_service: StateService, tx: Sender<String>) -> Result<()
     Ok(())
 }
 
-// 🏎️ DINÁMICO: Volvemos a leer el estado del simulador. Si está vacío, le clavamos el GP anterior para que busque en YT
+// 🏎️ MOTOR REAL: Si el simulador está en boxes, calcula el GP anterior (Silverstone) y busca en YouTube
 pub async fn get_cached_videos(State(ctx): State<Arc<Context>>) -> impl IntoResponse {
-    let mut gp_name = match ctx.state_service.get_state().await {
+    let gp_name = match ctx.state_service.get_state().await {
         Ok(state) => state.pointer("/SessionInfo/Meeting/Name")
             .and_then(|v| v.as_str())
             .unwrap_or_default()
@@ -69,12 +69,15 @@ pub async fn get_cached_videos(State(ctx): State<Arc<Context>>) -> impl IntoResp
         Err(_) => String::new(),
     };
 
-    // 🎯 SI EL SIMULADOR ESTÁ EN BOXES (Vacío), forzamos la búsqueda real en YT del último GP
-    if gp_name.is_empty() {
-        gp_name = "Barcelona Grand Prix".to_string();
-    }
+    // Lógica dinámica: Si el simulador está apagado o estamos en boxes en Bélgica,
+    // le mandamos de prepo "Silverstone" para traer los resúmenes del GP anterior.
+    let target_gp = if gp_name.is_empty() || gp_name.to_lowercase().contains("belgian") {
+        "Silverstone Grand Prix".to_string()
+    } else {
+        gp_name
+    };
 
-    let videos = ctx.youtube_service.get_videos(&gp_name).await;
+    let videos = ctx.youtube_service.get_videos(&target_gp).await;
     
     (StatusCode::OK, axum::Json(videos))
 }

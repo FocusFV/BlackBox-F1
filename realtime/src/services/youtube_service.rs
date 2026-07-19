@@ -40,12 +40,11 @@ impl YouTubeService {
     }
 
     pub async fn get_videos(&self, gp_name: &str) -> Vec<YouTubeVideo> {
-    // 🏎️ Intentamos leer la variable de Render, y si no está, le clavamos tu clave real de prepo
     let mut api_key = std::env::var("YOUTUBE_API_KEY")
         .unwrap_or_default();
         
     if api_key.is_empty() {
-        // 🚨 METÉ TU KEY DE GOOGLE ACÁ ENTRE LAS COMILLAS
+        // 🚨 PONÉ TU API KEY REAL DE GOOGLE CLOUD ACÁ
         api_key = "AIzaSyAX1l9eXjD1qXd5lygV40ksk44AlIEgh1Y".to_string();
     }
 
@@ -55,7 +54,7 @@ impl YouTubeService {
 
     let clean_gp = gp_name.to_lowercase().replace("grand prix", "").trim().to_string();
     
-    // Acá abajo sigue el código original tuyo que hace el fetch_from_youtube...
+    // De acá para abajo sigue tu función normal que le pega a YouTube...
         let cache_duration = Duration::from_secs(30 * 60);
         
         {
