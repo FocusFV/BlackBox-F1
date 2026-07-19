@@ -10,7 +10,7 @@ interface YouTubeVideo {
     thumbnail: string;
     publishedAt: string;
     embedUrl: string;
-    weight: number;
+    weight?: number; // 👈 Le clavamos el "?" y chau problema
 }
 
 export function YouTubeFeed() {
@@ -30,61 +30,32 @@ export function YouTubeFeed() {
         async function fetchLiveVideos() {
             if (!gpName) return;
 
-            const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
-            if (!apiKey) {
-                setLoading(false);
-                return;
-            }
-
             setLoading(true);
             
-            setLoading(true);
-            
-            // 🏎️ QUERY DINÁMICA DE TEMPORADA: Forzamos el año actual para barrer videos viejos de otras temporadas
-            const currentYear = new Date().getFullYear(); // Esto te clava 2026 automáticamente
-            const query = encodeURIComponent(`F1 Highlights ${gpName} ${currentYear}`);
-            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&maxResults=15&order=relevance&type=video&key=${apiKey}`;
+            // 🏎️ LE PEGAMOS DIRECTO A TU PROPIO BACKEND EN RENDER
+            // Axum se encarga del caché y de cuidar la cuota de Google
+            const url = `https://blackbox-f1-realtime.onrender.com/api/videos`;
 
             try {
                 const res = await fetch(url);
                 const data = await res.json();
 
-                if (data.items && data.items.length > 0) {
-                    const mappedVideos = data.items
-                        .filter((item: any) => {
-                            const title = item.snippet.title.toLowerCase();
-                            const isF1 = !title.includes("f2") && !title.includes("f3") && !title.includes("formula 2") && !title.includes("formula 3");
-                            const isNotGame = !title.includes("f1 24") && !title.includes("f1 23") && !title.includes("gameplay") && !title.includes("career mode");
-                            return isF1 && isNotGame;
-                        })
-                        .map((item: any) => {
-                            const title = item.snippet.title.toLowerCase();
-                            
-                            let weight = 99; 
-                            if (title.includes("fp1")) weight = 1;
-                            else if (title.includes("fp2")) weight = 2;
-                            else if (title.includes("fp3")) weight = 3;
-                            else if (title.includes("sprint")) weight = 4;
-                            else if (title.includes("qualifying") || title.includes("qualy")) weight = 5;
-                            else if (title.includes("race highlights") || title.includes("grand prix highlights") || title.includes("highlights: race") || title.includes("resumen")) weight = 6;
+                if (Array.isArray(data) && data.length > 0) {
+                    // Mapeamos los videos que nos manda Rust con el formato que ya usa tu VideoCard
+                    const mappedVideos = data.map((video: any) => ({
+                        id: video.id,
+                        title: video.title,
+                        thumbnail: video.thumbnail,
+                        publishedAt: video.publishedAt,
+                        embedUrl: video.embedUrl
+                    }));
 
-                            return {
-                                id: item.id.videoId,
-                                title: item.snippet.title,
-                                thumbnail: item.snippet.thumbnails?.maxres?.url || item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.default?.url,
-                                publishedAt: new Date(item.snippet.publishedAt).toLocaleDateString(),
-                                embedUrl: `https://www.youtube.com/embed/${item.id.videoId}`,
-                                weight
-                            };
-                        });
-
-                    const sortedVideos = mappedVideos.sort((a: YouTubeVideo, b: YouTubeVideo) => a.weight - b.weight);
-                    setVideos(sortedVideos.slice(0, 5));
+                    setVideos(mappedVideos);
                 } else {
                     setVideos([]);
                 }
             } catch (error) {
-                console.error("Error en la automatización de YT:", error);
+                console.error("Error trayendo videos del caché de Rust:", error);
                 setVideos([]);
             } finally {
                 setLoading(false);

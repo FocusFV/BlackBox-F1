@@ -1,6 +1,6 @@
 {
-	"name": "f1-dash",
-	"short_name": "f1-dash",
+	"name": "BlackBox F1",
+	"short_name": "BlackBox",
 	"start_url": "/",
 	"display": "standalone",
 	"background_color": "#09090b",
