@@ -47,7 +47,7 @@ impl YouTubeService {
             
         if api_key.is_empty() {
             // 🚨 REEMPLAZÁ LAS COMILLAS CON TU CLAVE REAL DE GOOGLE CLOUD
-            api_key = "TU_API_KEY_REAL_DE_GOOGLE_CLOUD_ACA".to_string();
+            api_key = "AIzaSyAX1l9eXjD1qXd5lygV40ksk44AlIEgh1Y".to_string();
         }
             
         println!("LOG-DEBUG: gp_name recibido en Rust = '{}'", gp_name);
