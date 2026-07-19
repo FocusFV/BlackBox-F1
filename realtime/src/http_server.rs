@@ -47,7 +47,6 @@ pub async fn start(state_service: StateService, tx: Sender<String>) -> Result<()
         .route("/api/drivers", get(drivers::drivers))
         .route("/api/connections", get(connections::current_connections))
         .route("/api/videos", get(get_cached_videos)) 
-        // 🎯 La ruta fantasma para probar a Render:
         .route("/api/test", get(prueba_render)) 
         .with_state(context)
         .layer(cors)
@@ -60,53 +59,26 @@ pub async fn start(state_service: StateService, tx: Sender<String>) -> Result<()
     Ok(())
 }
 
-// 🏎️ FUNCIÓN FINAL INTERCEPTADA: Devuelve el fin de semana ordenado de FP1 a Carrera del GP histórico
-pub async fn get_cached_videos(State(_ctx): State<Arc<Context>>) -> impl IntoResponse {
-    #[derive(serde::Serialize)]
-    struct HardcodedVideo {
-        id: String,
-        title: String,
-        thumbnail: String,
-        publishedAt: String,
-        embedUrl: String,
+// 🏎️ DINÁMICO: Volvemos a leer el estado del simulador. Si está vacío, le clavamos el GP anterior para que busque en YT
+pub async fn get_cached_videos(State(ctx): State<Arc<Context>>) -> impl IntoResponse {
+    let mut gp_name = match ctx.state_service.get_state().await {
+        Ok(state) => state.pointer("/SessionInfo/Meeting/Name")
+            .and_then(|v| v.as_str())
+            .unwrap_or_default()
+            .to_string(),
+        Err(_) => String::new(),
+    };
+
+    // 🎯 SI EL SIMULADOR ESTÁ EN BOXES (Vacío), forzamos la búsqueda real en YT del último GP
+    if gp_name.is_empty() {
+        gp_name = "Barcelona Grand Prix".to_string();
     }
 
-    // 🏆 Simulamos la data del GP anterior (Barcelona) ordenada cronológicamente por sesión
-    let videos = vec![
-        HardcodedVideo {
-            id: "7DEPkd9lBUg".to_string(),
-            title: "FP1 Highlights | 2026 Barcelona Grand Prix".to_string(),
-            thumbnail: "https://img.youtube.com/vi/7DEPkd9lBUg/maxresdefault.jpg".to_string(),
-            publishedAt: "Hace unos días".to_string(),
-            embedUrl: "https://www.youtube.com/embed/7DEPkd9lBUg".to_string(),
-        },
-        HardcodedVideo {
-            id: "oh_VY40lO6w".to_string(),
-            title: "FP2 Highlights | 2026 Barcelona Grand Prix".to_string(),
-            thumbnail: "https://img.youtube.com/vi/oh_VY40lO6w/maxresdefault.jpg".to_string(),
-            publishedAt: "Hace unos días".to_string(),
-            embedUrl: "https://www.youtube.com/embed/oh_VY40lO6w".to_string(),
-        },
-        HardcodedVideo {
-            id: "Q2fMM4H9bWY".to_string(),
-            title: "Qualifying Highlights | 2026 Barcelona Grand Prix".to_string(),
-            thumbnail: "https://img.youtube.com/vi/Q2fMM4H9bWY/maxresdefault.jpg".to_string(),
-            publishedAt: "Hace unos días".to_string(),
-            embedUrl: "https://www.youtube.com/embed/Q2fMM4H9bWY".to_string(),
-        },
-        HardcodedVideo {
-            id: "3N1-v_V2A70".to_string(),
-            title: "Race Highlights | 2026 Barcelona Grand Prix Official".to_string(),
-            thumbnail: "https://img.youtube.com/vi/oh_VY40lO6w/maxresdefault.jpg".to_string(),
-            publishedAt: "Hace unas horas".to_string(),
-            embedUrl: "https://www.youtube.com/embed/3N1-v_V2A70".to_string(),
-        }
-    ];
+    let videos = ctx.youtube_service.get_videos(&gp_name).await;
     
     (StatusCode::OK, axum::Json(videos))
 }
 
-// Función temporal para romperle el hielo a Render
 pub async fn prueba_render() -> &'static str {
     "RUST CACHE EN VIVO - SAPEEEE"
 }
@@ -127,11 +99,6 @@ pub fn cors_layer() -> Result<CorsLayer, Error> {
 
     Ok(CorsLayer::new()
         .allow_origin(origins)
-        .allow_methods([
-            Method::GET, 
-            Method::POST, 
-            Method::OPTIONS, 
-            Method::CONNECT
-        ])
+        .allow_methods([Method::GET, Method::POST, Method::OPTIONS, Method::CONNECT])
         .allow_headers(tower_http::cors::Any))
 }
