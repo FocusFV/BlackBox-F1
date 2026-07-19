@@ -10,7 +10,7 @@ interface YouTubeVideo {
     thumbnail: string;
     publishedAt: string;
     embedUrl: string;
-    weight?: number; // 👈 Le clavamos el "?" y chau problema
+    weight?: number; 
 }
 
 export function YouTubeFeed() {
@@ -28,13 +28,11 @@ export function YouTubeFeed() {
 
     useEffect(() => {
         async function fetchLiveVideos() {
-            if (!gpName) return;
-
             setLoading(true);
             
-            // 🏎️ LE PEGAMOS DIRECTO A TU PROPIO BACKEND EN RENDER
-            // Axum se encarga del caché y de cuidar la cuota de Google
-            const url = `https://blackbox-f1-realtime.onrender.com/api/videos`;
+            // 👑 USAMOS TU VARIABLE DE ENTORNO DINÁMICA O TU NUEVO RENDER DIRECTO
+            const baseUrl = process.env.NEXT_PUBLIC_LIVE_URL || "https://blackbox-f1-realtime-docker.onrender.com";
+            const url = `${baseUrl.replace(/\/$/, "")}/api/videos`;
 
             try {
                 const res = await fetch(url);
@@ -88,7 +86,7 @@ export function YouTubeFeed() {
             <div className="flex items-center justify-between mb-4 px-1 select-none">
                 <h2 className="text-xs font-bold uppercase tracking-widest font-mono text-zinc-500 flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                    • Resúmenes Oficiales: GP de {gpName || "Cargando..."}
+                    • Resúmenes Oficiales: GP de {gpName || "Formula 1"}
                 </h2>
             </div>
 
@@ -135,7 +133,7 @@ export function YouTubeFeed() {
 
                     {/* ➕ BOTÓN ORIGINAL CON PLAY EXTRA SANEADO */}
                     <a
-                        href={`https://www.youtube.com/results?search_query=F1+Highlights+${encodeURIComponent(gpName)}`}
+                        href={`https://www.youtube.com/results?search_query=F1+Highlights+${encodeURIComponent(gpName || "Formula 1")}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex-shrink-0 w-[calc(100%-2rem)] sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-0.75rem)] aspect-video rounded-xl bg-zinc-950 border border-zinc-900 border-dashed flex flex-col items-center justify-center p-4 snap-start relative group cursor-pointer hover:border-amber-500/40 transition duration-300 select-none text-center"
