@@ -69,9 +69,9 @@ pub async fn get_cached_videos(State(ctx): State<Arc<Context>>) -> impl IntoResp
         Err(_) => String::new(),
     };
 
-    // 🏎️ Si no hay una carrera activa en el estado, le clavamos una búsqueda fija para que devuelva videos sí o sí
+    // 🏎️ Si el simulador está en boxes (vacío), le clavamos la carrera de este finde para testear a fondo
     if gp_name.is_empty() {
-        gp_name = "Formula 1".to_string();
+        gp_name = "Belgian Grand Prix 2026 Highlights".to_string();
     }
 
     let videos = ctx.youtube_service.get_videos(&gp_name).await;
