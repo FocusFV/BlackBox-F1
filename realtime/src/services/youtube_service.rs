@@ -112,7 +112,7 @@ impl YouTubeService {
                         id: video_id.clone(),
                         title: video_title,
                         thumbnail,
-                        publishedAt,
+                        published_at,
                         embedUrl: format!("https://www.youtube.com/embed/{}", video_id),
                     });
                 }
