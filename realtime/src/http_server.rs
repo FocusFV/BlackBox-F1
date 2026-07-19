@@ -13,30 +13,29 @@ use tower_http::cors::CorsLayer;
 use tracing::{info, error};
 
 use crate::services::state_service::StateService;
-use crate::services::youtube_service::YouTubeService; // 👈 1. Importamos el nuevo servicio
+use crate::services::youtube_service::YouTubeService;
 
 mod connections;
 mod current;
 mod drivers;
 mod health;
 mod realtime;
+mod videos; // 👈 Módulo registrado formalmente como los demás
 
-// 2. Sumamos el YouTubeService al Context global de Axum
 pub struct Context {
     pub state_service: StateService,
-    pub youtube_service: YouTubeService, // 👈 Pasaporte VIP al caché
+    pub youtube_service: YouTubeService,
     pub tx: Sender<String>,
 }
 
 pub async fn start(state_service: StateService, tx: Sender<String>) -> Result<(), Error> {
     let addr = env::var("ADDRESS").unwrap_or_else(|_| "0.0.0.0:80".to_string());
 
-    // Inicializamos el servicio de YouTube en el arranque del servidor
     let youtube_service = YouTubeService::new();
 
     let context = Arc::new(Context { 
         state_service, 
-        youtube_service, // 👈 Lo metemos en el contexto de la app
+        youtube_service, 
         tx 
     });
 
@@ -48,8 +47,7 @@ pub async fn start(state_service: StateService, tx: Sender<String>) -> Result<()
         .route("/api/current", get(current::current_state))
         .route("/api/drivers", get(drivers::drivers))
         .route("/api/connections", get(connections::current_connections))
-        // 👈 3. Creamos la nueva ruta para el frontend
-        .route("/api/videos", get(get_cached_videos)) 
+        .route("/api/videos", get(videos::get_cached_videos)) // 👈 Ruta modular
         .with_state(context)
         .layer(cors)
         .into_make_service();
@@ -59,23 +57,6 @@ pub async fn start(state_service: StateService, tx: Sender<String>) -> Result<()
     axum::serve(TcpListener::bind(addr).await?, app).await?;
 
     Ok(())
-}
-
-// 🏎️ El Handler que va a atender a tu Next.js
-pub async fn get_cached_videos(State(ctx): State<Arc<Context>>) -> impl IntoResponse {
-    // Primero, le pedimos al state_service el nombre del GP actual en el servidor
-    let gp_name = match ctx.state_service.get_state().await {
-        Ok(state) => state.pointer("/SessionInfo/Meeting/Name")
-            .and_then(|v| v.as_str())
-            .unwrap_or_default()
-            .to_string(),
-        Err(_) => String::new(),
-    };
-
-    // Le pedimos los videos al caché inteligente (él sabrá si va a Google o usa la memoria)
-    let videos = ctx.youtube_service.get_videos(&gp_name).await;
-    
-    (StatusCode::OK, axum::Json(videos))
 }
 
 pub fn cors_layer() -> Result<CorsLayer, Error> {
