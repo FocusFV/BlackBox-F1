@@ -21,12 +21,12 @@ export default function HelpPage() {
 		<div>
 			<h1 className="my-4 text-3xl">Página de Ayuda</h1>
 
-			<p>Esta página explica algunas de las funciones principales y elementos de la interfaz de f1-dash.</p>
+			<p>Esta página explica algunas de las funciones principales y elementos de la interfaz de Blackboxf1.</p>
 
 			<h2 className="my-4 text-2xl">Colores</h2>
 
 			<p>
-				Un elemento central en la interfaz de f1-dash, inspirado en los gráficos oficiales de la Fórmula 1, es el sistema de codificación por colores utilizado para los tiempos de vuelta, tiempos de sector, mini sectores y diferencias. Cada color tiene un significado específico en este contexto.
+				Un elemento central en la interfaz de Blackboxf1, inspirado en los gráficos oficiales de la Fórmula 1, es el sistema de codificación por colores utilizado para los tiempos de vuelta, tiempos de sector, mini sectores y diferencias. Cada color tiene un significado específico en este contexto.
 			</p>
 
 			<div className="my-4 flex flex-col">
@@ -194,11 +194,11 @@ export default function HelpPage() {
 			<h2 className="my-4 text-2xl">Control de Retraso (Delay Control)</h2>
 
 			<p className="mb-4">
-				Al usar f1-dash mientras mirás la carrera en la tele, F1TV o tu plataforma de streaming favorita, vas a notar que f1-dash se actualiza mucho antes que tu transmisión. Esto le puede sacar emoción a las carreras, ya que te enterás de los eventos clave antes de verlos en pantalla. Para solucionar esto existe el control de retraso.
+				Al usar Blackboxf1 mientras mirás la carrera en la tele, F1TV o tu plataforma de streaming favorita, vas a notar que Blackboxf1 se actualiza mucho antes que tu transmisión. Esto le puede sacar emoción a las carreras, ya que te enterás de los eventos clave antes de verlos en pantalla. Para solucionar esto existe el control de retraso.
 			</p>
 
 			<p className="mb-4">
-				Con el control de retraso podés configurar una pausa en segundos para que f1-dash se actualice más tarde de lo habitual. Por ejemplo, si ponés un retraso de 30 segundos, la app va a procesar los datos con 30 segundos de demora.
+				Con el control de retraso podés configurar una pausa en segundos para que Blackboxf1 se actualice más tarde de lo habitual. Por ejemplo, si ponés un retraso de 30 segundos, la app va a procesar los datos con 30 segundos de demora.
 				<br />
 				Podés usar esta función para sincronizar perfectamente tu transmisión con el dashboard.
 			</p>

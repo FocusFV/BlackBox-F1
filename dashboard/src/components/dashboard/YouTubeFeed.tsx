@@ -26,7 +26,7 @@ export function YouTubeFeed() {
         async function fetchLiveVideos() {
             setLoading(true);
             try {
-                const baseUrl = "https://blackbox-f1-realtime-docker.onrender.com";
+                const baseUrl = "https://Blackbox-f1-realtime-docker.onrender.com";
                 const url = `${baseUrl}/api/videos`;
 
                 const res = await fetch(url, { cache: "no-store" });

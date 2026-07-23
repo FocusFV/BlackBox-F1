@@ -7,46 +7,46 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: f1-dash-web
-  namespace: f1-dash
+  name: Blackboxf1-web
+  namespace: Blackboxf1
   labels:
-    app: f1-dash-web
+    app: Blackboxf1-web
 spec:
   ports:
-    - name: f1-dash-web
+    - name: Blackboxf1-web
       port: 3000
       targetPort: 3000
   selector:
-    app: f1-dash-web
+    app: Blackboxf1-web
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: f1-dash-realtime
-  namespace: f1-dash
+  name: Blackboxf1-realtime
+  namespace: Blackboxf1
   labels:
-    app: f1-dash-realtime
+    app: Blackboxf1-realtime
 spec:
   ports:
-    - name: f1-dash-realtime
+    - name: Blackboxf1-realtime
       port: 80
       targetPort: 80
   selector:
-    app: f1-dash-realtime
+    app: Blackboxf1-realtime
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: f1-dash-api
-  namespace: f1-dash
+  name: Blackboxf1-api
+  namespace: Blackboxf1
   labels:
-    app: f1-dash-api
+    app: Blackboxf1-api
 spec:
   ports:
-    - name: f1-dash-api
+    - name: Blackboxf1-api
       port: 80
       targetPort: 80
   selector:
-    app: f1-dash-api
+    app: Blackboxf1-api

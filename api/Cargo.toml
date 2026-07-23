@@ -3,7 +3,7 @@ name = "api"
 version = "0.4.0"
 edition = "2024"
 publish = false
-authors = ["slowlydev"]
+authors = ["FocusFV"]
 
 [dependencies]
 shared = { workspace = true }

@@ -9,23 +9,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: f1-dash-realtime
-  namespace: f1-dash
+  name: Blackboxf1-realtime
+  namespace: Blackboxf1
   labels:
-    app: f1-dash-realtime
+    app: Blackboxf1-realtime
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: f1-dash-realtime
+      app: Blackboxf1-realtime
   template:
     metadata:
       labels:
-        app: f1-dash-realtime
+        app: Blackboxf1-realtime
     spec:
       containers:
         - name: realtime
-          image: ghcr.io/slowlydev/f1-dash-realtime:latest
+          image: ghcr.io/FocusFV/Blackboxf1-realtime:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -47,28 +47,28 @@ spec:
             - name: ADDRESS
               value: "0.0.0.0:80"
             - name: ORIGIN
-              value: "https://f1-dash.com"
+              value: "https://https://Blackboxf1.vercel.app/"
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: f1-dash-api
-  namespace: f1-dash
+  name: Blackboxf1-api
+  namespace: Blackboxf1
   labels:
-    app: f1-dash-api
+    app: Blackboxf1-api
 spec:
   selector:
     matchLabels:
-      app: f1-dash-api
+      app: Blackboxf1-api
   template:
     metadata:
       labels:
-        app: f1-dash-api
+        app: Blackboxf1-api
     spec:
       containers:
         - name: api
-          image: ghcr.io/slowlydev/f1-dash-api:latest
+          image: ghcr.io/FocusFV/Blackboxf1-api:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -89,7 +89,7 @@ spec:
               port: 80
           env:
             - name: ORIGIN
-              value: "https://f1-dash.com"
+              value: "https://https://Blackboxf1.vercel.app/"
             - name: API_ADDRESS
               value: "0.0.0.0:80"
             - name: RUST_LOG
@@ -99,21 +99,21 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: f1-dash-web
-  namespace: f1-dash
+  name: Blackboxf1-web
+  namespace: Blackboxf1
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: f1-dash-web
+      app: Blackboxf1-web
   template:
     metadata:
       labels:
-        app: f1-dash-web
+        app: Blackboxf1-web
     spec:
       containers:
         - name: web
-          image: ghcr.io/slowlydev/f1-dash:latest
+          image: ghcr.io/FocusFV/Blackboxf1:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
@@ -126,8 +126,8 @@ spec:
               cpu: 1000m
           env:
             - name: NEXT_PUBLIC_LIVE_URL
-              value: "https://rt-api.f1-dash.com"
+              value: "https://rt-api.https://Blackboxf1.vercel.app/"
             - name: API_URL
-              value: "https://api.f1-dash.com"
+              value: "https://api.https://Blackboxf1.vercel.app/"
             - name: DISABLE_IFRAME
               value: "1"

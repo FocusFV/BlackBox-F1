@@ -4,13 +4,13 @@ apiVersion: v1
 kind: Service
 metadata:
     name: web-published
-    namespace: f1-dash-main
+    namespace: Blackboxf1-main
     labels:
-        com.docker.compose.project: f1-dash-main
+        com.docker.compose.project: Blackboxf1-main
         com.docker.compose.service: web
 spec:
     selector:
-        com.docker.compose.project: f1-dash-main
+        com.docker.compose.project: Blackboxf1-main
         com.docker.compose.service: web
     ports:
         - name: web-3000

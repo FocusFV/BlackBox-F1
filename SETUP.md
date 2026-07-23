@@ -1,6 +1,6 @@
 # Setup
 
-A short tutorial on how to setup f1-dash via docker compose or kubernetes.
+A short tutorial on how to setup Blackboxf1 via docker compose or kubernetes.
 
 ## Components
 
@@ -27,7 +27,7 @@ NEXT_STANDALONE=1 			# enables nextjs standalone build, use for docker
 NEXT_NO_COMPRESS=1 			# disables nextjs compression, use when using proxy compression
 ```
 
-note: you can't change build variables when using the public f1-dash image. But you can set them when building your own.
+note: you can't change build variables when using the public Blackboxf1 image. But you can set them when building your own.
 
 ### realtime
 
@@ -44,7 +44,7 @@ RUST_LOG=realtime=info
 ADDRESS=0.0.0.0:4000
 
 # CORS Origin, set to dashboard address
-ORIGIN="https://f1-dash.com"
+ORIGIN="https://https://Blackboxf1.vercel.app/"
 
 # (optional) endpoint for simulator
 F1_DEV_URL=ws://localhost:8000/ws
@@ -65,7 +65,7 @@ RUST_LOG=api=info
 ADDRESS=0.0.0.0:4001
 
 # CORS Origin, set to dashboard address
-ORIGIN="https://f1-dash.com"
+ORIGIN="https://https://Blackboxf1.vercel.app/"
 ```
 
 ## Platforms
@@ -75,9 +75,9 @@ Please not when choosing the dockerimages / choosing which tag, if you use lates
 ### Docker Compose
 
 There is a basic docker compose file in the root of the project. This is a very basic setup only expected to run on a local machine and only expected to be accessed from there.
-If you want to host f1-dash on a server or also access it from other devices on your local network then adjustments have to be made like setting the ORIGIN environment variable or setting up a reverse proxy.
+If you want to host Blackboxf1 on a server or also access it from other devices on your local network then adjustments have to be made like setting the ORIGIN environment variable or setting up a reverse proxy.
 
 ### Kubernetes
 
 There is a kubernetes setup in the `.k8s` folder. This is a more advanced setup expected to run on a server and be accessed from other devices on your local network or even the internet.
-This is the way f1-dash.com is hosted. There's no Helm Chart for now just a few yamls. Ingress/Gatway is not included as this is very specific to your setup.
+This is the way https://Blackboxf1.vercel.app/ is hosted. There's no Helm Chart for now just a few yamls. Ingress/Gatway is not included as this is very specific to your setup.

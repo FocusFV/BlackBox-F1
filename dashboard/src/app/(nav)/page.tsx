@@ -52,7 +52,7 @@ transform: "translate(-75%, -50%) rotate(10deg)",
 <div className="w-full max-w-[460px] drop-shadow-[0_0_30px_rgba(245,158,11,0.18)] animate-pulse [animation-duration:4s] hover:scale-105 hover:drop-shadow-[0_0_45px_rgba(245,158,11,0.3)] transition duration-500 flex justify-center select-none">
 <Image 
 src={icon} 
-alt="BlackBox-F1 tag logo" 
+alt="Blackbox-F1 tag logo" 
 className="w-full h-auto object-contain" 
 priority 
 />
@@ -89,10 +89,10 @@ Formula 1 en Vivo
 <section className="bg-gradient-to-b from-zinc-900/60 to-neutral-950/50 p-6 rounded-2xl border border-zinc-900/80 shadow-lg backdrop-blur-sm transition duration-200 hover:border-zinc-700">
 <h2 className="mb-3 text-lg font-black uppercase tracking-wider text-amber-500 flex items-center gap-2">
 <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-¿Qué es BlackBox-F1?
+¿Qué es Blackbox-F1?
 </h2>
 <p className="text-sm text-zinc-400 leading-relaxed font-medium">
-BlackBox-F1 es una evolución estética y funcional inspirada en el proyecto original f1-dash. Nace con el objetivo de ofrecer una interfaz completamente traducida al español, con un diseño pulido, moderno y optimizado para los fanáticos de la Formula 1. Te permite seguir la telemetría y los tiempos oficiales en tiempo real, con datos de vueltas, sectores y neumáticos en una experiencia visual superadora.
+Blackbox-F1 es una evolución estética y funcional inspirada en el proyecto original Blackboxf1. Nace con el objetivo de ofrecer una interfaz completamente traducida al español, con un diseño pulido, moderno y optimizado para los fanáticos de la Formula 1. Te permite seguir la telemetría y los tiempos oficiales en tiempo real, con datos de vueltas, sectores y neumáticos en una experiencia visual superadora.
 </p>
 </section>
 
@@ -103,7 +103,7 @@ BlackBox-F1 es una evolución estética y funcional inspirada en el proyecto ori
 </h2>
 <div className="space-y-3 text-sm text-zinc-400 leading-relaxed font-medium">
 <p>
-Debido a las restricciones actuales en el acceso a las métricas de ubicación posicional por parte de los servicios oficiales, en BlackBox-F1 adaptamos la arquitectura del backend para procesar la información mediante un sistema inteligente de **minisectores**.
+Debido a las restricciones actuales en el acceso a las métricas de ubicación posicional por parte de los servicios oficiales, en Blackbox-F1 adaptamos la arquitectura del backend para procesar la información mediante un sistema inteligente de **minisectores**.
 </p>
 <p className="border-t border-zinc-900/80 pt-2 text-zinc-400/90">
 Este algoritmo estima de manera aproximada la localización de los monoplazas en el circuito. Aunque no es una telemetría por satélite milimétrica, otorga una referencia visual sumamente fiel de la progresión y las batallas en pista durante la carrera.
@@ -117,7 +117,7 @@ Este algoritmo estima de manera aproximada la localización de los monoplazas en
 Origen y Reestructuración
 </h2>
 <p className="text-sm text-zinc-400 leading-relaxed font-medium">
-Esta plataforma es una versión refactorizada que toma la sólida base Open Source de f1-dash y la lleva a un nuevo nivel de rendimiento local. Mientras el desarrollo original se mantiene bajo mantenimiento básico, en BlackBox-F1 integramos un backend robusto en Rust montado sobre contenedores Docker para garantizar estabilidad absoluta y respuestas instantáneas en cada sesión.
+Esta plataforma es una versión refactorizada que toma la sólida base Open Source de Blackboxf1 y la lleva a un nuevo nivel de rendimiento local. Mientras el desarrollo original se mantiene bajo mantenimiento básico, en Blackbox-F1 integramos un backend robusto en Rust montado sobre contenedores Docker para garantizar estabilidad absoluta y respuestas instantáneas en cada sesión.
 </p>
 </section>
 
@@ -127,7 +127,7 @@ Esta plataforma es una versión refactorizada que toma la sólida base Open Sour
 ¿Qué es lo próximo?
 </h2>
 <p className="text-sm text-zinc-400 leading-relaxed font-medium">
-El rediseño de la interfaz es solo el punto de partida. La meta de BlackBox-F1 es continuar tuneando la visualización de datos, incorporando componentes personalizados para la telemetría histórica y mejorando las herramientas de sincronización de transmisión. Iremos desplegando optimizaciones continuas en el panel de control para que ver las carreras del campeonato sea una experiencia totalmente inmersiva.
+El rediseño de la interfaz es solo el punto de partida. La meta de Blackbox-F1 es continuar tuneando la visualización de datos, incorporando componentes personalizados para la telemetría histórica y mejorando las herramientas de sincronización de transmisión. Iremos desplegando optimizaciones continuas en el panel de control para que ver las carreras del campeonato sea una experiencia totalmente inmersiva.
 </p>
 </section>
 

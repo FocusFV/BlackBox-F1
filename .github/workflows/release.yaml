@@ -11,7 +11,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  USER: slowlydev
+  USER: FocusFV
 
 jobs:
   build-and-push:
@@ -19,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        image: [f1-dash, f1-dash-api, f1-dash-realtime]
+        image: [Blackboxf1, Blackboxf1-api, Blackboxf1-realtime]
 
     permissions:
       contents: read

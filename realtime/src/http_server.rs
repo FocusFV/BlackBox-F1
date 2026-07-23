@@ -115,7 +115,7 @@ pub async fn prueba_render() -> &'static str {
 }
 
 pub fn cors_layer() -> Result<CorsLayer, Error> {
-    let origin_env = env::var("ORIGIN").unwrap_or_else(|_| "https://f1-dash.com".to_string());
+    let origin_env = env::var("ORIGIN").unwrap_or_else(|_| "https://Blackboxf1.vercel.app".to_string());
 
     let mut origins = origin_env
         .split(';')

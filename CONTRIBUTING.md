@@ -16,7 +16,7 @@ To get started with the frontend do the following:
 
 ```bash
 # Clone the repository or your fork
-git clone git@github.com:slowlydev/f1-dash.git
+git clone git@github.com:FocusFV/Blackboxf1.git
 
 # Go to the frontend
 cd dash/
@@ -44,7 +44,7 @@ Before we can use the frontend and start developing it, we need to set up the ba
 From here on we enter the Rust part, so make sure to have it installed.
 
 ```bash
-cd f1-dash/
+cd Blackboxf1/
 
 # If you haven't installed rust & cargo run the following
 rustup toolchain install
@@ -62,16 +62,16 @@ cargo r -p api
 Now when you want to develop something where you need to simulate a running race, you can use the simulator and pass it a telemetry recording of a past race.
 
 ```bash
-cd f1-dash/
+cd Blackboxf1/
 
 # Start the simulator
 cargo r -p simulator year-circuit.data.txt
 ```
 
-You can find existing telemetry recordings [here](https://github.com/slowlydev/f1-dash-data-parser/releases/tag/data). If you want to record your own new sessions, here is how:
+You can find existing telemetry recordings [here](https://github.com/FocusFV/Blackboxf1-data-parser/releases/tag/data). If you want to record your own new sessions, here is how:
 
 ```bash
-cd f1-dash/
+cd Blackboxf1/
 
 # Start the saver and save the telemetry recording in the year-circuit.data.txt file
 cargo r -p saver year-circuit.data.txt

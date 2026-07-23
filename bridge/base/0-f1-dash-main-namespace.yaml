@@ -1,8 +1,8 @@
-#! 0-f1-dash-main-namespace.yaml
+#! 0-Blackboxf1-main-namespace.yaml
 # Generated code, do not edit
 apiVersion: v1
 kind: Namespace
 metadata:
-    name: f1-dash-main
+    name: Blackboxf1-main
     labels:
-        com.docker.compose.project: f1-dash-main
+        com.docker.compose.project: Blackboxf1-main

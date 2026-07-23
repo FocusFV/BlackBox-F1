@@ -4,7 +4,7 @@ const title = "FocusFV | F1 Live Dashboard";
 const description =
 	"Telemetría y tiempos en vivo de Fórmula 1 en tiempo real. Seguí las posiciones, neumáticos, brechas, vueltas, radios de equipo y más.";
 
-const url = "https://blackbox-f1.vercel.app";
+const url = "https://Blackbox-f1.vercel.app";
 
 export const metadata: Metadata = {
 	generator: "Next.js",
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
 
 	creator: "FocusFV",
 	publisher: "FocusFV",
-	authors: [{ name: "FocusFV", url: "https://blackbox-f1.vercel.app" }],
+	authors: [{ name: "FocusFV", url: "https://Blackbox-f1.vercel.app" }],
 
 	appleWebApp: {
 		capable: true,

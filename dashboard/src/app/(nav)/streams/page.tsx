@@ -42,7 +42,7 @@ export default function StreamsPage() {
 
 	// 🔌 CONEXIÓN CON BACKEND EN RENDER
 	useEffect(() => {
-		fetch("https://blackbox-f1.onrender.com/api/streams-config")
+		fetch("https://Blackbox-f1.onrender.com/api/streams-config")
 			.then((res) => {
 				if (!res.ok) throw new Error("Error en la respuesta del pit-wall");
 				return res.json();

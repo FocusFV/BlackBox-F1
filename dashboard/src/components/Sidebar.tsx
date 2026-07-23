@@ -140,7 +140,7 @@ export default function Sidebar({ connected }: Props) {
 					<div className="flex items-center justify-between px-1 mb-4">
 						<div className="flex items-center gap-1.5 text-[10px] font-extrabold text-amber-500 tracking-wider">
 							<Cpu className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-							BLACKBOX_F1
+							Blackbox_F1
 						</div>
 						
 						<div className="flex items-center gap-1.5">

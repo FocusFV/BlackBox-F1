@@ -7,4 +7,4 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: f1-dash
+  name: Blackboxf1

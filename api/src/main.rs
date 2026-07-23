@@ -63,7 +63,7 @@ async fn main() -> Result<(), Error> {
 
 pub fn cors_layer() -> Result<CorsLayer, anyhow::Error> {
     // 🛠️ Actualizado con el https:// que faltaba
-    let origin = env::var("ORIGIN").unwrap_or_else(|_| "http://localhost:3000;https://blackboxf1.vercel.app".to_string());
+    let origin = env::var("ORIGIN").unwrap_or_else(|_| "http://localhost:3000;https://Blackboxf1.vercel.app".to_string());
 
     let origins = origin
         .split(';')

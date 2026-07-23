@@ -4,28 +4,28 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
     name: realtime
-    namespace: f1-dash-main
+    namespace: Blackboxf1-main
     labels:
-        com.docker.compose.project: f1-dash-main
+        com.docker.compose.project: Blackboxf1-main
         com.docker.compose.service: realtime
 spec:
     replicas: 1
     selector:
         matchLabels:
-            com.docker.compose.project: f1-dash-main
+            com.docker.compose.project: Blackboxf1-main
             com.docker.compose.service: realtime
     strategy:
         type: Recreate
     template:
         metadata:
             labels:
-                com.docker.compose.project: f1-dash-main
+                com.docker.compose.project: Blackboxf1-main
                 com.docker.compose.service: realtime
                 com.docker.compose.network.default: "true"
         spec:
             containers:
                 - name: realtime
-                  image: ghcr.io/slowlydev/f1-dash-realtime:latest
+                  image: ghcr.io/FocusFV/Blackboxf1-realtime:latest
                   imagePullPolicy: IfNotPresent
                   env:
                     - name: ADDRESS

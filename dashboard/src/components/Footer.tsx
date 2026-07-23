@@ -20,7 +20,7 @@ export default function Footer() {
 						</p>
 						
 						<p>
-							Código y refactorización en <TextLink website="https://github.com/FocusFV/BlackBox-F1">GitHub</TextLink>.
+							Código y refactorización en <TextLink website="https://github.com/FocusFV/Blackbox-F1">GitHub</TextLink>.
 						</p>
 
 						<p>

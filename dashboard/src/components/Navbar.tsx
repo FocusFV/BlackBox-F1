@@ -127,7 +127,7 @@ export default function Navbar() {
 					{/* Botón GitHub (Solo Icono, transparente) */}
 					<Link
 						className="flex items-center justify-center p-2 rounded-lg bg-transparent border border-transparent text-zinc-400 transition-all duration-300 hover:text-zinc-100 hover:border-zinc-800 hover:bg-zinc-900/20 active:scale-95 group"
-						href="https://github.com/FocusFV/BlackBox-F1"
+						href="https://github.com/FocusFV/Blackbox-F1"
 						target="_blank"
 						title="GitHub"
 					>
@@ -170,7 +170,7 @@ export default function Navbar() {
 							<Image src={coffeeIcon} alt="Café" width={18} height={18} className="brightness-0 invert opacity-60" />
 							<span>Café</span>
 						</Link>
-						<Link className="flex items-center justify-center p-2.5 rounded-xl bg-transparent border border-zinc-800 text-zinc-400" href="https://github.com/FocusFV/BlackBox-F1" target="_blank">
+						<Link className="flex items-center justify-center p-2.5 rounded-xl bg-transparent border border-zinc-800 text-zinc-400" href="https://github.com/FocusFV/Blackbox-F1" target="_blank">
 							<Image src={githubIcon} alt="GitHub" width={16} height={16} className="brightness-0 invert opacity-60" />
 						</Link>
 					</div>

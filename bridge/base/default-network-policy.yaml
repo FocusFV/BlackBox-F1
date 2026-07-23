@@ -4,7 +4,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
     name: default-network-policy
-    namespace: f1-dash-main
+    namespace: Blackboxf1-main
 spec:
     podSelector:
         matchLabels:

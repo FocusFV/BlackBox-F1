@@ -4,7 +4,7 @@ apiVersion: v1
 kind: Service
 metadata:
     name: realtime-published
-    namespace: f1-dash-main
+    namespace: Blackboxf1-main
 spec:
     type: LoadBalancer
 
