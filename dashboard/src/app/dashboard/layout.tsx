@@ -1,7 +1,7 @@
 'use client';
 
 import { type ReactNode } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import { useDataEngine } from '@/hooks/useDataEngine';
 import { useWakeLock } from '@/hooks/useWakeLock';
@@ -20,6 +20,7 @@ import TrackInfo from '@/components/TrackInfo';
 import DelayInput from '@/components/DelayInput';
 import DelayTimer from '@/components/DelayTimer';
 import ConnectionStatus from '@/components/ConnectionStatus';
+import SupportModal from '@/components/SupportModal';
 
 type Props = {
 	children: ReactNode;
@@ -66,6 +67,9 @@ export default function DashboardLayout({ children }: Props) {
 					<p>Or make your delay smaller.</p>
 				</div>
 			</motion.div>
+
+			{/* 🚀 MODAL DE APOYO CADA 30 MINUTOS */}
+			<SupportModal />
 		</div>
 	);
 }

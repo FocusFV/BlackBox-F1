@@ -61,7 +61,7 @@ const categoriesMenu: MenuCategory[] = [
 		items: [
 			{ href: "/dashboard/settings", name: "Ajustes", icon: Settings },
 			{ href: "/schedule", name: "Calendario GP", icon: Calendar },
-			{ href: "/help", name: "Ayuda", icon: HelpCircle, target: "_blank" },
+			{ href: "/help", name: "Ayuda", icon: HelpCircle },
 		]
 	},
 	{
@@ -208,7 +208,7 @@ export default function Sidebar({ connected }: Props) {
 
 					{/* Pie */}
 					<div className="border-t border-zinc-900/80 pt-3 mt-4 flex items-center justify-between text-[9px] font-bold tracking-widest text-zinc-600 uppercase">
-						<span>SYS_CORE_V4.5</span>
+						<span>Version 4.0.3</span>
 						<span className="text-amber-500/40 animate-pulse">● ONLINE</span>
 					</div>
 				</nav>

@@ -18,269 +18,345 @@ import wetTireIcon from "public/tires/wet.svg";
 
 export default function HelpPage() {
 	return (
-		<div>
-			<h1 className="my-4 text-3xl">Página de Ayuda</h1>
-
-			<p>Esta página explica algunas de las funciones principales y elementos de la interfaz de Blackboxf1.</p>
-
-			<h2 className="my-4 text-2xl">Colores</h2>
-
-			<p>
-				Un elemento central en la interfaz de Blackboxf1, inspirado en los gráficos oficiales de la Fórmula 1, es el sistema de codificación por colores utilizado para los tiempos de vuelta, tiempos de sector, mini sectores y diferencias. Cada color tiene un significado específico en este contexto.
-			</p>
-
-			<div className="my-4 flex flex-col">
-				<div className="flex gap-1">
-					<p className="flex items-center gap-1">
-						<span className="size-4 rounded-md bg-white" /> Blanco
+		<div className="mx-auto max-w-6xl space-y-12 px-4 py-8 text-zinc-100">
+			{/* HERO SECTION */}
+			<div className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900/90 via-zinc-900/40 to-black p-8 backdrop-blur-md shadow-2xl">
+				<div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-red-600/10 blur-3xl pointer-events-none" />
+				<div className="flex flex-col gap-3">
+					<div className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-400 w-fit uppercase tracking-widest">
+						<span className="size-2 rounded-full bg-red-500 animate-pulse" /> Guía Oficial de Telemetría
+					</div>
+					<h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl bg-gradient-to-r from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent">
+						Centro de Ayuda Blackboxf1
+					</h1>
+					<p className="max-w-2xl text-zinc-400 text-base leading-relaxed">
+						Dominá la interfaz de telemetría en tiempo real. Conocé la codificación de colores, indicadores de estado de los monoplazas y cómo sincronizar los datos en vivo con tu transmisión.
 					</p>
-					<p>Tiempo de la última vuelta</p>
-				</div>
-
-				<div className="flex gap-1">
-					<p className="flex items-center gap-1 text-yellow-500">
-						<span className="size-4 rounded-md bg-amber-400" /> Amarillo
-					</p>
-					<p>Más lento que su mejor marca personal</p>
-				</div>
-
-				<div className="flex gap-1">
-					<p className="flex items-center gap-1 text-emerald-500">
-						<span className="size-4 rounded-md bg-emerald-500" /> Verde
-					</p>
-					<p>Mejor marca personal (récord personal)</p>
-				</div>
-
-				<div className="flex gap-1">
-					<p className="flex items-center gap-1 text-violet-500">
-						<span className="size-4 rounded-md bg-violet-500" /> Violeta
-					</p>
-					<p>Mejor marca general (récord de la sesión)</p>
-				</div>
-
-				<div className="flex gap-1">
-					<p className="flex items-center gap-1 text-blue-500">
-						<span className="size-4 rounded-md bg-blue-500" /> Azul
-					</p>
-					<p>Piloto en la calle de boxes (pit lane)</p>
 				</div>
 			</div>
 
-			<Note>
-				Solo los mini sectores usan el color amarillo. Usar amarillo para todos los pilotos que no mejoran sus tiempos haría que la interfaz se vea muy cargada, ya que habría demasiados elementos de texto amarillos al mismo tiempo.
-			</Note>
-
-			<h2 className="my-4 text-2xl">Clasificación (Leaderboard)</h2>
-
-			<p className="mb-4">
-				La tabla de posiciones muestra a todos los pilotos de la sesión actual. Dependiendo del estado del piloto y del progreso de la sesión, algunos pueden aparecer con un fondo de color.
-			</p>
-
-			<div className="grid grid-cols-1 gap-x-4 divide-y divide-zinc-800 sm:grid-cols-3 sm:divide-y-0">
-				<div>
-					<p className="rounded-md bg-violet-800/30 p-2">Piloto con fondo violeta</p>
-					<p className="p-2">El piloto tiene el tiempo de vuelta más rápido de toda la sesión</p>
+			{/* SECCIÓN 1: CÓDIGO DE COLORES */}
+			<section className="space-y-6">
+				<div className="border-b border-zinc-800/80 pb-4">
+					<h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+						<span className="text-red-500">#</span> Sistema de Codificación por Colores
+					</h2>
+					<p className="text-sm text-zinc-400 mt-1">
+						Inspirado en los gráficos oficiales de la Fórmula 1 para tiempos de vuelta, sectores y deltas.
+					</p>
 				</div>
 
-				<div className="pt-4 sm:pt-0">
-					<p className="rounded-md border p-2 opacity-50">Piloto un poco transparente</p>
-					<p className="p-2">El piloto chocó, abandonó o quedó fuera de la sesión</p>
-				</div>
-
-				<div className="pt-4 sm:pt-0">
-					<p className="rounded-md bg-red-800/30 p-2">Piloto con fondo rojo</p>
-					<p className="p-2">Piloto en zona de eliminación durante la clasificación (qualy)</p>
-				</div>
-			</div>
-
-			<h2 className="my-4 text-2xl">Estado de DRS y PIT</h2>
-
-			<p className="mb-4">
-				Cada piloto en la tabla cuenta con un indicador de estado de DRS y PIT. Muestra si el piloto no tiene DRS, si está a menos de 1 segundo del auto de adelante (y es elegible para activarlo tras pasar por la zona de detección), si tiene el DRS activo, o si se encuentra entrando o saliendo de boxes.
-			</p>
-
-			<p className="mb-4">
-				En general, te da un vistazo rápido para saber si un piloto va a entrar a boxes y podría perder posiciones, o si viene con DRS activo y tiene chances claras de sobrepaso.
-			</p>
-
-			<div className="mb-4 flex flex-col gap-4">
-				<div className="flex items-center gap-2">
-					<div className="w-[4rem]">
-						<DriverDRS on={false} possible={false} inPit={false} pitOut={false} />
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+					<div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 backdrop-blur-sm hover:border-zinc-700 transition-all">
+						<div className="flex items-center gap-3">
+							<span className="size-5 rounded-md bg-white shadow-sm shadow-white/20" />
+							<span className="font-bold text-white">Blanco</span>
+						</div>
+						<p className="mt-2 text-sm text-zinc-400">Tiempo de la última vuelta registrada por el piloto.</p>
 					</div>
 
-					<p>Apagado: Sin DRS (por defecto)</p>
-				</div>
-
-				<div className="flex items-center gap-2">
-					<div className="w-[4rem]">
-						<DriverDRS on={false} possible={true} inPit={false} pitOut={false} />
+					<div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 backdrop-blur-sm hover:border-zinc-700 transition-all">
+						<div className="flex items-center gap-3">
+							<span className="size-5 rounded-md bg-amber-400 shadow-sm shadow-amber-400/20" />
+							<span className="font-bold text-amber-400">Amarillo</span>
+						</div>
+						<p className="mt-2 text-sm text-zinc-400">Sector o vuelta más lenta que la mejor marca personal.</p>
 					</div>
 
-					<p>Posible: Elegible para activar DRS en la próxima zona</p>
-				</div>
-
-				<div className="flex items-center gap-2">
-					<div className="w-[4rem]">
-						<DriverDRS on={true} possible={false} inPit={false} pitOut={false} />
+					<div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 backdrop-blur-sm hover:border-zinc-700 transition-all">
+						<div className="flex items-center gap-3">
+							<span className="size-5 rounded-md bg-emerald-500 shadow-sm shadow-emerald-500/20" />
+							<span className="font-bold text-emerald-400">Verde</span>
+						</div>
+						<p className="mt-2 text-sm text-zinc-400">Mejor marca personal del piloto (récord personal en la sesión).</p>
 					</div>
 
-					<p>Activo: El DRS está abierto / activado</p>
-				</div>
-
-				<div className="flex items-center gap-2">
-					<div className="w-[4rem]">
-						<DriverDRS on={false} possible={false} inPit={true} pitOut={false} />
+					<div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 backdrop-blur-sm hover:border-zinc-700 transition-all">
+						<div className="flex items-center gap-3">
+							<span className="size-5 rounded-md bg-violet-500 shadow-sm shadow-violet-500/20" />
+							<span className="font-bold text-violet-400">Violeta</span>
+						</div>
+						<p className="mt-2 text-sm text-zinc-400">Mejor marca absoluta de toda la sesión (récord de pista).</p>
 					</div>
 
-					<p>PIT: En la calle de boxes o saliendo de ella</p>
-				</div>
-			</div>
-
-			<h2 className="my-4 text-2xl">Neumáticos (Tires)</h2>
-
-			<p className="mb-4">
-				También mostramos los diferentes compuestos que usa cada piloto y cuántas vueltas dieron con ellos. <br />
-				En este ejemplo, el piloto lleva un neumático blando (soft) que tiene 12 vueltas de uso y realizó una parada en boxes.
-			</p>
-
-			<div className="mb-4">
-				<DriverTire
-					stints={[
-						{ TotalLaps: 12, Compound: "SOFT" },
-						{ TotalLaps: 12, Compound: "SOFT", New: "TRUE" },
-					]}
-				/>
-			</div>
-
-			<p className="mb-4">Estos son los diferentes íconos para cada tipo de compuesto:</p>
-
-			<div className="mb-4 flex flex-wrap gap-4">
-				<div className="flex items-center gap-2">
-					<Image src={softTireIcon} alt="blando" className="size-8" />
-					<p>Blando (Soft)</p>
-				</div>
-
-				<div className="flex items-center gap-2">
-					<Image src={mediumTireIcon} alt="medio" className="size-8" />
-					<p>Medio (Medium)</p>
-				</div>
-
-				<div className="flex items-center gap-2">
-					<Image src={hardTireIcon} alt="duro" className="size-8" />
-					<p>Duro (Hard)</p>
-				</div>
-
-				<div className="flex items-center gap-2">
-					<Image src={interTireIcon} alt="intermedio" className="size-8" />
-					<p>Intermedio (Intermediate)</p>
-				</div>
-
-				<div className="flex items-center gap-2">
-					<Image src={wetTireIcon} alt="lluvia" className="size-8" />
-					<p>Lluvia extrema (Wet)</p>
-				</div>
-
-				<div className="flex items-center gap-2">
-					<Image src={unknownTireIcon} alt="desconocido" className="size-8" />
-					<p>Desconocido</p>
-				</div>
-			</div>
-
-			<Note className="mb-4">
-				A veces el tipo de compuesto figura como desconocido. Esto puede pasar al inicio de una sesión o cuando hay algún inconveniente con la lectura de datos.
-			</Note>
-
-			<h2 className="my-4 text-2xl">Control de Retraso (Delay Control)</h2>
-
-			<p className="mb-4">
-				Al usar Blackboxf1 mientras mirás la carrera en la tele, F1TV o tu plataforma de streaming favorita, vas a notar que Blackboxf1 se actualiza mucho antes que tu transmisión. Esto le puede sacar emoción a las carreras, ya que te enterás de los eventos clave antes de verlos en pantalla. Para solucionar esto existe el control de retraso.
-			</p>
-
-			<p className="mb-4">
-				Con el control de retraso podés configurar una pausa en segundos para que Blackboxf1 se actualice más tarde de lo habitual. Por ejemplo, si ponés un retraso de 30 segundos, la app va a procesar los datos con 30 segundos de demora.
-				<br />
-				Podés usar esta función para sincronizar perfectamente tu transmisión con el dashboard.
-			</p>
-
-			<Note className="mb-4">
-				Actualmente, solo podés configurar un retraso equivalente al tiempo que llevás dentro de la página. Por ejemplo, si configurás 30s de delay en una página que visitás hace 20s, vas a tener que esperar 10s hasta que se reanude la reproducción de datos. (Esto se modificará en el futuro).
-			</Note>
-
-			<h3 className="my-4 text-xl">¿En qué fijarse para sincronizar?</h3>
-
-			<ul className="list ml-6 list-disc">
-				<li>
-					El inicio de una nueva vuelta <span className="text-zinc-500">(en carrera)</span>
-				</li>
-				<li>
-					El reloj de la sesión <span className="text-zinc-500">(en prácticas libres y clasificación)</span>
-				</li>
-				<li>Los cambios en los mini sectores, si están disponibles</li>
-			</ul>
-
-			<h2 className="my-4 text-2xl">Pedales del Piloto</h2>
-
-			<div className="mb-4 flex flex-col gap-4">
-				<div className="flex items-center gap-6">
-					<div className="w-[4rem]">
-						<DriverPedals className="bg-red-500" value={1} maxValue={3} />
+					<div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 backdrop-blur-sm hover:border-zinc-700 transition-all md:col-span-2 lg:col-span-2">
+						<div className="flex items-center gap-3">
+							<span className="size-5 rounded-md bg-blue-500 shadow-sm shadow-blue-500/20" />
+							<span className="font-bold text-blue-400">Azul</span>
+						</div>
+						<p className="mt-2 text-sm text-zinc-400">Indica que el piloto se encuentra transitando por la calle de boxes (pit lane).</p>
 					</div>
+				</div>
 
-					<p>
-						Muestra si el piloto está frenando <span className="text-zinc-500">(encendido / apagado)</span>
+				<Note className="border-amber-500/30 bg-amber-500/5 text-amber-200/90">
+					<strong>Atención:</strong> Solo los mini sectores utilizan el color amarillo. Esto evita sobrecargar la pantalla con texto cuando la mayoría de los pilotos no están mejorando sus tiempos.
+				</Note>
+			</section>
+
+			{/* SECCIÓN 2: LEADERBOARD / CLASIFICACIÓN */}
+			<section className="space-y-6">
+				<div className="border-b border-zinc-800/80 pb-4">
+					<h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+						<span className="text-red-500">#</span> Clasificación y Tabla de Posiciones
+					</h2>
+					<p className="text-sm text-zinc-400 mt-1">
+						Estados especiales destacados en el leaderboard según el transcurso de la sesión.
 					</p>
 				</div>
 
-				<div className="flex items-center gap-6">
-					<div className="w-[4rem]">
-						<DriverPedals className="bg-emerald-500" value={3} maxValue={4} />
+				<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+					<div className="rounded-xl border border-violet-500/30 bg-violet-950/20 p-5 backdrop-blur-sm">
+						<div className="inline-block rounded-md bg-violet-800/40 px-3 py-1 font-semibold text-violet-300 text-xs border border-violet-500/30 mb-3">
+							Vuelta Rápida
+						</div>
+						<h3 className="font-bold text-white text-base">Fondo Violeta</h3>
+						<p className="mt-1 text-xs text-zinc-400">El piloto posee el tiempo récord de vuelta en toda la sesión.</p>
 					</div>
 
-					<p>
-						Muestra qué tanto está pisando el pedal del acelerador <span className="text-zinc-500">(0-100%)</span>
+					<div className="rounded-xl border border-zinc-700/50 bg-zinc-900/30 p-5 opacity-70 backdrop-blur-sm">
+						<div className="inline-block rounded-md border border-zinc-600 bg-zinc-800/50 px-3 py-1 font-semibold text-zinc-300 text-xs mb-3">
+							Out / DNF
+						</div>
+						<h3 className="font-bold text-white text-base">Transparente</h3>
+						<p className="mt-1 text-xs text-zinc-400">El auto sufrió una avería, chocó o quedó eliminado de la tanda.</p>
+					</div>
+
+					<div className="rounded-xl border border-red-500/30 bg-red-950/20 p-5 backdrop-blur-sm">
+						<div className="inline-block rounded-md bg-red-800/40 px-3 py-1 font-semibold text-red-300 text-xs border border-red-500/30 mb-3">
+							Zona de Peligro
+						</div>
+						<h3 className="font-bold text-white text-base">Fondo Rojo</h3>
+						<p className="mt-1 text-xs text-zinc-400">Piloto dentro de la zona de eliminación instantánea durante Qualy.</p>
+					</div>
+				</div>
+			</section>
+
+			{/* SECCIÓN 3: DRS Y PIT */}
+			<section className="space-y-6">
+				<div className="border-b border-zinc-800/80 pb-4">
+					<h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+						<span className="text-red-500">#</span> Estados de DRS y Boxes (PIT)
+					</h2>
+					<p className="text-sm text-zinc-400 mt-1">
+						Saber al instante si un auto tiene oportunidad de sobrepaso o si perderá tiempo en boxes.
 					</p>
 				</div>
 
-				<div className="flex items-center gap-6">
-					<div className="w-[4rem]">
-						<DriverPedals className="bg-blue-500" value={2} maxValue={3} />
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="flex items-center justify-between rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
+						<div>
+							<h3 className="font-bold text-white">DRS Apagado</h3>
+							<p className="text-xs text-zinc-400">Estado por defecto cuando no hay zona habilitada o está fuera de rango.</p>
+						</div>
+						<div className="w-16">
+							<DriverDRS on={false} possible={false} inPit={false} pitOut={false} />
+						</div>
 					</div>
 
-					<p>
-						Muestra las revoluciones por minuto del motor (RPM) <span className="text-zinc-500">(0 - 15.000)</span>
+					<div className="flex items-center justify-between rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
+						<div>
+							<h3 className="font-bold text-white">DRS Posible</h3>
+							<p className="text-xs text-zinc-400">A menos de 1s en la detección. Listo para abrir ala en zona DRS.</p>
+						</div>
+						<div className="w-16">
+							<DriverDRS on={false} possible={true} inPit={false} pitOut={false} />
+						</div>
+					</div>
+
+					<div className="flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-950/10 p-4">
+						<div>
+							<h3 className="font-bold text-emerald-400">DRS Activo</h3>
+							<p className="text-xs text-zinc-400">El alerón trasero está abierto entregando máxima velocidad punta.</p>
+						</div>
+						<div className="w-16">
+							<DriverDRS on={true} possible={false} inPit={false} pitOut={false} />
+						</div>
+					</div>
+
+					<div className="flex items-center justify-between rounded-xl border border-amber-500/20 bg-amber-950/10 p-4">
+						<div>
+							<h3 className="font-bold text-amber-400">En PIT / Pit Out</h3>
+							<p className="text-xs text-zinc-400">El coche se desplaza por la calle de boxes realizando parada o regreso.</p>
+						</div>
+						<div className="w-16">
+							<DriverDRS on={false} possible={false} inPit={true} pitOut={false} />
+						</div>
+					</div>
+				</div>
+			</section>
+
+			{/* SECCIÓN 4: NEUMÁTICOS Y COMPUESTOS */}
+			<section className="space-y-6">
+				<div className="border-b border-zinc-800/80 pb-4">
+					<h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+						<span className="text-red-500">#</span> Neumáticos y Estrategia de Stints
+					</h2>
+					<p className="text-sm text-zinc-400 mt-1">
+						Muestra el tipo de goma colocado y la cantidad de vueltas acumuladas de uso.
 					</p>
 				</div>
-			</div>
 
-			<h2 className="my-4 text-2xl">Clima (Weather)</h2>
-
-			<div className="mb-4 flex flex-col gap-2">
-				<div className="flex flex-row items-center gap-2">
-					<TemperatureComplication value={39} label="TRC" />
-					<p>Muestra la temperatura actual de la superficie de la pista.</p>
+				<div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-6 flex flex-col md:flex-row items-center gap-6 justify-between">
+					<div className="space-y-1 text-center md:text-left">
+						<h3 className="font-bold text-white text-lg">Ejemplo de Historial de Paradas</h3>
+						<p className="text-sm text-zinc-400">
+							Acá se observa un piloto que realizó 1 parada y lleva neumáticos blandos con 12 vueltas.
+						</p>
+					</div>
+					<div className="bg-black/60 p-4 rounded-lg border border-zinc-800">
+						<DriverTire
+							stints={[
+								{ TotalLaps: 12, Compound: "SOFT" },
+								{ TotalLaps: 12, Compound: "SOFT", New: "TRUE" },
+							]}
+						/>
+					</div>
 				</div>
 
-				<div className="flex flex-row items-center gap-2">
-				<TemperatureComplication value={39} label="TRC" />
-				<p>Muestra la temperatura actual de la superficie de la pista.</p>
-			</div>
+				<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+					<div className="flex flex-col items-center justify-center p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center gap-2">
+						<Image src={softTireIcon} alt="blando" className="size-10" />
+						<span className="text-xs font-bold text-red-400">Blando (Soft)</span>
+					</div>
+					<div className="flex flex-col items-center justify-center p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center gap-2">
+						<Image src={mediumTireIcon} alt="medio" className="size-10" />
+						<span className="text-xs font-bold text-yellow-400">Medio (Medium)</span>
+					</div>
+					<div className="flex flex-col items-center justify-center p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center gap-2">
+						<Image src={hardTireIcon} alt="duro" className="size-10" />
+						<span className="text-xs font-bold text-white">Duro (Hard)</span>
+					</div>
+					<div className="flex flex-col items-center justify-center p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center gap-2">
+						<Image src={interTireIcon} alt="intermedio" className="size-10" />
+						<span className="text-xs font-bold text-emerald-400">Intermedio</span>
+					</div>
+					<div className="flex flex-col items-center justify-center p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center gap-2">
+						<Image src={wetTireIcon} alt="lluvia" className="size-10" />
+						<span className="text-xs font-bold text-blue-400">Extrema Lluvia</span>
+					</div>
+					<div className="flex flex-col items-center justify-center p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center gap-2">
+						<Image src={unknownTireIcon} alt="desconocido" className="size-10 opacity-60" />
+						<span className="text-xs font-bold text-zinc-500">Desconocido</span>
+					</div>
+				</div>
+			</section>
 
-				<div className="flex flex-row items-center gap-2">
-				<TemperatureComplication value={26} label="AIR" />
-				<p>Muestra la temperatura actual del ambiente (aire).</p>
-			</div>
-
-				<div className="flex flex-row items-center gap-2">
-					<RainComplication rain={true} />
-					<p>Muestra si está lloviendo en el circuito o no.</p>
+			{/* SECCIÓN 5: TELEMETRÍA DE PEDALES */}
+			<section className="space-y-6">
+				<div className="border-b border-zinc-800/80 pb-4">
+					<h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+						<span className="text-red-500">#</span> Telemetría de Pedales y Motor
+					</h2>
+					<p className="text-sm text-zinc-400 mt-1">
+						Medidores en tiempo real del esfuerzo de aceleración, frenado y revoluciones.
+					</p>
 				</div>
 
-				<div className="flex flex-row items-center gap-2">
-					<WindSpeedComplication speed={2.9} directionDeg={250} />
-					<p>Muestra la velocidad actual del viento en m/s y su dirección según los puntos cardinales.</p>
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+					<div className="flex flex-col items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 text-center">
+						<div className="w-16">
+							<DriverPedals className="bg-red-500" value={1} maxValue={3} />
+						</div>
+						<div>
+							<h3 className="font-bold text-red-400">Freno</h3>
+							<p className="text-xs text-zinc-400 mt-1">Presión aplicada en pedal de freno (On / Off).</p>
+						</div>
+					</div>
+
+					<div className="flex flex-col items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 text-center">
+						<div className="w-16">
+							<DriverPedals className="bg-emerald-500" value={3} maxValue={4} />
+						</div>
+						<div>
+							<h3 className="font-bold text-emerald-400">Acelerador</h3>
+							<p className="text-xs text-zinc-400 mt-1">Porcentaje de apertura de mariposa (0 - 100%).</p>
+						</div>
+					</div>
+
+					<div className="flex flex-col items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 text-center">
+						<div className="w-16">
+							<DriverPedals className="bg-blue-500" value={2} maxValue={3} />
+						</div>
+						<div>
+							<h3 className="font-bold text-blue-400">Motor (RPM)</h3>
+							<p className="text-xs text-zinc-400 mt-1">Revoluciones por minuto actuales (0 - 15.000 RPM).</p>
+						</div>
+					</div>
 				</div>
-			</div>
+			</section>
+
+			{/* SECCIÓN 6: CLIMA EN PISTA */}
+			<section className="space-y-6">
+				<div className="border-b border-zinc-800/80 pb-4">
+					<h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+						<span className="text-red-500">#</span> Condiciones Meteorológicas (Weather)
+					</h2>
+					<p className="text-sm text-zinc-400 mt-1">
+						Variables ambientales que alteran directamente el desgaste de neumáticos y la adherencia.
+					</p>
+				</div>
+
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+					<div className="flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+						<TemperatureComplication value={39} label="TRC" />
+						<div>
+							<h3 className="font-bold text-white text-sm">Pista (TRC)</h3>
+							<p className="text-xs text-zinc-400">Temp. del asfalto.</p>
+						</div>
+					</div>
+
+					<div className="flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+						<TemperatureComplication value={26} label="AIR" />
+						<div>
+							<h3 className="font-bold text-white text-sm">Ambiente (AIR)</h3>
+							<p className="text-xs text-zinc-400">Temp. del aire.</p>
+						</div>
+					</div>
+
+					<div className="flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+						<RainComplication rain={true} />
+						<div>
+							<h3 className="font-bold text-white text-sm">Lluvia</h3>
+							<p className="text-xs text-zinc-400">Precipitación detectada.</p>
+						</div>
+					</div>
+
+					<div className="flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+						<WindSpeedComplication speed={2.9} directionDeg={250} />
+						<div>
+							<h3 className="font-bold text-white text-sm">Viento</h3>
+							<p className="text-xs text-zinc-400">Velocidad y rumbo en m/s.</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			{/* SECCIÓN 7: DELAY CONTROL */}
+			<section className="space-y-6">
+				<div className="border-b border-zinc-800/80 pb-4">
+					<h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+						<span className="text-red-500">#</span> Sincronización y Control de Retraso
+					</h2>
+					<p className="text-sm text-zinc-400 mt-1">
+						Ajustá la telemetría para que coincida exactamente con tu señal de TV o F1TV.
+					</p>
+				</div>
+
+				<div className="rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900/60 to-black p-6 space-y-4">
+					<p className="text-sm text-zinc-300 leading-relaxed">
+						Dado que la API directo de boxes se actualiza milisegundos antes que la transmisión de TV, podés configurar un retraso (delay) en segundos. Así la app pausará la llegada de datos y la reproducirá a la par de tus imágenes sin spoliarte los sobrepasos.
+					</p>
+
+					<div className="rounded-xl border border-zinc-800 bg-zinc-950/80 p-4 space-y-2">
+						<h3 className="text-xs font-bold uppercase tracking-wider text-red-400">Puntos de Referencia para Sincronizar:</h3>
+						<ul className="text-sm text-zinc-400 space-y-1 list-disc pl-5">
+							<li>El paso por la línea de meta al iniciar nueva vuelta (en carrera).</li>
+							<li>El segundero del reloj principal de sesión (en FP1, FP2, FP3 y Qualy).</li>
+							<li>Los cambios de color en los sectores de los pilotos en pantalla.</li>
+						</ul>
+					</div>
+				</div>
+			</section>
 		</div>
 	);
 }
