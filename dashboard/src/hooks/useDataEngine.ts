@@ -65,22 +65,26 @@ export const useDataEngine = ({ updateState, updatePosition, updateCarData }: Pr
 		});
 
 		if (carZ) {
-			const carData = inflate<CarData>(carZ);
-			updateCarData(carData.Entries[0].Cars);
+	const carData = inflate<CarData>(carZ);
+	if (carData?.Entries && carData.Entries.length > 0) {
+		updateCarData(carData.Entries[0].Cars);
 
-			for (const entry of carData.Entries) {
-				carBuffer.pushTimed(entry.Cars, utcToLocalMs(entry.Utc));
-			}
+		for (const entry of carData.Entries) {
+			carBuffer.pushTimed(entry.Cars, utcToLocalMs(entry.Utc));
 		}
+	}
+}
 
-		if (posZ) {
-			const position = inflate<Position>(posZ);
-			updatePosition(position.Position[0].Entries);
+if (posZ) {
+	const position = inflate<Position>(posZ);
+	if (position?.Position && position.Position.length > 0) {
+		updatePosition(position.Position[0].Entries);
 
-			for (const entry of position.Position) {
-				posBuffer.pushTimed(entry.Entries, utcToLocalMs(entry.Timestamp));
-			}
+		for (const entry of position.Position) {
+			posBuffer.pushTimed(entry.Entries, utcToLocalMs(entry.Timestamp));
 		}
+	}
+}
 	};
 
 	const handleUpdate = ({ CarDataZ: carZ, PositionZ: posZ, ...update }: MessageUpdate) => {

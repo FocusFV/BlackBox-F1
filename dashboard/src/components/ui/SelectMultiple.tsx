@@ -21,8 +21,13 @@ type Props<T> = {
 export default function SelectMultiple<T>({ placeholder, options, selected, setSelected }: Props<T>) {
 	const [query, setQuery] = useState("");
 
+	// 🛡️ FILTRO BLINDADO: Se asegura de que option y option.label existan antes de llamar toLowerCase()
 	const filteredOptions =
-		query === "" ? options : options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase()));
+		query === ""
+			? options
+			: options.filter((option) =>
+					(option?.label || "").toLowerCase().includes(query.toLowerCase())
+			  );
 
 	return (
 		<Combobox value={selected} onChange={(value) => setSelected(value)} onClose={() => setQuery("")} multiple>
@@ -55,7 +60,7 @@ export default function SelectMultiple<T>({ placeholder, options, selected, setS
 						className="group flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 select-none data-focus:bg-white/10"
 					>
 						{/* <CheckIcon className="invisible size-4 fill-white group-data-selected:visible" /> */}
-						<div className="text-sm/6 text-white">{option.label}</div>
+						<div className="text-sm/6 text-white">{option.label || "Sin nombre"}</div>
 					</ComboboxOption>
 				))}
 			</ComboboxOptions>

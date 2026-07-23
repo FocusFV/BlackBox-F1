@@ -98,10 +98,18 @@ export const ParcFerme: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [hasSprint, setHasSprint] = useState(false);
 
-	// 📡 Lógica inversa limpia para TS: está activo si hay sesión y NO está terminada
-	const sessionStatus = useDataStore((state) => state.state?.SessionStatus?.Status);
-	const session = useDataStore((state) => state.state?.SessionInfo);
-	const isLive = !!session && sessionStatus !== "Ends" && sessionStatus !== "Finalised";
+	// 📡 ESTADO DE PISTA REVISADO Y CORREGIDO (TypeScript Safe)
+const rawStatus = useDataStore((state) => state.state?.SessionStatus?.Status);
+const session = useDataStore((state) => state.state?.SessionInfo);
+
+// Forzamos el tipo a string para que TypeScript no chille con los literales strictos
+const sessionStatus = rawStatus as string | undefined;
+
+// Evaluamos si el estado actual NO es de finalización
+const isEnded = sessionStatus === "Finished" || sessionStatus === "Finalised" || sessionStatus === "Ends";
+
+// Si hay sesión en el store y el status no es de finalización, la pista está activa
+const isLive = !!session && !!sessionStatus && !isEnded;
 
 	// 1. TELEMETRÍA OFICIAL
 	useEffect(() => {
@@ -145,8 +153,8 @@ export const ParcFerme: React.FC = () => {
 						const isFinished = statusStr.includes("Finished") || statusStr.includes("Lap") || isTimeBased;
 						const isDNF = !isFinished;
 
-						// ⏱️ PARCHE DE HORARIO/TIEMPO: Nos aseguramos de limpiar los strings o dejar el mejor tiempo de la sesión
-						const rawTime = r.Q3 || r.Q2 || r.Q1 || "S/T";
+						// ⏱️ TIEMPOS EN QUALY / SPRINT QUALY
+						const rawTime = r.Q3 || r.Q2 || r.Q1 || r.Time?.time || "S/T";
 						
 						return {
 							pos: r.position,

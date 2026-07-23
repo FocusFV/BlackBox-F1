@@ -9,7 +9,7 @@ export type Map = {
 	countryKey: number;
 	countryName: string;
 	location: string;
-	meetingKey: string;
+	meetingKey: number | string;
 	meetingName: string;
 	meetingOfficialName: string;
 	raceDate: string;

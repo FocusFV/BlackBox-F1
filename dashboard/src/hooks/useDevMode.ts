@@ -1,9 +1,13 @@
-export const useDevMode = () => {
-	let active = false;
+import { useEffect, useState } from "react";
 
-	if (typeof window != undefined) {
-		active = !!localStorage.getItem("dev");
-	}
+export const useDevMode = () => {
+	const [active, setActive] = useState(false);
+
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			setActive(!!localStorage.getItem("dev"));
+		}
+	}, []);
 
 	return { active };
 };

@@ -1,4 +1,4 @@
-import { clamping, describeArc, polarToCartesian } from "@/lib/circle";
+import { describeArc, polarToCartesian } from "@/lib/circle";
 
 type Props = {
 	value: number;
@@ -12,11 +12,15 @@ export default function Gauge({ value, max, gradient }: Props) {
 	const size = 50;
 	const strokeWidth = 5;
 
+	// 📐 Regla de tres simple para mapear el valor actual al ángulo correcto del arco
+	const safeValue = Math.max(0, Math.min(value, max));
+	const angle = startAngle + (endAngle - startAngle) * (safeValue / max);
+
 	const dot = polarToCartesian(
 		size / 2,
 		size / 2,
 		size / 2 - strokeWidth / 2,
-		clamping(value, startAngle, endAngle, max),
+		angle
 	);
 
 	return (
@@ -46,7 +50,7 @@ export default function Gauge({ value, max, gradient }: Props) {
 				strokeLinecap="round"
 			/>
 
-			<circle cx={dot.x} cy={dot.y} z="10" r="3.5" fill="none" stroke="black" strokeWidth="3" />
+			<circle cx={dot.x} cy={dot.y} r="3.5" fill="none" stroke="black" strokeWidth="3" />
 		</svg>
 	);
 }

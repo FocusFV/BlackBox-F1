@@ -18,7 +18,8 @@ export default function DriverMiniSectors({ sectors = [], bestSectors }: Props) 
 				<div key={`sector.${i}`} className="flex flex-col gap-1">
 					{showMiniSectors && (
 						<div className="flex flex-row gap-1">
-							{sector.Segments.map((segment, j) => (
+							{/* 🛡️ Protegido con optional chaining por si Segments viene undefined */}
+							{sector.Segments?.map((segment, j) => (
 								<MiniSector status={segment.Status} key={`sector.mini.${j}`} />
 							))}
 						</div>
@@ -38,10 +39,10 @@ export default function DriverMiniSectors({ sectors = [], bestSectors }: Props) 
 						{showBestSectors && (
 							<p
 								className={clsx("text-sm leading-none text-zinc-500 tabular-nums", {
-									"text-violet-600!": bestSectors?.[i].Position === 1,
+									"text-violet-600!": bestSectors?.[i]?.Position === 1,
 								})}
 							>
-								{bestSectors && bestSectors[i].Value ? bestSectors[i].Value : "-- ---"}
+								{bestSectors && bestSectors[i]?.Value ? bestSectors[i].Value : "-- ---"}
 							</p>
 						)}
 					</div>

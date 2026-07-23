@@ -23,8 +23,13 @@ export default function Select<T>({ placeholder, options, selected, setSelected 
 
 	const selectedOption = options.find((option) => option.value === selected) ?? null;
 
+	// 🛡️ Filtro blindado
 	const filteredOptions =
-		query === "" ? options : options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase()));
+		query === ""
+			? options
+			: options.filter((option) =>
+					(option?.label || "").toLowerCase().includes(query.toLowerCase())
+			  );
 
 	return (
 		<Combobox
@@ -43,7 +48,7 @@ export default function Select<T>({ placeholder, options, selected, setSelected 
 					onChange={(event) => setQuery(event.target.value)}
 				/>
 				<ComboboxButton className="group absolute inset-y-0 right-0 px-2.5">
-					{/* <ChevronDownIcon className="size-4 fill-white/60 group-data-hover:fill-white" /> */}
+					{/* Icono si querés */}
 				</ComboboxButton>
 			</div>
 
@@ -60,8 +65,7 @@ export default function Select<T>({ placeholder, options, selected, setSelected 
 						value={option}
 						className="group flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 select-none data-focus:bg-white/10"
 					>
-						{/* <CheckIcon className="invisible size-4 fill-white group-data-selected:visible" /> */}
-						<div className="text-sm/6 text-white">{option.label}</div>
+						<div className="text-sm/6 text-white">{option?.label || "Sin nombre"}</div>
 					</ComboboxOption>
 				))}
 			</ComboboxOptions>

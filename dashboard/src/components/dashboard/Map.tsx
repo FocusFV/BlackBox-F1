@@ -94,7 +94,13 @@ export default function Map({ filter }: { filter?: string[] }) {
 	const showCornerNumbers = useSettingsStore((state) => state.showCornerNumbers);
 	const favoriteDrivers = useSettingsStore((state) => state.favoriteDrivers);
 
-	const circuitKey = useDataStore((state) => state?.state?.SessionInfo?.Meeting.Circuit.Key) || 2;
+	// 🛡️ Compatible con TypeScript estricto y seguro ante objetos incompletos
+	const circuitKey = useDataStore((state) => 
+		state?.state?.SessionInfo?.Meeting?.Circuit?.Key ?? 
+		(state?.state?.SessionInfo as any)?.Circuit?.Key ?? 
+		2
+	);
+
 	const rawDrivers = useDataStore((state) => state?.state?.DriverList);
 	const rawTiming = useDataStore((state) => state?.state?.TimingData);
 
@@ -161,7 +167,7 @@ export default function Map({ filter }: { filter?: string[] }) {
 				points: s.points.map((p) => rotate(p.x, p.y, fixedRotation, cX, cY)),
 			}));
 
-			const cornerPositions: any[] = mapJson.corners.map((corner) => ({
+			const cornerPositions: any[] = (mapJson.corners || []).map((corner) => ({
 				number: corner.number,
 				pos: rotate(corner.trackPosition.x, corner.trackPosition.y, fixedRotation, cX, cY),
 				labelPos: rotate(corner.trackPosition.x + 640 * Math.cos(rad(corner.angle)), corner.trackPosition.y + 640 * Math.sin(rad(corner.angle)), fixedRotation, cX, cY),
@@ -265,7 +271,7 @@ export default function Map({ filter }: { filter?: string[] }) {
 			{centerX && centerY && drivers && timingDrivers && Object.keys(drivers).length > 0 && (
 				<>
 					{Object.values(drivers).reverse().filter((driver: any) => (filter ? filter.includes(driver.RacingNumber) : true)).map((driver: any) => {
-						const timingDriver = timingDrivers?.Lines[driver.RacingNumber];
+						const timingDriver = timingDrivers?.Lines?.[driver.RacingNumber];
 						
 						const data = getDriverPositionAndAngle(timingDriver, points, timeOffset);
 						if (!data) return null;

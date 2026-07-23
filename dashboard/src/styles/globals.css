@@ -8,8 +8,41 @@
 @theme {
 	--breakpoint-3xl: 1800px;
 
-	--color-popover: rgba(37, 37, 37, 0.9);
+	/* 🏎️ PALETA BASE & PANELES PREMIUM */
+	--color-popover: rgba(24, 24, 27, 0.95);
 	--color-pane: oklch(18% 0.005 285.82);
+	--color-f1-black: #09090b;
+	--color-f1-card: rgba(18, 18, 22, 0.75);
+
+	/* ⏱️ TELEMETRÍA & SECTORES OFICIALES */
+	--color-f1-purple: #a855f7; /* Overall Best Lap / Sector (Morado F1) */
+	--color-f1-green: #10b981;  /* Personal Best Sector (Verde) */
+	--color-f1-yellow: #f59e0b; /* Caution / Yellow Flag */
+	--color-f1-red: #ef4444;    /* Pit Out / Danger Zone / Stopped */
+	--color-f1-cyan: #06b6d4;   /* In Pit Lane */
+
+	/* 🏁 AUTO DE SEGURIDAD (SC / VSC) */
+	--color-sc-bg: #854d0e;
+	--color-vsc-bg: #713f12;
+}
+
+/* 🏎️ SCROLLBAR ULTRAFINA ESTILO F1-HUD */
+::-webkit-scrollbar {
+	width: 5px;
+	height: 5px;
+}
+
+::-webkit-scrollbar-track {
+	background: #09090b;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #27272a;
+	border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #3f3f46;
 }
 
 @layer utilities {
@@ -21,8 +54,20 @@
 		-ms-overflow-style: none;
 		scrollbar-width: none;
 	}
+
+	/* EFECTO BORDES BRILLANTES EN TARJETAS */
+	.f1-glass-panel {
+		background: rgba(18, 18, 22, 0.65);
+		backdrop-filter: blur(12px);
+		border: 1px solid rgba(255, 255, 255, 0.07);
+	}
+
+	.f1-glass-panel:hover {
+		border-color: rgba(255, 255, 255, 0.15);
+	}
 }
 
+/* ANIMACIONES */
 .pulse-loading-spinner {
 	animation: pulse-loading 1.2s cubic-bezier(0.52, 0.6, 0.25, 0.99) infinite;
 }

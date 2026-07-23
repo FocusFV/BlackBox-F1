@@ -20,11 +20,11 @@ export const getScheduleFromOpenF1 = async (): Promise<RoundType[] | null> => {
 	await connection();
 
 	try {
-		// 1. Traemos todos los eventos (meetings) de la temporada 2026 de OpenF1
+		// 1. Traemos todos los eventos (meetings) de la temporada de OpenF1
 		const meetingsReq = await fetch("https://api.openf1.org/v1/meetings?year=2026", { cache: "no-store" });
 		const meetings = await meetingsReq.json();
 
-		// 2. Traemos todas las sesiones de la temporada 2026 para agruparlas
+		// 2. Traemos todas las sesiones para agruparlas
 		const sessionsReq = await fetch("https://api.openf1.org/v1/sessions?year=2026", { cache: "no-store" });
 		const allSessions = await sessionsReq.json();
 
@@ -55,18 +55,23 @@ export const getScheduleFromOpenF1 = async (): Promise<RoundType[] | null> => {
 				};
 			});
 
-			// Buscamos la sesión de carrera para determinar la fecha de cierre precisa
+			// Buscamos la sesión de carrera
 			const raceSession = sessions.find(s => s.kind === "race");
-			const endMoment = raceSession ? utc(raceSession.end) : utc(meeting.date_start).add(3, 'days');
 			
-			// Calculamos si el Gran Premio ya terminó de forma matemática estricta
+			// 🎯 FIX DE HORARIO / VENTANA DE FIN DE SEMANA:
+			// Agregamos un margen de 6 horas después del final de la carrera para mantener vivo el GP durante el post-carrera
+			const endMoment = raceSession 
+				? utc(raceSession.end).add(6, 'hours') 
+				: utc(meeting.date_end || meeting.date_start).add(3, 'days');
+			
+			// Se da por finalizado solo si ya pasó la ventana de post-carrera
 			const isOver = endMoment.isBefore(utc());
 
 			return {
 				name: meeting.official_name || meeting.meeting_name,
 				countryName: countryNameMap[meeting.country_name] || meeting.country_name,
 				countryKey: null,
-				meetingKey: meeting.meeting_key, // 🏎️ Guardamos el ID real de la carrera
+				meetingKey: meeting.meeting_key,
 				start: meeting.date_start,
 				end: endMoment.toISOString(),
 				sessions: sessions,
@@ -83,7 +88,6 @@ export const getScheduleFromOpenF1 = async (): Promise<RoundType[] | null> => {
 };
 
 export default async function Schedule() {
-	// Puentemos tu API vieja y llamamos directo al motor de OpenF1
 	const schedule = await getScheduleFromOpenF1();
 
 	if (!schedule || schedule.length === 0) {
@@ -94,17 +98,16 @@ export default async function Schedule() {
 		);
 	}
 
-	// Buscamos cuál es la próxima ronda activa en base a la data fresca de OpenF1
+	// 🧠 Buscamos la ronda activa comparando con el endMoment corregido (+6 horas)
 	const next = schedule.find((round) => {
 		return utc(round.end) > utc();
 	}) || schedule[schedule.length - 1];
 
-	// 🛡️ FILTRO ANTI-DUPLICADOS: Excluimos de la grilla de abajo el GP que ya se luce arriba
+	// Excluimos el GP destacado de la grilla de abajo
 	const cleanSchedule = schedule.filter((round) => round.name !== next?.name);
 
 	return (
 		<div className="space-y-6 mb-20">
-			{/* Pasamos el array filtrado para evitar la superposición en el frontend */}
 			<RoundListClient schedule={cleanSchedule} nextName={next?.name} />
 		</div>
 	);

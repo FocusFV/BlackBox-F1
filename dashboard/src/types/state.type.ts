@@ -76,7 +76,7 @@ export type TrackStatus = {
 };
 
 export type SessionStatus = {
-	Status: "Started" | "Finished" | "Finalised" | "Ends";
+	Status: "Started" | "Finished" | "Finalised" | "Ends" | "StartedOnTime" | "Running" | "GreenFlag" | "PitsOpen" | string;
 };
 
 export type DriverList = {
@@ -158,6 +158,7 @@ export type SessionData = {
 export type StatusSeries = {
 	Utc: string;
 	TrackStatus?: string;
+	SessionStatus?: "Started" | "Finished" | "Finalised" | "Ends";
 	SesionStatus?: "Started" | "Finished" | "Finalised" | "Ends";
 };
 

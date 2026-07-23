@@ -13,8 +13,8 @@ type Props = {
 	endAngle?: number;
 
 	className?: string;
-	guideClassName: string;
-	progressClassName: string;
+	guideClassName?: string;
+	progressClassName?: string;
 };
 
 export default function SpeedGauge({
@@ -29,7 +29,9 @@ export default function SpeedGauge({
 	progressClassName,
 	className,
 }: Props) {
-	const progress = value > min ? (value > max ? 100 : ((value - min) / (max - min)) * 100) : 0;
+	// 🛡️ Prevenimos división por cero si max === min
+	const range = max - min || 1;
+	const progress = value > min ? (value > max ? 100 : ((value - min) / range) * 100) : 0;
 
 	const finalEndAngle = startAngle + (endAngle - startAngle) * (progress / 100);
 

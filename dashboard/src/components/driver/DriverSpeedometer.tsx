@@ -1,18 +1,25 @@
 import type { CarDataChannels } from "@/types/state.type";
-
 import SpeedGauge from "@/components/complications/SpeedGauge";
-
 import { useAnimatedNumber } from "@/hooks/useAnimatedNumber";
+import { useSettingsStore } from "@/stores/useSettingsStore";
 
 type Props = {
 	carData: CarDataChannels;
 };
 
-export default function DriverSpeedometer({ carData }: Props) {
-	const rpm = useAnimatedNumber(carData[0]);
-	const throttle = useAnimatedNumber(carData[4]);
+function convertKmhToMph(kmhValue: number) {
+	return Math.floor(kmhValue / 1.609344);
+}
 
-	const speed = useAnimatedNumber(carData[2]);
+export default function DriverSpeedometer({ carData }: Props) {
+	const speedUnit = useSettingsStore((state) => state.speedUnit);
+
+	const rpm = useAnimatedNumber(carData[0] || 0);
+	const throttle = useAnimatedNumber(carData[4] || 0);
+	const rawSpeed = carData[2] || 0;
+	const speed = useAnimatedNumber(rawSpeed);
+
+	const displayedSpeed = speedUnit === "metric" ? speed : convertKmhToMph(speed);
 
 	return (
 		<div className="flex size-32 flex-col items-center justify-center">
@@ -50,13 +57,12 @@ export default function DriverSpeedometer({ carData }: Props) {
 				progressClassName="stroke-red-700"
 			/>
 
-			{/* TODO add mph convertion peneding on preference */}
+			{/* Marcha (Gear) */}
+			<p className="mt-12 text-2xl tabular-nums font-bold">{carData[3] ?? "N"}</p>
 
-			<p className="mt-12 text-2xl tabular-nums">{carData["3"]}</p>
-
-			<p className="text-sm text-zinc-500">km/h</p>
-
-			<p className="text-xl tabular-nums">{speed.toFixed(0)}</p>
+			{/* Velocidad animada + Unidad dinámica */}
+			<p className="text-xl tabular-nums font-bold">{displayedSpeed.toFixed(0)}</p>
+			<p className="text-xs text-zinc-500 uppercase">{speedUnit === "metric" ? "km/h" : "mp/h"}</p>
 		</div>
 	);
 }
