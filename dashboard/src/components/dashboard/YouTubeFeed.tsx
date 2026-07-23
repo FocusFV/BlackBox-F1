@@ -14,14 +14,10 @@ interface YouTubeVideo {
 }
 
 export function YouTubeFeed() {
-    // 🏎️ Nos suscribimos al nombre del GP sin "grand prix"
-    const gpName = useDataStore((state) => {
-        const name = state.state?.SessionInfo?.Meeting?.Name;
-        if (!name) return "Belgian"; // 👈 Fallback de prueba
-        return name.replace(/grand prix/gi, "").trim();
-    });
+    const rawGpName = useDataStore((state) => state.state?.SessionInfo?.Meeting?.Name);
 
     const [videos, setVideos] = useState<YouTubeVideo[]>([]);
+    const [displayGpName, setDisplayGpName] = useState<string>("Belgium");
     const [loading, setLoading] = useState(true);
     
     const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -30,24 +26,21 @@ export function YouTubeFeed() {
         async function fetchLiveVideos() {
             setLoading(true);
             try {
-                // 🎯 CONEXIÓN REAL: Le pegamos directo al backend vivo en Render
                 const baseUrl = "https://blackbox-f1-realtime-docker.onrender.com";
                 const url = `${baseUrl}/api/videos`;
 
                 const res = await fetch(url, { cache: "no-store" });
                 const data = await res.json();
 
-                if (Array.isArray(data) && data.length > 0) {
-                    const mappedVideos = data.map((video: any) => ({
-                        id: video.id,
-                        title: video.title,
-                        thumbnail: video.thumbnail,
-                        publishedAt: video.publishedAt,
-                        embedUrl: video.embedUrl
-                    }));
-                    setVideos(mappedVideos);
+                // Manejo dinámico sincronizado con el objeto { target_gp, videos }
+                if (data && Array.isArray(data.videos)) {
+                    setVideos(data.videos);
+                    if (data.target_gp) {
+                        setDisplayGpName(data.target_gp);
+                    }
+                } else if (Array.isArray(data)) { 
+                    setVideos(data);
                 } else {
-                    console.log("El backend respondio pero no trajo videos:", data);
                     setVideos([]);
                 }
             } catch (error) {
@@ -59,7 +52,7 @@ export function YouTubeFeed() {
         }
 
         fetchLiveVideos();
-    }, [gpName]);
+    }, [rawGpName]);
 
     const scroll = (direction: "left" | "right") => {
         if (scrollContainerRef.current) {
@@ -84,13 +77,11 @@ export function YouTubeFeed() {
             <div className="flex items-center justify-between mb-4 px-1 select-none">
                 <h2 className="text-xs font-bold uppercase tracking-widest font-mono text-zinc-500 flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                    • Resúmenes Oficiales: GP de {gpName || "Formula 1"}
+                    • Resúmenes Oficiales: GP de {displayGpName}
                 </h2>
             </div>
 
             <div className="relative w-full">
-                
-                {/* 👑 FLECHA IZQUIERDA */}
                 <button 
                     onClick={() => scroll("left")}
                     className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-12 h-20 flex items-center justify-center opacity-0 group-hover/feed:opacity-100 transition-all duration-300 hover:-translate-x-1 active:scale-90 pointer-events-auto group/btnLeft"
@@ -106,15 +97,13 @@ export function YouTubeFeed() {
                     </svg>
                 </button>
 
-                {/* Tira scrolleable */}
                 <div ref={scrollContainerRef} className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth pb-4 snap-x snap-mandatory w-full">
                     {videos.map((video) => (
                         <VideoCard key={video.id} video={video} />
                     ))}
 
-                    {/* ➕ BOTÓN EXPLORAR */}
                     <a
-                        href={`https://www.youtube.com/results?search_query=F1+Highlights+${encodeURIComponent(gpName || "Formula 1")}`}
+                        href={`https://www.youtube.com/results?search_query=F1+Highlights+${encodeURIComponent(displayGpName)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex-shrink-0 w-[calc(100%-2rem)] sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-0.75rem)] aspect-video rounded-xl bg-zinc-950 border border-zinc-900 border-dashed flex flex-col items-center justify-center p-4 snap-start relative group cursor-pointer hover:border-amber-500/40 transition duration-300 select-none text-center"
@@ -125,7 +114,6 @@ export function YouTubeFeed() {
                     </a>
                 </div>
 
-                {/* 👑 FLECHA DERECHA */}
                 <button 
                     onClick={() => scroll("right")}
                     className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-12 h-20 flex items-center justify-center opacity-0 group-hover/feed:opacity-100 transition-all duration-300 hover:translate-x-1 active:scale-90 pointer-events-auto group/btnRight"

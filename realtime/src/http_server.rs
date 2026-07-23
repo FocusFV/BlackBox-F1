@@ -59,9 +59,30 @@ pub async fn start(state_service: StateService, tx: Sender<String>) -> Result<()
     Ok(())
 }
 
-// 🏎️ MOTOR REAL: Si el simulador está en boxes, calcula el GP anterior (Silverstone) y busca en YouTube
+// 🧠 HELPER INTELIGENTE: Devuelve automáticamente el GP anterior al actual en el calendario
+fn get_previous_gp_name(current_gp: &str) -> String {
+    let calendar = vec![
+        "Bahrain", "Saudi Arabia", "Australia", "Japan", "China", 
+        "Miami", "Emilia Romagna", "Monaco", "Canada", "Spain", 
+        "Austria", "Great Britain", "Hungary", "Belgium", "Netherlands", 
+        "Italy", "Azerbaijan", "Singapore", "United States", "Mexico", 
+        "Brazil", "Las Vegas", "Qatar", "Abu Dhabi"
+    ];
+
+    let clean_current = current_gp.to_lowercase();
+
+    if let Some(index) = calendar.iter().position(|&gp| clean_current.contains(&gp.to_lowercase())) {
+        if index > 0 {
+            return calendar[index - 1].to_string();
+        }
+    }
+
+    // Fallback inteligente si el simulador está apagado: asumimos Bélgica (Belgium)
+    "Belgium".to_string()
+}
+
 pub async fn get_cached_videos(State(ctx): State<Arc<Context>>) -> impl IntoResponse {
-    let gp_name = match ctx.state_service.get_state().await {
+    let current_gp = match ctx.state_service.get_state().await {
         Ok(state) => state.pointer("/SessionInfo/Meeting/Name")
             .and_then(|v| v.as_str())
             .unwrap_or_default()
@@ -69,17 +90,24 @@ pub async fn get_cached_videos(State(ctx): State<Arc<Context>>) -> impl IntoResp
         Err(_) => String::new(),
     };
 
-    // Lógica dinámica: Si el simulador está apagado o estamos en boxes en Bélgica,
-    // le mandamos de prepo "Silverstone" para traer los resúmenes del GP anterior.
-    let target_gp = if gp_name.is_empty() || gp_name.to_lowercase().contains("belgian") {
-        "Silverstone Grand Prix".to_string()
-    } else {
-        gp_name
-    };
+    // Obtenemos el GP anterior real
+    let target_gp = get_previous_gp_name(&current_gp);
 
     let videos = ctx.youtube_service.get_videos(&target_gp).await;
     
-    (StatusCode::OK, axum::Json(videos))
+    // Devolvemos el nombre dinámico junto a los videos para sincronizar la interfaz
+    #[derive(serde::Serialize)]
+    struct VideoResponse {
+        target_gp: String,
+        videos: Vec<crate::services::youtube_service::YouTubeVideo>,
+    }
+
+    let response = VideoResponse {
+        target_gp,
+        videos,
+    };
+
+    (StatusCode::OK, axum::Json(response))
 }
 
 pub async fn prueba_render() -> &'static str {
