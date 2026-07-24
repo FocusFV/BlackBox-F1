@@ -4,44 +4,30 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useDataStore } from "@/stores/useDataStore";
 import { useSidebarStore } from "@/stores/useSidebarStore";
-import { Lock, Unlock, ShieldAlert, Play } from "lucide-react";
+import { Lock, Unlock } from "lucide-react";
 
 // 🚀 IMPORTAMOS COMPONENTES DE NAVEGACIÓN Y APOYO
 import Sidebar from "@/components/Sidebar";
 import SidenavButton from "@/components/SidenavButton";
 import SupportModal from "@/components/SupportModal";
 
-// 🏎️ DICCIONARIO DE ESTILOS FOCUSFV PARA ONBOARDS Y CANALES
+// 🏎️ DICCIONARIO DE ESTILOS FOCUSFV
 const PILOTOS_CONFIG: Record<string, { name: string; border: string; shadow: string; logo: string; btnColor: string }> = {
-	RUS: { name: "Onboard Russell", border: "border-cyan-400 hover:border-cyan-500", shadow: "shadow-[0_10px_25px_rgba(34,211,238,0.25)]", logo: "/george.png", btnColor: "bg-cyan-400 hover:bg-cyan-300 text-black" },
-	ANT: { name: "Onboard Antonelli", border: "border-cyan-400 hover:border-cyan-500", shadow: "shadow-[0_10px_25px_rgba(34,211,238,0.25)]", logo: "/kimi.png", btnColor: "bg-cyan-400 hover:bg-cyan-300 text-black" },
-	LEC: { name: "Onboard Leclerc", border: "border-red-500 hover:border-red-600", shadow: "shadow-[0_10px_25px_rgba(220,38,38,0.25)]", logo: "/leclerc.png", btnColor: "bg-red-600 hover:bg-red-500 text-white" },
-	HAM: { name: "Onboard Hamilton", border: "border-red-500 hover:border-red-600", shadow: "shadow-[0_10px_25px_rgba(220,38,38,0.25)]", logo: "/hamilton.png", btnColor: "bg-red-600 hover:bg-red-500 text-white" },
-	VER: { name: "Onboard Verstappen", border: "border-blue-500 hover:border-blue-600", shadow: "shadow-[0_10px_25px_rgba(37,99,235,0.25)]", logo: "/max.png", btnColor: "bg-blue-600 hover:bg-blue-500 text-white" },
-	NOR: { name: "Onboard Norris", border: "border-orange-400 hover:border-orange-500", shadow: "shadow-[0_10px_25px_rgba(249,115,22,0.25)]", logo: "/norris.png", btnColor: "bg-orange-500 hover:bg-orange-400 text-black" },
-	PIA: { name: "Onboard Piastri", border: "border-orange-400 hover:border-orange-500", shadow: "shadow-[0_10px_25px_rgba(249,115,22,0.25)]", logo: "/piastri.png", btnColor: "bg-orange-500 hover:bg-orange-400 text-black" },
-	ALO: { name: "Onboard Alonso", border: "border-emerald-600 hover:border-emerald-700", shadow: "shadow-[0_10px_25px_rgba(5,150,105,0.25)]", logo: "/alonso.png", btnColor: "bg-emerald-500 hover:bg-emerald-400 text-black" },
-	SAI: { name: "Onboard Sainz", border: "border-blue-600 hover:border-blue-700", shadow: "shadow-[0_10px_25px_rgba(29,78,216,0.25)]", logo: "/sainz.png", btnColor: "bg-blue-600 hover:bg-blue-500 text-white" },
-};
-
-// Map para asociar las pestañas principales con su color correspondiente
-const TAB_COLORS: Record<string, string> = {
-	FOX: "bg-sky-500 hover:bg-sky-400 text-black",
-	DISNEY: "bg-cyan-400 hover:bg-cyan-300 text-black",
-	DAZN: "bg-red-600 hover:bg-red-500 text-white",
-	COLAPINTO: "bg-pink-500 hover:bg-pink-400 text-black",
-	NORRIS: "bg-orange-500 hover:bg-orange-400 text-black",
-	RACEHUB: "bg-blue-600 hover:bg-blue-500 text-white",
-	GENERAL: "bg-purple-600 hover:bg-purple-500 text-white",
+	RUS: { name: "Onboard Russell", border: "border-cyan-400 hover:border-cyan-500", shadow: "shadow-[0_10px_25px_rgba(34,211,238,0.25)]", logo: "/george.png", btnColor: "bg-cyan-400 text-black" },
+	ANT: { name: "Onboard Antonelli", border: "border-cyan-400 hover:border-cyan-500", shadow: "shadow-[0_10px_25px_rgba(34,211,238,0.25)]", logo: "/kimi.png", btnColor: "bg-cyan-400 text-black" },
+	LEC: { name: "Onboard Leclerc", border: "border-red-500 hover:border-red-600", shadow: "shadow-[0_10px_25px_rgba(220,38,38,0.25)]", logo: "/leclerc.png", btnColor: "bg-red-600 text-white" },
+	HAM: { name: "Onboard Hamilton", border: "border-red-500 hover:border-red-600", shadow: "shadow-[0_10px_25px_rgba(220,38,38,0.25)]", logo: "/hamilton.png", btnColor: "bg-red-600 text-white" },
+	VER: { name: "Onboard Verstappen", border: "border-blue-500 hover:border-blue-600", shadow: "shadow-[0_10px_25px_rgba(37,99,235,0.25)]", logo: "/max.png", btnColor: "bg-blue-600 text-white" },
+	NOR: { name: "Onboard Norris", border: "border-orange-400 hover:border-orange-500", shadow: "shadow-[0_10px_25px_rgba(249,115,22,0.25)]", logo: "/norris.png", btnColor: "bg-orange-500 text-black" },
+	PIA: { name: "Onboard Piastri", border: "border-orange-400 hover:border-orange-500", shadow: "shadow-[0_10px_25px_rgba(249,115,22,0.25)]", logo: "/piastri.png", btnColor: "bg-orange-500 text-black" },
+	ALO: { name: "Onboard Alonso", border: "border-emerald-600 hover:border-emerald-700", shadow: "shadow-[0_10px_25px_rgba(5,150,105,0.25)]", logo: "/alonso.png", btnColor: "bg-emerald-500 text-black" },
+	SAI: { name: "Onboard Sainz", border: "border-blue-600 hover:border-blue-700", shadow: "shadow-[0_10px_25px_rgba(29,78,216,0.25)]", logo: "/sainz.png", btnColor: "bg-blue-600 text-white" },
 };
 
 export default function StreamsPage() {
 	const [bypass, setBypass] = useState<boolean>(false);
 	const [clickCount, setClickCount] = useState<number>(0);
 	const [isUnlocking, setIsUnlocking] = useState<boolean>(false);
-	
-	// 🛡️ Estado del Escudo de Protección Antianuncios
-	const [overlayActive, setOverlayActive] = useState<boolean>(true);
 
 	// Controles del Sidebar Store
 	const openSidebar = useSidebarStore((state) => state.open);
@@ -54,7 +40,6 @@ export default function StreamsPage() {
 		disney8: "HAM"  
 	});
 
-	// 🔌 CONEXIÓN CON BACKEND EN RENDER
 	useEffect(() => {
 		fetch("https://Blackbox-f1.onrender.com/api/streams-config")
 			.then((res) => {
@@ -84,26 +69,10 @@ export default function StreamsPage() {
 
 	const [activeTab, setActiveTab] = useState<keyof typeof STREAMS_CONFIG>("FOX");
 
-	// Cada vez que cambia la pestaña, reactivamos el escudo por seguridad
-	const handleTabChange = (tab: keyof typeof STREAMS_CONFIG) => {
+	const handleTabSelect = (tab: keyof typeof STREAMS_CONFIG) => {
 		setActiveTab(tab);
-		setOverlayActive(true);
 	};
 
-	// Determinamos el color activo del botón según la pestaña actual
-	const getActiveButtonColor = () => {
-		if (activeTab === "DISNEY7") {
-			const tla = firebaseStreams.disney7 || "RUS";
-			return PILOTOS_CONFIG[tla]?.btnColor || "bg-amber-500 hover:bg-amber-400 text-black";
-		}
-		if (activeTab === "DISNEY8") {
-			const tla = firebaseStreams.disney8 || "HAM";
-			return PILOTOS_CONFIG[tla]?.btnColor || "bg-amber-500 hover:bg-amber-400 text-black";
-		}
-		return TAB_COLORS[activeTab] || "bg-amber-500 hover:bg-amber-400 text-black";
-	};
-
-	// Monitoreo del store de Zustand
 	const trackStatus = useDataStore((state) => state.state?.TrackStatus?.Status);
 	const sessionInfo = useDataStore((state) => state.state?.SessionInfo);
 	const activeRace = sessionInfo?.Meeting?.Name || "Gran Premio";
@@ -140,7 +109,6 @@ export default function StreamsPage() {
 				{!isLive && !bypass ? (
 					<div className="pt-4 w-full mx-auto px-4 sm:px-6 h-full flex flex-col items-center justify-center relative">
 						
-						{/* BOTÓN PARA ABRIR SIDEBAR SI ESTÁ DESFIJADO */}
 						<div className="absolute top-4 left-4">
 							<SidenavButton onClick={() => (pinnedSidebar ? pinSidebar() : openSidebar())} />
 						</div>
@@ -204,87 +172,57 @@ export default function StreamsPage() {
 							</Link>
 						</div>
 
-						{/* 📺 REPRODUCTOR XL CON ESCUDO CORTA-POPUP */}
-						<div className="w-full mx-auto aspect-video rounded-3xl overflow-hidden border border-zinc-800 bg-black/80 shadow-[0_0_60px_rgba(0,0,0,0.9)] relative mb-6">
-							
+						{/* 📺 REPRODUCTOR DE VIDEO DIRECTO */}
+						<div className="w-full mx-auto aspect-video rounded-3xl overflow-hidden border border-zinc-800 bg-zinc-950/90 shadow-[0_0_60px_rgba(0,0,0,0.9)] relative mb-6">
 							<iframe
-								key={activeTab}
 								src={STREAMS_CONFIG[activeTab]}
-								className="w-full h-full"
-								allowFullScreen
-								scrolling="no"
+								className="w-full h-full border-0"
 								allow="autoplay; encrypted-media; picture-in-picture"
+								allowFullScreen
 							/>
-
-							{/* 🛡️ ESCUDO CON MENSAJE AMIGABLE Y COLOR DINÁMICO */}
-							{overlayActive && (
-								<div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center p-4 text-center">
-									<div className="bg-zinc-950/90 border border-zinc-800 p-6 sm:p-8 rounded-3xl max-w-md flex flex-col items-center shadow-2xl space-y-4">
-										<div className="p-3.5 bg-zinc-900 border border-zinc-800 text-amber-400 rounded-2xl shadow-inner">
-											<ShieldAlert className="w-7 h-7 animate-pulse" />
-										</div>
-										
-										<div className="space-y-1">
-											<h3 className="text-lg font-black text-white uppercase tracking-tight">
-												Escudo Antianuncios
-											</h3>
-											<p className="text-xs text-zinc-400 font-sans leading-relaxed">
-												Para esquivar las pestañas y anuncios molestos tuve que poner este botón. Tocalo y arrancá a ver la transmisión tranquilo.
-											</p>
-										</div>
-
-										<button
-											onClick={() => setOverlayActive(false)}
-											className={`w-full py-3.5 px-5 font-black uppercase text-xs rounded-xl flex items-center justify-center gap-2.5 transition-all duration-200 shadow-lg hover:scale-[1.02] active:scale-95 ${getActiveButtonColor()}`}
-										>
-											<Play className="w-4 h-4 fill-current" /> Iniciar Stream
-										</button>
-									</div>
-								</div>
-							)}
 						</div>
 
 						{/* 🎛️ TABLERO DE CONTROL MULTICANAL */}
 						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-6">
 							
 							{/* FOX SPORTS */}
-							<button onClick={() => handleTabChange("FOX")} className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 ${activeTab === "FOX" ? "text-white border-blue-400 shadow-[0_10px_25px_rgba(14,165,233,0.25)] animate-pulse" : "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-blue-800"}`}>
+							<button onClick={() => handleTabSelect("FOX")} className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 ${activeTab === "FOX" ? "text-white border-blue-400 shadow-[0_10px_25px_rgba(14,165,233,0.25)] animate-pulse" : "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-blue-800"}`}>
 								<img src="/fox.png" alt="Fox" className="h-10 w-auto max-w-[85%] object-contain" />
 								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">Fox Sports AR</span>
 							</button>
 
 							{/* DISNEY+ */}
-							<button onClick={() => handleTabChange("DISNEY")} className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 ${activeTab === "DISNEY" ? "text-white border-cyan-400 shadow-[0_10px_25px_rgba(14,165,233,0.25)] animate-pulse" : "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-cyan-800"}`}>
+							<button onClick={() => handleTabSelect("DISNEY")} className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 ${activeTab === "DISNEY" ? "text-white border-cyan-400 shadow-[0_10px_25px_rgba(14,165,233,0.25)] animate-pulse" : "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-cyan-800"}`}>
 								<img src="/disney.png" alt="Disney" className="h-10 w-auto max-w-[85%] object-contain" />
 								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">Disney +</span>
 							</button>
 
 							{/* DAZN F1 */}
-							<button onClick={() => handleTabChange("DAZN")} className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 ${activeTab === "DAZN" ? "text-white border-red-500 shadow-[0_10px_25px_rgba(220,38,38,0.3)] animate-pulse" : "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-red-800"}`}>
+							<button onClick={() => handleTabSelect("DAZN")} className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 ${activeTab === "DAZN" ? "text-white border-red-500 shadow-[0_10px_25px_rgba(220,38,38,0.3)] animate-pulse" : "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-red-800"}`}>
 								<img src="/dazn.png" alt="DAZN" className="h-10 w-auto max-w-[85%] object-contain" />
 								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">DAZN F1</span>
 							</button>
 
 							{/* ONBOARD FRANCO COLAPINTO */}
-							<button onClick={() => handleTabChange("COLAPINTO")} className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 ${activeTab === "COLAPINTO" ? "text-white border-pink-400 shadow-[0_10px_25px_rgba(244,63,94,0.3)] animate-pulse" : "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-pink-800"}`}>
+							<button onClick={() => handleTabSelect("COLAPINTO")} className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 ${activeTab === "COLAPINTO" ? "text-white border-pink-400 shadow-[0_10px_25px_rgba(244,63,94,0.3)] animate-pulse" : "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-pink-800"}`}>
 								<img src="/colapinto.png" alt="Colapinto" className="h-10 w-auto max-w-[85%] object-contain rounded-sm" />
 								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">Onboard Colapinto</span>
 							</button>
 
 							{/* ONBOARD LANDO NORRIS */}
-							<button onClick={() => handleTabChange("NORRIS")} className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 ${activeTab === "NORRIS" ? "text-white border-orange-400 shadow-[0_10px_25px_rgba(249,115,22,0.3)] animate-pulse" : "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-orange-800"}`}>
+							<button onClick={() => handleTabSelect("NORRIS")} className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 ${activeTab === "NORRIS" ? "text-white border-orange-400 shadow-[0_10px_25px_rgba(249,115,22,0.3)] animate-pulse" : "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-orange-800"}`}>
 								<img src="/norris.png" alt="Norris" className="h-10 w-auto max-w-[85%] object-contain" />
 								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">Onboard Norris</span>
 							</button>
 
 							{/* RACEHUB GENERAL */}
-							<button onClick={() => handleTabChange("RACEHUB")} className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 ${activeTab === "RACEHUB" ? "text-white border-blue-500 shadow-[0_10px_25px_rgba(37,99,235,0.3)] animate-pulse" : "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-blue-800"}`}>
+							<button onClick={() => handleTabSelect("RACEHUB")} className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 ${activeTab === "RACEHUB" ? "text-white border-blue-500 shadow-[0_10px_25px_rgba(37,99,235,0.3)] animate-pulse" : "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-blue-800"}`}>
 								<img src="/racehub.png" alt="RaceHub" className="h-10 w-auto max-w-[85%] object-contain" />
 								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">RaceHub General</span>
 							</button>
 
 							{/* ONBOARD GENERAL */}
-							<button onClick={() => handleTabChange("GENERAL")} className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 ${activeTab === "GENERAL" ? "text-white border-purple-500 shadow-[0_10px_25px_rgba(147,51,234,0.3)] animate-pulse" : "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-purple-800"}`}>
+							<button onClick={() => handleTabSelect("GENERAL")} className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 ${activeTab === "GENERAL" ? "text-white border-purple-500 shadow-[0_10px_25px_rgba(147,51,234,0.3)] animate-pulse" : "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-purple-800"}`}>
 								<img src="/onboard.png" alt="General" className="h-10 w-auto max-w-[85%] object-contain" />
 								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">Onboard General</span>
 							</button>
@@ -295,7 +233,7 @@ export default function StreamsPage() {
 								const style = PILOTOS_CONFIG[tla] || { name: `Disney 7 (${tla})`, border: "border-zinc-900", shadow: "", logo: "/onboard.png" };
 								return (
 									<button 
-										onClick={() => handleTabChange("DISNEY7")} 
+										onClick={() => handleTabSelect("DISNEY7")} 
 										className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 ${
 											activeTab === "DISNEY7" ? `text-white ${style.border} ${style.shadow} animate-pulse` : `bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:bg-zinc-900/40`
 										}`}
@@ -312,7 +250,7 @@ export default function StreamsPage() {
 								const style = PILOTOS_CONFIG[tla] || { name: `Disney 8 (${tla})`, border: "border-zinc-900", shadow: "", logo: "/onboard.png" };
 								return (
 									<button 
-										onClick={() => handleTabChange("DISNEY8")} 
+										onClick={() => handleTabSelect("DISNEY8")} 
 										className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 ${
 											activeTab === "DISNEY8" ? `text-white ${style.border} ${style.shadow} animate-pulse` : `bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:bg-zinc-900/40`
 										}`}
@@ -323,17 +261,6 @@ export default function StreamsPage() {
 								);
 							})()}
 
-						</div>
-
-						{/* ADVERTENCIA DE SEGURIDAD */}
-						<div className="w-full mx-auto p-4 border border-amber-500/10 bg-amber-500/5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 font-sans text-xs mb-6">
-							<div className="space-y-1">
-								<p className="font-mono font-black text-amber-400 uppercase tracking-wider">⚠️ RECOMENDACIÓN ANTI-POPUP</p>
-								<p className="text-zinc-400">Para bloquear ventanas molestas al hacer clic en el video, usá una extensión adblocker.</p>
-							</div>
-							<div className="flex flex-wrap gap-2 shrink-0">
-								<a href="https://ublockorigin.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-300 font-mono font-bold text-[11px] uppercase tracking-wide">🛡️ uBlock Origin</a>
-							</div>
 						</div>
 
 					</div>
