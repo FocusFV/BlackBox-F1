@@ -56,8 +56,8 @@ export default function StreamsPage() {
 
 	// 🏎️ PARRILLA COMPLETA DE IFRAMES
 	const STREAMS_CONFIG = {
-		FOX: "https://streamx-hd.com/live1.php?stream=fox1ar",
-		DISNEY: "https://streamx-hd.com/live1.php?stream=disney2",
+		FOX: "https://fltvhd.com/online/canal.php?stream=foxsports",
+		DISNEY: "https://la18hd.su/vivo/canal.php?stream=disney3",
 		DAZN: "https://streamx-hd.com/live1.php?stream=daznf1",
 		COLAPINTO: "https://streamx-hd.com/live1.php?stream=disney5",
 		NORRIS: "https://streamx-hd.com/live1.php?stream=disney6",
