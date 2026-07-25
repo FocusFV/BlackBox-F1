@@ -98,18 +98,24 @@ export const ParcFerme: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [hasSprint, setHasSprint] = useState(false);
 
-	// 📡 ESTADO DE PISTA REVISADO Y CORREGIDO (TypeScript Safe)
-const rawStatus = useDataStore((state) => state.state?.SessionStatus?.Status);
-const session = useDataStore((state) => state.state?.SessionInfo);
+	// 📡 LECTURA ROBUSTA DEL ZUSTAND STORE
+	const fullStoreState = useDataStore((state) => state.state);
+	const rawStatus = fullStoreState?.SessionStatus?.Status;
+	const session = fullStoreState?.SessionInfo;
 
-// Forzamos el tipo a string para que TypeScript no chille con los literales strictos
-const sessionStatus = rawStatus as string | undefined;
+	// Convertimos a string en minúsculas por seguridad (sirve para números como "1" o "Started")
+	const statusString = String(rawStatus || "").trim().toLowerCase();
 
-// Evaluamos si el estado actual NO es de finalización
-const isEnded = sessionStatus === "Finished" || sessionStatus === "Finalised" || sessionStatus === "Ends";
+	// Palabras/códigos clave de sesión corriendo en vivo
+	const activeStatusKeywords = ["started", "inprogress", "ontrack", "green", "running", "1"];
 
-// Si hay sesión en el store y el status no es de finalización, la pista está activa
-const isLive = !!session && !!sessionStatus && !isEnded;
+	// Si hay sesión y el status indica pista abierta, activamos isLive
+	const isLive = Boolean(session) && activeStatusKeywords.some((status) => statusString.includes(status));
+
+	// 🔍 DEBUG PARA VER QUÉ VIENE EN LA CONSOLA DEL NAVEGADOR
+	useEffect(() => {
+		console.log("🔍 [ParcFerme Debug] Raw Status:", rawStatus, "| Status String:", statusString, "| Session:", session, "| isLive:", isLive);
+	}, [rawStatus, statusString, session, isLive]);
 
 	// 1. TELEMETRÍA OFICIAL
 	useEffect(() => {

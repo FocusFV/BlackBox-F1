@@ -1,8 +1,5 @@
 import { create } from "zustand";
-
 import type { CarsData, Positions, State } from "@/types/state.type";
-
-// main store
 
 type DataStore = {
 	state: State | null;
@@ -19,16 +16,23 @@ export const useDataStore = create<DataStore>((set) => ({
 	carsData: null,
 	positions: null,
 
-	setState: (partialState: Partial<State> | null) =>
-		set((prev) => ({
-			state: partialState
-				? {
-						...(prev.state ?? {}),
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						...Object.fromEntries(Object.entries(partialState).filter(([_, v]) => v !== undefined)),
-					}
-				: null,
-		})),
-	setCarsData: (carsData: CarsData | null) => set({ carsData }),
-	setPositions: (positions: Positions | null) => set({ positions }),
+	setState: (partialState) =>
+		set((prev) => {
+			if (partialState === null) return { state: null };
+
+			// Limpiamos los campos undefined antes del merge
+			const cleanPartial = Object.fromEntries(
+				Object.entries(partialState).filter(([_, v]) => v !== undefined)
+			);
+
+			return {
+				state: {
+					...(prev.state || {}),
+					...cleanPartial,
+				} as State,
+			};
+		}),
+
+	setCarsData: (carsData) => set({ carsData }),
+	setPositions: (positions) => set({ positions }),
 }));

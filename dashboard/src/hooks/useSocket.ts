@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
-
+import { useEffect, useRef, useState } from "react";
 import type { MessageInitial, MessageUpdate } from "@/types/message.type";
-
 import { env } from "@/env";
 
 type Props = {
@@ -12,77 +10,43 @@ type Props = {
 export const useSocket = ({ handleInitial, handleUpdate }: Props) => {
 	const [connected, setConnected] = useState<boolean>(false);
 
+	// Guardamos las referencias actualizadas de las funciones
+	const savedHandleInitial = useRef(handleInitial);
+	const savedHandleUpdate = useRef(handleUpdate);
+
+	// Mantenemos la referencia al día en cada render sin re-conectar SSE
 	useEffect(() => {
-		const baseUrl = env.NEXT_PUBLIC_LIVE_URL.replace(/^http/, "ws");
-		const prodUrl = `${baseUrl}/ws`;
-		const simUrl = "ws://127.0.0.1:8080/ws";
+		savedHandleInitial.current = handleInitial;
+		savedHandleUpdate.current = handleUpdate;
+	}, [handleInitial, handleUpdate]);
 
-		let ws: WebSocket | null = null;
-		let triedProd = false;
+	useEffect(() => {
+		const sse = new EventSource(`${env.NEXT_PUBLIC_LIVE_URL}/api/realtime`);
 
-		const connect = (url: string) => {
-			ws = new WebSocket(url);
-
-			ws.onopen = () => {
-				setConnected(true);
-				console.log(`🟢 Conectado con éxito a: ${url}`);
-			};
-
-			ws.onerror = () => {
-				setConnected(false);
-				// 🚀 Si el simulador de Cargo está apagado, saltamos automáticamente al servidor Real/Prod
-				if (!triedProd && url === simUrl) {
-					console.warn("⚠️ Simulador local apagado. Conectando automáticamente a la URL real...");
-					triedProd = true;
-					ws?.close();
-					connect(prodUrl);
-				} else {
-					console.warn(`⚠️ No se pudo conectar al WebSocket (${url})`);
-				}
-			};
-
-			ws.onclose = () => {
-				setConnected(false);
-			};
-
-			ws.onmessage = (event) => {
-				const raw = event.data?.trim();
-				if (!raw) return;
-
-				try {
-					const parsed = JSON.parse(raw);
-
-					// Si viene la respuesta inicial de SignalR (Objeto 'R')
-					if (parsed.R) {
-						console.log("🏎️ Estado inicial recibido:", parsed.R);
-						handleInitial(parsed.R);
-					} 
-					// Si vienen actualizaciones progresivas (Array 'M')
-					else if (parsed.M && Array.isArray(parsed.M)) {
-						parsed.M.forEach((update: any) => {
-							if (update.A) {
-								handleUpdate(update.A[1] || update);
-							}
-						});
-					} 
-					// Fallback por si la app espera JSONs simples
-					else {
-						handleUpdate(parsed);
-					}
-				} catch (error) {
-					console.warn("⚠️ Línea no parseable en la telemetría, omitiendo...", error);
-				}
-			};
+		sse.onopen = () => setConnected(true);
+		
+		sse.onerror = (err) => {
+			console.error("Error en SSE:", err);
+			setConnected(false);
 		};
 
-		// Arranca intentando conectar al simulador local
-		connect(simUrl);
+		sse.addEventListener("initial", (message) => {
+			if (savedHandleInitial.current) {
+				savedHandleInitial.current(JSON.parse(message.data));
+			}
+		});
+
+		sse.addEventListener("update", (message) => {
+			if (savedHandleUpdate.current) {
+				savedHandleUpdate.current(JSON.parse(message.data));
+			}
+		});
 
 		return () => {
-			ws?.close();
+			sse.close();
+			setConnected(false);
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, []); // Se conecta una sola vez al montar
 
 	return { connected };
 };
