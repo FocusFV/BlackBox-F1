@@ -55,7 +55,12 @@ export const useDataEngine = ({ updateState, updatePosition, updateCarData }: Pr
 
 	const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-	const handleInitial = ({ CarDataZ: carZ, PositionZ: posZ, ...initial }: MessageInitial) => {
+	const handleInitial = (payload: any) => {
+		// 🛠️ Mapeo inteligente para capturar CarData.z o CarDataZ indistintamente
+		const carZ = payload["CarData.z"] || payload["CarDataZ"];
+		const posZ = payload["Position.z"] || payload["PositionZ"];
+		const initial = { ...payload };
+
 		updateState(initial);
 
 		Object.keys(buffers).forEach((key) => {
@@ -65,29 +70,41 @@ export const useDataEngine = ({ updateState, updatePosition, updateCarData }: Pr
 		});
 
 		if (carZ) {
-	const carData = inflate<CarData>(carZ);
-	if (carData?.Entries && carData.Entries.length > 0) {
-		updateCarData(carData.Entries[0].Cars);
+			try {
+				const carData = inflate<CarData>(carZ);
+				if (carData?.Entries?.[0]?.Cars) {
+					updateCarData(carData.Entries[0].Cars);
 
-		for (const entry of carData.Entries) {
-			carBuffer.pushTimed(entry.Cars, utcToLocalMs(entry.Utc));
+					for (const entry of carData.Entries) {
+						carBuffer.pushTimed(entry.Cars, utcToLocalMs(entry.Utc));
+					}
+				}
+			} catch (err) {
+				console.error("[DataEngine] Error descomprimiendo CarData:", err);
+			}
 		}
-	}
-}
 
-if (posZ) {
-	const position = inflate<Position>(posZ);
-	if (position?.Position && position.Position.length > 0) {
-		updatePosition(position.Position[0].Entries);
+		if (posZ) {
+			try {
+				const position = inflate<Position>(posZ);
+				if (position?.Position?.[0]?.Entries) {
+					updatePosition(position.Position[0].Entries);
 
-		for (const entry of position.Position) {
-			posBuffer.pushTimed(entry.Entries, utcToLocalMs(entry.Timestamp));
+					for (const entry of position.Position) {
+						posBuffer.pushTimed(entry.Entries, utcToLocalMs(entry.Timestamp));
+					}
+				}
+			} catch (err) {
+				console.error("[DataEngine] Error descomprimiendo Position:", err);
+			}
 		}
-	}
-}
 	};
 
-	const handleUpdate = ({ CarDataZ: carZ, PositionZ: posZ, ...update }: MessageUpdate) => {
+	const handleUpdate = (payload: any) => {
+		const carZ = payload["CarData.z"] || payload["CarDataZ"];
+		const posZ = payload["Position.z"] || payload["PositionZ"];
+		const update = { ...payload };
+
 		Object.keys(buffers).forEach((key) => {
 			const data = update[key as keyof typeof update];
 			const buffer = buffers[key as keyof typeof buffers];
@@ -95,83 +112,97 @@ if (posZ) {
 		});
 
 		if (carZ) {
-			const carData = inflate<CarData>(carZ);
-			for (const entry of carData.Entries) {
-				carBuffer.pushTimed(entry.Cars, utcToLocalMs(entry.Utc));
+			try {
+				const carData = inflate<CarData>(carZ);
+				if (carData?.Entries) {
+					for (const entry of carData.Entries) {
+						carBuffer.pushTimed(entry.Cars, utcToLocalMs(entry.Utc));
+					}
+				}
+			} catch (err) {
+				console.error("[DataEngine] Error descomprimiendo CarData update:", err);
 			}
 		}
 
 		if (posZ) {
-			const position = inflate<Position>(posZ);
-			for (const entry of position.Position) {
-				posBuffer.pushTimed(entry.Entries, utcToLocalMs(entry.Timestamp));
+			try {
+				const position = inflate<Position>(posZ);
+				if (position?.Position) {
+					for (const entry of position.Position) {
+						posBuffer.pushTimed(entry.Entries, utcToLocalMs(entry.Timestamp));
+					}
+				}
+			} catch (err) {
+				console.error("[DataEngine] Error descomprimiendo Position update:", err);
 			}
 		}
 	};
 
 	const handleCurrentState = () => {
-		const delay = delayRef.current;
+    const delay = delayRef.current;
 
-		if (delay === 0) {
-			const newStateFrame: Record<string, State[keyof State]> = {};
+    if (delay === 0) {
+        const newStateFrame: Record<string, State[keyof State]> = {};
 
-			Object.keys(buffers).forEach((key) => {
-				const buffer = buffers[key as keyof typeof buffers];
-				const latest = buffer.latest() as State[keyof State];
-				if (latest) newStateFrame[key] = latest;
-			});
+        Object.keys(buffers).forEach((key) => {
+            const buffer = buffers[key as keyof typeof buffers];
+            const latest = buffer.latest() as State[keyof State];
+            if (latest) newStateFrame[key] = latest;
+        });
 
-			updateState(newStateFrame);
+        // 🛡️ SOLUCIÓN: Solo actualizamos Zustand si realmente hay datos en el frame
+        if (Object.keys(newStateFrame).length > 0) {
+            updateState(newStateFrame);
+        }
 
-			const carFrame = carBuffer.latest();
-			if (carFrame) updateCarData(carFrame);
+        const carFrame = carBuffer.latest();
+        if (carFrame) updateCarData(carFrame);
 
-			const posFrame = posBuffer.latest();
-			if (posFrame) updatePosition(posFrame);
-		} else {
-			const delayedTimestamp = Date.now() - delay * 1000;
-			const newStateFrame: Record<string, State[keyof State]> = {};
+        const posFrame = posBuffer.latest();
+        if (posFrame) updatePosition(posFrame);
+    } else {
+        const delayedTimestamp = Date.now() - delay * 1000;
+        const newStateFrame: Record<string, State[keyof State]> = {};
 
-			Object.keys(buffers).forEach((key) => {
-				const buffer = buffers[key as keyof typeof buffers];
-				const delayed = buffer.delayed(delayedTimestamp) as State[keyof State];
+        Object.keys(buffers).forEach((key) => {
+            const buffer = buffers[key as keyof typeof buffers];
+            const delayed = buffer.delayed(delayedTimestamp) as State[keyof State];
 
-				if (delayed) newStateFrame[key] = delayed;
+            if (delayed) newStateFrame[key] = delayed;
 
-				setTimeout(() => buffer.cleanup(delayedTimestamp), 0);
-			});
+            setTimeout(() => buffer.cleanup(delayedTimestamp), 0);
+        });
 
-			updateState(newStateFrame);
+        // 🛡️ SOLUCIÓN: Solo actualizamos Zustand si realmente hay datos en el frame retrasado
+        if (Object.keys(newStateFrame).length > 0) {
+            updateState(newStateFrame);
+        }
 
-			const carFrame = carBuffer.delayed(delayedTimestamp);
-			if (carFrame) {
-				updateCarData(carFrame);
-				setTimeout(() => carBuffer.cleanup(delayedTimestamp), 0);
-			}
+        const carFrame = carBuffer.delayed(delayedTimestamp);
+        if (carFrame) {
+            updateCarData(carFrame);
+            setTimeout(() => carBuffer.cleanup(delayedTimestamp), 0);
+        }
 
-			const posFrame = posBuffer.delayed(delayedTimestamp);
-			if (posFrame) {
-				updatePosition(posFrame);
-				setTimeout(() => posBuffer.cleanup(delayedTimestamp), 0);
-			}
-		}
+        const posFrame = posBuffer.delayed(delayedTimestamp);
+        if (posFrame) {
+            updatePosition(posFrame);
+            setTimeout(() => posBuffer.cleanup(delayedTimestamp), 0);
+        }
+    }
 
-		const maxDelay = Math.min(
-			...Object.values(buffers)
-				.map((buffer) => buffer.maxDelay())
-				.filter((delay) => delay > 0),
-			// carBuffer.maxDelay(),
-			// posBuffer.maxDelay(),
-		);
+    const maxDelay = Math.min(
+        ...Object.values(buffers)
+            .map((buffer) => buffer.maxDelay())
+            .filter((delay) => delay > 0),
+    );
 
-		setMaxDelay(maxDelay);
-	};
+    setMaxDelay(maxDelay);
+};
 
 	useEffect(() => {
 		intervalRef.current = setInterval(handleCurrentState, UPDATE_MS);
 		return () => (intervalRef.current ? clearInterval(intervalRef.current) : void 0);
-		// TODO investigate if this might have performance issues
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return {

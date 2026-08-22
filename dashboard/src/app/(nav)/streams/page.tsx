@@ -57,12 +57,12 @@ export default function StreamsPage() {
 	// 🏎️ PARRILLA COMPLETA DE IFRAMES
 	const STREAMS_CONFIG = {
 		FOX: "https://fltvhd.com/online/canal.php?stream=foxsports",
-		DISNEY: "https://la18hd.su/vivo/canal.php?stream=disney3",
+		DISNEY: "https://streamx-hd.com/live1.php?stream=disney3",
 		DAZN: "https://streamx-hd.com/live1.php?stream=daznf1",
-		COLAPINTO: "https://streamx-hd.com/live1.php?stream=disney5",
+		COLAPINTO: "https://streamx-hd.com/live1.php?stream=disney6",
 		NORRIS: "https://streamx-hd.com/live1.php?stream=disney6",
-		RACEHUB: "https://streamx-hd.com/live1.php?stream=disney3",
-		GENERAL: "https://streamx-hd.com/live1.php?stream=disney4",
+		RACEHUB: "https://streamx-hd.com/live1.php?stream=disney4",
+		GENERAL: "https://streamx-hd.com/live1.php?stream=disney5",
 		DISNEY7: "https://streamx-hd.com/live1.php?stream=disney7",
 		DISNEY8: "https://streamx-hd.com/live1.php?stream=disney8",
 	};

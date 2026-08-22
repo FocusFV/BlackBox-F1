@@ -23,16 +23,15 @@ export default function SessionInfo() {
 	const session = useDataStore((state) => state.state?.SessionInfo);
 	const timingData = useDataStore((state) => state.state?.TimingData);
 	const lapCount = useDataStore((state) => state.state?.LapCount);
-	// 📡 Telemetría oficial del estado de la sesión
 	const sessionStatus = useDataStore((state) => state.state?.SessionStatus?.Status);
 
 	const delay = useSettingsStore((state) => state.delay);
 
-	// 🔒 Lógica de Parque Cerrado automática sincronizada con el dashboard
-	const isParcFerme = !session || 
+	// 🔒 Solo entramos a Parque Cerrado si explícitamente la sesión TERMINÓ o se cumplieron todas las vueltas
+	const isFinished = 
 		sessionStatus === "Ends" || 
 		sessionStatus === "Finalised" || 
-		(!!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps); 
+		(!!lapCount && lapCount.CurrentLap > 0 && lapCount.CurrentLap >= lapCount.TotalLaps);
 
 	const timeRemaining =
 		!!clock && !!clock.Remaining
@@ -45,8 +44,8 @@ export default function SessionInfo() {
 				: clock.Remaining
 			: undefined;
 
-	// 🏁 Si estamos en Parque Cerrado, mostramos una interfaz limpia y apagada
-	if (isParcFerme) {
+	// 🏁 Si la sesión terminó explícitamente
+	if (isFinished) {
 		return (
 			<div className="flex items-center gap-2">
 				<div className="text-2xl">🏁</div>
@@ -67,7 +66,7 @@ export default function SessionInfo() {
 			<div className="flex flex-col justify-center">
 				{session ? (
 					<h1 className="truncate text-sm leading-none font-medium text-white">
-						{session.Meeting.Name}: {session.Name ?? "Unknown"}
+						{session.Meeting?.Name}: {session.Name ?? "En Vivo"}
 						{timingData?.SessionPart ? ` ${sessionPartPrefix(session.Name)}${timingData.SessionPart}` : ""}
 					</h1>
 				) : (

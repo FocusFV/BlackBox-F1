@@ -11,20 +11,23 @@ import { useDataStore } from "@/stores/useDataStore";
 import { YouTubeFeed } from "@/components/dashboard/YouTubeFeed"; 
 
 export default function Page() {
+	// Solo leemos el store global, no iniciamos sockets acá
 	const dataStore = useDataStore();
 
 	const session = dataStore.state?.SessionInfo;
 	const lapCount = dataStore.state?.LapCount;
-	// 📡 Traemos el estado oficial que manda la API
 	const sessionStatus = dataStore.state?.SessionStatus?.Status;
 
 	// 🏎️ MODO MOTORES APAGADOS / PARQUE CERRADO BLINDADO
-	// Si no hay sesión en el store (Offline), si la API manda estado de cierre ("Ends"/"Finalised"),
-	// o si ya se completaron todas las vueltas programadas, la telemetría se guarda en boxes.
+    // BYPASS PARA DEBUG: Comentamos la validación original y forzamos false
+    /*
 	const isOfflineOrFerme = !session || 
 		sessionStatus === "Ends" || 
 		sessionStatus === "Finalised" || 
 		(session.Name === "Race" && !!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps);
+    */
+    
+    const isOfflineOrFerme = false;
 
 	return (
 		<div className="flex w-full flex-col gap-4 px-4 py-4 text-zinc-100">
@@ -40,7 +43,7 @@ export default function Page() {
 				</div>
 			) : (
 				<>
-					{/* HUD de comando en vivo (Solo visible con Bandera Verde / Motores Encendidos) */}
+					{/* HUD de comando en vivo */}
 					<div className="flex w-full flex-col gap-2 2xl:flex-row">
 						<div className="overflow-x-auto">
 							<LeaderBoard />

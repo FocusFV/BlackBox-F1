@@ -98,12 +98,12 @@ export const ParcFerme: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [hasSprint, setHasSprint] = useState(false);
 
-	// 📡 LECTURA ROBUSTA DEL ZUSTAND STORE
-	const fullStoreState = useDataStore((state) => state.state);
-	const rawStatus = fullStoreState?.SessionStatus?.Status;
-	const session = fullStoreState?.SessionInfo;
+	// 📡 VOLVEMOS A USEDATASTORE PERO BUSCAMOS EN EL STORE COMPLETO
+	const state = useDataStore((s) => s.state);
+	const rawStatus = state?.SessionStatus?.Status;
+	const session = state?.SessionInfo;
 
-	// Convertimos a string en minúsculas por seguridad (sirve para números como "1" o "Started")
+	// Convertimos a string en minúsculas por seguridad
 	const statusString = String(rawStatus || "").trim().toLowerCase();
 
 	// Palabras/códigos clave de sesión corriendo en vivo
@@ -114,6 +114,7 @@ export const ParcFerme: React.FC = () => {
 
 	// 🔍 DEBUG PARA VER QUÉ VIENE EN LA CONSOLA DEL NAVEGADOR
 	useEffect(() => {
+		console.log("🔥 TODO EL STORE ZUSTAND:", useDataStore.getState());
 		console.log("🔍 [ParcFerme Debug] Raw Status:", rawStatus, "| Status String:", statusString, "| Session:", session, "| isLive:", isLive);
 	}, [rawStatus, statusString, session, isLive]);
 
@@ -188,7 +189,7 @@ export const ParcFerme: React.FC = () => {
 	return (
 		<div className="flex flex-col gap-6 p-4 text-white w-full items-center">
 			
-			{/* 🏆 PÍLDORA CENTRAL DINÁMICA CORREGIDA */}
+			{/* 🏆 PÍLDORA CENTRAL DINÁMICA */}
 			<div className="flex justify-center w-full select-none">
 				<div className="flex items-center gap-4 px-6 py-4 bg-zinc-950/60 border border-zinc-900 rounded-xl shadow-[0_4px_25px_rgba(0,0,0,0.6)] lg:w-6/12 w-full justify-center">
 					<span className={`text-xl animate-pulse flex-shrink-0 ${isLive ? "drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]" : "drop-shadow-[0_0_8px_rgba(250,204,21,0.4)]"}`}>
