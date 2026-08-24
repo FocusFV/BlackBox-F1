@@ -10,48 +10,201 @@ interface YouTubeVideo {
     thumbnail: string;
     publishedAt: string;
     embedUrl: string;
-    weight?: number; 
+    sessionType?: string;
 }
 
 export function YouTubeFeed() {
     const rawGpName = useDataStore((state) => state.state?.SessionInfo?.Meeting?.Name);
 
     const [videos, setVideos] = useState<YouTubeVideo[]>([]);
-    const [displayGpName, setDisplayGpName] = useState<string>("Belgium");
+    const [displayGpName, setDisplayGpName] = useState<string>("Cargando...");
     const [loading, setLoading] = useState(true);
     
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        async function fetchLiveVideos() {
+        let isMounted = true;
+
+        async function fetchSessions() {
             setLoading(true);
             try {
-                const baseUrl = "https://Blackbox-f1-realtime-docker.onrender.com";
-                const url = `${baseUrl}/api/videos`;
+                // 1. Obtener GP dinámicamente desde API
+                let currentGp = "Dutch";
 
-                const res = await fetch(url, { cache: "no-store" });
-                const data = await res.json();
-
-                // Manejo dinámico sincronizado con el objeto { target_gp, videos }
-                if (data && Array.isArray(data.videos)) {
-                    setVideos(data.videos);
-                    if (data.target_gp) {
-                        setDisplayGpName(data.target_gp);
+                try {
+                    const gpRes = await fetch("https://api.jolpi.ca/ergast/f1/current/last/results.json");
+                    const gpData = await gpRes.json();
+                    if (gpData?.MRData?.RaceTable?.Races?.length > 0) {
+                        const race = gpData.MRData.RaceTable.Races[0];
+                        currentGp = (race.raceName || "").replace("Grand Prix", "").trim() || "Dutch";
                     }
-                } else if (Array.isArray(data)) { 
-                    setVideos(data);
-                } else {
-                    setVideos([]);
+                } catch {
+                    if (rawGpName) currentGp = rawGpName;
                 }
-            } catch (error) {
-                console.error("Error conectando con el backend de Render:", error);
-                setVideos([]);
+
+                if (isMounted) setDisplayGpName(currentGp);
+
+                const gpKeywords = [
+                    currentGp.toLowerCase(),
+                    "dutch",
+                    "paises bajos",
+                    "países bajos",
+                    "netherlands",
+                    "zandvoort"
+                ];
+
+                // 2. Traer el listado extendido de videos del canal oficial de F1
+                const ytChannelUrl = "https://www.youtube.com/@F1/videos";
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(ytChannelUrl)}`;
+                
+                let rawList: any[] = [];
+
+                try {
+                    const response = await fetch(proxyUrl);
+                    const data = await response.json();
+                    const html = data.contents;
+
+                    const match = html.match(/var ytInitialData = ({.*?});<\/script>/);
+                    if (match && match[1]) {
+                        const parsed = JSON.parse(match[1]);
+                        const tabs = parsed.contents?.twoColumnBrowseResultsRenderer?.tabs;
+                        const tab = tabs?.find((t: any) => t.tabRenderer?.content);
+                        const items = tab?.tabRenderer?.content?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents?.[0]?.gridRenderer?.items 
+                                   || tab?.tabRenderer?.content?.richGridRenderer?.contents;
+
+                        if (Array.isArray(items)) {
+                            for (const it of items) {
+                                const renderer = it.gridVideoRenderer || it.richItemRenderer?.content?.videoRenderer;
+                                if (!renderer) continue;
+
+                                const videoId = renderer.videoId;
+                                const title = renderer.title?.runs?.[0]?.text || renderer.title?.simpleText || "";
+                                const thumb = renderer.thumbnail?.thumbnails?.slice(-1)[0]?.url || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+                                const published = renderer.publishedTimeText?.simpleText || "";
+
+                                if (videoId && title) {
+                                    rawList.push({
+                                        id: videoId,
+                                        title,
+                                        thumbnail: thumb,
+                                        publishedAt: published,
+                                        embedUrl: `https://www.youtube.com/embed/${videoId}`
+                                    });
+                                }
+                            }
+                        }
+                    }
+                } catch {
+                    // Fallback directo a RSS si el scraping del tab falla
+                    try {
+                        const rssRes = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent("https://www.youtube.com/feeds/videos.xml?channel_id=UCB_qr75-ydFVKSF9Dmo6izg")}`);
+                        const rssData = await rssRes.json();
+                        if (rssData?.items) {
+                            rawList = rssData.items.map((i: any) => ({
+                                id: i.guid?.replace("yt:video:", "") || i.link?.split("v=")[1],
+                                title: i.title,
+                                thumbnail: i.thumbnail || `https://i.ytimg.com/vi/${i.guid?.replace("yt:video:", "")}/hqdefault.jpg`,
+                                publishedAt: i.pubDate,
+                                embedUrl: `https://www.youtube.com/embed/${i.guid?.replace("yt:video:", "")}`
+                            }));
+                        }
+                    } catch {}
+                }
+
+                // 3. Filtrar y clasificar únicamente sesiones en pista
+                const forbidden = [
+                    "podcast", "nation", "react", "interview", "press", "review", 
+                    "debrief", "warm up", "live:", "unfiltered", "talks", "speaks", 
+                    "radio", "chumps", "top 10", "palmer", "jolyon", "show"
+                ];
+
+                const sessionMap: Record<string, YouTubeVideo> = {};
+
+                for (const v of rawList) {
+                    if (!v || !v.id) continue;
+
+                    const titleLower = (v.title || "").toLowerCase();
+                    const normalized = titleLower.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+                    if (forbidden.some((w) => normalized.includes(w))) continue;
+                    if (!gpKeywords.some((k) => normalized.includes(k))) continue;
+
+                    const videoObj: YouTubeVideo = {
+                        id: v.id,
+                        title: v.title,
+                        thumbnail: v.thumbnail,
+                        publishedAt: v.publishedAt,
+                        embedUrl: v.embedUrl
+                    };
+
+                    if (
+                        (normalized.includes("sprint qualifying") || normalized.includes("clasificacion sprint") || normalized.includes("shootout")) &&
+                        !sessionMap["SPRINT_QUALY"]
+                    ) {
+                        sessionMap["SPRINT_QUALY"] = { ...videoObj, sessionType: "Sprint Qualy" };
+                    } else if (
+                        (normalized.includes("sprint highlights") || normalized.includes("momentos sprint") || (normalized.includes("sprint") && normalized.includes("race"))) &&
+                        !normalized.includes("clasificaci") &&
+                        !sessionMap["SPRINT"]
+                    ) {
+                        sessionMap["SPRINT"] = { ...videoObj, sessionType: "Sprint" };
+                    } else if (
+                        (normalized.includes("qualifying highlights") || normalized.includes("clasificacion")) &&
+                        !normalized.includes("sprint") &&
+                        !sessionMap["QUALY"]
+                    ) {
+                        sessionMap["QUALY"] = { ...videoObj, sessionType: "Qualifying" };
+                    } else if (
+                        (normalized.includes("race highlights") || normalized.includes("mejores momentos")) &&
+                        !normalized.includes("sprint") &&
+                        !normalized.includes("clasificaci") &&
+                        !sessionMap["RACE"]
+                    ) {
+                        sessionMap["RACE"] = { ...videoObj, sessionType: "Race" };
+                    } else if (
+                        (normalized.includes("fp3") || normalized.includes("practice 3") || normalized.includes("libres 3")) &&
+                        !sessionMap["FP3"]
+                    ) {
+                        sessionMap["FP3"] = { ...videoObj, sessionType: "FP3" };
+                    } else if (
+                        (normalized.includes("fp2") || normalized.includes("practice 2") || normalized.includes("libres 2")) &&
+                        !sessionMap["FP2"]
+                    ) {
+                        sessionMap["FP2"] = { ...videoObj, sessionType: "FP2" };
+                    } else if (
+                        (normalized.includes("fp1") || normalized.includes("practice 1") || normalized.includes("libres 1")) &&
+                        !sessionMap["FP1"]
+                    ) {
+                        sessionMap["FP1"] = { ...videoObj, sessionType: "FP1" };
+                    }
+                }
+
+                // 4. Ordenar cronológicamente (Carrera -> Qualy -> Sprint -> Sprint Qualy -> Prácticas)
+                const priority = ["RACE", "QUALY", "SPRINT", "SPRINT_QUALY", "FP3", "FP2", "FP1"];
+                const resultList: YouTubeVideo[] = [];
+
+                for (const key of priority) {
+                    if (sessionMap[key]) {
+                        resultList.push(sessionMap[key]);
+                    }
+                }
+
+                if (isMounted) {
+                    setVideos(resultList);
+                }
+            } catch (err) {
+                console.error("Error obteniendo videos:", err);
+                if (isMounted) setVideos([]);
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         }
 
-        fetchLiveVideos();
+        fetchSessions();
+
+        return () => {
+            isMounted = false;
+        };
     }, [rawGpName]);
 
     const scroll = (direction: "left" | "right") => {
@@ -67,7 +220,7 @@ export function YouTubeFeed() {
     if (loading) {
         return (
             <div className="h-32 flex items-center justify-center text-zinc-500 font-mono text-[10px] uppercase tracking-widest animate-pulse w-full">
-                Buscando transmisiones oficiales...
+                Cargando sesiones oficiales...
             </div>
         );
     }
@@ -77,7 +230,7 @@ export function YouTubeFeed() {
             <div className="flex items-center justify-between mb-4 px-1 select-none">
                 <h2 className="text-xs font-bold uppercase tracking-widest font-mono text-zinc-500 flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                    • Resúmenes Oficiales: GP de {displayGpName}
+                    • Sesiones Oficiales: GP de {displayGpName}
                 </h2>
             </div>
 
@@ -99,7 +252,7 @@ export function YouTubeFeed() {
 
                 <div ref={scrollContainerRef} className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth pb-4 snap-x snap-mandatory w-full">
                     {videos.map((video) => (
-                        <VideoCard key={video.id} video={video} />
+                        <VideoCard key={video.id} video={video as any} />
                     ))}
 
                     <a
@@ -128,7 +281,6 @@ export function YouTubeFeed() {
                         <path d="M8 4L18 12L8 20L5 17L13 12L5 7L8 4Z" fill="url(#gold3DRight)" stroke="#78350f" strokeWidth="0.75" strokeLinejoin="round" />
                     </svg>
                 </button>
-
             </div>
         </div>
     );
