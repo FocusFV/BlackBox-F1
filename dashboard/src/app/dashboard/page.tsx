@@ -76,10 +76,10 @@ export default function Page() {
 		dataStore.state?.TimingData?.Lines && Object.keys(dataStore.state.TimingData.Lines).length > 0
 	);
 	const hasCarData = Boolean(
-		dataStore.state?.CarData?.Entries && dataStore.state.CarData.Entries.length > 0
+		dataStore.carsData && Object.keys(dataStore.carsData).length > 0
 	);
 	const hasPositionData = Boolean(
-		dataStore.state?.Position?.Position && dataStore.state.Position.Position.length > 0
+		dataStore.positions && Object.keys(dataStore.positions).length > 0
 	);
 	const hasLiveTelemetry = hasTimingData || hasCarData || hasPositionData;
 
