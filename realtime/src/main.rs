@@ -9,7 +9,6 @@ mod f1;
 mod http_server;
 mod services {
     pub mod state_service;
-    pub mod youtube_service; // 👈 Registramos el nuevo motor
 }
 
 #[tokio::main]

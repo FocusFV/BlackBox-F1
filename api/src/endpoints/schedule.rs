@@ -13,31 +13,27 @@ use cached::proc_macro::io_cached;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Session {
-    kind: String,
-    start: DateTime<Utc>,
-    end: DateTime<Utc>,
+    pub kind: String,
+    pub start: DateTime<Utc>,
+    pub end: DateTime<Utc>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Round {
-    name: String,
-    country_name: String,
-    country_key: Option<String>,
-    start: DateTime<Utc>,
-    end: DateTime<Utc>,
-    sessions: Vec<Session>,
-    over: bool,
+    pub name: String,
+    pub country_name: String,
+    pub country_key: Option<String>,
+    pub start: DateTime<Utc>,
+    pub end: DateTime<Utc>,
+    pub sessions: Vec<Session>,
+    pub over: bool,
 }
 
 fn parse_ical_utc(date_string: &str) -> Result<DateTime<Utc>, anyhow::Error> {
-    // Trim any whitespace
     let date_string = date_string.trim();
-
-    // Check string length to determine format
     let len = date_string.len();
 
-    // Date only format: YYYYMMDD (8 characters)
     if len == 8 && !date_string.contains('T') {
         let naive_date = chrono::NaiveDate::parse_from_str(date_string, "%Y%m%d").map_err(|e| {
             anyhow::anyhow!("Failed to parse date-only string '{}': {}", date_string, e)
@@ -46,7 +42,6 @@ fn parse_ical_utc(date_string: &str) -> Result<DateTime<Utc>, anyhow::Error> {
         return Ok(Utc.from_utc_datetime(&naive_datetime));
     }
 
-    // UTC datetime with Z suffix: YYYYMMDDTHHMMSSZ (16 characters)
     if date_string.ends_with('Z') {
         let naive_datetime =
             NaiveDateTime::parse_from_str(date_string, "%Y%m%dT%H%M%SZ").map_err(|e| {
@@ -55,7 +50,6 @@ fn parse_ical_utc(date_string: &str) -> Result<DateTime<Utc>, anyhow::Error> {
         return Ok(Utc.from_utc_datetime(&naive_datetime));
     }
 
-    // Local datetime without Z: YYYYMMDDTHHMMSS (15 characters)
     if date_string.contains('T') {
         let naive_datetime =
             NaiveDateTime::parse_from_str(date_string, "%Y%m%dT%H%M%S").map_err(|e| {
@@ -77,7 +71,6 @@ fn get_property(event: &IcalEvent, name: &str) -> Option<String> {
             return property.value.clone();
         }
     }
-
     None
 }
 
@@ -155,11 +148,12 @@ fn update_round(event: IcalEvent, round: &mut Round, kind: &str) -> Result<(), E
     time = 1800
 )]
 async fn get_schedule(year: i32) -> Result<Vec<Round>, anyhow::Error> {
-    // webcal://ics.ecal.com/ecal-sub/660897ca63f9ca0008bcbea6/Formula%201.ics
-    // *note this is a link created by entering a email and other info on the f1 website
-    // i hope this does not expire...
     let cal_url = "https://ics.ecal.com/ecal-sub/660897ca63f9ca0008bcbea6/Formula%201.ics";
-    let cal_bytes = reqwest::get(cal_url).await?.bytes().await?;
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(5))
+        .build()?;
+
+    let cal_bytes = client.get(cal_url).send().await?.bytes().await?;
     let cal_buf = BufReader::new(cal_bytes.as_ref());
     let cal_reader = ical::IcalParser::new(cal_buf);
 
@@ -209,7 +203,6 @@ async fn get_schedule(year: i32) -> Result<Vec<Round>, anyhow::Error> {
 
     for round in &mut rounds {
         round.over = round.end < utc_now;
-
         round
             .sessions
             .sort_unstable_by(|a, b| a.start.cmp(&b.start));
@@ -224,8 +217,8 @@ pub async fn get() -> Result<axum::Json<Vec<Round>>, axum::http::StatusCode> {
 
     match schedule {
         Ok(schedule) => Ok(axum::Json(schedule)),
-        Err(_) => {
-            error!("failed to create schedule for year {}", year);
+        Err(err) => {
+            error!("failed to create schedule for year {}: {:?}", year, err);
             Err(axum::http::StatusCode::INTERNAL_SERVER_ERROR)
         }
     }
@@ -245,8 +238,8 @@ pub async fn get_next() -> Result<axum::Json<Round>, axum::http::StatusCode> {
                 None => Err(axum::http::StatusCode::NO_CONTENT),
             }
         }
-        Err(_) => {
-            error!("failed to create schedule for year {}", year);
+        Err(err) => {
+            error!("failed to create next schedule for year {}: {:?}", year, err);
             Err(axum::http::StatusCode::INTERNAL_SERVER_ERROR)
         }
     }

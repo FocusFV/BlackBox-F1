@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
+
+const emptySubscribe = () => () => {};
 
 export const useDevMode = () => {
-	const [active, setActive] = useState(false);
-
-	useEffect(() => {
-		if (typeof window !== "undefined") {
-			setActive(!!localStorage.getItem("dev"));
-		}
-	}, []);
+	const active = useSyncExternalStore(
+		emptySubscribe,
+		() => (typeof window !== "undefined" ? !!localStorage.getItem("dev") : false),
+		() => false,
+	);
 
 	return { active };
 };

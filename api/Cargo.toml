@@ -20,3 +20,4 @@ chrono = { version = "0.4", features = ["serde"] }
 cached = { version = "0.56.0", features = ["disk_store", "async"] }
 regex = "1.12.2"
 scraper = "0.22.0"
+urlencoding = "2.1"

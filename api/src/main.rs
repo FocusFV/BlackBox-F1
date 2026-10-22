@@ -15,11 +15,7 @@ use tracing::info;
 
 use shared::tracing_subscriber;
 
-mod endpoints {
-    pub(crate) mod health;
-    pub(crate) mod schedule;
-    pub(crate) mod insights; 
-}
+mod endpoints;
 
 #[derive(Serialize)]
 struct StreamsConfig {
@@ -46,6 +42,7 @@ async fn main() -> Result<(), Error> {
         .route("/api/health", get(endpoints::health::check))
         .route("/api/insights", get(endpoints::insights::get_live_insights))
         .route("/api/streams-config", get(get_streams_config))
+        .route("/api/videos", get(endpoints::videos::get_official_highlights))
         .layer(cors_layer()?); 
 
     info!(addr, "starting api http server");

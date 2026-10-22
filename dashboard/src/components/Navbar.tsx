@@ -10,7 +10,7 @@ import coffeeIcon from "public/icons/bmc-logo.svg";
 
 export default function Navbar() {
 	const [isOpen, setIsOpen] = useState(false);
-	const pathname = pathnameIcon();
+	const pathname = usePathname();
 
 	// 🕵️ LÓGICA DE SCROLL REFORZADA
 	const [isVisible, setIsVisible] = useState(true);
@@ -35,9 +35,7 @@ export default function Navbar() {
 		return () => window.removeEventListener("scroll", handleScroll);
 	}, [lastScrollY]);
 
-	function pathnameIcon() {
-		try { return usePathname(); } catch { return "/"; }
-	}
+
 
 	const navLinks = [
 		{ name: "Panel", href: "/dashboard" },

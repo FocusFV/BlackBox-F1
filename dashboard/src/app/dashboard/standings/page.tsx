@@ -144,8 +144,10 @@ export default function Standings() {
 			};
 			fetchBackupStandings();
 		} else {
-			setExtDrivers([]);
-			setExtTeams([]);
+			queueMicrotask(() => {
+				setExtDrivers([]);
+				setExtTeams([]);
+			});
 		}
 	}, [year, driverStandingsLive, teamStandingsLive]);
 

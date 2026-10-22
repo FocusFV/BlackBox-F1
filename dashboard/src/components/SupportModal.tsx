@@ -136,7 +136,7 @@ export default function SupportModal() {
 
 									{/* Opción PayPal */}
 									<a
-										href="https://paypal.me/tu_usuario" 
+										href="https://github.com/sponsors/FocusFV" 
 										target="_blank"
 										rel="noopener noreferrer"
 										className="flex items-center justify-center gap-2 py-3 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-wider text-[11px] shadow-lg hover:scale-[1.02] active:scale-95 transition-all duration-200"

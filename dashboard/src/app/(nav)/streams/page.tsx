@@ -26,7 +26,8 @@ const PILOTOS_CONFIG: Record<string, { name: string; border: string; shadow: str
 
 export default function StreamsPage() {
 	const [bypass, setBypass] = useState<boolean>(false);
-	const [clickCount, setClickCount] = useState<number>(0);
+		const clickTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+	const clickCountRef = React.useRef<number>(0);
 	const [isUnlocking, setIsUnlocking] = useState<boolean>(false);
 
 	// Controles del Sidebar Store
@@ -41,7 +42,7 @@ export default function StreamsPage() {
 	});
 
 	useEffect(() => {
-		fetch("https://Blackbox-f1.onrender.com/api/streams-config")
+		fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://Blackbox-f1.onrender.com"}/api/streams-config`)
 			.then((res) => {
 				if (!res.ok) throw new Error("Error en la respuesta del pit-wall");
 				return res.json();
@@ -77,24 +78,50 @@ export default function StreamsPage() {
 	const sessionInfo = useDataStore((state) => state.state?.SessionInfo);
 	const activeRace = sessionInfo?.Meeting?.Name || "Gran Premio";
 
-	const checkTimeWindow = (): boolean => {
-		if (trackStatus && parseInt(trackStatus, 10) > 0) return true;
-		if (!sessionInfo?.StartDate || !sessionInfo?.EndDate) return false;
+	const [isLive, setIsLive] = useState<boolean>(false);
 
-		const now = Date.now();
-		const parseUTC = (dateStr: string) => {
-			const cleanStr = dateStr.endsWith("Z") ? dateStr : `${dateStr}Z`;
-			return new Date(cleanStr).getTime();
+	useEffect(() => {
+		const checkTimeWindow = (): boolean => {
+			if (trackStatus && parseInt(trackStatus, 10) > 0) return true;
+			if (!sessionInfo?.StartDate || !sessionInfo?.EndDate) return false;
+
+			const now = Date.now();
+			const parseUTC = (dateStr: string) => {
+				const cleanStr = dateStr.endsWith("Z") ? dateStr : `${dateStr}Z`;
+				return new Date(cleanStr).getTime();
+			};
+
+			const startTime = parseUTC(sessionInfo.StartDate);
+			const endTime = parseUTC(sessionInfo.EndDate);
+			const THIRTY_MINUTES = 1800000; 
+
+			return now >= (startTime - THIRTY_MINUTES) && now <= (endTime + THIRTY_MINUTES);
 		};
 
-		const startTime = parseUTC(sessionInfo.StartDate);
-		const endTime = parseUTC(sessionInfo.EndDate);
-		const THIRTY_MINUTES = 1800000; 
+		setIsLive(checkTimeWindow());
+		const interval = setInterval(() => {
+			setIsLive(checkTimeWindow());
+		}, 30000);
+		return () => clearInterval(interval);
+	}, [trackStatus, sessionInfo?.StartDate, sessionInfo?.EndDate]);
 
-		return now >= (startTime - THIRTY_MINUTES) && now <= (endTime + THIRTY_MINUTES);
+	const handleLockClick = () => {
+		clickCountRef.current += 1;
+		if (clickCountRef.current >= 3) {
+			clickCountRef.current = 0;
+			if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+			setIsUnlocking(true);
+			setTimeout(() => {
+				setBypass(true);
+				setIsUnlocking(false);
+			}, 600);
+		} else {
+			if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+			clickTimeoutRef.current = setTimeout(() => {
+				clickCountRef.current = 0;
+			}, 1000);
+		}
 	};
-
-	const isLive = checkTimeWindow();
 
 	return (
 		<div className="flex h-screen w-full md:pt-2 md:pr-2 md:pb-2 font-mono text-white select-none">
@@ -115,21 +142,7 @@ export default function StreamsPage() {
 
 						<div className="max-w-md w-full border border-zinc-900 bg-[#0c0a05]/20 backdrop-blur-md p-8 rounded-3xl text-center flex flex-col items-center shadow-[0_20px_50px_rgba(0,0,0,0.7)] animate-fade-in">
 							<div 
-								onClick={() => {
-									setClickCount((prev) => {
-										const nextCount = prev + 1;
-										if (nextCount >= 3) {
-											setIsUnlocking(true);
-											setTimeout(() => {
-												setBypass(true);
-												setIsUnlocking(false);
-											}, 600);
-											return 0;
-										}
-										setTimeout(() => setClickCount(0), 1000);
-										return nextCount;
-									});
-								}}
+								onClick={handleLockClick}
 								className={`w-14 h-14 rounded-2xl bg-gradient-to-b from-zinc-900 to-zinc-950 border flex items-center justify-center mb-6 transition-all duration-300 cursor-pointer active:scale-95 group ${
 									isUnlocking 
 										? "border-emerald-500/40 text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.3)] scale-110 rotate-[360deg]" 
@@ -138,7 +151,7 @@ export default function StreamsPage() {
 							>
 								{isUnlocking ? <Unlock className="w-6 h-6" /> : <Lock className="w-6 h-6 group-hover:scale-110 duration-300" />}
 							</div>
-							<span className="text-[11px] font-black text-zinc-600 uppercase tracking-widest mb-2">// FEED SATELITAL: INACTIVO</span>
+							<span className="text-[11px] font-black text-zinc-600 uppercase tracking-widest mb-2">{"// FEED SATELITAL: INACTIVO"}</span>
 							<h2 className="text-xl font-black uppercase tracking-tight text-zinc-200">MOTORES APAGADOS</h2>
 							<p className="text-zinc-500 text-xs font-sans mt-3 leading-relaxed">
 								La señal de video en vivo se habilita automáticamente <span className="text-zinc-300 font-bold">30 minutos antes</span> de la sesión.
