@@ -84,32 +84,35 @@ pub async fn ingest_f1(
         .timeout(Duration::from_secs(15))
         .build()?;
 
-    let user = read_env_var("F1_USERNAME");
+    let mut user = read_env_var("F1_USERNAME");
+    if user.is_empty() {
+        user = read_env_var("F1_EMAIL");
+    }
     let pass = read_env_var("F1_PASSWORD");
     let full_cookie = read_env_var("F1_FULL_COOKIE");
 
-    let mut cookie_header_val = String::new();
+    let mut auth_token = String::new();
 
-    // 1. Intentar auto-login si hay credenciales
+    // 1. Intentar auto-login si hay credenciales de usuario/email
     if !user.is_empty() && !pass.is_empty() {
         match get_f1_token(&client, &user, &pass).await {
             Ok(token) => {
-                cookie_header_val = format!("ascendSubscriptionToken={}", token);
+                auth_token = format!("ascendSubscriptionToken={}", token);
             }
             Err(e) => {
-                warn!("No se pudo hacer auto-login: {}. Probando con cookie de respaldo...", e);
+                warn!("No se pudo hacer auto-login en F1: {}. Intentando con cookie de respaldo...", e);
             }
         }
     }
 
     // 2. Si no hay token de auto-login, usar F1_FULL_COOKIE
-    if cookie_header_val.is_empty() && !full_cookie.is_empty() {
+    if auth_token.is_empty() && !full_cookie.is_empty() {
         info!("Usando F1_FULL_COOKIE como método de autenticación");
-        cookie_header_val = full_cookie;
+        auth_token = full_cookie;
     }
 
-    if cookie_header_val.is_empty() {
-        warn!("ATENCIÓN: No hay credenciales ni cookie configuradas");
+    if auth_token.is_empty() {
+        warn!("ATENCIÓN: No hay credenciales ni cookie configuradas para F1");
     }
 
     info!("Negociando conexión con SignalR de F1...");
@@ -121,13 +124,24 @@ pub async fn ingest_f1(
         .header(ORIGIN, "https://www.formula1.com")
         .header(REFERER, "https://www.formula1.com/");
 
-    if !cookie_header_val.is_empty() {
-        req = req.header(COOKIE, HeaderValue::from_str(&cookie_header_val)?);
+    if !auth_token.is_empty() {
+        req = req.header(COOKIE, HeaderValue::from_str(&auth_token)?);
     }
 
     let res = req.send().await?;
     if !res.status().is_success() {
         return Err(anyhow!("SignalR negotiate devolvió status: {}", res.status()));
+    }
+
+    // 🍪 Extraemos las cookies de sesión (AWSALB, AWSALBCORS) devueltas por el servidor en negotiate
+    let mut session_cookies = Vec::new();
+    for cookie_header in res.headers().get_all(reqwest::header::SET_COOKIE) {
+        if let Ok(cookie_str) = cookie_header.to_str() {
+            let key_val = cookie_str.split(';').next().unwrap_or(cookie_str).trim();
+            if !key_val.is_empty() {
+                session_cookies.push(key_val.to_string());
+            }
+        }
     }
 
     let negotiate: NegotiateResponse = res.json().await?;
@@ -143,8 +157,17 @@ pub async fn ingest_f1(
     let headers = ws_req.headers_mut();
     headers.insert(USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64)".parse().unwrap());
     headers.insert(ORIGIN, "https://www.formula1.com".parse().unwrap());
-    if !cookie_header_val.is_empty() {
-        headers.insert(COOKIE, HeaderValue::from_str(&cookie_header_val)?);
+
+    // Adjuntamos tanto las cookies de balanceador de carga (AWSALB) como el token de suscripción
+    if !auth_token.is_empty() {
+        session_cookies.push(auth_token);
+    }
+
+    let final_cookie_header = session_cookies.join("; ");
+    if !final_cookie_header.is_empty() {
+        if let Ok(hval) = HeaderValue::from_str(&final_cookie_header) {
+            headers.insert(COOKIE, hval);
+        }
     }
 
     let (ws_stream, _) = connect_async(ws_req).await?;
