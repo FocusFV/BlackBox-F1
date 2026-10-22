@@ -142,12 +142,7 @@ fn update_round(event: IcalEvent, round: &mut Round, kind: &str) -> Result<(), E
     Ok(())
 }
 
-#[io_cached(
-    map_error = r##"|e| anyhow::anyhow!(format!("disk cache error {:?}", e))"##,
-    disk = true,
-    time = 1800
-)]
-async fn get_schedule(year: i32) -> Result<Vec<Round>, anyhow::Error> {
+async fn fetch_ical_schedule(year: i32) -> Result<Vec<Round>, anyhow::Error> {
     let cal_url = "https://ics.ecal.com/ecal-sub/660897ca63f9ca0008bcbea6/Formula%201.ics";
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(5))
@@ -209,6 +204,126 @@ async fn get_schedule(year: i32) -> Result<Vec<Round>, anyhow::Error> {
     }
 
     Ok(rounds)
+}
+
+fn parse_ergast_datetime(date_str: &str, time_str: Option<&str>) -> Option<DateTime<Utc>> {
+    let time = time_str.unwrap_or("12:00:00Z").trim_end_matches('Z');
+    let rfc_str = format!("{}T{}Z", date_str.trim(), time.trim());
+    DateTime::parse_from_rfc3339(&rfc_str)
+        .ok()
+        .map(|dt| dt.with_timezone(&Utc))
+}
+
+async fn fetch_schedule_from_ergast(year: i32) -> Result<Vec<Round>, anyhow::Error> {
+    let url = format!("https://api.jolpi.ca/ergast/f1/{}.json", year);
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(6))
+        .build()?;
+
+    let res = client.get(&url).send().await?.json::<serde_json::Value>().await?;
+    let races = res
+        .pointer("/MRData/RaceTable/Races")
+        .and_then(|r| r.as_array())
+        .ok_or_else(|| anyhow::anyhow!("No se encontraron carreras en la respuesta de Ergast"))?;
+
+    let mut rounds = Vec::new();
+    let utc_now = Utc::now();
+
+    for race in races {
+        let name = race
+            .get("raceName")
+            .and_then(|n| n.as_str())
+            .unwrap_or("Gran Premio")
+            .to_string();
+
+        let country_name = race
+            .pointer("/Circuit/Location/country")
+            .and_then(|c| c.as_str())
+            .unwrap_or("F1")
+            .to_string();
+
+        let country_key = if country_name.len() >= 2 {
+            Some(country_name[..2].to_uppercase())
+        } else {
+            None
+        };
+
+        let mut sessions = Vec::new();
+
+        let session_defs = [
+            ("FirstPractice", "Practice 1"),
+            ("SecondPractice", "Practice 2"),
+            ("ThirdPractice", "Practice 3"),
+            ("SprintQualifying", "Sprint Qualifying"),
+            ("Sprint", "Sprint"),
+            ("Qualifying", "Qualifying"),
+        ];
+
+        for (field, kind) in session_defs {
+            if let Some(session_obj) = race.get(field) {
+                if let Some(d) = session_obj.get("date").and_then(|v| v.as_str()) {
+                    let t = session_obj.get("time").and_then(|v| v.as_str());
+                    if let Some(start) = parse_ergast_datetime(d, t) {
+                        let end = start + chrono::Duration::hours(1);
+                        sessions.push(Session {
+                            kind: kind.to_string(),
+                            start,
+                            end,
+                        });
+                    }
+                }
+            }
+        }
+
+        // Carrera principal
+        if let Some(race_date) = race.get("date").and_then(|d| d.as_str()) {
+            let race_time = race.get("time").and_then(|t| t.as_str());
+            if let Some(start) = parse_ergast_datetime(race_date, race_time) {
+                let end = start + chrono::Duration::hours(2);
+                sessions.push(Session {
+                    kind: "Race".to_string(),
+                    start,
+                    end,
+                });
+            }
+        }
+
+        sessions.sort_unstable_by(|a, b| a.start.cmp(&b.start));
+
+        if let (Some(first), Some(last)) = (sessions.first(), sessions.last()) {
+            let start = first.start;
+            let end = last.end;
+            let over = end < utc_now;
+
+            rounds.push(Round {
+                name,
+                country_name,
+                country_key,
+                start,
+                end,
+                sessions,
+                over,
+            });
+        }
+    }
+
+    rounds.sort_unstable_by(|a, b| a.start.cmp(&b.start));
+    Ok(rounds)
+}
+
+#[io_cached(
+    map_error = r##"|e| anyhow::anyhow!(format!("disk cache error {:?}", e))"##,
+    disk = true,
+    time = 1800
+)]
+async fn get_schedule(year: i32) -> Result<Vec<Round>, anyhow::Error> {
+    match fetch_ical_schedule(year).await {
+        Ok(rounds) if !rounds.is_empty() => Ok(rounds),
+        Ok(_) | Err(_) => {
+            warn!("eCal schedule no disponible o vacío para {}. Usando fallback API Jolpica/Ergast...", year);
+            fetch_schedule_from_ergast(year).await
+        }
+    }
 }
 
 pub async fn get() -> Result<axum::Json<Vec<Round>>, axum::http::StatusCode> {

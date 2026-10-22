@@ -1,9 +1,11 @@
+use std::time::Duration;
+use cached::proc_macro::io_cached;
 use axum::{extract::Query, response::IntoResponse, Json};
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use reqwest::header::USER_AGENT;
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct PressNote {
     pub label: String,
     pub title: String,
@@ -28,7 +30,7 @@ pub async fn get_live_insights(Query(params): Query<InsightsParams>) -> impl Int
         .trim()
         .to_string();
 
-    match raspando_google_news(&gp_clean).await {
+    match raspando_google_news(gp_clean.clone()).await {
         Ok(notes) => Json(notes).into_response(),
         Err(err) => {
             tracing::error!("Error raspando Google News: {}", err);
@@ -38,7 +40,12 @@ pub async fn get_live_insights(Query(params): Query<InsightsParams>) -> impl Int
     }
 }
 
-async fn raspando_google_news(gp_keyword: &str) -> anyhow::Result<Vec<PressNote>> {
+#[io_cached(
+    map_error = r##"|e| anyhow::anyhow!(format!("cache error {:?}", e))"##,
+    disk = true,
+    time = 900
+)]
+async fn raspando_google_news(gp_keyword: String) -> anyhow::Result<Vec<PressNote>> {
     // Traducimos términos comunes para asegurar noticias en castellano de ese circuito
     let search_term = match gp_keyword.to_lowercase().as_str() {
         "spanish" | "barcelona" => "F1+España+Barcelona",
