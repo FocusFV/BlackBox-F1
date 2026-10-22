@@ -144,3 +144,23 @@ export function evaluateSessionStatus(sessions: ScheduleSession[]): SessionStatu
 		nextSessionStart: null,
 	};
 }
+
+// ⏳ Da formato amigable a la cuenta regresiva hasta un timestamp en ms
+export function formatCountdown(targetMs: number | null): string {
+	if (!targetMs) return "";
+	const diff = targetMs - Date.now();
+	if (diff <= 0) return "¡Iniciando ahora!";
+
+	const hours = Math.floor(diff / (1000 * 60 * 60));
+	const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+	const days = Math.floor(hours / 24);
+
+	if (days > 1) {
+		return `${days}d ${hours % 24}h`;
+	}
+	if (hours > 0) {
+		return `${hours.toString().padStart(2, "0")}h ${minutes.toString().padStart(2, "0")}m`;
+	}
+	const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+	return `${minutes.toString().padStart(2, "0")}m ${seconds.toString().padStart(2, "0")}s`;
+}
