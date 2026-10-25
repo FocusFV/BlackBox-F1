@@ -121,10 +121,10 @@ export default function Page() {
 
 	return (
 		<div className="flex w-full flex-col gap-4 px-4 py-4 text-zinc-100">
-			{/* 🏎️ Barra de estado HUD */}
-			<div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950/80 px-4 py-2.5 backdrop-blur-md">
-				<div className="flex items-center gap-3">
-					{showTelemetry ? (
+			{showTelemetry && (
+				<>
+					{/* 🏎️ Barra de estado HUD en Vivo */}
+					<div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950/80 px-4 py-2.5 backdrop-blur-md">
 						<div className="flex items-center gap-2">
 							<span className="relative flex h-3 w-3">
 								<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
@@ -134,43 +134,30 @@ export default function Page() {
 								{scheduleStatus.activeSessionName || session?.Name || "Telemetría en Vivo"}
 							</span>
 						</div>
-					) : (
-						<div className="flex items-center gap-2">
-							<span className="text-base">🏁</span>
-							<span className="text-xs font-semibold tracking-wider text-zinc-400 uppercase">
-								Parque Cerrado (Fuera de Sesión)
-							</span>
-							{scheduleStatus.nextSessionName && countdownText && (
-								<span className="hidden rounded bg-zinc-900 border border-zinc-800 px-2 py-0.5 text-[11px] text-zinc-400 md:inline-block">
-									Próxima: <strong className="text-zinc-200">{scheduleStatus.nextSessionName}</strong> ({countdownText})
-								</span>
-							)}
+
+						{/* Controles de la derecha: Cara a Cara y TV Sync */}
+						<div className="flex flex-wrap items-center gap-2">
+							<button
+								type="button"
+								onClick={() => setIsH2HOpen(true)}
+								className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/90 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 hover:border-red-500/50 hover:bg-zinc-800 hover:text-white transition-all cursor-pointer"
+								title="Abrir comparador Cara a Cara entre dos pilotos"
+							>
+								<Swords className="h-3.5 w-3.5 text-red-500" />
+								<span>Cara a Cara</span>
+							</button>
+
+							<TvSyncControl />
 						</div>
-					)}
-				</div>
+					</div>
 
-				{/* Controles de la derecha: Cara a Cara y TV Sync */}
-				<div className="flex flex-wrap items-center gap-2">
-					{/* Botón Cara a Cara */}
-					<button
-						type="button"
-						onClick={() => setIsH2HOpen(true)}
-						className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/90 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 hover:border-red-500/50 hover:bg-zinc-800 hover:text-white transition-all cursor-pointer"
-						title="Abrir comparador Cara a Cara entre dos pilotos"
-					>
-						<Swords className="h-3.5 w-3.5 text-red-500" />
-						<span>Cara a Cara</span>
-					</button>
+					{/* Alertas dinámicas de Dirección de Carrera (SC, VSC, Banderas, Sanciones) */}
+					<RaceControlAlertBanner />
 
-					<TvSyncControl />
-				</div>
-			</div>
-
-			{/* ⚠️ Alertas dinámicas oficiales de Dirección de Carrera (SC, VSC, Banderas, Sanciones) */}
-			<RaceControlAlertBanner />
-
-			{/* 🎙️ Popup interactivo flotante de Team Radios en vivo */}
-			<TeamRadioAlertPopup />
+					{/* Popup flotante de Team Radios en vivo */}
+					<TeamRadioAlertPopup />
+				</>
+			)}
 
 			{/* Contenido principal */}
 			{!showTelemetry ? (

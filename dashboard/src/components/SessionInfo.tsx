@@ -17,6 +17,16 @@ const sessionPartPrefix = (name: string) => {
 	}
 };
 
+const countryCodeMap: Record<string, string> = {
+	Australia: "aus", Austria: "aut", Azerbaijan: "aze", Bahrain: "brn",
+	Belgium: "bel", Brazil: "bra", Canada: "can", China: "chn", Spain: "esp",
+	France: "fra", "Great Britain": "gbr", "United Kingdom": "gbr", Germany: "ger",
+	Hungary: "hun", Italy: "ita", Japan: "jpn", "Saudi Arabia": "ksa",
+	Mexico: "mex", Monaco: "mon", Netherlands: "ned", Portugal: "por",
+	Qatar: "qat", Singapore: "sgp", "United Arab Emirates": "uae", "United States": "usa",
+	USA: "usa", UK: "gbr"
+};
+
 export default function SessionInfo() {
 	const clock = useDataStore((state) => state.state?.ExtrapolatedClock);
 	const session = useDataStore((state) => state.state?.SessionInfo);
@@ -38,7 +48,7 @@ export default function SessionInfo() {
 	const [nextGpName, setNextGpName] = useState("Próximo Gran Premio");
 	const [nextSessionName, setNextSessionName] = useState("Sesión Oficial");
 	const [countdown, setCountdown] = useState("00:00:00");
-	const [countryCode, setCountryCode] = useState<string | undefined>(undefined);
+	const [countryCode, setCountryCode] = useState<string | undefined>("mex");
 
 	// Obtener la próxima carrera y calcular el contador
 	useEffect(() => {
@@ -55,9 +65,10 @@ export default function SessionInfo() {
 				if (data.MRData?.RaceTable?.Races?.length > 0) {
 					const nextRace = data.MRData.RaceTable.Races[0];
 					setNextGpName(nextRace.raceName || "Gran Premio");
-					if (nextRace.Circuit?.Location?.country) {
-						setCountryCode(nextRace.Circuit.Location.country.substring(0, 2).toLowerCase());
-					}
+
+					const countryRaw = nextRace.Circuit?.Location?.country || "";
+					const mappedCode = countryCodeMap[countryRaw] || countryRaw.substring(0, 3).toLowerCase();
+					setCountryCode(mappedCode);
 
 					const now = new Date().getTime();
 					const sessionsToCheck = [
@@ -112,23 +123,25 @@ export default function SessionInfo() {
 		};
 	}, [isOfflineOrFinished]);
 
-	// Render fuera de sesión
+	// Render fuera de sesión (diseño con bandera oficial y estilo Pit-Wall)
 	if (isOfflineOrFinished) {
 		return (
 			<div className="flex items-center gap-3">
-				<div className="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 text-base">
-					🏁
+				{/* Banderita del país del próximo GP */}
+				<div className="flex items-center justify-center overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/80 p-0.5 shadow-md shrink-0">
+					<Flag countryCode={countryCode || "mex"} className="h-6 w-9 object-cover rounded-md" />
 				</div>
+
 				<div className="flex flex-col justify-center">
 					<div className="flex items-center gap-2">
 						<span className="truncate text-xs leading-none font-bold text-amber-400 uppercase tracking-widest font-mono">
-							MOTORES APAGADOS
+							{nextGpName}
 						</span>
-						<span className="text-[10px] text-zinc-500 font-mono tracking-tight">
-							// {nextGpName} ({nextSessionName})
+						<span className="rounded bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 text-[9px] font-bold text-zinc-400 uppercase tracking-wider">
+							{nextSessionName}
 						</span>
 					</div>
-					<p className="text-xl md:text-2xl leading-none font-black text-zinc-100 font-mono tracking-wider mt-1">
+					<p className="text-xl md:text-2xl leading-none font-black text-zinc-100 font-mono tracking-wider mt-1.5">
 						{countdown}
 					</p>
 				</div>

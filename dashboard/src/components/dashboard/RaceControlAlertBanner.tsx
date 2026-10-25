@@ -140,6 +140,11 @@ export function RaceControlAlertBanner() {
 		if (!latest || latest.Utc === lastMessageUtc.current) return;
 		lastMessageUtc.current = latest.Utc;
 
+		// Solo alertar si el mensaje ocurrió en el último minuto en vivo
+		const msgTime = new Date(latest.Utc).getTime();
+		const isRecent = !isNaN(msgTime) && Math.abs(Date.now() - msgTime) < 60 * 1000;
+		if (!isRecent) return;
+
 		const text = (latest.Message || "").toUpperCase();
 		const isCritical =
 			text.includes("PENALTY") ||

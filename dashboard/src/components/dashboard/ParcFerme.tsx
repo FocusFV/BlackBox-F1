@@ -194,23 +194,6 @@ export const ParcFerme: React.FC = () => {
 
 	return (
 		<div className="flex flex-col gap-6 w-full text-white items-center">
-			{/* PÍLDORA CENTRAL INFORMATIVA */}
-			<div className="flex justify-center w-full select-none">
-				<div className="flex items-center gap-4 px-6 py-4 bg-zinc-950/60 border border-zinc-900 rounded-xl shadow-[0_4px_25px_rgba(0,0,0,0.6)] lg:w-6/12 w-full justify-center">
-					<div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/20 flex-shrink-0">
-						<span className="text-base">🔒</span>
-					</div>
-					<div className="font-mono text-center">
-						<h2 className="text-sm md:text-base font-black uppercase tracking-widest bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 text-transparent bg-clip-text">
-							RÉGIMEN DE PARQUE CERRADO
-						</h2>
-						<p className="text-[11px] md:text-xs text-zinc-400 font-medium uppercase tracking-wide mt-1 leading-normal max-w-md">
-							Telemetría en tiempo real bloqueada. Mostrando resultados de la última sesión oficial.
-						</p>
-					</div>
-				</div>
-			</div>
-
 			{/* GRILLA DE RESULTADOS */}
 			<div className="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full justify-center">
 				<div className="lg:col-start-4 lg:col-span-6 flex flex-col bg-zinc-950/40 border border-zinc-900 rounded-2xl p-4 backdrop-blur-xl max-w-full">
