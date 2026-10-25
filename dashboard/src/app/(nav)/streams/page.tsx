@@ -133,15 +133,11 @@ export default function StreamsPage() {
 
 	// 🏎️ PARRILLA COMPLETA DE IFRAMES
 	const STREAMS_CONFIG = {
-		FOX: "https://fltvhd.com/online/canal.php?stream=foxsports",
-		DISNEY: "https://streamx-hd.com/live1.php?stream=disney3",
-		DAZN: "https://streamx-hd.com/live1.php?stream=daznf1",
-		COLAPINTO: "https://streamx-hd.com/live1.php?stream=disney6",
-		NORRIS: "https://streamx-hd.com/live1.php?stream=disney6",
-		RACEHUB: "https://streamx-hd.com/live1.php?stream=disney4",
-		GENERAL: "https://streamx-hd.com/live1.php?stream=disney5",
-		DISNEY7: "https://streamx-hd.com/live1.php?stream=disney7",
-		DISNEY8: "https://streamx-hd.com/live1.php?stream=disney8",
+		FOX: "https://streamtp99a.sbs/global1.php?stream=fox1ar",
+		GENERAL: "https://streamtp99a.sbs/global1.php?stream=espn2",
+		DISNEY: "https://streamtp99a.sbs/global1.php?stream=disney8",
+		DAZN: "https://streamtp99a.sbs/global1.php?stream=daznf1",
+		COLAPINTO: "https://streamtp99a.sbs/global1.php?stream=disney9",
 	};
 
 	const [activeTab, setActiveTab] =
@@ -334,18 +330,12 @@ export default function StreamsPage() {
 								const key = tabKey as keyof typeof STREAMS_CONFIG;
 								const isActive = activeTab === key;
 
-								let label = key.toUpperCase();
-								if (key === "DISNEY7") {
-									const pilot =
-										PILOTOS_CONFIG[firebaseStreams.disney7]?.name ||
-										firebaseStreams.disney7;
-									label = `D7: ${pilot}`;
-								} else if (key === "DISNEY8") {
-									const pilot =
-										PILOTOS_CONFIG[firebaseStreams.disney8]?.name ||
-										firebaseStreams.disney8;
-									label = `D8: ${pilot}`;
-								}
+								let label: string = key;
+								if (key === "FOX") label = "Fox Sports";
+								else if (key === "GENERAL") label = "ESPN 2 / General";
+								else if (key === "DISNEY") label = "Disney+";
+								else if (key === "DAZN") label = "DAZN F1";
+								else if (key === "COLAPINTO") label = "🇦🇷 Onboard Colapinto";
 
 								return (
 									<button
