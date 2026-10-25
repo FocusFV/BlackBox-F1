@@ -88,22 +88,33 @@ export default function Page() {
 	);
 	const hasLiveTelemetry = hasTimingData || hasCarData || hasPositionData;
 
-	const isTrackActive = Boolean(trackStatus && trackStatus !== "0" && trackStatus !== "");
-	const isSessionStarted = sessionStatus === "Started" || sessionStatus === "Running";
 	const isSessionFinished =
 		sessionStatus === "Ends" ||
 		sessionStatus === "Finalised" ||
 		(session?.Name === "Race" && !!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps && lapCount.TotalLaps > 0);
 
-	// Sesión activa por calendario
+	// Telemetría con heartbeat activo en los últimos 3 minutos (descarta datos viejos cacheados)
+	const isRecentHeartbeat = Boolean(
+		dataStore.state?.Heartbeat?.Utc &&
+		Math.abs(Date.now() - new Date(dataStore.state.Heartbeat.Utc).getTime()) < 3 * 60 * 1000
+	);
+
+	const isTrackActive = Boolean(
+		trackStatus &&
+		trackStatus !== "0" &&
+		trackStatus !== "3" &&
+		isRecentHeartbeat
+	);
+
+	const isSessionStarted = sessionStatus === "Started" || sessionStatus === "Running";
+
+	// Sesión activa por calendario (ventana de ±15 minutos)
 	const isCalendarLive = scheduleStatus.isLiveWindow;
 
-	// Determinación de modo en vivo automática
+	// Determinación de modo en vivo automática: Si la carrera terminó o expiró la ventana, pasa a Parque Cerrado
 	const isLiveAuto =
-		hasLiveTelemetry ||
-		isTrackActive ||
-		isSessionStarted ||
-		(isCalendarLive && !isSessionFinished);
+		!isSessionFinished &&
+		(isCalendarLive || (isTrackActive && isSessionStarted));
 
 	// Vista activa (por defecto automático)
 	const showTelemetry = isLiveAuto;

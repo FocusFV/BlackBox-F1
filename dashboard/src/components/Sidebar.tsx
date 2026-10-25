@@ -96,10 +96,28 @@ export default function Sidebar({ connected }: Props) {
 	const setDelay = useSettingsStore((state) => state.setDelay);
 
 	// 📡 Detección de sesión activa para mostrar u ocultar opciones dinámicas
+	const sessionStatus = useDataStore((state) => state?.state?.SessionStatus?.Status);
+	const session = useDataStore((state) => state?.state?.SessionInfo);
+	const lapCount = useDataStore((state) => state?.state?.LapCount);
 	const trackStatus = useDataStore((state) => state?.state?.TrackStatus?.Status);
-	const hasTiming = useDataStore((state) => Boolean(state?.state?.TimingData?.Lines && Object.keys(state.state.TimingData.Lines).length > 0));
-	const hasPositions = useDataStore((state) => Boolean(state?.positions && Object.keys(state.positions).length > 0));
-	const isTelemetryActive = Boolean(trackStatus && trackStatus !== "0" && trackStatus !== "") || hasTiming || hasPositions;
+	const heartbeatUtc = useDataStore((state) => state?.state?.Heartbeat?.Utc);
+
+	const isSessionFinished =
+		sessionStatus === "Ends" ||
+		sessionStatus === "Finalised" ||
+		(session?.Name === "Race" && !!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps && lapCount.TotalLaps > 0);
+
+	const isRecentHeartbeat = Boolean(
+		heartbeatUtc &&
+		Math.abs(Date.now() - new Date(heartbeatUtc).getTime()) < 3 * 60 * 1000
+	);
+
+	const isTrackActive = Boolean(
+		trackStatus &&
+		trackStatus !== "0" &&
+		trackStatus !== "3" &&
+		isRecentHeartbeat
+	);
 
 	const [sessions, setSessions] = useState<ScheduleSession[]>([]);
 	const [isScheduleLive, setIsScheduleLive] = useState<boolean>(false);
@@ -125,7 +143,8 @@ export default function Sidebar({ connected }: Props) {
 		return () => clearInterval(interval);
 	}, [sessions]);
 
-	const isLive = isTelemetryActive || isScheduleLive;
+	// En vivo solo si no terminó y la ventana de 15m está activa o hay actividad reciente en pista
+	const isLive = !isSessionFinished && (isScheduleLive || isTrackActive);
 
 	const filteredCategories = useMemo(() => {
 		return categoriesMenu

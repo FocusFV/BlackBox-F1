@@ -131,20 +131,80 @@ export default function StreamsPage() {
 			);
 	}, []);
 
-	// 🏎️ PARRILLA COMPLETA DE IFRAMES
-	const STREAMS_CONFIG = {
-		FOX: "https://streamtp99a.sbs/global1.php?stream=fox1ar",
-		GENERAL: "https://streamtp99a.sbs/global1.php?stream=espn2",
-		DISNEY: "https://streamtp99a.sbs/global1.php?stream=disney8",
-		DAZN: "https://streamtp99a.sbs/global1.php?stream=daznf1",
-		COLAPINTO: "https://streamtp99a.sbs/global1.php?stream=disney9",
+	// 🏎️ PARRILLA COMPLETA DE IFRAMES CON SERVIDORES PRINCIPALES Y DE RESPALDO
+	interface StreamSource {
+		label: string;
+		url: string;
+	}
+
+	const STREAMS_CONFIG: Record<string, StreamSource[]> = {
+		FOX: [
+			{ label: "Servidor 1", url: "https://streamtp99a.sbs/global1.php?stream=fox1ar" },
+			{ label: "Servidor 2 (Respaldo)", url: "https://la18hd.su/vivo/canales.php?stream=foxsports" },
+		],
+		DISNEY: [
+			{ label: "Servidor 1", url: "https://streamtp99a.sbs/global1.php?stream=disney8" },
+			{ label: "Servidor 2 (Respaldo)", url: "https://streamx723.sbs/global1.php?channel=disney8" },
+		],
+		DAZN: [
+			{ label: "Servidor 1", url: "https://streamtp99a.sbs/global1.php?stream=daznf1" },
+			{ label: "Servidor 2 (Respaldo)", url: "https://streamx723.sbs/global1.php?channel=daznf1" },
+		],
+		COLAPINTO: [
+			{ label: "Servidor 1", url: "https://streamtp99a.sbs/global1.php?stream=disney9" },
+			{ label: "Servidor 2 (Respaldo)", url: "https://streamx723.sbs/global1.php?channel=disney9" },
+		],
+		GENERAL: [
+			{ label: "Servidor 1", url: "https://streamtp99a.sbs/global1.php?stream=espn2" },
+			{ label: "Servidor 2 (Respaldo)", url: "https://streamx723.sbs/global1.php?channel=espn2" },
+			{ label: "Servidor 3 (HD)", url: "https://tvf90.com/hd.php?stream=espn2" },
+			{ label: "Servidor 4 (Opción 1)", url: "https://tvf90.com/1.php?stream=espn2" },
+			{ label: "Servidor 5 (Opción 2)", url: "https://tvf90.com/2.php?stream=espn2" },
+			{ label: "Servidor 6 (Opción 3)", url: "https://tvf90.com/3.php?stream=espn2" },
+		],
 	};
 
 	const [activeTab, setActiveTab] =
 		useState<keyof typeof STREAMS_CONFIG>("FOX");
+	const [serverIndex, setServerIndex] = useState<number>(0);
+	const [switchNotice, setSwitchNotice] = useState<string | null>(null);
+
+	// 🔍 Sonda automática: si el Servidor 1 está caído/inaccesible, salta al Servidor 2 automáticamente
+	useEffect(() => {
+		let isCancelled = false;
+		const sources = STREAMS_CONFIG[activeTab] || [];
+		if (sources.length <= 1) return;
+
+		const currentSource = sources[serverIndex] || sources[0];
+
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+		fetch(currentSource.url, { mode: "no-cors", signal: controller.signal })
+			.then(() => {
+				clearTimeout(timeoutId);
+			})
+			.catch(() => {
+				clearTimeout(timeoutId);
+				if (isCancelled) return;
+				// Si falla el servidor primario (índice 0), conmutamos al servidor secundario (índice 1)
+				if (serverIndex === 0 && sources.length > 1) {
+					setServerIndex(1);
+					setSwitchNotice(`Servidor 1 no disponible, cambiando automáticamente a ${sources[1].label}...`);
+					setTimeout(() => setSwitchNotice(null), 5000);
+				}
+			});
+
+		return () => {
+			isCancelled = true;
+			clearTimeout(timeoutId);
+		};
+	}, [activeTab, serverIndex]);
 
 	const handleTabSelect = (tab: keyof typeof STREAMS_CONFIG) => {
 		setActiveTab(tab);
+		setServerIndex(0);
+		setSwitchNotice(null);
 	};
 
 	const trackStatus = useDataStore((state) => state.state?.TrackStatus?.Status);
@@ -392,16 +452,57 @@ export default function StreamsPage() {
 							</button>
 						</div>
 
-						{/* REPRODUCTOR DE STREAM SELECCIONADO */}
-						<div className="w-full aspect-video rounded-2xl overflow-hidden border border-zinc-900 bg-black shadow-2xl relative">
-							<iframe
-								src={STREAMS_CONFIG[activeTab]}
-								title="F1 Live Stream"
-								className="w-full h-full border-0"
-								allowFullScreen
-								allow="autoplay; encrypted-media; picture-in-picture"
-							/>
-						</div>
+						{/* SELECTOR DE SERVIDORES Y AVISO DE CONMUTACIÓN */}
+						{(() => {
+							const sources = STREAMS_CONFIG[activeTab] || [];
+							const currentSource = sources[serverIndex] || sources[0];
+
+							return (
+								<>
+									<div className="flex items-center justify-between flex-wrap gap-2 mb-3 bg-zinc-950/80 p-2.5 rounded-xl border border-zinc-900">
+										<div className="flex items-center gap-2 flex-wrap">
+											<span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">// SERVIDOR:</span>
+											<div className="flex items-center gap-1.5 flex-wrap">
+												{sources.map((source, idx) => (
+													<button
+														key={source.url}
+														onClick={() => {
+															setServerIndex(idx);
+															setSwitchNotice(null);
+														}}
+														className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+															serverIndex === idx
+																? "bg-amber-500 text-black shadow-md font-black"
+																: "bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 border border-zinc-800"
+														}`}
+													>
+														{source.label}
+													</button>
+												))}
+											</div>
+										</div>
+
+										{switchNotice && (
+											<span className="text-[10px] font-bold text-amber-400 animate-pulse bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">
+												⚠️ {switchNotice}
+											</span>
+										)}
+									</div>
+
+									{/* REPRODUCTOR DE STREAM SELECCIONADO */}
+									<div className="w-full aspect-video rounded-2xl overflow-hidden border border-zinc-900 bg-black shadow-2xl relative">
+										<iframe
+											key={currentSource?.url}
+											src={currentSource?.url}
+											title="F1 Live Stream"
+											className="w-full h-full border-0"
+											allowFullScreen
+											allow="autoplay; encrypted-media; picture-in-picture"
+										/>
+									</div>
+								</>
+							);
+						})()}
 
 						{/* ADVERTENCIA DE SEGURIDAD */}
 						<div className="w-full mx-auto p-4 border border-amber-500/10 bg-amber-500/5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 font-sans text-xs mt-6 mb-6">
