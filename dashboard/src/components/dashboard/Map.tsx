@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 
 import type { PositionCar, TimingDataDriver } from "@/types/state.type";
@@ -19,6 +19,7 @@ import {
 	prioritizeColoredSectors,
 	rad,
 	rotate,
+	findMinDistance,
 } from "@/lib/map";
 
 // 🏎️ DICCIONARIO FocusFV OFICIAL 2026
@@ -65,6 +66,13 @@ type Corner = {
 	pos: TrackPosition;
 	labelPos: TrackPosition;
 };
+
+function smoothAngle(prevAngle: number, newAngle: number): number {
+	let diff = (newAngle - prevAngle) % 360;
+	if (diff > 180) diff -= 360;
+	if (diff < -180) diff += 360;
+	return prevAngle + diff;
+}
 
 function getDriverPositionAndAngle(
 	timingDriver: TimingDataDriver | undefined,
@@ -129,6 +137,15 @@ export default function Map({ filter }: { filter?: string[] }) {
 
 	const trackStatus = useDataStore((state) => state?.state?.TrackStatus);
 	const raceControlMessages = useDataStore((state) => state?.state?.RaceControlMessages?.Messages ?? undefined);
+	const positions = useDataStore((state) => state.positions);
+	const prevCarsRef = useRef<Record<string, { x: number; y: number; angle: number }>>({});
+
+	const hasLivePositions = useMemo(() => {
+		if (!positions) return false;
+		return Object.values(positions).some(
+			(p) => p && typeof p.X === "number" && (p.X !== 0 || p.Y !== 0)
+		);
+	}, [positions]);
 
 	const [[minX, minY, widthX, widthY], setBounds] = useState<(null | number)[]>([null, null, null, null]);
 	const [[centerX, centerY], setCenter] = useState<(null | number)[]>([null, null]);
@@ -141,6 +158,7 @@ export default function Map({ filter }: { filter?: string[] }) {
 
 	const [timeOffset, setTimeOffset] = useState(0);
 	useEffect(() => {
+		if (hasLivePositions) return;
 		let frameId: number;
 		const updateFrame = () => {
 			setTimeOffset((Date.now() / 24000) % 1);
@@ -148,7 +166,7 @@ export default function Map({ filter }: { filter?: string[] }) {
 		};
 		frameId = requestAnimationFrame(updateFrame);
 		return () => cancelAnimationFrame(frameId);
-	}, []);
+	}, [hasLivePositions]);
 
 	useEffect(() => {
 		(async () => {
@@ -268,28 +286,92 @@ export default function Map({ filter }: { filter?: string[] }) {
 				<text key={`corner.${corner.number}`} x={corner.labelPos.x} y={corner.labelPos.y} className="fill-zinc-600 font-mono font-black select-none" fontSize={240}>{corner.number}</text>
 			))}
 
-			{centerX && centerY && drivers && timingDrivers && Object.keys(drivers).length > 0 && (
+			{centerX !== null && centerY !== null && rotation !== null && drivers && timingDrivers && Object.keys(drivers).length > 0 && (
 				<>
 					{Object.values(drivers).reverse().filter((driver: any) => (filter ? filter.includes(driver.RacingNumber) : true)).map((driver: any) => {
 						const timingDriver = timingDrivers?.Lines?.[driver.RacingNumber];
-						
-						const data = getDriverPositionAndAngle(timingDriver, points, timeOffset);
-						if (!data) return null;
+						const rawPos = positions?.[driver.RacingNumber];
+						const hasCarPos = Boolean(
+							rawPos &&
+							typeof rawPos.X === "number" &&
+							typeof rawPos.Y === "number" &&
+							(rawPos.X !== 0 || rawPos.Y !== 0)
+						);
+
+						let carX: number;
+						let carY: number;
+						let carAngle: number;
+
+						if (hasCarPos && rawPos) {
+							// 🏎️ TELEMETRÍA OFICIAL F1: Coordenadas GPS exactas en pista
+							const rotated = rotate(rawPos.X, rawPos.Y, rotation, centerX, centerY);
+							carX = rotated.x;
+							carY = rotated.y;
+
+							const prev = prevCarsRef.current[driver.RacingNumber];
+							if (prev) {
+								const dx = carX - prev.x;
+								const dy = carY - prev.y;
+								const dist = Math.hypot(dx, dy);
+								if (dist > 3) {
+									const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+									carAngle = smoothAngle(prev.angle, targetAngle);
+								} else {
+									carAngle = prev.angle;
+								}
+							} else if (points && points.length > 0) {
+								const closestIdx = findMinDistance({ x: carX, y: carY }, points);
+								if (closestIdx !== -1) {
+									const nextIdx = (closestIdx + 3) % points.length;
+									carAngle = Math.atan2(
+										points[nextIdx].y - points[closestIdx].y,
+										points[nextIdx].x - points[closestIdx].x
+									) * (180 / Math.PI);
+								} else {
+									carAngle = 0;
+								}
+							} else {
+								carAngle = 0;
+							}
+
+							prevCarsRef.current[driver.RacingNumber] = { x: carX, y: carY, angle: carAngle };
+						} else if (!hasLivePositions) {
+							// 🕒 MODO DEMO: Fallback únicamente cuando NO hay sesión con GPS en vivo
+							const data = getDriverPositionAndAngle(timingDriver, points, timeOffset);
+							if (!data) return null;
+							carX = data.x;
+							carY = data.y;
+							carAngle = data.angle;
+						} else {
+							// Hay sesión en vivo pero este auto no tiene posición activa (ej. en garaje o retirado)
+							const prev = prevCarsRef.current[driver.RacingNumber];
+							if (prev && timingDriver?.InPit) {
+								carX = prev.x;
+								carY = prev.y;
+								carAngle = prev.angle;
+							} else {
+								return null;
+							}
+						}
 
 						const colorConfig = TEAM_COLORS_2026[driver.Tla] || { bg: "#ffffff", text: "#ffffff" };
 						const isFav = favoriteDrivers.includes(driver.RacingNumber);
+						const inPit = Boolean(timingDriver?.InPit || rawPos?.Status === "InPit");
+						const isHidden = Boolean(
+							timingDriver ? (timingDriver.KnockedOut || timingDriver.Stopped || timingDriver.Retired) : false
+						);
 
 						return (
 							<CarObject
 								key={`map.driver.${driver.RacingNumber}`}
 								name={driver.Tla}
 								colors={colorConfig}
-								x={data.x}
-								y={data.y}
-								angle={data.angle}
+								x={carX}
+								y={carY}
+								angle={carAngle}
 								favorite={isFav}
-								pit={timingDriver ? timingDriver.InPit : false}
-								hidden={timingDriver ? (timingDriver.KnockedOut || timingDriver.Stopped || timingDriver.Retired) : false}
+								pit={inPit}
+								hidden={isHidden}
 							/>
 						);
 					})}
@@ -302,11 +384,11 @@ export default function Map({ filter }: { filter?: string[] }) {
 const CarObject = ({ x, y, name, colors, angle, favorite, pit, hidden }: any) => {
 	return (
 		<g 
-			className={clsx("transition-transform duration-150 ease-linear", { "opacity-40": pit }, { "opacity-0!": hidden })} 
+			className={clsx("transition-transform duration-300 ease-linear", { "opacity-40": pit }, { "opacity-0!": hidden })} 
 			style={{ transform: `translateX(${x}px) translateY(${y}px)` }}
 		>
 			{/* 🏎️ MONOPLAZA 2026 PREMIUM (Silueta con Curvas Orgánicas Redondeadas) */}
-			<g transform={`rotate(${angle + 90})`} style={{ transition: "transform 0.16s linear" }}>
+			<g transform={`rotate(${angle + 90})`} style={{ transition: "transform 0.3s linear" }}>
 				{/* Ejes de suspensión delantera y trasera estilizados */}
 				<rect x="-120" y="-175" width="240" height="10" fill="#444" rx="2" />
 				<rect x="-130" y="145" width="260" height="12" fill="#444" rx="2" />

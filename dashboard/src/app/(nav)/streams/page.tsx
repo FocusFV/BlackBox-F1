@@ -324,33 +324,72 @@ export default function StreamsPage() {
 							</Link>
 						</div>
 
-						{/* SELECTOR DE CANALES */}
-						<div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar mb-4 border-b border-zinc-900/60">
-							{Object.keys(STREAMS_CONFIG).map((tabKey) => {
-								const key = tabKey as keyof typeof STREAMS_CONFIG;
-								const isActive = activeTab === key;
+						{/* PARRILLA DE CANALES (GRID DE ACCESO DIRECTO CON DISEÑO PREMIUM) */}
+						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
+							{/* CANAL FOX */}
+							<button
+								onClick={() => handleTabSelect("FOX")}
+								className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 cursor-pointer ${
+									activeTab === "FOX"
+										? "text-white border-blue-400 shadow-[0_10px_25px_rgba(56,189,248,0.3)] animate-pulse"
+										: "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-blue-900"
+								}`}
+							>
+								<img src="/fox.png" alt="Fox Sports" className="h-10 w-auto max-w-[85%] object-contain" />
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">Fox Sports AR</span>
+							</button>
 
-								let label: string = key;
-								if (key === "FOX") label = "Fox Sports";
-								else if (key === "GENERAL") label = "ESPN 2 / General";
-								else if (key === "DISNEY") label = "Disney+";
-								else if (key === "DAZN") label = "DAZN F1";
-								else if (key === "COLAPINTO") label = "🇦🇷 Onboard Colapinto";
+							{/* CANAL DISNEY */}
+							<button
+								onClick={() => handleTabSelect("DISNEY")}
+								className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 cursor-pointer ${
+									activeTab === "DISNEY"
+										? "text-white border-cyan-400 shadow-[0_10px_25px_rgba(34,211,238,0.3)] animate-pulse"
+										: "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-cyan-900"
+								}`}
+							>
+								<img src="/disney.png" alt="Disney+" className="h-10 w-auto max-w-[85%] object-contain" />
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">Disney +</span>
+							</button>
 
-								return (
-									<button
-										key={key}
-										onClick={() => handleTabSelect(key)}
-										className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
-											isActive
-												? "bg-zinc-100 text-black shadow-lg"
-												: "bg-zinc-900/80 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
-										}`}
-									>
-										{label}
-									</button>
-								);
-							})}
+							{/* CANAL DAZN F1 */}
+							<button
+								onClick={() => handleTabSelect("DAZN")}
+								className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 cursor-pointer ${
+									activeTab === "DAZN"
+										? "text-white border-red-500 shadow-[0_10px_25px_rgba(239,68,68,0.3)] animate-pulse"
+										: "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-red-900"
+								}`}
+							>
+								<img src="/dazn.png" alt="DAZN F1" className="h-10 w-auto max-w-[85%] object-contain" />
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">DAZN F1</span>
+							</button>
+
+							{/* ONBOARD COLAPINTO */}
+							<button
+								onClick={() => handleTabSelect("COLAPINTO")}
+								className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 cursor-pointer ${
+									activeTab === "COLAPINTO"
+										? "text-white border-pink-400 shadow-[0_10px_25px_rgba(244,114,182,0.3)] animate-pulse"
+										: "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-pink-900"
+								}`}
+							>
+								<img src="/colapinto.png" alt="Colapinto" className="h-10 w-auto max-w-[85%] object-contain rounded-sm" />
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">🇦🇷 Onboard Colapinto</span>
+							</button>
+
+							{/* GENERAL / ESPN 2 */}
+							<button
+								onClick={() => handleTabSelect("GENERAL")}
+								className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 cursor-pointer ${
+									activeTab === "GENERAL"
+										? "text-white border-purple-500 shadow-[0_10px_25px_rgba(147,51,234,0.3)] animate-pulse"
+										: "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-purple-900"
+								}`}
+							>
+								<img src="/onboard.png" alt="General" className="h-10 w-auto max-w-[85%] object-contain" />
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">ESPN 2 / General</span>
+							</button>
 						</div>
 
 						{/* REPRODUCTOR DE STREAM SELECCIONADO */}
@@ -362,6 +401,17 @@ export default function StreamsPage() {
 								allowFullScreen
 								allow="autoplay; encrypted-media; picture-in-picture"
 							/>
+						</div>
+
+						{/* ADVERTENCIA DE SEGURIDAD */}
+						<div className="w-full mx-auto p-4 border border-amber-500/10 bg-amber-500/5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 font-sans text-xs mt-6 mb-6">
+							<div className="space-y-1">
+								<p className="font-mono font-black text-amber-400 uppercase tracking-wider">⚠️ RECOMENDACIÓN ANTI-POPUP</p>
+								<p className="text-zinc-400">Para bloquear ventanas molestas al hacer clic en el video, usá una extensión adblocker.</p>
+							</div>
+							<div className="flex flex-wrap gap-2 shrink-0">
+								<a href="https://ublockorigin.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-300 font-mono font-bold text-[11px] uppercase tracking-wide">🛡️ uBlock Origin</a>
+							</div>
 						</div>
 					</div>
 				)}
