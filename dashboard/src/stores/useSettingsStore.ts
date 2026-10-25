@@ -41,6 +41,9 @@ type SettingsStore = {
 	raceControlChimeVolume: number;
 	setRaceControlChimeVolume: (raceControlChimeVolume: number) => void;
 
+	autoPlayFavoriteRadios: boolean;
+	setAutoPlayFavoriteRadios: (autoPlayFavoriteRadios: boolean) => void;
+
 	delayIsPaused: boolean;
 	setDelayIsPaused: (delayIsPaused: boolean) => void;
 };
@@ -86,6 +89,9 @@ export const useSettingsStore = create<SettingsStore>()(
 
 				raceControlChimeVolume: 50,
 				setRaceControlChimeVolume: (raceControlChimeVolume: number) => set({ raceControlChimeVolume }),
+
+				autoPlayFavoriteRadios: true,
+				setAutoPlayFavoriteRadios: (autoPlayFavoriteRadios: boolean) => set({ autoPlayFavoriteRadios }),
 
 				delayIsPaused: true,
 				setDelayIsPaused: (delayIsPaused: boolean) => set({ delayIsPaused }),

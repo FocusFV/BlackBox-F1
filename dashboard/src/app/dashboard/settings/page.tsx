@@ -100,6 +100,11 @@ export default function SettingsPage() {
 						<span className="text-xs font-medium text-zinc-300">Sonido de alerta para nuevos avisos de FIA / Race Control</span>
 					</div>
 
+					<div className="flex items-center gap-3 bg-zinc-900/30 p-3 rounded-xl border border-zinc-900">
+						<Toggle enabled={settings.autoPlayFavoriteRadios} setEnabled={(v) => settings.setAutoPlayFavoriteRadios(v)} />
+						<span className="text-xs font-medium text-zinc-300">Auto-reproducir audios de radio de pilotos favoritos en vivo</span>
+					</div>
+
 					{settings.raceControlChime && (
 						<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/60 mt-3">
 							<div className="flex items-center gap-3">
