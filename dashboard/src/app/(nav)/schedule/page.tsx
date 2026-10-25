@@ -22,10 +22,10 @@ export default async function SchedulePage() {
 			{isLive ? (
 				<div className="my-12 flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-emerald-500/30 bg-gradient-to-b from-zinc-950 to-emerald-950/10 rounded-3xl shadow-[0_0_50px_rgba(16,185,129,0.05)] animate-fade-in">
 					
-					{/* Encabezado de Crisis en Pista */}
+					{/* Encabezado de sesión activa */}
 					<div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 px-4 py-1.5 rounded-full text-emerald-400 text-xs font-black tracking-widest uppercase animate-pulse mb-6">
 						<span className="w-2 h-2 rounded-full bg-emerald-400" />
-						<span>¡Semáforos en verde! Sesión activa en vivo</span>
+						<span>Sesión en Vivo en Pista</span>
 					</div>
 
 					<h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-zinc-100 max-w-3xl">
@@ -33,25 +33,24 @@ export default async function SchedulePage() {
 					</h1>
 					
 					<p className="text-zinc-400 text-sm md:text-base mt-4 max-w-xl font-sans">
-						Los contadores de cronograma se suspendieron de forma automática para priorizar los canales de telemetría crítica del pit-wall.
+						La sesión oficial está en curso. Podés seguir todos los tiempos por sector, neumáticos y posiciones en tiempo real.
 					</p>
 
-					{/* Botón Masivo Industrial para saltar al Dashboard */}
+					{/* Botón para saltar al Dashboard */}
 					<div className="my-8">
 						<Link 
 							href="/dashboard" 
 							className="inline-flex items-center gap-3 text-sm md:text-base font-black bg-emerald-500 text-black hover:bg-emerald-400 active:scale-95 transition-all px-8 py-4 rounded-2xl uppercase tracking-widest shadow-[0_0_30px_rgba(16,185,129,0.35)] border border-emerald-300/30 group"
 						>
-							<span>Ingresar al centro de comando</span>
-							<span className="text-xl group-hover:translate-x-1 transition-transform">🏎️💨</span>
+							<span>Ver Telemetría en Vivo</span>
 						</Link>
 					</div>
 
-					{/* 🎧 REPRODUCTOR DE AUDIO HUD DE TRANSMISIÓN DE BOXES */}
+					{/* REPRODUCTOR DE AUDIO DE TRANSMISIÓN DE BOXES */}
 					<div className="w-full max-w-lg border border-zinc-800 bg-zinc-950/80 backdrop-blur-md p-4 rounded-2xl flex flex-col gap-3 text-left">
 						<div className="flex items-center justify-between border-b border-zinc-900 pb-2">
-							<span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">// REPRODUCIR AUDIO DE BOXES (LIVE)</span>
-							<span className="text-[10px] bg-zinc-800 px-2 py-0.5 rounded text-amber-400 font-bold">PU 2026</span>
+							<span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Audio de Boxes (En Vivo)</span>
+							<span className="text-[10px] bg-zinc-800 px-2 py-0.5 rounded text-amber-400 font-bold">2026</span>
 						</div>
 						
 						<audio 
@@ -61,10 +60,6 @@ export default async function SchedulePage() {
 						>
 							Tu navegador no soporta el elemento de reproducción de audio.
 						</audio>
-						
-						<p className="text-[9px] text-zinc-500 text-center italic">
-							Sugerencia: Conectá los auriculares para escuchar las comunicaciones de radio del muro de ingenieros.
-						</p>
 					</div>
 
 				</div>

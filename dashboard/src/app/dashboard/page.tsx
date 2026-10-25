@@ -133,11 +133,6 @@ export default function Page() {
 							<span className="text-xs font-bold tracking-wider text-emerald-400 uppercase">
 								{scheduleStatus.activeSessionName || session?.Name || "Telemetría en Vivo"}
 							</span>
-							{hasLiveTelemetry && (
-								<span className="hidden rounded bg-emerald-950/60 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300 border border-emerald-800/50 sm:inline-block">
-									DATALINK ACTIVO
-								</span>
-							)}
 						</div>
 					) : (
 						<div className="flex items-center gap-2">

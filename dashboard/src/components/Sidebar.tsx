@@ -229,8 +229,8 @@ export default function Sidebar({ connected }: Props) {
 					{/* 🎛️ HUD DE DELAY: Contraste recuperado y legible */}
 					<div className="bg-black/50 border border-zinc-900 rounded-xl p-2.5 mb-5 space-y-2.5 shadow-inner">
 						<div className="flex justify-between items-center px-0.5">
-							<p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">// RETRASO FEED</p>
-							<span className="text-[9px] font-bold text-amber-500/60 uppercase tracking-wider animate-pulse">Sincro</span>
+							<p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Retraso TV</p>
+							<span className="text-[9px] font-bold text-amber-500/70 uppercase tracking-wider">Sync</span>
 						</div>
 
 						{/* Fila del Control Real: Fondo oscuro limpio de filtros para leer el input perfecto */}
@@ -249,7 +249,7 @@ export default function Sidebar({ connected }: Props) {
 						{/* Botón En Vivo */}
 						<button 
 							onClick={handleForzarEnVivo}
-							className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/15 hover:border-amber-500/40 text-[10px] font-extrabold text-amber-500 uppercase tracking-widest transition-all duration-300 active:scale-95 group/btn"
+							className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/15 hover:border-amber-500/40 text-[10px] font-extrabold text-amber-500 uppercase tracking-widest transition-all duration-300 active:scale-95 group/btn cursor-pointer"
 						>
 							<Radio className="w-3 h-3 text-amber-500 animate-pulse group-hover/btn:scale-110 transition-transform" />
 							En Vivo
@@ -260,8 +260,8 @@ export default function Sidebar({ connected }: Props) {
 					<div className="flex-1 space-y-5 overflow-y-auto no-scrollbar">
 						{filteredCategories.map((cat: MenuCategory, idx: number) => (
 							<div key={idx} className="space-y-1.5">
-								<p className="px-2.5 text-[9px] font-extrabold text-amber-500/50 uppercase tracking-widest">
-									// {cat.titulo}
+								<p className="px-2.5 text-[9px] font-extrabold text-amber-500/60 uppercase tracking-widest">
+									{cat.titulo}
 								</p>
 								<div className="flex flex-col gap-1">
 									{cat.items.map((item: MenuItem) => (
@@ -280,8 +280,8 @@ export default function Sidebar({ connected }: Props) {
 
 					{/* Pie */}
 					<div className="border-t border-zinc-900/80 pt-3 mt-4 flex items-center justify-between text-[9px] font-bold tracking-widest text-zinc-600 uppercase">
-						<span>Version 4.0.3</span>
-						<span className="text-amber-500/40 animate-pulse">● ONLINE</span>
+						<span>v4.0.3</span>
+						<span className="text-zinc-600">FocusFV</span>
 					</div>
 				</nav>
 			</motion.div>

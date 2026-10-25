@@ -311,7 +311,7 @@ export default function StreamsPage() {
 							</div>
 
 							<span className="text-[11px] font-black text-zinc-500 uppercase tracking-widest mb-2">
-								{"// FEED SATELITAL: EN ESPERA"}
+								FEED SATELITAL EN ESPERA
 							</span>
 							<h2 className="text-xl font-black uppercase tracking-tight text-zinc-100">
 								MOTORES APAGADOS
@@ -343,7 +343,7 @@ export default function StreamsPage() {
 							)}
 
 							<p className="text-zinc-600 text-[10px] mt-3 font-sans">
-								(Hacé triple-clic en el candado para probar la señal ahora)
+								Hacé triple clic en el candado para habilitar la señal de forma manual
 							</p>
 						</div>
 					</div>
@@ -370,8 +370,8 @@ export default function StreamsPage() {
 									</div>
 									<p className="text-zinc-500 text-xs mt-1">
 										{bypass
-											? "// ACCESO MANUAL FORZADO POR EL USUARIO"
-											: `// SEÑAL SATELITAL ACTIVA: ${activeRace}`}
+											? "Acceso manual de prueba"
+											: `Señal satelital activa: ${activeRace}`}
 									</p>
 								</div>
 							</div>
@@ -461,7 +461,7 @@ export default function StreamsPage() {
 								<>
 									<div className="flex items-center justify-between flex-wrap gap-2 mb-3 bg-zinc-950/80 p-2.5 rounded-xl border border-zinc-900">
 										<div className="flex items-center gap-2 flex-wrap">
-											<span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">// SERVIDOR:</span>
+											<span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">SERVIDOR:</span>
 											<div className="flex items-center gap-1.5 flex-wrap">
 												{sources.map((source, idx) => (
 													<button
@@ -484,7 +484,7 @@ export default function StreamsPage() {
 
 										{switchNotice && (
 											<span className="text-[10px] font-bold text-amber-400 animate-pulse bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">
-												⚠️ {switchNotice}
+												{switchNotice}
 											</span>
 										)}
 									</div>
@@ -504,14 +504,14 @@ export default function StreamsPage() {
 							);
 						})()}
 
-						{/* ADVERTENCIA DE SEGURIDAD */}
-						<div className="w-full mx-auto p-4 border border-amber-500/10 bg-amber-500/5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 font-sans text-xs mt-6 mb-6">
+						{/* RECOMENDACIÓN DE REPRODUCCIÓN */}
+						<div className="w-full mx-auto p-4 border border-zinc-900 bg-zinc-950/40 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 font-sans text-xs mt-6 mb-6">
 							<div className="space-y-1">
-								<p className="font-mono font-black text-amber-400 uppercase tracking-wider">⚠️ RECOMENDACIÓN ANTI-POPUP</p>
-								<p className="text-zinc-400">Para bloquear ventanas molestas al hacer clic en el video, usá una extensión adblocker.</p>
+								<p className="font-mono font-black text-zinc-300 uppercase tracking-wider">Recomendación para la transmisión</p>
+								<p className="text-zinc-500">Para una experiencia limpia y sin ventanas emergentes de los reproductores, se sugiere utilizar un bloqueador de anuncios.</p>
 							</div>
 							<div className="flex flex-wrap gap-2 shrink-0">
-								<a href="https://ublockorigin.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-300 font-mono font-bold text-[11px] uppercase tracking-wide">🛡️ uBlock Origin</a>
+								<a href="https://ublockorigin.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-mono font-bold text-[11px] uppercase tracking-wide transition-all">uBlock Origin</a>
 							</div>
 						</div>
 					</div>

@@ -150,7 +150,7 @@ export default function Home() {
 			<section className="relative z-10 py-20 max-w-7xl mx-auto px-6 sm:px-12">
 				<div className="text-center mb-16 space-y-3">
 					<h2 className="text-xs font-mono font-extrabold text-amber-500 uppercase tracking-[0.3em]">
-						// DATOS EN TIEMPO REAL
+						DATOS EN TIEMPO REAL
 					</h2>
 					<p className="text-3xl sm:text-5xl font-black uppercase text-white tracking-tight">
 						Tu Segunda Pantalla para el Fin de Semana
@@ -250,7 +250,7 @@ export default function Home() {
 			<section className="relative z-10 py-20 max-w-4xl mx-auto px-6 sm:px-12">
 				<div className="text-center mb-12 space-y-2">
 					<h2 className="text-xs font-mono font-extrabold text-amber-500 uppercase tracking-[0.3em]">
-						// PREGUNTAS FRECUENTES
+						PREGUNTAS FRECUENTES
 					</h2>
 					<p className="text-3xl font-black uppercase text-white">Preguntas Frecuentes</p>
 				</div>
@@ -330,7 +330,7 @@ export default function Home() {
 
 			{/* FOOTER */}
 			<footer className="relative z-10 border-t border-zinc-900 bg-black/80 py-8 text-center text-xs font-mono text-zinc-600">
-				<p>BLACKBOX-F1 // PLATAFORMA DE TELEMETRÍA EN ESPAÑOL</p>
+				<p>BLACKBOX-F1 · PLATAFORMA DE TELEMETRÍA EN ESPAÑOL</p>
 			</footer>
 		</div>
 	);
