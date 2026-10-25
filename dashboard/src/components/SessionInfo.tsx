@@ -5,6 +5,7 @@ import { utc, duration } from "moment";
 import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import Flag from "@/components/Flag";
+import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
 
 const sessionPartPrefix = (name: string) => {
 	switch (name) {
@@ -64,11 +65,10 @@ export default function SessionInfo() {
 
 				if (data.MRData?.RaceTable?.Races?.length > 0) {
 					const nextRace = data.MRData.RaceTable.Races[0];
-					setNextGpName(nextRace.raceName || "Gran Premio");
+					setNextGpName(translateGpName(nextRace.raceName));
 
 					const countryRaw = nextRace.Circuit?.Location?.country || "";
-					const mappedCode = countryCodeMap[countryRaw] || countryRaw.substring(0, 3).toLowerCase();
-					setCountryCode(mappedCode);
+					setCountryCode(getCountryCodeForGp(nextRace.raceName, countryRaw));
 
 					const now = new Date().getTime();
 					const sessionsToCheck = [
