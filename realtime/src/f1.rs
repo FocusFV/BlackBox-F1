@@ -8,50 +8,15 @@ use std::time::Duration;
 use tokio::sync::broadcast::Sender;
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::client::IntoClientRequest;
-use tracing::{error, info, warn};
+use tracing::{error, info};
 
 use crate::services::state_service::StateService;
 
 #[derive(Deserialize)]
-struct AuthResponse {
-    #[serde(rename = "data")]
-    data: AuthData,
-}
-
-#[derive(Deserialize)]
-struct AuthData {
-    #[serde(rename = "subscriptionToken")]
-    subscription_token: String,
-}
-
-#[derive(Deserialize)]
-struct NegotiateResponse {
-    #[serde(rename = "ConnectionToken")]
-    connection_token: String,
-}
-
-async fn get_f1_token(client: &Client, user: &str, pass: &str) -> Result<String, Error> {
-    info!("Intentando autenticación automática en F1 con usuario y contraseña...");
-    let payload = json!({
-        "Login": user,
-        "Password": pass
-    });
-
-    let res = client
-        .post("https://api.formula1.com/v2/account/subscriber/customers/authenticate")
-        .header(USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-        .header("apiKey", "fCUCjWrKPu9ylJwRAv8BpGLEgiAuQIx7")
-        .json(&payload)
-        .send()
-        .await?;
-
-    if !res.status().is_success() {
-        return Err(anyhow!("Fallo autenticación automática F1 (Status: {})", res.status()));
-    }
-
-    let auth: AuthResponse = res.json().await?;
-    info!("¡Autenticación exitosa! Token de sesión obtenido automáticamente");
-    Ok(auth.data.subscription_token)
+#[serde(rename_all = "camelCase")]
+struct SignalRCoreNegotiateResponse {
+    connection_token: Option<String>,
+    connection_id: Option<String>,
 }
 
 fn read_env_var(var_name: &str) -> String {
@@ -73,7 +38,8 @@ fn read_env_var(var_name: &str) -> String {
             }
         }
     }
-    "".to_string()
+
+    String::new()
 }
 
 pub async fn ingest_f1(
@@ -84,56 +50,27 @@ pub async fn ingest_f1(
         .timeout(Duration::from_secs(15))
         .build()?;
 
-    let mut user = read_env_var("F1_USERNAME");
-    if user.is_empty() {
-        user = read_env_var("F1_EMAIL");
-    }
-    let pass = read_env_var("F1_PASSWORD");
-    let full_cookie = read_env_var("F1_FULL_COOKIE");
+    let f1_token = read_env_var("F1_TOKEN");
 
-    let mut auth_token = String::new();
+    info!("Negociando conexión con F1 Live Timing (SignalR Core)...");
 
-    // 1. Intentar auto-login si hay credenciales de usuario/email
-    if !user.is_empty() && !pass.is_empty() {
-        match get_f1_token(&client, &user, &pass).await {
-            Ok(token) => {
-                auth_token = format!("ascendSubscriptionToken={}", token);
-            }
-            Err(e) => {
-                warn!("No se pudo hacer auto-login en F1: {}. Intentando con cookie de respaldo...", e);
-            }
-        }
-    }
-
-    // 2. Si no hay token de auto-login, usar F1_FULL_COOKIE
-    if auth_token.is_empty() && !full_cookie.is_empty() {
-        info!("Usando F1_FULL_COOKIE como método de autenticación");
-        auth_token = full_cookie;
-    }
-
-    if auth_token.is_empty() {
-        warn!("ATENCIÓN: No hay credenciales ni cookie configuradas para F1");
-    }
-
-    info!("Negociando conexión con SignalR de F1...");
-
-    let negotiate_url = "https://livetiming.formula1.com/signalr/negotiate?connectionData=%5B%7B%22name%22%3A%22Streaming%22%7D%5D&clientProtocol=1.5";
+    let negotiate_url = "https://livetiming.formula1.com/signalrcore/negotiate?negotiateVersion=1";
     let mut req = client
-        .get(negotiate_url)
-        .header(USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        .post(negotiate_url)
+        .header(USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36")
         .header(ORIGIN, "https://www.formula1.com")
         .header(REFERER, "https://www.formula1.com/");
 
-    if !auth_token.is_empty() {
-        req = req.header(COOKIE, HeaderValue::from_str(&auth_token)?);
+    if !f1_token.is_empty() {
+        req = req.header("Authorization", format!("Bearer {}", f1_token));
     }
 
     let res = req.send().await?;
     if !res.status().is_success() {
-        return Err(anyhow!("SignalR negotiate devolvió status: {}", res.status()));
+        return Err(anyhow!("SignalR Core negotiate devolvió status: {}", res.status()));
     }
 
-    // 🍪 Extraemos las cookies de sesión (AWSALB, AWSALBCORS) devueltas por el servidor en negotiate
+    // 🍪 Extraemos las cookies de balanceo de carga (AWSALB, AWSALBCORS)
     let mut session_cookies = Vec::new();
     for cookie_header in res.headers().get_all(reqwest::header::SET_COOKIE) {
         if let Ok(cookie_str) = cookie_header.to_str() {
@@ -144,12 +81,17 @@ pub async fn ingest_f1(
         }
     }
 
-    let negotiate: NegotiateResponse = res.json().await?;
-    info!(connection_token = %negotiate.connection_token, "¡Negociación exitosa con F1 Live Timing!");
+    let negotiate: SignalRCoreNegotiateResponse = res.json().await?;
+    let connection_token = negotiate
+        .connection_token
+        .or(negotiate.connection_id)
+        .ok_or_else(|| anyhow!("No se recibió connectionToken ni connectionId en negotiate"))?;
 
-    let encoded_token = urlencoding::encode(&negotiate.connection_token);
+    info!(token = %connection_token, "¡Negociación exitosa con SignalR Core!");
+
+    let encoded_token = urlencoding::encode(&connection_token);
     let ws_url = format!(
-        "wss://livetiming.formula1.com/signalr/connect?clientProtocol=1.5&transport=webSockets&connectionData=%5B%7B%22name%22%3A%22Streaming%22%7D%5D&connectionToken={}",
+        "wss://livetiming.formula1.com/signalrcore?id={}",
         encoded_token
     );
 
@@ -158,11 +100,6 @@ pub async fn ingest_f1(
     headers.insert(USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64)".parse().unwrap());
     headers.insert(ORIGIN, "https://www.formula1.com".parse().unwrap());
 
-    // Adjuntamos tanto las cookies de balanceador de carga (AWSALB) como el token de suscripción
-    if !auth_token.is_empty() {
-        session_cookies.push(auth_token);
-    }
-
     let final_cookie_header = session_cookies.join("; ");
     if !final_cookie_header.is_empty() {
         if let Ok(hval) = HeaderValue::from_str(&final_cookie_header) {
@@ -170,42 +107,82 @@ pub async fn ingest_f1(
         }
     }
 
+    info!("Estableciendo conexión WebSocket con F1 SignalR Core...");
     let (ws_stream, _) = connect_async(ws_req).await?;
-    info!("Conectado al WebSocket de F1 SignalR");
+    info!("¡Conectado al WebSocket de F1 SignalR Core!");
 
     let (mut write, mut read) = ws_stream.split();
 
+    // 1. Handshake inicial de SignalR Core: {"protocol":"json","version":1}\x1e
+    let handshake_msg = "{\"protocol\":\"json\",\"version\":1}\x1e";
+    write.send(tokio_tungstenite::tungstenite::Message::Text(handshake_msg.into())).await?;
+
+    // 2. Suscripción a todos los canales de telemetría oficiales
     let subscribe_msg = json!({
-        "H": "Streaming",
-        "M": "Subscribe",
-        "A": [[
+        "type": 1,
+        "invocationId": "0",
+        "target": "Subscribe",
+        "arguments": [[
             "Heartbeat", "CarData.z", "Position.z", "TimingAppData",
             "TimingData", "WeatherData", "TrackStatus", "DriverList",
-            "RaceControlMessages", "SessionInfo", "SessionData", "LapCount"
-        ]],
-        "I": 1
+            "RaceControlMessages", "SessionInfo", "SessionData", "LapCount",
+            "TeamRadio", "TimingStats", "TopThree"
+        ]]
     });
+    let subscribe_payload = format!("{}\x1e", subscribe_msg);
+    write.send(tokio_tungstenite::tungstenite::Message::Text(subscribe_payload.into())).await?;
+    info!("Suscripción SignalR Core enviada exitosamente para todos los canales de F1");
 
-    write.send(tokio_tungstenite::tungstenite::Message::Text(subscribe_msg.to_string().into())).await?;
-    info!("Suscripción enviada a los canales de telemetría de F1");
-
+    // 3. Procesar mensajes entrantes (separados por el terminador ASCII 0x1E)
     while let Some(msg) = read.next().await {
         match msg {
             Ok(tokio_tungstenite::tungstenite::Message::Text(text)) => {
                 let text_str = text.as_str();
-                if let Ok(val) = serde_json::from_str::<Value>(text_str) {
-                    if let Some(hub_messages) = val.get("M").and_then(|m| m.as_array()) {
-                        for message in hub_messages {
-                            if let Some(args) = message.get("A").and_then(|a| a.as_array()) {
-                                if let (Some(topic), Some(payload)) = (args.get(0).and_then(|t| t.as_str()), args.get(1)) {
+                for record in text_str.split('\x1e') {
+                    let trimmed = record.trim();
+                    if trimmed.is_empty() || trimmed == "{}" {
+                        continue;
+                    }
+
+                    if let Ok(val) = serde_json::from_str::<Value>(trimmed) {
+                        let msg_type = val.get("type").and_then(|t| t.as_i64()).unwrap_or(0);
+
+                        // Tipo 3: Completion de Subscribe -> Contiene el estado inicial COMPLETO
+                        if msg_type == 3 {
+                            if let Some(result) = val.get("result").and_then(|r| r.as_object()) {
+                                info!("¡Recibido estado inicial completo de F1 Live Timing! ({} temas recibidos)", result.len());
+                                for (topic, payload) in result {
                                     let mut state_update = serde_json::Map::new();
-                                    state_update.insert(topic.to_string(), payload.clone());
+                                    state_update.insert(topic.clone(), payload.clone());
                                     let update_obj = Value::Object(state_update);
 
                                     state_service.update_state(update_obj.clone()).await.ok();
                                     let _ = update_sender.send(update_obj.to_string());
                                 }
                             }
+                        }
+
+                        // Tipo 1: Invocación en streaming -> Updates en vivo ("feed")
+                        if msg_type == 1 {
+                            if let Some(target) = val.get("target").and_then(|t| t.as_str()) {
+                                if target == "feed" {
+                                    if let Some(args) = val.get("arguments").and_then(|a| a.as_array()) {
+                                        if let (Some(topic), Some(payload)) = (args.get(0).and_then(|t| t.as_str()), args.get(1)) {
+                                            let mut state_update = serde_json::Map::new();
+                                            state_update.insert(topic.to_string(), payload.clone());
+                                            let update_obj = Value::Object(state_update);
+
+                                            state_service.update_state(update_obj.clone()).await.ok();
+                                            let _ = update_sender.send(update_obj.to_string());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Tipo 6: Ping keep-alive del servidor
+                        if msg_type == 6 {
+                            write.send(tokio_tungstenite::tungstenite::Message::Text("{\"type\":6}\x1e".into())).await.ok();
                         }
                     }
                 }
@@ -214,7 +191,7 @@ pub async fn ingest_f1(
                 write.send(tokio_tungstenite::tungstenite::Message::Pong(ping)).await.ok();
             }
             Err(e) => {
-                error!("Error en la conexión WebSocket de F1: {}", e);
+                error!("Error en la conexión WebSocket de F1 SignalR Core: {}", e);
                 break;
             }
             _ => {}
