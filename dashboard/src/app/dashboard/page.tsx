@@ -14,8 +14,7 @@ import { TvSyncControl } from "@/components/dashboard/TvSyncControl";
 import { RaceControlAlertBanner } from "@/components/dashboard/RaceControlAlertBanner";
 import { TeamRadioAlertPopup } from "@/components/dashboard/TeamRadioAlertPopup";
 import { HeadToHeadModal } from "@/components/dashboard/HeadToHeadModal";
-import { simulator } from "@/lib/simulatorFeed";
-import { Swords, Play, Square } from "lucide-react";
+import { Swords } from "lucide-react";
 import {
 	getUpcomingSessions,
 	evaluateSessionStatus,
@@ -42,23 +41,8 @@ export default function Page() {
 	});
 	const [countdownText, setCountdownText] = useState<string>("");
 
-	// 🎛️ Selector de vista manual (Auto, Telemetría forzada, Parque Cerrado)
-	const [viewMode, setViewMode] = useState<"auto" | "telemetry" | "parc_ferme">("auto");
-
-	// ⚔️ Modal Cara a Cara y Modo Simulador
+	// ⚔️ Modal Cara a Cara
 	const [isH2HOpen, setIsH2HOpen] = useState(false);
-	const [isSimulating, setIsSimulating] = useState(false);
-
-	const toggleSimulator = () => {
-		if (isSimulating) {
-			simulator.stop();
-			setIsSimulating(false);
-		} else {
-			simulator.start();
-			setIsSimulating(true);
-			setViewMode("telemetry");
-		}
-	};
 
 	useEffect(() => {
 		let isMounted = true;
@@ -121,13 +105,12 @@ export default function Page() {
 		isSessionStarted ||
 		(isCalendarLive && !isSessionFinished);
 
-	// Vista activa
-	const showTelemetry =
-		viewMode === "telemetry" || (viewMode === "auto" && isLiveAuto);
+	// Vista activa (por defecto automático)
+	const showTelemetry = isLiveAuto;
 
 	return (
 		<div className="flex w-full flex-col gap-4 px-4 py-4 text-zinc-100">
-			{/* 🏎️ Barra de estado y selector de modo */}
+			{/* 🏎️ Barra de estado HUD */}
 			<div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950/80 px-4 py-2.5 backdrop-blur-md">
 				<div className="flex items-center gap-3">
 					{showTelemetry ? (
@@ -160,84 +143,20 @@ export default function Page() {
 					)}
 				</div>
 
-				{/* Controles de la derecha: TV Sync, Cara a Cara, Simulador y Selector de Vista */}
+				{/* Controles de la derecha: Cara a Cara y TV Sync */}
 				<div className="flex flex-wrap items-center gap-2">
 					{/* Botón Cara a Cara */}
 					<button
 						type="button"
 						onClick={() => setIsH2HOpen(true)}
-						className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/90 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 hover:border-red-500/50 hover:bg-zinc-800 hover:text-white transition-all"
+						className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/90 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 hover:border-red-500/50 hover:bg-zinc-800 hover:text-white transition-all cursor-pointer"
 						title="Abrir comparador Cara a Cara entre dos pilotos"
 					>
 						<Swords className="h-3.5 w-3.5 text-red-500" />
 						<span>Cara a Cara</span>
 					</button>
 
-					{/* Botón Simulador Replay */}
-					<button
-						type="button"
-						onClick={toggleSimulator}
-						className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-all ${
-							isSimulating
-								? "border-emerald-500 bg-emerald-950/60 text-emerald-300 shadow-sm"
-								: "border-zinc-800 bg-zinc-900/90 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-800"
-						}`}
-						title={isSimulating ? "Detener simulación de telemetría" : "Iniciar carrera simulada offline"}
-					>
-						{isSimulating ? (
-							<>
-								<Square className="h-3.5 w-3.5 fill-emerald-400 text-emerald-400" />
-								<span>Detener Sim</span>
-							</>
-						) : (
-							<>
-								<Play className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-								<span>Simulador</span>
-							</>
-						)}
-					</button>
-
 					<TvSyncControl />
-
-					{/* Botones de alternancia manual */}
-					<div className="flex items-center rounded-md border border-zinc-800 bg-zinc-900/90 p-0.5 text-xs font-medium">
-						<button
-							type="button"
-							onClick={() => setViewMode("auto")}
-							className={`rounded px-2.5 py-1 transition-all ${
-								viewMode === "auto"
-									? "bg-red-600 text-white shadow-sm"
-									: "text-zinc-400 hover:text-zinc-200"
-							}`}
-							title="Cambio automático según el horario de la sesión y datos en vivo"
-						>
-							Auto
-						</button>
-						<button
-							type="button"
-							onClick={() => setViewMode("telemetry")}
-							className={`rounded px-2.5 py-1 transition-all ${
-								viewMode === "telemetry"
-									? "bg-red-600 text-white shadow-sm"
-									: "text-zinc-400 hover:text-zinc-200"
-							}`}
-							title="Forzar vista de telemetría y mapa de carrera"
-						>
-							📡 Telemetría
-						</button>
-						<button
-							type="button"
-							onClick={() => setViewMode("parc_ferme")}
-							className={`rounded px-2.5 py-1 transition-all ${
-								viewMode === "parc_ferme"
-									? "bg-red-600 text-white shadow-sm"
-									: "text-zinc-400 hover:text-zinc-200"
-							}`}
-							title="Ver Parque Cerrado y videos oficiales"
-						>
-							🏁 Parque Cerrado
-						</button>
-					</div>
 				</div>
 			</div>
 

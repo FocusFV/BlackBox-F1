@@ -2,12 +2,18 @@
 
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 
 import { useSidebarStore } from "@/stores/useSidebarStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useDataStore } from "@/stores/useDataStore";
+import {
+	getUpcomingSessions,
+	evaluateSessionStatus,
+	type ScheduleSession,
+} from "@/lib/sessionSchedule";
 
 import ConnectionStatus from "@/components/ConnectionStatus";
 import DelayInput from "@/components/DelayInput";
@@ -88,6 +94,53 @@ export default function Sidebar({ connected }: Props) {
 
 	const oledMode = useSettingsStore((state) => state.oledMode);
 	const setDelay = useSettingsStore((state) => state.setDelay);
+
+	// 📡 Detección de sesión activa para mostrar u ocultar opciones dinámicas
+	const trackStatus = useDataStore((state) => state?.state?.TrackStatus?.Status);
+	const hasTiming = useDataStore((state) => Boolean(state?.state?.TimingData?.Lines && Object.keys(state.state.TimingData.Lines).length > 0));
+	const hasPositions = useDataStore((state) => Boolean(state?.positions && Object.keys(state.positions).length > 0));
+	const isTelemetryActive = Boolean(trackStatus && trackStatus !== "0" && trackStatus !== "") || hasTiming || hasPositions;
+
+	const [sessions, setSessions] = useState<ScheduleSession[]>([]);
+	const [isScheduleLive, setIsScheduleLive] = useState<boolean>(false);
+
+	useEffect(() => {
+		let isMounted = true;
+		getUpcomingSessions().then((data) => {
+			if (isMounted && data.length > 0) {
+				setSessions(data);
+				setIsScheduleLive(evaluateSessionStatus(data).isLiveWindow);
+			}
+		});
+		return () => {
+			isMounted = false;
+		};
+	}, []);
+
+	useEffect(() => {
+		if (sessions.length === 0) return;
+		const interval = setInterval(() => {
+			setIsScheduleLive(evaluateSessionStatus(sessions).isLiveWindow);
+		}, 10000);
+		return () => clearInterval(interval);
+	}, [sessions]);
+
+	const isLive = isTelemetryActive || isScheduleLive;
+
+	const filteredCategories = useMemo(() => {
+		return categoriesMenu
+			.map((cat) => ({
+				...cat,
+				items: cat.items.filter((item) => {
+					// 🚫 Si NO hay carrera / sesión oficial activa, ocultamos "Telemetría Pista" y "El Clima"
+					if (!isLive && (item.href === "/dashboard/track-map" || item.href === "/dashboard/weather")) {
+						return false;
+					}
+					return true;
+				}),
+			}))
+			.filter((cat) => cat.items.length > 0);
+	}, [isLive]);
 
 	const handleForzarEnVivo = () => {
 		setDelay(0);
@@ -186,7 +239,7 @@ export default function Sidebar({ connected }: Props) {
 
 					{/* Secciones de menú */}
 					<div className="flex-1 space-y-5 overflow-y-auto no-scrollbar">
-						{categoriesMenu.map((cat: MenuCategory, idx: number) => (
+						{filteredCategories.map((cat: MenuCategory, idx: number) => (
 							<div key={idx} className="space-y-1.5">
 								<p className="px-2.5 text-[9px] font-extrabold text-amber-500/50 uppercase tracking-widest">
 									// {cat.titulo}

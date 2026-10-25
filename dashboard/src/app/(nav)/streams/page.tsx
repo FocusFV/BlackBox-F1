@@ -269,14 +269,14 @@ export default function StreamsPage() {
 										{countdownText}
 									</span>
 									<span className="text-[9px] text-zinc-500 mt-1">
-										El candado se abre automáticamente 30 minutos antes
+										El candado se abre automáticamente 15 minutos antes
 									</span>
 								</div>
 							) : (
 								<p className="text-zinc-400 text-xs font-sans mt-3 leading-relaxed">
 									La señal de video en vivo se habilita automáticamente{" "}
 									<span className="text-zinc-200 font-bold">
-										30 minutos antes
+										15 minutos antes
 									</span>{" "}
 									de cada sesión oficial (FP1, FP2, FP3, Qualy, Sprint o Carrera).
 								</p>
