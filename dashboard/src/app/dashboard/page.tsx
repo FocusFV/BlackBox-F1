@@ -201,11 +201,27 @@ export default function Page() {
 						}`}
 					>
 						{/* Historial y resultados del último GP */}
-						<ParcFerme />
+						<ParcFerme onOpenCircuit={() => setIsCinematicTrackMode(true)} />
 
 						{/* Feed oficial de YouTube */}
 						<YouTubeFeed />
 					</div>
+
+					{/* 🏎️ Franjas laterales táctiles para activar el circuito al hacer clic en los márgenes exteriores */}
+					{!isCinematicTrackMode && (
+						<>
+							<div
+								onClick={() => setIsCinematicTrackMode(true)}
+								className="hidden lg:block absolute left-0 top-0 bottom-0 w-[18%] z-20 cursor-pointer"
+								title="Toca para ver el circuito completo"
+							/>
+							<div
+								onClick={() => setIsCinematicTrackMode(true)}
+								className="hidden lg:block absolute right-0 top-0 bottom-0 w-[18%] z-20 cursor-pointer"
+								title="Toca para ver el circuito completo"
+							/>
+						</>
+					)}
 				</div>
 			) : (
 				<>

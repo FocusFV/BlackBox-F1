@@ -98,7 +98,11 @@ const TeamLogo: React.FC<{ teamName: string }> = ({ teamName }) => {
 	);
 };
 
-export const ParcFerme: React.FC = () => {
+interface ParcFermeProps {
+	onOpenCircuit?: () => void;
+}
+
+export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 	const [activeTab, setActiveTab] = useState<SessionTab>("RACE");
 	const [results, setResults] = useState<DriverResult[]>([]);
 	const [gpName, setGpName] = useState("Gran Premio");
@@ -221,8 +225,12 @@ export const ParcFerme: React.FC = () => {
 
 	return (
 		<div className="flex flex-col gap-4 w-full text-white items-center">
-			{/* 🏁 CABECERA UNIFICADA PANORÁMICA */}
-			<div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 shadow-[0_4px_25px_rgba(0,0,0,0.5)] backdrop-blur-xl lg:w-8/12 w-full">
+			{/* 🏁 CABECERA UNIFICADA PANORÁMICA (TÁCTIL PARA ACTIVAR MODO CIRCUITO EN MÓVIL Y DESKTOP) */}
+			<div
+				onClick={onOpenCircuit}
+				className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-2xl bg-zinc-950/75 border border-zinc-800/80 shadow-[0_4px_25px_rgba(0,0,0,0.5)] backdrop-blur-xl lg:w-8/12 w-full cursor-pointer hover:border-amber-500/50 hover:bg-zinc-900/80 transition-all group"
+				title="Toca para ver el circuito completo en alta resolución"
+			>
 				<div className="flex items-center gap-3 w-full sm:w-auto">
 					<div className="flex items-center justify-center overflow-hidden rounded-lg border border-zinc-700/60 bg-zinc-900 p-0.5 shadow-md shrink-0">
 						<Flag countryCode={countryCode} className="h-6 w-9 object-cover rounded-md" />
@@ -232,11 +240,11 @@ export const ParcFerme: React.FC = () => {
 							<span className="text-[10px] uppercase font-mono font-bold tracking-wider text-amber-400">
 								Última Ronda Oficial
 							</span>
-							<span className="text-[9px] px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-mono font-bold uppercase">
-								Resultados
+							<span className="text-[9px] px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-mono font-bold uppercase group-hover:border-amber-500/40 group-hover:text-amber-300 transition-colors">
+								Ver Circuito 🏁
 							</span>
 						</div>
-						<h2 className="text-sm md:text-base font-black tracking-wide text-zinc-100 font-sans">
+						<h2 className="text-sm md:text-base font-black tracking-wide text-zinc-100 font-sans group-hover:text-amber-100 transition-colors">
 							{gpName}
 						</h2>
 					</div>
