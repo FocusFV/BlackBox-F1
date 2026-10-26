@@ -8,16 +8,13 @@ import { motion, AnimatePresence } from "motion/react";
 import {
 	Timer,
 	Gauge,
-	Zap,
 	RotateCcw,
-	Compass,
 	Flame,
 	Crosshair,
 	Activity,
-	MoveVertical,
-	ShieldAlert,
 	Eye,
 	EyeOff,
+	Milestone,
 } from "lucide-react";
 
 interface Props {
@@ -55,7 +52,7 @@ function playHudChime() {
 	} catch {}
 }
 
-// Helper para calcular la posición y ángulo de la Línea de Meta a partir del trazado SVG
+// Helper para calcular la posición de la Línea de Meta y la Flecha de Sentido de Giro
 function getStartFinishCoords(svgPath: string): {
 	x0: number;
 	y0: number;
@@ -63,6 +60,9 @@ function getStartFinishCoords(svgPath: string): {
 	y1: number;
 	x2: number;
 	y2: number;
+	arrowX: number;
+	arrowY: number;
+	arrowAngleDeg: number;
 } | null {
 	if (!svgPath) return null;
 	const match = svgPath.match(/M\s*([\d.-]+)[,\s]+([\d.-]+)(?:[^\d.-]+([\d.-]+)[,\s]+([\d.-]+))?/);
@@ -76,10 +76,20 @@ function getStartFinishCoords(svgPath: string): {
 	const dy = nextY - y0;
 	const len = Math.hypot(dx, dy) || 1;
 
-	// Vector normal perpendicular para la línea de meta (longitud 12px a cada lado)
-	const nx = -dy / len;
-	const ny = dx / len;
-	const halfWidth = 12;
+	// Vector tangente (dirección de marcha de los monoplazas al largar)
+	const tx = dx / len;
+	const ty = dy / len;
+
+	// Vector normal perpendicular para la línea de meta
+	const nx = -ty;
+	const ny = tx;
+	const halfWidth = 14;
+
+	// Flecha de sentido posicionada 18px delante de la meta siguiendo el trazado
+	const arrowDist = 18;
+	const arrowX = x0 + tx * arrowDist;
+	const arrowY = y0 + ty * arrowDist;
+	const arrowAngleDeg = (Math.atan2(ty, tx) * 180) / Math.PI;
 
 	return {
 		x0,
@@ -88,6 +98,9 @@ function getStartFinishCoords(svgPath: string): {
 		y1: y0 - ny * halfWidth,
 		x2: x0 + nx * halfWidth,
 		y2: y0 + ny * halfWidth,
+		arrowX,
+		arrowY,
+		arrowAngleDeg,
 	};
 }
 
@@ -175,7 +188,7 @@ export function CircuitBackdrop({
 		[onToggleCinematic]
 	);
 
-	// Coordenadas calculadas para la Línea de Meta 🏁
+	// Coordenadas calculadas para la Línea de Meta 🏁 y Flecha de Sentido
 	const finishLine = useMemo(() => {
 		return getStartFinishCoords(circuit.svgPath);
 	}, [circuit.svgPath]);
@@ -193,7 +206,7 @@ export function CircuitBackdrop({
 					: "z-0 pointer-events-auto cursor-pointer"
 			}`}
 		>
-			{/* 🏎️ FOTO AÉREA CINEMATOGRÁFICA DEL CIRCUITO (MÁXIMA VISIBILIDAD, BRILLO Y NITIDEZ) */}
+			{/* 🏎️ FOTO AÉREA CINEMATOGRÁFICA DEL CIRCUITO (MÁXIMA VISIBILIDAD Y NITIDEZ) */}
 			<img
 				key={imageUrl}
 				src={imageUrl}
@@ -205,23 +218,23 @@ export function CircuitBackdrop({
 				}}
 				className={`w-full h-full object-cover object-center filter contrast-[1.08] transition-all duration-700 ${
 					isCinematic
-						? "opacity-100 scale-100 brightness-[1.05]"
+						? "opacity-100 scale-100 brightness-[1.04]"
 						: loaded
 						? "opacity-65 scale-100 brightness-[0.98]"
 						: "opacity-50 scale-100 brightness-[0.9]"
 				}`}
 			/>
 
-			{/* Viñetas ultra sutiles solo en extremos superior/inferior para legibilidad de textos, dejando el 85% de la foto libre */}
+			{/* Viñetas ultra sutiles para legibilidad sin tapar la pista */}
 			<div
 				className={`absolute inset-0 pointer-events-none transition-opacity duration-700 ${
 					isCinematic
-						? "bg-gradient-to-t from-black/85 via-transparent to-black/60"
+						? "bg-gradient-to-t from-black/90 via-transparent to-black/60"
 						: "bg-gradient-to-t from-black/80 via-black/35 to-black/15"
 				}`}
 			/>
 
-			{/* 🎮 EASTER EGG: MODO PISTA Y TELEMETRÍA (FOTO TOTALMENTE DESPEJADA) */}
+			{/* 🎮 EASTER EGG: MODO CIRCUITO Y TELEMETRÍA LIMPIA */}
 			<AnimatePresence>
 				{isCinematic && (
 					<motion.div
@@ -229,87 +242,86 @@ export function CircuitBackdrop({
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
 						transition={{ duration: 0.35 }}
-						className="absolute inset-0 flex flex-col justify-between pt-18 sm:pt-20 pb-4 px-4 sm:px-8 overflow-hidden pointer-events-none"
+						className="absolute inset-0 flex flex-col justify-between pt-18 sm:pt-20 pb-4 px-4 sm:px-8 overflow-y-auto no-scrollbar pointer-events-none"
 					>
-						{/* 🏁 BARRA SUPERIOR: ENCABEZADO ELEGANTE Y RADAR 2D FLOTANTE */}
-						<div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 max-w-7xl mx-auto w-full z-10 pointer-events-auto">
-							{/* Título e información del Gran Premio */}
-							<motion.div
-								initial={{ opacity: 0, y: -15 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.4 }}
-								className="flex flex-col gap-1 drop-shadow-[0_3px_12px_rgba(0,0,0,0.95)]"
-							>
+						{/* 🏁 BARRA SUPERIOR: ENCABEZADO Y CONTROLES */}
+						<motion.div
+							initial={{ opacity: 0, y: -15 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.4 }}
+							className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 max-w-7xl mx-auto w-full z-10 pointer-events-auto shrink-0"
+						>
+							<div className="flex flex-col gap-1 drop-shadow-[0_3px_12px_rgba(0,0,0,0.95)]">
 								<div className="flex items-center gap-2 flex-wrap">
-									<div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-black/60 px-3 py-0.8 backdrop-blur-md">
+									<div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-black/65 px-3 py-0.8 backdrop-blur-md">
 										<Flag countryCode={circuit.countryCode} className="h-3.5 w-5 rounded object-cover" />
 										<span className="font-mono text-[10px] font-black uppercase tracking-wider text-amber-400">
 											{circuit.country}
 										</span>
 									</div>
 
-									<span className="font-mono text-[11px] font-bold text-zinc-300 flex items-center gap-1 bg-black/60 px-2.5 py-0.5 rounded-full border border-zinc-800/80 backdrop-blur-md">
+									<span className="font-mono text-[11px] font-bold text-zinc-300 flex items-center gap-1 bg-black/65 px-2.5 py-0.5 rounded-full border border-zinc-800/80 backdrop-blur-md">
 										<Crosshair className="w-3.5 h-3.5 text-red-500" />
 										<span>{circuit.gpsCoordinates}</span>
 									</span>
 
-									{/* Botón para alternar entre ver telemetría o ver solo la foto limpia */}
+									{/* Botón para alternar telemetría o ver solo la foto limpia */}
 									<button
 										type="button"
 										onClick={(e) => {
 											e.stopPropagation();
 											setShowHud((prev) => !prev);
 										}}
-										className="inline-flex items-center gap-1.5 px-3 py-0.8 rounded-full bg-zinc-900/80 border border-zinc-700/80 hover:border-amber-400/80 text-[10px] text-zinc-200 font-mono font-bold uppercase tracking-wider backdrop-blur-md transition-all cursor-pointer shadow-lg"
+										className="inline-flex items-center gap-1.5 px-3 py-0.8 rounded-full bg-zinc-900/85 border border-zinc-700/80 hover:border-amber-400/80 text-[10px] text-zinc-200 font-mono font-bold uppercase tracking-wider backdrop-blur-md transition-all cursor-pointer shadow-lg"
 									>
 										{showHud ? <EyeOff className="w-3.5 h-3.5 text-amber-400" /> : <Eye className="w-3.5 h-3.5 text-emerald-400" />}
-										<span>{showHud ? "Solo Foto Limpia" : "Ver Datos Telemetría"}</span>
+										<span>{showHud ? "Solo Foto Limpia" : "Ver Datos"}</span>
 									</button>
 								</div>
 
-								<h1 className="text-2xl sm:text-4xl md:text-5xl font-black font-mono tracking-tight uppercase text-white drop-shadow-[0_4px_20px_rgba(0,0,0,0.95)] leading-tight mt-0.5">
+								<h1 className="text-2xl sm:text-4xl md:text-5xl font-black font-mono tracking-tight uppercase text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] leading-tight mt-0.5">
 									{circuit.name}
 								</h1>
 
 								<p className="font-mono text-xs sm:text-sm font-bold text-zinc-200 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] flex items-center gap-2 flex-wrap">
 									<span className="text-amber-400 font-black">{circuit.gpName}</span>
-									<span className="text-zinc-400">·</span>
-									<span className="text-zinc-200">Debut F1: {circuit.firstGp}</span>
-									<span className="text-zinc-400">·</span>
-									<span className="text-zinc-200">Diseñador: {circuit.designer}</span>
+									<span className="text-zinc-500">·</span>
+									<span className="text-zinc-300">Debut F1: {circuit.firstGp}</span>
+									<span className="text-zinc-500">·</span>
+									<span className="text-zinc-300">Diseñado por {circuit.designer}</span>
 								</p>
-							</motion.div>
+							</div>
+						</motion.div>
 
-							{/* 🗺️ RADAR MAPA 2D FLOTANTE (COMPACTO, TRANSPARENTE, NO TAPA LA FOTO) */}
+						{/* 🗺️ CENTRO: MAPA 2D GRANDE ANIMADO (PROTAGONISTA Y PANORÁMICO) */}
+						<div className="flex-1 my-auto py-3 max-w-7xl mx-auto w-full flex items-center justify-center lg:justify-end z-10 pointer-events-auto">
 							<AnimatePresence>
 								{showHud && (
 									<motion.div
-										initial={{ opacity: 0, scale: 0.9 }}
+										initial={{ opacity: 0, scale: 0.92 }}
 										animate={{ opacity: 1, scale: 1 }}
-										exit={{ opacity: 0, scale: 0.9 }}
-										transition={{ duration: 0.35 }}
-										className="flex flex-col items-center p-3 rounded-2xl bg-black/45 border border-white/15 backdrop-blur-md shadow-2xl w-64 sm:w-72 shrink-0 pointer-events-auto"
+										exit={{ opacity: 0, scale: 0.92 }}
+										transition={{ duration: 0.45 }}
+										className="relative flex flex-col items-center justify-center p-4 sm:p-6 rounded-3xl bg-black/45 border border-white/15 backdrop-blur-md shadow-2xl w-full max-w-lg lg:max-w-xl"
 									>
-										{/* Encabezado del radar */}
-										<div className="w-full flex items-center justify-between border-b border-white/10 pb-1.5 mb-1.5 font-mono text-[10px]">
+										{/* Indicador de sentido de giro en la cabecera del mapa */}
+										<div className="w-full flex items-center justify-between border-b border-white/10 pb-2 mb-2 font-mono text-xs">
 											<div className="flex items-center gap-1.5 text-amber-400 font-black uppercase tracking-wider">
-												<Compass className="w-3.5 h-3.5 text-amber-400" />
-												<span>{circuit.direction}</span>
+												<span>Sentido de Giro: {circuit.direction}</span>
 											</div>
-											<div className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-zinc-900/80 border border-zinc-700 text-zinc-200 font-bold uppercase">
-												<span className="text-red-400 font-black">N</span>
-												<span>NORTE ↑</span>
-											</div>
+											<span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+												Planimetría 2D Oficial
+											</span>
 										</div>
 
-										{/* Trazado Vectorial con Línea de Meta 🏁 (Limpio sin bugs de loops) */}
+										{/* Trazado Vectorial Animado (pathLength de 0 a 1) */}
 										<svg
 											viewBox="0 0 400 300"
-											className="w-full h-36 sm:h-40 drop-shadow-[0_0_16px_rgba(245,158,11,0.35)]"
+											className="w-full h-56 sm:h-72 drop-shadow-[0_0_24px_rgba(245,158,11,0.35)]"
 										>
 											<defs>
-												<filter id="track-neon" x="-20%" y="-20%" width="140%" height="140%">
-													<feGaussianBlur stdDeviation="3.5" result="blur" />
+												<filter id="track-neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+													<feGaussianBlur stdDeviation="4" result="blur" />
 													<feMerge>
 														<feMergeNode in="blur" />
 														<feMergeNode in="SourceGraphic" />
@@ -322,7 +334,7 @@ export function CircuitBackdrop({
 												d={circuit.svgPath}
 												fill="none"
 												stroke="#09090b"
-												strokeWidth="14"
+												strokeWidth="15"
 												strokeLinecap="round"
 												strokeLinejoin="round"
 											/>
@@ -330,33 +342,36 @@ export function CircuitBackdrop({
 												d={circuit.svgPath}
 												fill="none"
 												stroke="#27272a"
-												strokeWidth="7"
+												strokeWidth="8"
 												strokeLinecap="round"
 												strokeLinejoin="round"
 											/>
 
-											{/* Línea neón dorada */}
-											<path
+											{/* Trazado animado que recorre todo el circuito en la entrada */}
+											<motion.path
 												d={circuit.svgPath}
 												fill="none"
 												stroke="#f59e0b"
-												strokeWidth="3.5"
+												strokeWidth="4"
 												strokeLinecap="round"
 												strokeLinejoin="round"
-												filter="url(#track-neon)"
+												filter="url(#track-neon-glow)"
+												initial={{ pathLength: 0 }}
+												animate={{ pathLength: 1 }}
+												transition={{ duration: 1.4, ease: "easeInOut" }}
 											/>
 
-											{/* 🏁 LÍNEA DE META OFICIAL FIA (Precisa, estática y sin loops raros) */}
+											{/* 🏁 LÍNEA DE META OFICIAL Y FLECHA DE SENTIDO DE MARCHA */}
 											{finishLine && (
 												<g>
-													{/* Barra transversal de meta cuadriculada */}
+													{/* Barra transversal de meta */}
 													<line
 														x1={finishLine.x1}
 														y1={finishLine.y1}
 														x2={finishLine.x2}
 														y2={finishLine.y2}
 														stroke="#ffffff"
-														strokeWidth="4.5"
+														strokeWidth="5"
 														strokeLinecap="butt"
 													/>
 													<line
@@ -365,32 +380,44 @@ export function CircuitBackdrop({
 														x2={finishLine.x2}
 														y2={finishLine.y2}
 														stroke="#000000"
-														strokeWidth="3.5"
-														strokeDasharray="2 2"
+														strokeWidth="4"
+														strokeDasharray="2.5 2.5"
 														strokeLinecap="butt"
 													/>
 
-													{/* Indicador puntual de largada */}
+													{/* Punto de largada */}
 													<circle
 														cx={finishLine.x0}
 														cy={finishLine.y0}
-														r="3"
+														r="3.5"
 														fill="#ef4444"
 														stroke="#ffffff"
 														strokeWidth="1.2"
 													/>
 
+													{/* ➔ Flecha de sentido colocada delante de la meta siguiendo el asfalto */}
+													<g
+														transform={`translate(${finishLine.arrowX}, ${finishLine.arrowY}) rotate(${finishLine.arrowAngleDeg})`}
+													>
+														<polygon
+															points="-6,-5 7,0 -6,5 -3,0"
+															fill="#f59e0b"
+															stroke="#ffffff"
+															strokeWidth="1"
+														/>
+													</g>
+
 													{/* Badge 🏁 META */}
 													<g
-														transform={`translate(${finishLine.x0 + (finishLine.x0 > 200 ? -42 : 10)}, ${
-															finishLine.y0 + (finishLine.y0 > 150 ? -14 : 14)
+														transform={`translate(${finishLine.x0 + (finishLine.x0 > 200 ? -48 : 12)}, ${
+															finishLine.y0 + (finishLine.y0 > 150 ? -16 : 14)
 														})`}
 													>
 														<rect
 															x="0"
 															y="0"
-															width="38"
-															height="15"
+															width="44"
+															height="16"
 															rx="3"
 															fill="#000000"
 															stroke="#f59e0b"
@@ -398,10 +425,10 @@ export function CircuitBackdrop({
 															opacity="0.9"
 														/>
 														<text
-															x="19"
-															y="11"
+															x="22"
+															y="11.5"
 															textAnchor="middle"
-															fontSize="8.5"
+															fontSize="9"
 															fontWeight="bold"
 															fill="#ffffff"
 															fontFamily="monospace"
@@ -412,112 +439,79 @@ export function CircuitBackdrop({
 												</g>
 											)}
 										</svg>
-
-										<div className="w-full flex items-center justify-between pt-1 border-t border-white/10 text-[9px] font-mono text-zinc-300">
-											<span>{circuit.turns}</span>
-											<span className="text-amber-400 font-bold">{circuit.drsZones} Zonas DRS</span>
-										</div>
 									</motion.div>
 								)}
 							</AnimatePresence>
 						</div>
 
-						{/* 🏎️ CENTRO DE LA PANTALLA: ¡100% LIBRE PARA VER LA FOTO SATELITAL COMPLETA! */}
-						<div className="flex-1 my-auto pointer-events-none" />
-
-						{/* 📊 BARRA INFERIOR DE TELEMETRÍA (DOCK TRANSLÚCIDO ESTILO SIMRACING / COCKPIT) */}
+						{/* 📊 BARRA INFERIOR DE TELEMETRÍA (4 BLOQUES AMPLIOS, SIN CORTES NI REDUNDANCIA) */}
 						<AnimatePresence>
 							{showHud && (
 								<motion.div
-									initial={{ opacity: 0, y: 25 }}
+									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
-									exit={{ opacity: 0, y: 25 }}
+									exit={{ opacity: 0, y: 20 }}
 									transition={{ duration: 0.4 }}
 									className="w-full max-w-7xl mx-auto z-10 pointer-events-auto mb-2"
 								>
-									<div className="bg-black/55 backdrop-blur-xl border border-white/15 rounded-2xl p-3 sm:p-4 shadow-[0_8px_32px_rgba(0,0,0,0.8)] grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-left font-mono">
-										{/* 1. CUERDA & CARRERA */}
-										<div className="flex flex-col gap-0.5 bg-zinc-900/60 p-2.5 rounded-xl border border-white/5">
-											<span className="text-[10px] text-zinc-300 uppercase tracking-wider flex items-center gap-1 font-bold">
-												<Gauge className="w-3 h-3 text-amber-400 shrink-0" />
-												Longitud
+									<div className="bg-black/55 backdrop-blur-xl border border-white/15 rounded-2xl p-3 sm:p-4 shadow-[0_8px_32px_rgba(0,0,0,0.8)] grid grid-cols-2 lg:grid-cols-4 gap-3 text-left font-mono">
+										{/* 1. RÉCORD OFICIAL */}
+										<div className="flex flex-col justify-center gap-1 bg-purple-950/30 p-3 sm:p-3.5 rounded-xl border border-purple-500/30">
+											<span className="text-[10px] sm:text-xs text-purple-300 uppercase tracking-wider flex items-center gap-1.5 font-bold">
+												<Timer className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+												Récord de Vuelta
 											</span>
-											<span className="text-sm sm:text-base font-black text-amber-300">
-												{circuit.length}
-											</span>
-											<span className="text-[10px] text-zinc-400">
-												{circuit.raceLaps} Vueltas · {circuit.raceDistance}
-											</span>
-										</div>
-
-										{/* 2. SPEED TRAP */}
-										<div className="flex flex-col gap-0.5 bg-zinc-900/60 p-2.5 rounded-xl border border-white/5">
-											<span className="text-[10px] text-zinc-300 uppercase tracking-wider flex items-center gap-1 font-bold">
-												<Activity className="w-3 h-3 text-cyan-400 shrink-0" />
-												Speed Trap
-											</span>
-											<span className="text-sm sm:text-base font-black text-cyan-300">
-												{circuit.topSpeed}
-											</span>
-											<span className="text-[10px] text-zinc-400">Velocidad Punta Máx.</span>
-										</div>
-
-										{/* 3. RECTA & DRS */}
-										<div className="flex flex-col gap-0.5 bg-zinc-900/60 p-2.5 rounded-xl border border-white/5">
-											<span className="text-[10px] text-zinc-300 uppercase tracking-wider flex items-center gap-1 font-bold">
-												<Zap className="w-3 h-3 text-emerald-400 shrink-0" />
-												Recta & DRS
-											</span>
-											<span className="text-sm sm:text-base font-black text-emerald-300">
-												{circuit.longestStraight}
-											</span>
-											<span className="text-[10px] text-zinc-400">{circuit.drsZones} Zonas DRS</span>
-										</div>
-
-										{/* 4. MÁXIMA FUERZA G */}
-										<div className="flex flex-col gap-0.5 bg-zinc-900/60 p-2.5 rounded-xl border border-white/5">
-											<span className="text-[10px] text-zinc-300 uppercase tracking-wider flex items-center gap-1 font-bold">
-												<Flame className="w-3 h-3 text-orange-400 shrink-0" />
-												Fuerza G Lateral
-											</span>
-											<span className="text-sm sm:text-base font-black text-orange-300">
-												{circuit.maxGForce}
-											</span>
-											<span className="text-[10px] text-zinc-400">Acelerador: {circuit.fullThrottle}</span>
-										</div>
-
-										{/* 5. ELEVACIÓN Y FRENOS */}
-										<div className="flex flex-col gap-0.5 bg-zinc-900/60 p-2.5 rounded-xl border border-white/5">
-											<span className="text-[10px] text-zinc-300 uppercase tracking-wider flex items-center gap-1 font-bold">
-												<MoveVertical className="w-3 h-3 text-cyan-400 shrink-0" />
-												Desnivel / Freno
-											</span>
-											<span className="text-xs sm:text-sm font-black text-zinc-100 truncate">
-												{circuit.elevation}
-											</span>
-											<span className="text-[10px] text-zinc-400 truncate flex items-center gap-1">
-												<ShieldAlert className="w-3 h-3 text-red-400 shrink-0" />
-												{circuit.brakeLoad}
-											</span>
-										</div>
-
-										{/* 6. RÉCORD OFICIAL */}
-										<div className="flex flex-col gap-0.5 bg-purple-950/30 p-2.5 rounded-xl border border-purple-500/30">
-											<span className="text-[10px] text-purple-300 uppercase tracking-wider flex items-center gap-1 font-bold">
-												<Timer className="w-3 h-3 text-purple-400 shrink-0" />
-												Récord Oficial
-											</span>
-											<span className="text-xs sm:text-sm font-black text-purple-200 truncate">
+											<span className="text-sm sm:text-base md:text-lg font-black text-purple-200">
 												{circuit.lapRecord}
 											</span>
-											<span className="text-[10px] text-purple-400/80">Vuelta rápida FIA</span>
+											<span className="text-[10px] text-purple-400/80 font-medium">Vuelta Rápida Oficial FIA</span>
+										</div>
+
+										{/* 2. VELOCIDAD PUNTA (SPEED TRAP) */}
+										<div className="flex flex-col justify-center gap-1 bg-zinc-900/60 p-3 sm:p-3.5 rounded-xl border border-white/10">
+											<span className="text-[10px] sm:text-xs text-zinc-300 uppercase tracking-wider flex items-center gap-1.5 font-bold">
+												<Activity className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+												Speed Trap
+											</span>
+											<span className="text-sm sm:text-base md:text-lg font-black text-cyan-300">
+												{circuit.topSpeed}
+											</span>
+											<span className="text-[10px] text-zinc-400 font-medium">Velocidad Punta Máxima</span>
+										</div>
+
+										{/* 3. GEOMETRÍA Y RECTA */}
+										<div className="flex flex-col justify-center gap-1 bg-zinc-900/60 p-3 sm:p-3.5 rounded-xl border border-white/10">
+											<span className="text-[10px] sm:text-xs text-zinc-300 uppercase tracking-wider flex items-center gap-1.5 font-bold">
+												<Gauge className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+												Trazado & Recta
+											</span>
+											<span className="text-sm sm:text-base md:text-lg font-black text-amber-300">
+												{circuit.length}
+											</span>
+											<span className="text-[10px] text-zinc-300 font-medium">
+												{circuit.turns} · Recta {circuit.longestStraight}
+											</span>
+										</div>
+
+										{/* 4. EXIGENCIA Y DINÁMICA */}
+										<div className="flex flex-col justify-center gap-1 bg-zinc-900/60 p-3 sm:p-3.5 rounded-xl border border-white/10">
+											<span className="text-[10px] sm:text-xs text-zinc-300 uppercase tracking-wider flex items-center gap-1.5 font-bold">
+												<Flame className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+												Fuerza G Lateral
+											</span>
+											<span className="text-sm sm:text-base md:text-lg font-black text-orange-300">
+												{circuit.maxGForce}
+											</span>
+											<span className="text-[10px] text-zinc-300 font-medium">
+												Gas a Fondo: {circuit.fullThrottle}
+											</span>
 										</div>
 									</div>
 								</motion.div>
 							)}
 						</AnimatePresence>
 
-						{/* PIE DE PÁGINA: PROMPT DE RETORNO DISCRETO */}
+						{/* PIE DE PÁGINA: RETORNO DISCRETO */}
 						<div className="flex justify-center w-full max-w-7xl mx-auto z-10 pointer-events-auto">
 							<div className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-black/65 px-4 py-1.5 font-mono text-[11px] font-bold text-amber-300 shadow-lg backdrop-blur-md">
 								<RotateCcw className="w-3.5 h-3.5 text-amber-400" />
