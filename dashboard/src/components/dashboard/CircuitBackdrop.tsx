@@ -5,6 +5,7 @@ import { getCircuitDetails, type CircuitDetails, DEFAULT_CIRCUIT } from "@/lib/c
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Flag from "@/components/Flag";
 import { motion, AnimatePresence } from "motion/react";
+import { createPortal } from "react-dom";
 import {
 	Timer,
 	Gauge,
@@ -14,6 +15,7 @@ import {
 	Activity,
 	Eye,
 	EyeOff,
+	X,
 } from "lucide-react";
 
 interface Props {
@@ -59,7 +61,6 @@ function getRecordDriverInfo(lapRecord: string): {
 	time: string;
 	photoUrl: string;
 } {
-	// Parseamos el string ej: "1:36.169 · C. Leclerc (Ferrari, 2019)"
 	const match = lapRecord.match(/^([\d:.]+)\s*·\s*([^()]+)\s*(?:\(([^,]+),\s*(\d{4})\))?/);
 	const time = match ? match[1].trim() : lapRecord;
 	const driverName = match ? match[2].trim() : "FIA";
@@ -120,16 +121,13 @@ function getStartFinishCoords(svgPath: string): {
 	const dy = nextY - y0;
 	const len = Math.hypot(dx, dy) || 1;
 
-	// Vector tangente (dirección de marcha de los monoplazas al largar)
 	const tx = dx / len;
 	const ty = dy / len;
 
-	// Vector normal perpendicular para la línea de meta
 	const nx = -ty;
 	const ny = tx;
 	const halfWidth = 14;
 
-	// Flecha de sentido posicionada 18px delante de la meta siguiendo el trazado
 	const arrowDist = 18;
 	const arrowX = x0 + tx * arrowDist;
 	const arrowY = y0 + ty * arrowDist;
@@ -160,6 +158,11 @@ export function CircuitBackdrop({
 	const [imageUrl, setImageUrl] = useState<string>("/circuits/default.webp");
 	const [loaded, setLoaded] = useState(true);
 	const [showHud, setShowHud] = useState(true);
+	const [isMounted, setIsMounted] = useState(false);
+
+	useEffect(() => {
+		setIsMounted(true);
+	}, []);
 
 	// Reproducir sonido al entrar al modo cinemático (Easter Egg)
 	useEffect(() => {
@@ -167,6 +170,18 @@ export function CircuitBackdrop({
 			playHudChime();
 			setShowHud(true);
 		}
+	}, [isCinematic]);
+
+	// Bloquear scroll del body mientras el modo cinemático está activo
+	useEffect(() => {
+		if (isCinematic) {
+			document.body.style.overflow = "hidden";
+		} else {
+			document.body.style.overflow = "";
+		}
+		return () => {
+			document.body.style.overflow = "";
+		};
 	}, [isCinematic]);
 
 	useEffect(() => {
@@ -177,12 +192,12 @@ export function CircuitBackdrop({
 			return;
 		}
 
-		let isMounted = true;
+		let active = true;
 		async function autoResolveCircuit() {
 			try {
 				const resNext = await fetch("https://api.jolpi.ca/ergast/f1/current/next.json");
 				const dataNext = await resNext.json();
-				if (isMounted && dataNext?.MRData?.RaceTable?.Races?.length > 0) {
+				if (active && dataNext?.MRData?.RaceTable?.Races?.length > 0) {
 					const race = dataNext.MRData.RaceTable.Races[0];
 					const d = getCircuitDetails(
 						race.raceName,
@@ -198,7 +213,7 @@ export function CircuitBackdrop({
 			try {
 				const resLast = await fetch("https://api.jolpi.ca/ergast/f1/current/last/results.json");
 				const dataLast = await resLast.json();
-				if (isMounted && dataLast?.MRData?.RaceTable?.Races?.length > 0) {
+				if (active && dataLast?.MRData?.RaceTable?.Races?.length > 0) {
 					const race = dataLast.MRData.RaceTable.Races[0];
 					const d = getCircuitDetails(
 						race.raceName,
@@ -215,13 +230,12 @@ export function CircuitBackdrop({
 		autoResolveCircuit();
 
 		return () => {
-			isMounted = false;
+			active = false;
 		};
 	}, [gpName, country, circuitId]);
 
 	const handleContainerClick = useCallback(
 		(e: React.MouseEvent) => {
-			// Si hace clic en un botón interactivo dentro del HUD, no cerramos
 			if ((e.target as HTMLElement).closest("button")) {
 				return;
 			}
@@ -232,73 +246,77 @@ export function CircuitBackdrop({
 		[onToggleCinematic]
 	);
 
-	// Coordenadas calculadas para la Línea de Meta 🏁 y Flecha de Sentido
 	const finishLine = useMemo(() => {
 		return getStartFinishCoords(circuit.svgPath);
 	}, [circuit.svgPath]);
 
-	// Información del récord y avatar del piloto
 	const recordInfo = useMemo(() => {
 		return getRecordDriverInfo(circuit.lapRecord);
 	}, [circuit.lapRecord]);
 
-	if (oledMode) {
-		return null;
-	}
-
-	return (
-		<div
-			onClick={handleContainerClick}
-			className={`fixed inset-0 select-none transition-all duration-700 overflow-hidden ${
-				isCinematic
-					? "z-40 pointer-events-auto cursor-pointer"
-					: "z-0 pointer-events-auto cursor-pointer"
-			}`}
-		>
-			{/* 🏎️ FOTO AÉREA CINEMATOGRÁFICA DEL CIRCUITO (MÁXIMA VISIBILIDAD Y NITIDEZ) */}
-			<img
-				key={imageUrl}
-				src={imageUrl}
-				alt={circuit.name}
-				onLoad={() => setLoaded(true)}
-				onError={() => {
-					setImageUrl("/circuits/default.webp");
-					setLoaded(true);
-				}}
-				className={`w-full h-full object-cover object-center filter contrast-[1.08] transition-all duration-700 ${
-					isCinematic
-						? "opacity-100 scale-100 brightness-[1.04]"
-						: loaded
-						? "opacity-65 scale-100 brightness-[0.98]"
-						: "opacity-50 scale-100 brightness-[0.9]"
-				}`}
-			/>
-
-			{/* Viñetas ultra sutiles para legibilidad sin tapar la pista */}
+	// 1. MODO FONDO NORMAL (DETRÁS DE PARC FERMÉ)
+	// Si oledMode está activo y NO es cinemático, no mostramos la imagen tenue de fondo para ahorrar batería OLED
+	const renderPassiveBackdrop = () => {
+		if (oledMode) return null;
+		return (
 			<div
-				className={`absolute inset-0 pointer-events-none transition-opacity duration-700 ${
-					isCinematic
-						? "bg-gradient-to-t from-black/90 via-transparent to-black/60"
-						: "bg-gradient-to-t from-black/80 via-black/35 to-black/15"
-				}`}
-			/>
+				onClick={handleContainerClick}
+				className="fixed inset-0 select-none z-0 pointer-events-auto cursor-pointer overflow-hidden"
+				title="Toca para ver el circuito completo"
+			>
+				<img
+					key={`bg-${imageUrl}`}
+					src={imageUrl}
+					alt={circuit.name}
+					onLoad={() => setLoaded(true)}
+					onError={() => {
+						setImageUrl("/circuits/default.webp");
+						setLoaded(true);
+					}}
+					className={`w-full h-full object-cover object-center filter contrast-[1.08] transition-all duration-700 ${
+						loaded ? "opacity-65 scale-100 brightness-[0.98]" : "opacity-45 scale-100 brightness-[0.9]"
+					}`}
+				/>
+				<div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20 pointer-events-none" />
+			</div>
+		);
+	};
 
-			{/* 🎮 EASTER EGG: MODO CIRCUITO Y TELEMETRÍA LIMPIA */}
+	// 2. MODO CINEMÁTICO INMERSIVO (FULLSCREEN OVERLAY VIA PORTAL)
+	// Se monta en document.body para cubrir 100% el viewport en móviles y PC, sin ser atrapado por layouts
+	const renderCinematicOverlay = () => {
+		if (!isCinematic || !isMounted) return null;
+
+		return createPortal(
 			<AnimatePresence>
-				{isCinematic && (
-					<motion.div
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-						transition={{ duration: 0.35 }}
-						className="absolute inset-0 flex flex-col justify-between pt-18 sm:pt-20 pb-4 px-4 sm:px-8 overflow-y-auto no-scrollbar pointer-events-none"
-					>
-						{/* 🏁 BARRA SUPERIOR: ENCABEZADO Y CONTROLES */}
+				<motion.div
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					exit={{ opacity: 0 }}
+					transition={{ duration: 0.35 }}
+					onClick={handleContainerClick}
+					className="fixed inset-0 z-[9999] select-none bg-black overflow-y-auto no-scrollbar cursor-pointer flex flex-col justify-between"
+				>
+					{/* 🏎️ FOTO AÉREA CINEMATOGRÁFICA EN PANTALLA COMPLETA */}
+					<img
+						key={`cine-${imageUrl}`}
+						src={imageUrl}
+						alt={circuit.name}
+						onError={() => setImageUrl("/circuits/default.webp")}
+						className="fixed inset-0 w-full h-full object-cover object-center filter contrast-[1.08] brightness-[1.04] pointer-events-none"
+					/>
+
+					{/* Viñeta sutil para contraste de textos */}
+					<div className="fixed inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/65 pointer-events-none" />
+
+					{/* 🏁 CONTENIDO DEL HUD CINEMÁTICO */}
+					<div className="relative z-10 w-full min-h-screen flex flex-col justify-between pt-6 sm:pt-8 pb-6 px-4 sm:px-8">
+						{/* BARRA SUPERIOR: ENCABEZADO Y CONTROLES */}
 						<motion.div
 							initial={{ opacity: 0, y: -15 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.4 }}
-							className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 max-w-7xl mx-auto w-full z-10 pointer-events-auto shrink-0"
+							className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 max-w-7xl mx-auto w-full shrink-0"
 						>
 							<div className="flex flex-col gap-1 drop-shadow-[0_3px_12px_rgba(0,0,0,0.95)]">
 								<div className="flex items-center gap-2 flex-wrap">
@@ -340,10 +358,23 @@ export function CircuitBackdrop({
 									<span className="text-zinc-300">Diseñado por {circuit.designer}</span>
 								</p>
 							</div>
+
+							{/* Botón X de cerrar para móvil y escritorio */}
+							<button
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation();
+									onToggleCinematic?.();
+								}}
+								className="self-end sm:self-center p-2 rounded-full bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-300 hover:text-white backdrop-blur-md transition-all cursor-pointer shadow-lg"
+								title="Cerrar y volver a los resultados"
+							>
+								<X className="w-5 h-5" />
+							</button>
 						</motion.div>
 
-						{/* 🗺️ CENTRO: MAPA 2D GRANDE ANIMADO (PROTAGONISTA Y PANORÁMICO) */}
-						<div className="flex-1 my-auto py-3 max-w-7xl mx-auto w-full flex items-center justify-center lg:justify-end z-10 pointer-events-auto">
+						{/* 🗺️ CENTRO: MAPA 2D GRANDE ANIMADO */}
+						<div className="flex-1 my-auto py-4 max-w-7xl mx-auto w-full flex items-center justify-center lg:justify-end">
 							<AnimatePresence>
 								{showHud && (
 									<motion.div
@@ -351,9 +382,8 @@ export function CircuitBackdrop({
 										animate={{ opacity: 1, scale: 1 }}
 										exit={{ opacity: 0, scale: 0.92 }}
 										transition={{ duration: 0.45 }}
-										className="relative flex flex-col items-center justify-center p-4 sm:p-6 rounded-3xl bg-black/45 border border-white/15 backdrop-blur-md shadow-2xl w-full max-w-lg lg:max-w-xl"
+										className="relative flex flex-col items-center justify-center p-4 sm:p-6 rounded-3xl bg-black/50 border border-white/15 backdrop-blur-md shadow-2xl w-full max-w-lg lg:max-w-xl"
 									>
-										{/* Indicador de sentido de giro en la cabecera del mapa */}
 										<div className="w-full flex items-center justify-between border-b border-white/10 pb-2 mb-2 font-mono text-xs">
 											<div className="flex items-center gap-1.5 text-amber-400 font-black uppercase tracking-wider">
 												<span>Sentido de Giro: {circuit.direction}</span>
@@ -363,10 +393,10 @@ export function CircuitBackdrop({
 											</span>
 										</div>
 
-										{/* Trazado Vectorial Animado (pathLength de 0 a 1) */}
+										{/* Trazado Vectorial Animado */}
 										<svg
 											viewBox="0 0 400 300"
-											className="w-full h-56 sm:h-72 drop-shadow-[0_0_24px_rgba(245,158,11,0.35)]"
+											className="w-full h-52 sm:h-72 drop-shadow-[0_0_24px_rgba(245,158,11,0.35)]"
 										>
 											<defs>
 												<filter id="track-neon-glow" x="-20%" y="-20%" width="140%" height="140%">
@@ -396,7 +426,7 @@ export function CircuitBackdrop({
 												strokeLinejoin="round"
 											/>
 
-											{/* Trazado animado que recorre todo el circuito en la entrada */}
+											{/* Trazado neón animado */}
 											<motion.path
 												d={circuit.svgPath}
 												fill="none"
@@ -410,10 +440,9 @@ export function CircuitBackdrop({
 												transition={{ duration: 1.4, ease: "easeInOut" }}
 											/>
 
-											{/* 🏁 LÍNEA DE META OFICIAL Y FLECHA DE SENTIDO DE MARCHA */}
+											{/* 🏁 LÍNEA DE META Y FLECHA BLANCA */}
 											{finishLine && (
 												<g>
-													{/* Barra transversal de meta */}
 													<line
 														x1={finishLine.x1}
 														y1={finishLine.y1}
@@ -434,7 +463,6 @@ export function CircuitBackdrop({
 														strokeLinecap="butt"
 													/>
 
-													{/* Punto de largada */}
 													<circle
 														cx={finishLine.x0}
 														cy={finishLine.y0}
@@ -444,7 +472,7 @@ export function CircuitBackdrop({
 														strokeWidth="1.2"
 													/>
 
-													{/* ➔ Flecha de sentido en BLANCO BRILLANTE de alto contraste */}
+													{/* ➔ Flecha de sentido en BLANCO BRILLANTE */}
 													<g
 														transform={`translate(${finishLine.arrowX}, ${finishLine.arrowY}) rotate(${finishLine.arrowAngleDeg})`}
 													>
@@ -493,7 +521,7 @@ export function CircuitBackdrop({
 							</AnimatePresence>
 						</div>
 
-						{/* 📊 BARRA INFERIOR DE TELEMETRÍA (4 BLOQUES AMPLIOS CON CARITA DEL PILOTO RÉCORD) */}
+						{/* 📊 BARRA INFERIOR DE TELEMETRÍA (4 BLOQUES CON CARITA DEL PILOTO) */}
 						<AnimatePresence>
 							{showHud && (
 								<motion.div
@@ -501,10 +529,10 @@ export function CircuitBackdrop({
 									animate={{ opacity: 1, y: 0 }}
 									exit={{ opacity: 0, y: 20 }}
 									transition={{ duration: 0.4 }}
-									className="w-full max-w-7xl mx-auto z-10 pointer-events-auto mb-2"
+									className="w-full max-w-7xl mx-auto mb-2"
 								>
-									<div className="bg-black/55 backdrop-blur-xl border border-white/15 rounded-2xl p-3 sm:p-4 shadow-[0_8px_32px_rgba(0,0,0,0.8)] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-left font-mono">
-										{/* 1. RÉCORD OFICIAL CON LA CARITA DEL PILOTO Y SU MONO DE LA ÉPOCA */}
+									<div className="bg-black/60 backdrop-blur-xl border border-white/15 rounded-2xl p-3 sm:p-4 shadow-[0_8px_32px_rgba(0,0,0,0.8)] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-left font-mono">
+										{/* 1. RÉCORD OFICIAL CON LA CARITA DEL PILOTO Y SU MONO */}
 										<div className="flex items-center gap-3 bg-purple-950/40 p-2.5 sm:p-3 rounded-xl border border-purple-500/40 shadow-inner">
 											<div className="relative shrink-0">
 												<img
@@ -578,15 +606,23 @@ export function CircuitBackdrop({
 						</AnimatePresence>
 
 						{/* PIE DE PÁGINA: RETORNO DISCRETO */}
-						<div className="flex justify-center w-full max-w-7xl mx-auto z-10 pointer-events-auto">
+						<div className="flex justify-center w-full max-w-7xl mx-auto">
 							<div className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-black/65 px-4 py-1.5 font-mono text-[11px] font-bold text-amber-300 shadow-lg backdrop-blur-md">
 								<RotateCcw className="w-3.5 h-3.5 text-amber-400" />
-								<span>Toca en cualquier parte (o Escape) para volver a los resultados</span>
+								<span>Toca en cualquier parte para volver</span>
 							</div>
 						</div>
-					</motion.div>
-				)}
-			</AnimatePresence>
-		</div>
+					</div>
+				</motion.div>
+			</AnimatePresence>,
+			document.body
+		);
+	};
+
+	return (
+		<>
+			{renderPassiveBackdrop()}
+			{renderCinematicOverlay()}
+		</>
 	);
 }
