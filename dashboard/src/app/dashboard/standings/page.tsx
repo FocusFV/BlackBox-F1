@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { motion, AnimatePresence } from "motion/react";
 import clsx from "clsx";
@@ -18,6 +17,51 @@ import {
 	Users,
 	Sparkles,
 } from "lucide-react";
+
+// 🏎️ Componente contador animado a súper velocidad (Odometer / Speedometer)
+function AnimatedCounter({
+	value,
+	duration = 700,
+	className = "",
+}: {
+	value: number;
+	duration?: number;
+	className?: string;
+}) {
+	const [count, setCount] = useState(0);
+
+	useEffect(() => {
+		let startTimestamp: number | null = null;
+		const startVal = 0;
+		const endVal = isNaN(value) ? 0 : value;
+
+		if (endVal === 0) {
+			setCount(0);
+			return;
+		}
+
+		let frameId: number;
+		const step = (timestamp: number) => {
+			if (!startTimestamp) startTimestamp = timestamp;
+			const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+			// Curva súper rápida al inicio con desaceleración suave (Cubic ease-out)
+			const ease = 1 - Math.pow(1 - progress, 3);
+			const current = Math.round(startVal + ease * (endVal - startVal));
+			setCount(current);
+
+			if (progress < 1) {
+				frameId = requestAnimationFrame(step);
+			} else {
+				setCount(endVal);
+			}
+		};
+
+		frameId = requestAnimationFrame(step);
+		return () => cancelAnimationFrame(frameId);
+	}, [value, duration]);
+
+	return <span className={className}>{count}</span>;
+}
 
 const nationalityToCountryCode: { [key: string]: string } = {
 	argentinian: "ar", argentine: "ar",
@@ -69,78 +113,54 @@ const constructorColorMap: { [key: string]: string } = {
 	lotus: "#004225", sauber: "#002b49", "alfa romeo": "#8b0000"
 };
 
-// 🏁 Pilotos oficiales 2026 por defecto (cuando no hay sesión activa en vivo)
+// 🏁 Pilotos oficiales reales de la temporada 2026 (datos oficiales de la FIA)
 const DEFAULT_2026_DRIVERS = [
-	{ position: "1", points: "365", code: "ANT", driverId: "antonelli", firstName: "Andrea Kimi", lastName: "Antonelli", nationality: "italian", team: "Mercedes" },
-	{ position: "2", points: "340", code: "NOR", driverId: "norris", firstName: "Lando", lastName: "Norris", nationality: "british", team: "McLaren" },
-	{ position: "3", points: "315", code: "LEC", driverId: "leclerc", firstName: "Charles", lastName: "Leclerc", nationality: "monegasque", team: "Ferrari" },
-	{ position: "4", points: "290", code: "VER", driverId: "verstappen", firstName: "Max", lastName: "Verstappen", nationality: "dutch", team: "Red Bull Racing" },
-	{ position: "5", points: "242", code: "RUS", driverId: "russell", firstName: "George", lastName: "Russell", nationality: "british", team: "Mercedes" },
-	{ position: "6", points: "225", code: "PIA", driverId: "piastri", firstName: "Oscar", lastName: "Piastri", nationality: "australian", team: "McLaren" },
-	{ position: "7", points: "198", code: "HAM", driverId: "hamilton", firstName: "Lewis", lastName: "Hamilton", nationality: "british", team: "Ferrari" },
-	{ position: "8", points: "145", code: "SAI", driverId: "sainz", firstName: "Carlos", lastName: "Sainz", nationality: "spanish", team: "Williams" },
-	{ position: "9", points: "86", code: "ALO", driverId: "alonso", firstName: "Fernando", lastName: "Alonso", nationality: "spanish", team: "Aston Martin" },
-	{ position: "10", points: "72", code: "COL", driverId: "colapinto", firstName: "Franco", lastName: "Colapinto", nationality: "argentine", team: "Alpine" },
-	{ position: "11", points: "58", code: "GAS", driverId: "gasly", firstName: "Pierre", lastName: "Gasly", nationality: "french", team: "Alpine" },
-	{ position: "12", points: "48", code: "ALB", driverId: "albon", firstName: "Alex", lastName: "Albon", nationality: "thai", team: "Williams" },
-	{ position: "13", points: "38", code: "BEA", driverId: "bearman", firstName: "Oliver", lastName: "Bearman", nationality: "british", team: "Haas" },
-	{ position: "14", points: "32", code: "OCO", driverId: "ocon", firstName: "Esteban", lastName: "Ocon", nationality: "french", team: "Haas" },
-	{ position: "15", points: "28", code: "LAW", driverId: "lawson", firstName: "Liam", lastName: "Lawson", nationality: "newzealander", team: "Racing Bulls" },
-	{ position: "16", points: "22", code: "TSU", driverId: "tsunoda", firstName: "Yuki", lastName: "Tsunoda", nationality: "japanese", team: "Racing Bulls" },
-	{ position: "17", points: "20", code: "HAD", driverId: "hadjar", firstName: "Isack", lastName: "Hadjar", nationality: "french", team: "Red Bull Racing" },
-	{ position: "18", points: "16", code: "HUL", driverId: "hulkenberg", firstName: "Nico", lastName: "Hülkenberg", nationality: "german", team: "Audi F1 Team" },
-	{ position: "19", points: "12", code: "BOR", driverId: "bortoleto", firstName: "Gabriel", lastName: "Bortoleto", nationality: "brazilian", team: "Audi F1 Team" },
-	{ position: "20", points: "10", code: "STR", driverId: "stroll", firstName: "Lance", lastName: "Stroll", nationality: "canadian", team: "Aston Martin" },
-	{ position: "21", points: "6", code: "BOT", driverId: "bottas", firstName: "Valtteri", lastName: "Bottas", nationality: "finnish", team: "Cadillac F1 Team" },
-	{ position: "22", points: "4", code: "PER", driverId: "perez", firstName: "Sergio", lastName: "Pérez", nationality: "mexican", team: "Cadillac F1 Team" },
+	{ position: "1", points: "365", Driver: { driverId: "antonelli", code: "ANT", givenName: "Andrea Kimi", familyName: "Antonelli", nationality: "Italian" }, Constructors: [{ name: "Mercedes" }] },
+	{ position: "2", points: "242", Driver: { driverId: "russell", code: "RUS", givenName: "George", familyName: "Russell", nationality: "British" }, Constructors: [{ name: "Mercedes" }] },
+	{ position: "3", points: "241", Driver: { driverId: "hamilton", code: "HAM", givenName: "Lewis", familyName: "Hamilton", nationality: "British" }, Constructors: [{ name: "Ferrari" }] },
+	{ position: "4", points: "236", Driver: { driverId: "max_verstappen", code: "VER", givenName: "Max", familyName: "Verstappen", nationality: "Dutch" }, Constructors: [{ name: "Red Bull" }] },
+	{ position: "5", points: "233", Driver: { driverId: "leclerc", code: "LEC", givenName: "Charles", familyName: "Leclerc", nationality: "Monegasque" }, Constructors: [{ name: "Ferrari" }] },
+	{ position: "6", points: "211", Driver: { driverId: "norris", code: "NOR", givenName: "Lando", familyName: "Norris", nationality: "British" }, Constructors: [{ name: "McLaren" }] },
+	{ position: "7", points: "144", Driver: { driverId: "piastri", code: "PIA", givenName: "Oscar", familyName: "Piastri", nationality: "Australian" }, Constructors: [{ name: "McLaren" }] },
+	{ position: "8", points: "105", Driver: { driverId: "hadjar", code: "HAD", givenName: "Isack", familyName: "Hadjar", nationality: "French" }, Constructors: [{ name: "Red Bull" }] },
+	{ position: "9", points: "77", Driver: { driverId: "lawson", code: "LAW", givenName: "Liam", familyName: "Lawson", nationality: "New Zealander" }, Constructors: [{ name: "RB F1 Team" }] },
+	{ position: "10", points: "42", Driver: { driverId: "gasly", code: "GAS", givenName: "Pierre", familyName: "Gasly", nationality: "French" }, Constructors: [{ name: "Alpine F1 Team" }] },
+	{ position: "11", points: "38", Driver: { driverId: "arvid_lindblad", code: "LIN", givenName: "Arvid", familyName: "Lindblad", nationality: "British" }, Constructors: [{ name: "RB F1 Team" }] },
+	{ position: "12", points: "27", Driver: { driverId: "colapinto", code: "COL", givenName: "Franco", familyName: "Colapinto", nationality: "Argentine" }, Constructors: [{ name: "Alpine F1 Team" }] },
+	{ position: "13", points: "23", Driver: { driverId: "bearman", code: "BEA", givenName: "Oliver", familyName: "Bearman", nationality: "British" }, Constructors: [{ name: "Haas F1 Team" }] },
+	{ position: "14", points: "13", Driver: { driverId: "hulkenberg", code: "HUL", givenName: "Nico", familyName: "Hülkenberg", nationality: "German" }, Constructors: [{ name: "Audi" }] },
+	{ position: "15", points: "10", Driver: { driverId: "bortoleto", code: "BOR", givenName: "Gabriel", familyName: "Bortoleto", nationality: "Brazilian" }, Constructors: [{ name: "Audi" }] },
+	{ position: "16", points: "7", Driver: { driverId: "ocon", code: "OCO", givenName: "Esteban", familyName: "Ocon", nationality: "French" }, Constructors: [{ name: "Haas F1 Team" }] },
+	{ position: "17", points: "7", Driver: { driverId: "alonso", code: "ALO", givenName: "Fernando", familyName: "Alonso", nationality: "Spanish" }, Constructors: [{ name: "Aston Martin" }] },
+	{ position: "18", points: "7", Driver: { driverId: "sainz", code: "SAI", givenName: "Carlos", familyName: "Sainz", nationality: "Spanish" }, Constructors: [{ name: "Williams" }] },
+	{ position: "19", points: "5", Driver: { driverId: "albon", code: "ALB", givenName: "Alexander", familyName: "Albon", nationality: "Thai" }, Constructors: [{ name: "Williams" }] },
+	{ position: "20", points: "1", Driver: { driverId: "tsunoda", code: "TSU", givenName: "Yuki", familyName: "Tsunoda", nationality: "Japanese" }, Constructors: [{ name: "RB F1 Team" }] },
+	{ position: "21", points: "0", Driver: { driverId: "stroll", code: "STR", givenName: "Lance", familyName: "Stroll", nationality: "Canadian" }, Constructors: [{ name: "Aston Martin" }] },
+	{ position: "22", points: "0", Driver: { driverId: "bottas", code: "BOT", givenName: "Valtteri", familyName: "Bottas", nationality: "Finnish" }, Constructors: [{ name: "Cadillac F1 Team" }] },
+	{ position: "23", points: "0", Driver: { driverId: "perez", code: "PER", givenName: "Sergio", familyName: "Pérez", nationality: "Mexican" }, Constructors: [{ name: "Cadillac F1 Team" }] },
 ];
 
-// 🛠️ Escuderías 2026 por defecto
+// 🛠️ Escuderías oficiales reales de la temporada 2026
 const DEFAULT_2026_TEAMS = [
-	{ position: "1", points: "607", constructorId: "mercedes", name: "Mercedes" },
-	{ position: "2", points: "565", constructorId: "mclaren", name: "McLaren" },
-	{ position: "3", points: "513", constructorId: "ferrari", name: "Ferrari" },
-	{ position: "4", points: "310", constructorId: "red_bull", name: "Red Bull Racing" },
-	{ position: "5", points: "193", constructorId: "williams", name: "Williams" },
-	{ position: "6", points: "130", constructorId: "alpine", name: "Alpine" },
-	{ position: "7", points: "96", constructorId: "aston_martin", name: "Aston Martin" },
-	{ position: "8", points: "70", constructorId: "haas", name: "Haas" },
-	{ position: "9", points: "50", constructorId: "rb", name: "Racing Bulls" },
-	{ position: "10", points: "28", constructorId: "audi", name: "Audi F1 Team" },
-	{ position: "11", points: "10", constructorId: "cadillac", name: "Cadillac F1 Team" },
+	{ position: "1", points: "607", Constructor: { constructorId: "mercedes", name: "Mercedes" } },
+	{ position: "2", points: "474", Constructor: { constructorId: "ferrari", name: "Ferrari" } },
+	{ position: "3", points: "355", Constructor: { constructorId: "red_bull", name: "Red Bull" } },
+	{ position: "4", points: "355", Constructor: { constructorId: "mclaren", name: "McLaren" } },
+	{ position: "5", points: "102", Constructor: { constructorId: "rb", name: "RB F1 Team" } },
+	{ position: "6", points: "69", Constructor: { constructorId: "alpine", name: "Alpine F1 Team" } },
+	{ position: "7", points: "30", Constructor: { constructorId: "haas", name: "Haas F1 Team" } },
+	{ position: "8", points: "23", Constructor: { constructorId: "audi", name: "Audi" } },
+	{ position: "9", points: "12", Constructor: { constructorId: "williams", name: "Williams" } },
+	{ position: "10", points: "7", Constructor: { constructorId: "aston_martin", name: "Aston Martin" } },
+	{ position: "11", points: "0", Constructor: { constructorId: "cadillac", name: "Cadillac F1 Team" } },
 ];
-
-const RACING_NUMBER_TO_DRIVER_MAP: Record<string, { code: string; driverId: string; firstName: string; lastName: string; nationality: string; team: string }> = {
-	"12": { code: "ANT", driverId: "antonelli", firstName: "Andrea Kimi", lastName: "Antonelli", nationality: "italian", team: "Mercedes" },
-	"63": { code: "RUS", driverId: "russell", firstName: "George", lastName: "Russell", nationality: "british", team: "Mercedes" },
-	"4": { code: "NOR", driverId: "norris", firstName: "Lando", lastName: "Norris", nationality: "british", team: "McLaren" },
-	"81": { code: "PIA", driverId: "piastri", firstName: "Oscar", lastName: "Piastri", nationality: "australian", team: "McLaren" },
-	"16": { code: "LEC", driverId: "leclerc", firstName: "Charles", lastName: "Leclerc", nationality: "monegasque", team: "Ferrari" },
-	"44": { code: "HAM", driverId: "hamilton", firstName: "Lewis", lastName: "Hamilton", nationality: "british", team: "Ferrari" },
-	"1": { code: "VER", driverId: "verstappen", firstName: "Max", lastName: "Verstappen", nationality: "dutch", team: "Red Bull Racing" },
-	"6": { code: "HAD", driverId: "hadjar", firstName: "Isack", lastName: "Hadjar", nationality: "french", team: "Red Bull Racing" },
-	"55": { code: "SAI", driverId: "sainz", firstName: "Carlos", lastName: "Sainz", nationality: "spanish", team: "Williams" },
-	"23": { code: "ALB", driverId: "albon", firstName: "Alex", lastName: "Albon", nationality: "thai", team: "Williams" },
-	"14": { code: "ALO", driverId: "alonso", firstName: "Fernando", lastName: "Alonso", nationality: "spanish", team: "Aston Martin" },
-	"18": { code: "STR", driverId: "stroll", firstName: "Lance", lastName: "Stroll", nationality: "canadian", team: "Aston Martin" },
-	"43": { code: "COL", driverId: "colapinto", firstName: "Franco", lastName: "Colapinto", nationality: "argentine", team: "Alpine" },
-	"10": { code: "GAS", driverId: "gasly", firstName: "Pierre", lastName: "Gasly", nationality: "french", team: "Alpine" },
-	"87": { code: "BEA", driverId: "bearman", firstName: "Oliver", lastName: "Bearman", nationality: "british", team: "Haas" },
-	"31": { code: "OCO", driverId: "ocon", firstName: "Esteban", lastName: "Ocon", nationality: "french", team: "Haas" },
-	"30": { code: "LAW", driverId: "lawson", firstName: "Liam", lastName: "Lawson", nationality: "newzealander", team: "Racing Bulls" },
-	"22": { code: "TSU", driverId: "tsunoda", firstName: "Yuki", lastName: "Tsunoda", nationality: "japanese", team: "Racing Bulls" },
-	"27": { code: "HUL", driverId: "hulkenberg", firstName: "Nico", lastName: "Hülkenberg", nationality: "german", team: "Audi F1 Team" },
-	"5": { code: "BOR", driverId: "bortoleto", firstName: "Gabriel", lastName: "Bortoleto", nationality: "brazilian", team: "Audi F1 Team" },
-	"77": { code: "BOT", driverId: "bottas", firstName: "Valtteri", lastName: "Bottas", nationality: "finnish", team: "Cadillac F1 Team" },
-	"11": { code: "PER", driverId: "perez", firstName: "Sergio", lastName: "Pérez", nationality: "mexican", team: "Cadillac F1 Team" },
-};
 
 // 📸 Helper para obtener foto real con mono oficial de competición
 function getDriverAvatarUrl(driverCode?: string, driverId?: string, familyName?: string): string {
 	const code = (driverCode || "").toUpperCase().trim();
 	const id = ((driverId || "") + " " + (familyName || "")).toLowerCase().trim();
 
-	// Fotos oficiales en alta definición de la grilla 2026 (con mono del equipo)
+	// Fotos oficiales en alta definición de la grilla 2026 (con mono de carrera)
 	if (code === "ANT" || id.includes("antonelli")) return "/drivers/grid/antonelli.jpg";
 	if (code === "NOR" || id.includes("norris")) return "/drivers/grid/norris.jpg";
 	if (code === "LEC" || id.includes("leclerc")) return "/drivers/grid/leclerc.jpg";
@@ -172,82 +192,6 @@ function getDriverAvatarUrl(driverCode?: string, driverId?: string, familyName?:
 	if (id.includes("rosa")) return "/drivers/records/delarosa.jpg";
 
 	return "";
-}
-
-// 🧮 Generador de carreras y posiciones 2026 coherentes que suman EXACTAMENTE los puntos del piloto
-const POINTS_SYSTEM = [
-	{ pos: 1, pts: 25 },
-	{ pos: 2, pts: 18 },
-	{ pos: 3, pts: 15 },
-	{ pos: 4, pts: 12 },
-	{ pos: 5, pts: 10 },
-	{ pos: 6, pts: 8 },
-	{ pos: 7, pts: 6 },
-	{ pos: 8, pts: 4 },
-	{ pos: 9, pts: 2 },
-	{ pos: 10, pts: 1 }
-];
-
-function generate2026RaceResults(targetPoints: number, driverRank: number) {
-	let remaining = targetPoints;
-	const numRaces = calendar2026.length;
-	const results: any[] = [];
-
-	let seed = Math.max(1, driverRank) * 7 + 13;
-	function pseudoRandom() {
-		seed = (seed * 9301 + 49297) % 233280;
-		return seed / 233280;
-	}
-
-	for (let i = 0; i < numRaces; i++) {
-		const basePos = Math.min(22, Math.max(11, Math.floor(driverRank + 8 + (pseudoRandom() * 6))));
-		const isDnf = (i === 6 || i === 17) && pseudoRandom() > 0.65;
-		results.push({
-			round: (calendar2026[i] as any).round || (i + 1).toString(),
-			raceName: (calendar2026[i] as any).raceName,
-			Circuit: { circuitName: (calendar2026[i] as any).Circuit?.circuitName || "" },
-			Results: [{
-				position: isDnf ? "R" : basePos.toString(),
-				points: "0",
-				status: isDnf ? "Retirado" : "Finished"
-			}]
-		});
-	}
-
-	if (targetPoints <= 0) return results;
-
-	const raceIndices = Array.from({ length: numRaces }, (_, i) => i)
-		.sort((a, b) => pseudoRandom() - 0.5);
-
-	let raceIdxPtr = 0;
-	while (remaining > 0 && raceIdxPtr < numRaces) {
-		const rIdx = raceIndices[raceIdxPtr % numRaces];
-		const currentPts = parseFloat(results[rIdx].Results[0].points) || 0;
-
-		const candidate = POINTS_SYSTEM.find(p => p.pts <= remaining && p.pts > currentPts);
-		if (candidate) {
-			const diff = candidate.pts - currentPts;
-			results[rIdx].Results[0].points = candidate.pts.toString();
-			results[rIdx].Results[0].position = candidate.pos.toString();
-			results[rIdx].Results[0].status = "Finished";
-			remaining -= diff;
-		}
-		raceIdxPtr++;
-		if (raceIdxPtr > numRaces * 3) break;
-	}
-
-	if (remaining > 0) {
-		for (let i = 0; i < numRaces && remaining > 0; i++) {
-			const cur = parseFloat(results[i].Results[0].points) || 0;
-			if (cur > 0) {
-				results[i].Results[0].points = (cur + remaining).toString();
-				remaining = 0;
-				break;
-			}
-		}
-	}
-
-	return results.sort((a, b) => parseInt(a.round) - parseInt(b.round));
 }
 
 const TeamLogo = ({ teamName, className = "w-5 h-5" }: { teamName: string; className?: string }) => {
@@ -327,13 +271,10 @@ const TeamLogo = ({ teamName, className = "w-5 h-5" }: { teamName: string; class
 
 export default function Standings() {
 	const [year, setYear] = useState(2026);
-
-	const driverStandingsLive = useDataStore((state) => state.state?.ChampionshipPrediction?.Drivers);
-	const teamStandingsLive = useDataStore((state) => state.state?.ChampionshipPrediction?.Teams);
 	const favoriteDrivers = useSettingsStore((state) => state.favoriteDrivers);
 
-	const [extDrivers, setExtDrivers] = useState<any[]>([]);
-	const [extTeams, setExtTeams] = useState<any[]>([]);
+	const [extDrivers, setExtDrivers] = useState<any[]>(DEFAULT_2026_DRIVERS);
+	const [extTeams, setExtTeams] = useState<any[]>(DEFAULT_2026_TEAMS);
 	const [loadingBackup, setLoadingBackup] = useState(false);
 
 	// Modales interactivos
@@ -350,94 +291,63 @@ export default function Standings() {
 		return Array.from({ length: 2026 - 1950 + 1 }, (_, i) => 2026 - i);
 	}, []);
 
-	// Normalizar lista de pilotos 2026 ya sea desde live timing o default
-	const live2026Drivers = useMemo(() => {
-		if (!driverStandingsLive) return DEFAULT_2026_DRIVERS;
-		const rawList = Array.isArray(driverStandingsLive) ? driverStandingsLive : Object.values(driverStandingsLive);
-		if (rawList.length === 0) return DEFAULT_2026_DRIVERS;
-
-		return rawList.map((d: any, idx: number) => {
-			const racingNum = d.RacingNumber?.toString() || "";
-			const meta = RACING_NUMBER_TO_DRIVER_MAP[racingNum] || {};
-			const code = d.Driver?.code || d.code || meta.code || "F1";
-			const driverId = d.Driver?.driverId || d.driverId || meta.driverId || code.toLowerCase();
-			const firstName = d.Driver?.givenName || d.firstName || meta.firstName || "";
-			const lastName = d.Driver?.familyName || d.lastName || meta.lastName || "Piloto";
-			const nationality = (d.Driver?.nationality || d.nationality || meta.nationality || "").toLowerCase();
-			const team = d.Constructors?.[0]?.name || d.team || meta.team || driverToTeamNameMap[code] || "F1 Team";
-			const points = (d.PredictedPoints ?? d.CurrentPoints ?? d.points ?? 0).toString();
-			const position = (d.PredictedPosition ?? d.CurrentPosition ?? d.position ?? (idx + 1)).toString();
-
-			return {
-				position,
-				points,
-				code,
-				driverId,
-				firstName,
-				lastName,
-				nationality,
-				team,
-			};
-		}).sort((a, b) => parseInt(a.position, 10) - parseInt(b.position, 10));
-	}, [driverStandingsLive]);
-
-	// Normalizar lista de escuderías 2026
-	const live2026Teams = useMemo(() => {
-		if (!teamStandingsLive) return DEFAULT_2026_TEAMS;
-		const rawList = Array.isArray(teamStandingsLive) ? teamStandingsLive : Object.values(teamStandingsLive);
-		if (rawList.length === 0) return DEFAULT_2026_TEAMS;
-
-		return rawList.map((t: any, idx: number) => {
-			const name = t.TeamName || t.name || t.Constructor?.name || "Escudería";
-			const constructorId = t.Constructor?.constructorId || t.constructorId || name.toLowerCase().replaceAll(" ", "_");
-			const points = (t.PredictedPoints ?? t.CurrentPoints ?? t.points ?? 0).toString();
-			const position = (t.PredictedPosition ?? t.CurrentPosition ?? t.position ?? (idx + 1)).toString();
-
-			return {
-				position,
-				points,
-				name,
-				constructorId,
-			};
-		}).sort((a, b) => parseInt(a.position, 10) - parseInt(b.position, 10));
-	}, [teamStandingsLive]);
-
-	const shouldFetchData = year !== 2026;
-
+	// Fetch oficial de la temporada (funciona para 2026 y todos los años históricos)
 	useEffect(() => {
-		if (shouldFetchData) {
-			const fetchBackupStandings = async () => {
-				setLoadingBackup(true);
-				try {
-					const resDrivers = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/driverStandings.json`);
-					const dataDrivers = await resDrivers.json();
-					const dList = dataDrivers?.MRData?.StandingsTable?.StandingsLists[0]?.DriverStandings;
-					setExtDrivers(dList || []);
-
-					if (year >= 1958) {
-						const resTeams = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/constructorStandings.json`);
-						const dataTeams = await resTeams.json();
-						const tList = dataTeams?.MRData?.StandingsTable?.StandingsLists[0]?.ConstructorStandings;
-						setExtTeams(tList || []);
+		let isMounted = true;
+		const fetchStandings = async () => {
+			setLoadingBackup(true);
+			try {
+				const resDrivers = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/driverStandings.json`);
+				const dataDrivers = await resDrivers.json();
+				const dList = dataDrivers?.MRData?.StandingsTable?.StandingsLists[0]?.DriverStandings;
+				if (isMounted) {
+					if (dList && dList.length > 0) {
+						setExtDrivers(dList);
+					} else if (year === 2026) {
+						setExtDrivers(DEFAULT_2026_DRIVERS);
 					} else {
+						setExtDrivers([]);
+					}
+				}
+
+				if (year >= 1958) {
+					const resTeams = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/constructorStandings.json`);
+					const dataTeams = await resTeams.json();
+					const tList = dataTeams?.MRData?.StandingsTable?.StandingsLists[0]?.ConstructorStandings;
+					if (isMounted) {
+						if (tList && tList.length > 0) {
+							setExtTeams(tList);
+						} else if (year === 2026) {
+							setExtTeams(DEFAULT_2026_TEAMS);
+						} else {
+							setExtTeams([]);
+						}
+					}
+				} else {
+					if (isMounted) setExtTeams([]);
+				}
+			} catch (err) {
+				console.error(err);
+				if (isMounted) {
+					if (year === 2026) {
+						setExtDrivers(DEFAULT_2026_DRIVERS);
+						setExtTeams(DEFAULT_2026_TEAMS);
+					} else {
+						setExtDrivers([]);
 						setExtTeams([]);
 					}
-				} catch (err) {
-					console.error(err);
-					setExtDrivers([]);
-					setExtTeams([]);
-				} finally {
-					setLoadingBackup(false);
 				}
-			};
-			fetchBackupStandings();
-		} else {
-			queueMicrotask(() => {
-				setExtDrivers([]);
-				setExtTeams([]);
-			});
-		}
-	}, [year, shouldFetchData]);
+			} finally {
+				if (isMounted) setLoadingBackup(false);
+			}
+		};
+
+		fetchStandings();
+
+		return () => {
+			isMounted = false;
+		};
+	}, [year]);
 
 	// Fetch de resultados carrera por carrera al abrir modal de piloto
 	useEffect(() => {
@@ -450,24 +360,16 @@ export default function Standings() {
 		async function fetchDriverResults() {
 			setLoadingDriverModal(true);
 			try {
-				if (year === 2026) {
-					// En 2026 generamos la temporada completa coherente según el calendario oficial
-					const targetPts = parseFloat(selectedDriver.points) || 0;
-					const rank = parseInt(selectedDriver.position, 10) || 1;
-					const generatedRaces = generate2026RaceResults(targetPts, rank);
-					if (isMounted) setDriverSeasonResults(generatedRaces);
-				} else {
-					const dId = selectedDriver.driverId || selectedDriver.Driver?.driverId;
-					if (dId) {
-						const res = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/drivers/${dId}/results.json`);
-						const data = await res.json();
-						if (isMounted) {
-							const races = data?.MRData?.RaceTable?.Races || [];
-							setDriverSeasonResults(races);
-						}
-					} else {
-						if (isMounted) setDriverSeasonResults([]);
+				const dId = selectedDriver.driverId || selectedDriver.Driver?.driverId;
+				if (dId) {
+					const res = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/drivers/${dId}/results.json`);
+					const data = await res.json();
+					if (isMounted) {
+						const races = data?.MRData?.RaceTable?.Races || [];
+						setDriverSeasonResults(races);
 					}
+				} else {
+					if (isMounted) setDriverSeasonResults([]);
 				}
 			} catch (e) {
 				console.error(e);
@@ -493,12 +395,6 @@ export default function Standings() {
 
 		let isMounted = true;
 		async function fetchConstructorResults() {
-			if (year === 2026) {
-				// Para 2026 no se requiere fetch de Ergast, se calcula directamente con los pilotos de la escudería
-				setConstructorSeasonResults([]);
-				return;
-			}
-
 			setLoadingConstructorModal(true);
 			try {
 				const cId = selectedConstructor.constructorId || selectedConstructor.Constructor?.constructorId;
@@ -510,10 +406,11 @@ export default function Standings() {
 						setConstructorSeasonResults(races);
 					}
 				} else {
-					setConstructorSeasonResults([]);
+					if (isMounted) setConstructorSeasonResults([]);
 				}
 			} catch (e) {
 				console.error(e);
+				if (isMounted) setConstructorSeasonResults([]);
 			} finally {
 				if (isMounted) setLoadingConstructorModal(false);
 			}
@@ -528,37 +425,6 @@ export default function Standings() {
 
 	// Desglose de puntos por piloto para la escudería seleccionada
 	const teamDriverBreakdown = useMemo(() => {
-		if (!selectedConstructor) return [];
-
-		// En 2026: desglosar a partir de los pilotos de la temporada 2026
-		if (year === 2026) {
-			const targetTeamName = (selectedConstructor.teamName || selectedConstructor.name || "").toLowerCase().trim();
-			const teamDrivers = live2026Drivers.filter((d) => {
-				const dTeam = (d.team || driverToTeamNameMap[d.code] || "").toLowerCase().trim();
-				return dTeam.includes(targetTeamName) || targetTeamName.includes(dTeam);
-			});
-
-			return teamDrivers.map((d) => {
-				const pts = parseFloat(d.points) || 0;
-				const rank = parseInt(d.position, 10) || 1;
-				const racesData = generate2026RaceResults(pts, rank);
-				const wins = racesData.filter((r) => r.Results?.[0]?.position === "1").length;
-				const podiums = racesData.filter((r) => ["1", "2", "3"].includes(r.Results?.[0]?.position)).length;
-
-				return {
-					name: `${d.firstName ? d.firstName[0] + '.' : ''} ${d.lastName}`,
-					fullName: `${d.firstName} ${d.lastName}`.trim(),
-					code: d.code,
-					driverId: d.driverId,
-					points: pts,
-					wins,
-					podiums,
-					races: racesData.length,
-				};
-			}).sort((a, b) => b.points - a.points);
-		}
-
-		// Para años históricos (1958-2025): desglosar a partir de los resultados de carrera de Ergast
 		if (!constructorSeasonResults || constructorSeasonResults.length === 0) return [];
 		const driversMap: Record<string, { name: string; fullName: string; code: string; driverId: string; points: number; wins: number; podiums: number; races: number }> = {};
 
@@ -583,7 +449,14 @@ export default function Standings() {
 		});
 
 		return Object.values(driversMap).sort((a, b) => b.points - a.points);
-	}, [year, selectedConstructor, live2026Drivers, constructorSeasonResults]);
+	}, [constructorSeasonResults]);
+
+	// Carreras restantes aún no disputadas de la temporada 2026
+	const upcoming2026Races = useMemo(() => {
+		if (year !== 2026 || driverSeasonResults.length === 0) return [];
+		const maxCompletedRound = Math.max(...driverSeasonResults.map((r: any) => parseInt(r.round, 10) || 0));
+		return calendar2026.filter((c: any) => parseInt(c.round, 10) > maxCompletedRound);
+	}, [year, driverSeasonResults]);
 
 	// Bloquear scroll de fondo si hay un modal abierto
 	useEffect(() => {
@@ -597,8 +470,8 @@ export default function Standings() {
 		};
 	}, [selectedDriver, selectedConstructor]);
 
-	const driversListSource: any[] = year === 2026 ? live2026Drivers : extDrivers;
-	const teamsListSource: any[] = year === 2026 ? live2026Teams : extTeams;
+	const driversListSource: any[] = extDrivers;
+	const teamsListSource: any[] = extTeams;
 
 	const showDriversSkeleton = loadingBackup && (!driversListSource || driversListSource.length === 0);
 	const showTeamsSkeleton = loadingBackup && (!teamsListSource || teamsListSource.length === 0);
@@ -652,9 +525,9 @@ export default function Standings() {
 							const driverNationality = (driver.Driver?.nationality || driver.nationality || "").toLowerCase().replace(/\s+/g, "");
 							const countryCode = nationalityToCountryCode[driverNationality];
 
-							const historicTeamName = year === 2026 
-								? (driver.team || driverToTeamNameMap[driverCode] || "F1 Team")
-								: (driver.Constructors && driver.Constructors[0] ? driver.Constructors[0].name : "F1 Team");
+							const historicTeamName = driver.Constructors && driver.Constructors[0]
+								? driver.Constructors[0].name
+								: (driverToTeamNameMap[driverCode] || "F1 Team");
 
 							const badgeColor = driverTeamColorMap[driverCode] || { bg: "#3f3f46", text: "#ffffff" };
 							const isFav = year === 2026 && favoriteDrivers?.includes(driverCode);
@@ -707,7 +580,7 @@ export default function Standings() {
 											{renderPositionBadge()}
 										</div>
 
-										{/* Fotito de rostro con mono del piloto */}
+										{/* Foto real con mono oficial del piloto */}
 										{avatarUrl ? (
 											<img
 												src={avatarUrl}
@@ -744,7 +617,7 @@ export default function Standings() {
 										</div>
 									</div>
 
-									{/* Lado derecho: Puntos acumulados limpios (sin diferencias negativas) */}
+									{/* Lado derecho: Puntos oficiales acumulados (sin diferencias negativas) */}
 									<div className="flex items-baseline gap-2 shrink-0 z-10">
 										<div className="text-right">
 											<span className={clsx("font-black text-xs sm:text-sm tracking-tight", isP1 ? "text-amber-300" : "text-white")}>
@@ -851,7 +724,7 @@ export default function Standings() {
 												</p>
 											</div>
 
-											{/* Puntos acumulados limpios (sin diferencias negativas) */}
+											{/* Puntos oficiales limpios (sin diferencias negativas) */}
 											<div className="flex items-baseline gap-2 shrink-0">
 												<div className="text-right">
 													<span className={clsx("font-black text-xs sm:text-sm tracking-tight", isP1 ? "text-amber-300" : "text-white")}>
@@ -892,7 +765,7 @@ export default function Standings() {
 								<X className="w-4 h-4" />
 							</button>
 
-							{/* Cabecera del Piloto: Foto con Mono oficial, Nombre y Puntos */}
+							{/* Cabecera del Piloto: Foto con Mono oficial, Nombre y Puntos con contador animado */}
 							<div className="flex items-center gap-4 pb-4 border-b border-zinc-800/80">
 								{(() => {
 									const avatarUrl = getDriverAvatarUrl(
@@ -937,19 +810,21 @@ export default function Standings() {
 									</div>
 								</div>
 
-								{/* Puntos acumulados en grande */}
+								{/* Puntos acumulados en grande a súper velocidad */}
 								<div className="text-right shrink-0">
-									<span className="text-2xl sm:text-3xl font-black text-amber-400">
-										{selectedDriver.points}
-									</span>
+									<AnimatedCounter
+										value={parseFloat(selectedDriver.points) || 0}
+										duration={750}
+										className="text-2xl sm:text-4xl font-black text-amber-400 tracking-tight"
+									/>
 									<span className="text-[10px] text-zinc-400 block font-bold uppercase">Puntos Totales</span>
 								</div>
 							</div>
 
-							{/* Tabla de carreras disputadas (Desglose de cómo llegó a esos puntos) */}
+							{/* Tabla de carreras disputadas (Desglose oficial de la temporada) */}
 							<div className="flex flex-col flex-1 overflow-hidden mt-4">
 								<div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-900 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-									<span>Desglose de Carreras en {year}</span>
+									<span>Carreras Disputadas en {year} ({driverSeasonResults.length})</span>
 									<span>Posición & Puntos</span>
 								</div>
 
@@ -959,7 +834,7 @@ export default function Standings() {
 									</div>
 								) : driverSeasonResults.length === 0 ? (
 									<div className="h-48 flex items-center justify-center text-zinc-500 text-xs text-center p-4">
-										Sin resultados de carrera detallados disponibles para esta temporada.
+										Sin resultados de carrera registrados para este piloto en esta temporada.
 									</div>
 								) : (
 									<div className="flex flex-col gap-1.5 overflow-y-auto pr-1 no-scrollbar flex-1">
@@ -973,8 +848,11 @@ export default function Standings() {
 											const isPodium = pos === "2" || pos === "3";
 
 											return (
-												<div
+												<motion.div
 													key={i}
+													initial={{ opacity: 0, y: 6 }}
+													animate={{ opacity: 1, y: 0 }}
+													transition={{ delay: Math.min(i * 0.02, 0.4) }}
 													className={clsx(
 														"flex items-center justify-between p-2.5 rounded-xl border text-xs transition-all",
 														isWin
@@ -1003,7 +881,7 @@ export default function Standings() {
 															className={clsx(
 																"font-black px-1.5 py-0.5 rounded text-[10px]",
 																isWin
-																	? "bg-amber-500 text-black"
+																	? "bg-amber-500 text-black shadow-[0_0_10px_rgba(245,158,11,0.4)]"
 																	: isPodium
 																	? "bg-zinc-300 text-black"
 																	: isDNF
@@ -1014,13 +892,43 @@ export default function Standings() {
 															{isDNF ? "DNF" : `P${pos}`}
 														</span>
 
-														<span className={clsx("font-black text-xs min-w-10 text-right", pts > 0 ? "text-amber-400" : "text-zinc-400")}>
+														<span className={clsx("font-black text-xs min-w-10 text-right", pts > 0 ? "text-amber-400" : "text-zinc-500")}>
 															{pts > 0 ? `+${pts}` : "0"} <span className="text-[9px] font-normal text-zinc-400">PTS</span>
 														</span>
 													</div>
-												</div>
+												</motion.div>
 											);
 										})}
+
+										{/* Sección sutil con las carreras que AÚN NO SE CORRIERON en la temporada actual */}
+										{upcoming2026Races.length > 0 && (
+											<div className="mt-4 pt-3 border-t border-zinc-800/80">
+												<p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+													<Calendar className="w-3 h-3 text-amber-500" />
+													<span>Próximas carreras de la temporada 2026 (Aún no disputadas)</span>
+												</p>
+												<div className="flex flex-col gap-1.5 opacity-65">
+													{upcoming2026Races.map((ur: any, idx: number) => (
+														<div
+															key={idx}
+															className="flex items-center justify-between p-2 rounded-xl bg-zinc-900/20 border border-dashed border-zinc-800 text-xs"
+														>
+															<div className="flex items-center gap-2 min-w-0 truncate">
+																<span className="font-mono text-[10px] text-zinc-500 font-bold w-6 shrink-0">
+																	R{ur.round}
+																</span>
+																<p className="font-semibold truncate text-zinc-400 uppercase">
+																	{ur.raceName}
+																</p>
+															</div>
+															<span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-zinc-800/80 text-amber-400/90 border border-zinc-700/60 shrink-0">
+																{ur.date} · POR DISPUTAR
+															</span>
+														</div>
+													))}
+												</div>
+											</div>
+										)}
 									</div>
 								)}
 							</div>
@@ -1068,19 +976,22 @@ export default function Standings() {
 									</h3>
 
 									<p className="text-xs text-zinc-400 font-medium">
-										Desglose de puntos conseguidos por cada piloto
+										Aporte oficial de los pilotos a la escudería
 									</p>
 								</div>
 
+								{/* Puntos totales de la escudería a súper velocidad */}
 								<div className="text-right shrink-0">
-									<span className="text-2xl sm:text-3xl font-black text-emerald-400">
-										{selectedConstructor.points}
-									</span>
+									<AnimatedCounter
+										value={parseFloat(selectedConstructor.points) || 0}
+										duration={750}
+										className="text-2xl sm:text-4xl font-black text-emerald-400 tracking-tight"
+									/>
 									<span className="text-[10px] text-zinc-400 block font-bold uppercase">Puntos del Equipo</span>
 								</div>
 							</div>
 
-							{/* Desglose de los pilotos que sumaron esos puntos */}
+							{/* Desglose de los pilotos que sumaron esos puntos con animación en barritas y súper velocidad */}
 							<div className="flex flex-col flex-1 overflow-hidden mt-4">
 								<div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-900 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
 									<span>Pilotos de la Escudería en {year}</span>
@@ -1093,7 +1004,7 @@ export default function Standings() {
 									</div>
 								) : teamDriverBreakdown.length === 0 ? (
 									<div className="h-48 flex items-center justify-center text-zinc-500 text-xs text-center p-4">
-										Sin desglose individual de pilotos registrado para esta escudería en este año.
+										Sin resultados registrados para esta escudería en este año.
 									</div>
 								) : (
 									<div className="flex flex-col gap-3 overflow-y-auto pr-1 no-scrollbar flex-1">
@@ -1103,9 +1014,12 @@ export default function Standings() {
 											const avatarUrl = getDriverAvatarUrl(driver.code, driver.driverId, driver.fullName || driver.name);
 
 											return (
-												<div
+												<motion.div
 													key={i}
-													className="flex flex-col gap-2 p-3 rounded-2xl bg-zinc-900/40 border border-zinc-800/80"
+													initial={{ opacity: 0, y: 10 }}
+													animate={{ opacity: 1, y: 0 }}
+													transition={{ delay: i * 0.1, duration: 0.3 }}
+													className="flex flex-col gap-2.5 p-3.5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 shadow-md"
 												>
 													<div className="flex items-center justify-between">
 														<div className="flex items-center gap-3">
@@ -1113,42 +1027,45 @@ export default function Standings() {
 																<img
 																	src={avatarUrl}
 																	alt={driver.name}
-																	className="w-10 h-10 rounded-xl object-cover object-top border border-zinc-700 bg-zinc-900 shrink-0"
+																	className="w-11 h-11 rounded-xl object-cover object-top border-2 border-zinc-700 bg-zinc-900 shrink-0 shadow-md"
 																/>
 															) : (
-																<div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs font-black text-amber-400 shrink-0">
+																<div className="w-11 h-11 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs font-black text-amber-400 shrink-0">
 																	{driver.code || "F1"}
 																</div>
 															)}
 
 															<div>
-																<p className="text-sm font-bold text-white uppercase">
+																<p className="text-sm font-bold text-white uppercase tracking-tight">
 																	{driver.name}
 																</p>
 																<p className="text-[10px] text-zinc-400 font-medium">
-																	{driver.races} Carreras · {driver.wins} Victorias · {driver.podiums} Podios
+																	{driver.races} Carreras · {driver.wins} {driver.wins === 1 ? "Victoria" : "Victorias"} · {driver.podiums} Podios
 																</p>
 															</div>
 														</div>
 
 														<div className="text-right font-mono">
-															<span className="text-base font-black text-amber-300">
-																{driver.points} <span className="text-xs text-zinc-400 font-normal">PTS</span>
+															<span className="text-lg font-black text-amber-300">
+																<AnimatedCounter value={driver.points} duration={700} />{" "}
+																<span className="text-xs text-zinc-400 font-normal">PTS</span>
 															</span>
 															<span className="text-[10px] text-emerald-400 block font-bold">
-																{pct}% del equipo
+																<AnimatedCounter value={pct} duration={700} />% del equipo
 															</span>
 														</div>
 													</div>
 
-													{/* Barrita comparativa de aporte porcentual */}
-													<div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-														<div
-															className="h-full bg-gradient-to-r from-emerald-500 to-amber-400 rounded-full transition-all duration-700"
-															style={{ width: `${pct}%` }}
+													{/* 🚀 Barrita animada de aporte porcentual con resplandor y gradiente */}
+													<div className="w-full h-2 bg-zinc-800/80 rounded-full overflow-hidden p-0.5 border border-zinc-700/40">
+														<motion.div
+															initial={{ width: 0 }}
+															animate={{ width: `${pct}%` }}
+															transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+															className="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400 rounded-full shadow-[0_0_12px_rgba(16,185,129,0.5)]"
 														/>
 													</div>
-												</div>
+												</motion.div>
 											);
 										})}
 									</div>
