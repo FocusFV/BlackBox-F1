@@ -16,9 +16,7 @@ import {
 } from "@/lib/sessionSchedule";
 
 import ConnectionStatus from "@/components/ConnectionStatus";
-import DelayInput from "@/components/DelayInput";
 import SidenavButton from "@/components/SidenavButton";
-import DelayTimer from "@/components/DelayTimer";
 
 import { 
 	LayoutDashboard, 
@@ -93,7 +91,6 @@ export default function Sidebar({ connected }: Props) {
 	const unpin = useSidebarStore((state) => state.unpin);
 
 	const oledMode = useSettingsStore((state) => state.oledMode);
-	const setDelay = useSettingsStore((state) => state.setDelay);
 
 	// 📡 Detección de sesión activa para mostrar u ocultar opciones dinámicas
 	const sessionStatus = useDataStore((state) => state?.state?.SessionStatus?.Status);
@@ -161,9 +158,6 @@ export default function Sidebar({ connected }: Props) {
 			.filter((cat) => cat.items.length > 0);
 	}, [isLive]);
 
-	const handleForzarEnVivo = () => {
-		setDelay(0);
-	};
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -226,35 +220,6 @@ export default function Sidebar({ connected }: Props) {
 						</div>
 					</div>
 
-					{/* 🎛️ HUD DE DELAY: Contraste recuperado y legible */}
-					<div className="bg-black/50 border border-zinc-900 rounded-xl p-2.5 mb-5 space-y-2.5 shadow-inner">
-						<div className="flex justify-between items-center px-0.5">
-							<p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Retraso TV</p>
-							<span className="text-[9px] font-bold text-amber-500/70 uppercase tracking-wider">Sync</span>
-						</div>
-
-						{/* Fila del Control Real: Fondo oscuro limpio de filtros para leer el input perfecto */}
-						<div className="flex items-center justify-between gap-1.5 bg-zinc-950/80 p-2 rounded-lg border border-zinc-900/60">
-							<div className="flex items-center gap-1 overflow-hidden">
-								<span className="text-[9px] text-zinc-500 font-bold block select-none mr-0.5">MS:</span>
-								<DelayInput saveDelay={500} />
-							</div>
-							
-							{/* Lógica del Timer */}
-							<div className="flex items-center text-right border-l border-zinc-900/60 pl-2 font-bold text-amber-500">
-								<DelayTimer />
-							</div>
-						</div>
-
-						{/* Botón En Vivo */}
-						<button 
-							onClick={handleForzarEnVivo}
-							className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/15 hover:border-amber-500/40 text-[10px] font-extrabold text-amber-500 uppercase tracking-widest transition-all duration-300 active:scale-95 group/btn cursor-pointer"
-						>
-							<Radio className="w-3 h-3 text-amber-500 animate-pulse group-hover/btn:scale-110 transition-transform" />
-							En Vivo
-						</button>
-					</div>
 
 					{/* Secciones de menú */}
 					<div className="flex-1 space-y-5 overflow-y-auto no-scrollbar">

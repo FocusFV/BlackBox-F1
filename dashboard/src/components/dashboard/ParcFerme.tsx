@@ -14,16 +14,11 @@ interface DriverResult {
 	constructorId: string;
 	points?: string;
 	gapTime: string;
-	q1?: string;
-	q2?: string;
-	q3?: string;
-	isFastestLap?: boolean;
-	fastestLapTime?: string;
 	isDNF: boolean;
 	dnfReason?: string;
 }
 
-type SessionTab = "RACE" | "QUALY" | "SPRINT";
+type SessionTab = "RACE" | "QUALY" | "SPRINT" | "FP3" | "FP2" | "FP1" | "SQ";
 
 const driverNationalityMap: Record<string, string> = {
 	COL: "ar", VER: "nl", HAM: "gb", RUS: "gb", LEC: "mc", SAI: "es",
@@ -108,6 +103,7 @@ export const ParcFerme: React.FC = () => {
 	const [results, setResults] = useState<DriverResult[]>([]);
 	const [gpName, setGpName] = useState("Gran Premio");
 	const [countryCode, setCountryCode] = useState<string>("usa");
+	const [raceDate, setRaceDate] = useState<string>("");
 	const [loading, setLoading] = useState(true);
 	const [hasSprint, setHasSprint] = useState(false);
 
@@ -115,9 +111,24 @@ export const ParcFerme: React.FC = () => {
 		async function fetchSessionData() {
 			setLoading(true);
 			try {
+				// 1. Si es práctica libre (FP1, FP2, FP3), consultamos nuestra API de OpenF1
+				if (activeTab === "FP1" || activeTab === "FP2" || activeTab === "FP3") {
+					const dateParam = raceDate ? `&date=${raceDate}` : "";
+					const res = await fetch(`/api/practice?session=${activeTab}${dateParam}`);
+					if (res.ok) {
+						const data = await res.json();
+						if (Array.isArray(data.results) && data.results.length > 0) {
+							setResults(data.results);
+							setLoading(false);
+							return;
+						}
+					}
+				}
+
+				// 2. Para Carrera, Qualy y Sprint consultamos Jolpica/Ergast
 				let subpath = "results.json";
 				if (activeTab === "QUALY") subpath = "qualifying.json";
-				else if (activeTab === "SPRINT") subpath = "sprint.json";
+				else if (activeTab === "SPRINT" || activeTab === "SQ") subpath = "sprint.json";
 
 				const endpoints = [
 					`https://api.jolpi.ca/ergast/f1/current/last/${subpath}`,
@@ -142,6 +153,7 @@ export const ParcFerme: React.FC = () => {
 					const race = data.MRData.RaceTable.Races[0];
 					setGpName(translateGpName(race.raceName));
 					setCountryCode(getCountryCodeForGp(race.raceName, race.Circuit?.Location?.country));
+					if (race.date) setRaceDate(race.date);
 
 					if (race.Sprint || race.SprintResults) {
 						setHasSprint(true);
@@ -167,8 +179,6 @@ export const ParcFerme: React.FC = () => {
 							isTimeBased;
 
 						const isDNF = !isFinished;
-						const isFastestLap = activeTab === "RACE" ? r.FastestLap?.rank === "1" : r.position === "1";
-						const flTime = r.FastestLap?.Time?.time;
 
 						let gapTime = "";
 						let pointsStr = "";
@@ -191,11 +201,6 @@ export const ParcFerme: React.FC = () => {
 							constructorId: r.Constructor?.constructorId || "",
 							points: pointsStr,
 							gapTime,
-							q1: r.Q1,
-							q2: r.Q2,
-							q3: r.Q3,
-							isFastestLap,
-							fastestLapTime: flTime,
 							isDNF,
 							dnfReason: r.status,
 						};
@@ -211,45 +216,42 @@ export const ParcFerme: React.FC = () => {
 		}
 
 		fetchSessionData();
-	}, [activeTab]);
-
-	const top3 = results.slice(0, 3);
-	const restResults = results.slice(3);
+	}, [activeTab, raceDate]);
 
 	return (
-		<div className="flex flex-col gap-5 w-full text-white items-center">
-			{/* AVISO ELEGANTE DE ESTADO DE PISTA Y ÚLTIMO GP */}
-			<div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 shadow-[0_4px_25px_rgba(0,0,0,0.5)] backdrop-blur-xl lg:w-8/12 w-full">
-				<div className="flex items-center gap-3.5 w-full md:w-auto">
+		<div className="flex flex-col gap-4 w-full text-white items-center">
+			{/* 🏁 CABECERA UNIFICADA PANORÁMICA */}
+			<div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 shadow-[0_4px_25px_rgba(0,0,0,0.5)] backdrop-blur-xl lg:w-8/12 w-full">
+				<div className="flex items-center gap-3 w-full sm:w-auto">
 					<div className="flex items-center justify-center overflow-hidden rounded-lg border border-zinc-700/60 bg-zinc-900 p-0.5 shadow-md shrink-0">
-						<Flag countryCode={countryCode} className="h-7 w-11 object-cover rounded-md" />
+						<Flag countryCode={countryCode} className="h-6 w-9 object-cover rounded-md" />
 					</div>
 					<div>
 						<div className="flex items-center gap-2">
 							<span className="text-[10px] uppercase font-mono font-bold tracking-wider text-amber-400">
 								Última Ronda Oficial
 							</span>
-							<span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-mono font-bold uppercase">
-								Resultados Finales
+							<span className="text-[9px] px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-mono font-bold uppercase">
+								Resultados
 							</span>
 						</div>
-						<h2 className="text-sm md:text-base font-black tracking-wide text-zinc-100 font-sans mt-0.5">
+						<h2 className="text-sm md:text-base font-black tracking-wide text-zinc-100 font-sans">
 							{gpName}
 						</h2>
 					</div>
 				</div>
 
-				<div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-zinc-900/80 border border-zinc-800/80 w-full md:w-auto justify-center md:justify-end">
-					<span className="relative flex h-2.5 w-2.5">
+				<div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-900/80 border border-zinc-800/80 w-full sm:w-auto justify-center sm:justify-end">
+					<span className="relative flex h-2 w-2">
 						<span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 animate-ping"></span>
-						<span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+						<span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
 					</span>
 					<div className="text-left font-mono">
-						<p className="text-[11px] font-bold text-zinc-200 uppercase tracking-tight leading-none">
-							Sin carrera en curso
+						<p className="text-[10px] font-bold text-zinc-300 uppercase tracking-tight leading-none">
+							Pista en Pausa
 						</p>
-						<p className="text-[9px] text-zinc-400 font-medium tracking-normal leading-tight mt-0.5">
-							Telemetría en espera hasta la próxima sesión
+						<p className="text-[8px] text-zinc-500 font-medium tracking-normal leading-tight mt-0.5">
+							Telemetría en espera
 						</p>
 					</div>
 				</div>
@@ -258,50 +260,98 @@ export const ParcFerme: React.FC = () => {
 			{/* GRILLA DE RESULTADOS PRINCIPAL */}
 			<div className="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full justify-center">
 				<div className="lg:col-start-3 lg:col-span-8 flex flex-col bg-zinc-950/50 border border-zinc-800/80 rounded-2xl p-4 md:p-5 backdrop-blur-xl max-w-full shadow-2xl">
-					{/* SELECTOR DE SESIÓN ESTILO F1 BROADCASH */}
-					<div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-5 border-b border-zinc-900 pb-4">
-						<div className="flex items-center gap-2 self-start sm:self-auto">
-							<span className="text-xs font-mono font-bold uppercase tracking-widest text-zinc-400">
-								Sesión:
-							</span>
-							<div className="flex bg-zinc-900/80 p-1 rounded-xl border border-zinc-800 select-none gap-1">
+					{/* SELECTOR COMPLETO DE SESIONES */}
+					<div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4 border-b border-zinc-900 pb-3">
+						<div className="flex items-center gap-2 self-start sm:self-auto overflow-x-auto max-w-full no-scrollbar">
+							<div className="flex bg-zinc-900/80 p-1 rounded-xl border border-zinc-800 select-none gap-1 shrink-0">
+								<button
+									onClick={() => setActiveTab("FP1")}
+									className={`text-[10px] font-mono font-bold py-1 px-2.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
+										activeTab === "FP1"
+											? "bg-zinc-800 text-zinc-100 border border-zinc-600/80 shadow-sm"
+											: "text-zinc-500 hover:text-zinc-300"
+									}`}
+								>
+									FP1
+								</button>
+								{hasSprint ? (
+									<>
+										<button
+											onClick={() => setActiveTab("SQ")}
+											className={`text-[10px] font-mono font-bold py-1 px-2.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
+												activeTab === "SQ"
+													? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm"
+													: "text-zinc-500 hover:text-zinc-300"
+											}`}
+										>
+											⚡ SQ
+										</button>
+										<button
+											onClick={() => setActiveTab("SPRINT")}
+											className={`text-[10px] font-mono font-bold py-1 px-2.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
+												activeTab === "SPRINT"
+													? "bg-orange-500/20 text-orange-300 border border-orange-500/40 shadow-sm"
+													: "text-zinc-500 hover:text-zinc-300"
+											}`}
+										>
+											⚡ Sprint
+										</button>
+									</>
+								) : (
+									<>
+										<button
+											onClick={() => setActiveTab("FP2")}
+											className={`text-[10px] font-mono font-bold py-1 px-2.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
+												activeTab === "FP2"
+													? "bg-zinc-800 text-zinc-100 border border-zinc-600/80 shadow-sm"
+													: "text-zinc-500 hover:text-zinc-300"
+											}`}
+										>
+											FP2
+										</button>
+										<button
+											onClick={() => setActiveTab("FP3")}
+											className={`text-[10px] font-mono font-bold py-1 px-2.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
+												activeTab === "FP3"
+													? "bg-zinc-800 text-zinc-100 border border-zinc-600/80 shadow-sm"
+													: "text-zinc-500 hover:text-zinc-300"
+											}`}
+										>
+											FP3
+										</button>
+									</>
+								)}
+								<button
+									onClick={() => setActiveTab("QUALY")}
+									className={`text-[10px] font-mono font-bold py-1 px-2.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
+										activeTab === "QUALY"
+											? "bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm"
+											: "text-zinc-500 hover:text-zinc-300"
+									}`}
+								>
+									⏱️ Qualy
+								</button>
 								<button
 									onClick={() => setActiveTab("RACE")}
-									className={`text-[11px] font-mono font-bold py-1.5 px-3 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
+									className={`text-[10px] font-mono font-bold py-1 px-2.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
 										activeTab === "RACE"
 											? "bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm"
-											: "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
+											: "text-zinc-500 hover:text-zinc-300"
 									}`}
 								>
 									🏁 Carrera
 								</button>
-								<button
-									onClick={() => setActiveTab("QUALY")}
-									className={`text-[11px] font-mono font-bold py-1.5 px-3 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
-										activeTab === "QUALY"
-											? "bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm"
-											: "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
-									}`}
-								>
-									⏱️ Clasificación
-								</button>
-								{hasSprint && (
-									<button
-										onClick={() => setActiveTab("SPRINT")}
-										className={`text-[11px] font-mono font-bold py-1.5 px-3 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
-											activeTab === "SPRINT"
-												? "bg-orange-500/20 text-orange-300 border border-orange-500/40 shadow-sm"
-												: "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
-										}`}
-									>
-										⚡ Sprint
-									</button>
-								)}
 							</div>
 						</div>
 
-						<span className="text-[10px] font-mono text-zinc-500 self-end sm:self-auto">
-							{activeTab === "RACE" ? "Clasificación Final Oficial" : activeTab === "QUALY" ? "Tiempos Oficiales Q1 / Q2 / Q3" : "Puntos Sprint"}
+						<span className="text-[10px] font-mono text-zinc-500 self-end sm:self-auto shrink-0">
+							{activeTab === "RACE"
+								? "Clasificación Final"
+								: activeTab === "QUALY"
+								? "Tiempos Q1 / Q2 / Q3"
+								: activeTab.startsWith("FP")
+								? "Mejores Vueltas en Pista"
+								: "Puntos Sprint"}
 						</span>
 					</div>
 
@@ -315,176 +365,121 @@ export const ParcFerme: React.FC = () => {
 							Sin resultados registrados para esta sesión.
 						</div>
 					) : (
-						<div className="flex flex-col gap-4">
-							{/* 🏆 MINI-PODIO DESTACADO (TOP 3) */}
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-2">
-								{top3.map((driver) => {
-									const driverFlag = driverNationalityMap[driver.code];
-									const teamColor = driverTeamColorMap[driver.code]?.bg || "#3f3f46";
-									const isP1 = driver.pos === "1";
-									const isP2 = driver.pos === "2";
+						/* LISTA UNIFICADA Y COMPACTA (DE P1 A P20 SIN TARJETAS GIGANTES) */
+						<div className="flex flex-col gap-1.5 max-h-[500px] overflow-y-auto pr-1 no-scrollbar">
+							{results.map((row, index) => {
+								const driverFlag = driverNationalityMap[row.code];
+								const teamColor = driverTeamColorMap[row.code]?.bg || "#3f3f46";
+								const posNum = parseInt(row.pos, 10);
 
-									const cardStyle = isP1
-										? "border-amber-500/50 bg-gradient-to-b from-amber-500/15 via-zinc-900/90 to-zinc-950/90 shadow-[0_4px_25px_rgba(245,158,11,0.2)] md:-translate-y-1"
-										: isP2
-										? "border-zinc-400/30 bg-gradient-to-b from-zinc-400/10 via-zinc-900/90 to-zinc-950/90 shadow-md"
-										: "border-amber-700/30 bg-gradient-to-b from-amber-700/10 via-zinc-900/90 to-zinc-950/90 shadow-md";
+								const isP1 = posNum === 1;
+								const isP2 = posNum === 2;
+								const isP3 = posNum === 3;
 
-									const badgeText = isP1
-										? activeTab === "QUALY" ? "POLE POSITION" : "1º VICTORIA"
-										: isP2
-										? "2º LUGAR"
-										: "3º LUGAR";
+								// Líneas de corte FIA limpias en Qualy (sin texto)
+								const isCutoffQ2 = activeTab === "QUALY" && posNum === 11;
+								const isCutoffQ1 = activeTab === "QUALY" && posNum === 16;
 
-									const medalEmoji = isP1 ? "🥇" : isP2 ? "🥈" : "🥉";
+								// Estilo sutil de podio integrado en la misma altura
+								const rowBg = isP1
+									? "bg-amber-500/10 border-amber-500/40 hover:bg-amber-500/15"
+									: isP2
+									? "bg-zinc-400/10 border-zinc-500/40 hover:bg-zinc-400/15"
+									: isP3
+									? "bg-amber-700/10 border-amber-700/40 hover:bg-amber-700/15"
+									: row.isDNF
+									? "bg-zinc-950/20 border-zinc-900/40 opacity-40 saturate-50"
+									: "bg-zinc-900/30 border-zinc-900/80 hover:border-zinc-700/80 hover:bg-zinc-900/60";
 
+								const renderPosBadge = () => {
+									if (isP1) return <span className="text-sm">🥇</span>;
+									if (isP2) return <span className="text-sm">🥈</span>;
+									if (isP3) return <span className="text-sm">🥉</span>;
 									return (
-										<div
-											key={`podium-${driver.code}`}
-											className={`relative rounded-xl border p-3.5 flex flex-col justify-between transition-all duration-300 ${cardStyle}`}
-											style={{ borderLeft: `4px solid ${teamColor}` }}
-										>
-											<div className="flex items-center justify-between mb-2">
-												<div className="flex items-center gap-1.5">
-													<span className="text-base">{medalEmoji}</span>
-													<span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-300">
-														{badgeText}
-													</span>
-												</div>
-												<span className="text-[10px] font-mono text-zinc-400 px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800">
-													#{driver.number}
-												</span>
-											</div>
+										<span className="font-mono font-bold text-xs text-zinc-400">
+											{row.pos}
+										</span>
+									);
+								};
 
-											<div className="flex items-center gap-2.5 my-1">
+								return (
+									<React.Fragment key={`${activeTab}-${row.code}-${row.pos}`}>
+										{/* Línea de corte Q2 (sin texto) */}
+										{isCutoffQ2 && (
+											<div className="h-[1px] w-full bg-red-500/40 my-1" />
+										)}
+
+										{/* Línea de corte Q1 (sin texto) */}
+										{isCutoffQ1 && (
+											<div className="h-[1px] w-full bg-zinc-700/50 my-1" />
+										)}
+
+										<motion.div
+											initial={{ opacity: 0, x: 8 }}
+											animate={{ opacity: 1, x: 0 }}
+											transition={{ delay: index * 0.015 }}
+											className={`relative flex items-center justify-between p-2.5 rounded-xl border transition-all duration-200 h-12 overflow-hidden ${rowBg}`}
+										>
+											<div className="flex items-center gap-2.5 z-10 truncate flex-1 min-w-0 pr-2">
+												{/* Franja vertical recta de escudería (sin arcos ni paréntesis) */}
+												<div
+													className="w-1 self-stretch rounded-full shrink-0 my-0.5"
+													style={{ backgroundColor: row.isDNF ? "#3f3f46" : teamColor }}
+												/>
+
+												<div className="w-5 flex justify-center items-center shrink-0">
+													{renderPosBadge()}
+												</div>
+
 												{driverFlag && (
 													<img
 														src={`https://flagcdn.com/w20/${driverFlag}.png`}
 														alt=""
-														className="w-4 h-auto rounded-xs opacity-90 shadow-xs"
+														className="w-4 h-auto rounded-xs opacity-90 shadow-xs shrink-0"
 													/>
 												)}
-												<TeamLogo teamName={driver.team} />
-												<div className="truncate">
-													<h4 className="text-sm font-bold text-white truncate leading-tight">
-														{driver.name}
-													</h4>
-													<p className="text-[10px] font-mono text-zinc-400 truncate">
-														{driver.team}
-													</p>
-												</div>
-											</div>
 
-											<div className="flex items-center justify-between pt-2 mt-2 border-t border-zinc-800/60 font-mono text-xs">
-												<span className="text-zinc-400 text-[11px] truncate">{driver.gapTime}</span>
-												{driver.points && (
-													<span className="text-amber-400 font-bold text-[11px]">
-														{driver.points}
-													</span>
-												)}
-												{driver.isFastestLap && (
-													<span className="text-purple-400 font-bold text-[10px] px-1 rounded bg-purple-500/10 border border-purple-500/30">
-														🟣 {activeTab === "QUALY" ? "POLE" : "FL"}
-													</span>
-												)}
-											</div>
-										</div>
-									);
-								})}
-							</div>
-
-							{/* RESTO DE LA PARRILLA (P4 A P20) */}
-							<div className="flex flex-col gap-2 max-h-[460px] overflow-y-auto pr-1 no-scrollbar">
-								{restResults.map((row, index) => {
-									const driverFlag = driverNationalityMap[row.code];
-									const teamColor = driverTeamColorMap[row.code]?.bg || "#3f3f46";
-									const posNum = parseInt(row.pos, 10);
-
-									const isCutoffQ2 = activeTab === "QUALY" && posNum === 11;
-									const isCutoffQ1 = activeTab === "QUALY" && posNum === 16;
-
-									return (
-										<React.Fragment key={`${activeTab}-${row.code}-${row.pos}`}>
-											{/* Líneas de Corte Oficiales FIA en Qualy */}
-											{isCutoffQ2 && (
-												<div className="flex items-center gap-3 my-2 select-none">
-													<div className="h-[1px] flex-1 bg-red-500/30" />
-													<span className="text-[10px] font-mono font-bold uppercase tracking-widest text-red-400/90 px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20">
-														── Eliminados en Q2 (Línea de Corte Top 10) ──
-													</span>
-													<div className="h-[1px] flex-1 bg-red-500/30" />
-												</div>
-											)}
-											{isCutoffQ1 && (
-												<div className="flex items-center gap-3 my-2 select-none">
-													<div className="h-[1px] flex-1 bg-zinc-700/40" />
-													<span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400 px-2 py-0.5 rounded bg-zinc-800/60 border border-zinc-700/40">
-														── Eliminados en Q1 (Línea de Corte Top 15) ──
-													</span>
-													<div className="h-[1px] flex-1 bg-zinc-700/40" />
-												</div>
-											)}
-
-											<motion.div
-												initial={{ opacity: 0, x: 10 }}
-												animate={{ opacity: 1, x: 0 }}
-												transition={{ delay: index * 0.02 }}
-												className={`relative flex items-center justify-between p-2.5 rounded-xl border transition-all duration-200 h-13 overflow-hidden ${
-													row.isDNF
-														? "bg-zinc-950/30 border-zinc-900/50 opacity-40 saturate-50"
-														: "bg-zinc-900/30 border-zinc-900/80 hover:border-zinc-700/80 hover:bg-zinc-900/60"
-												}`}
-												style={{ borderLeft: `3px solid ${row.isDNF ? "#3f3f46" : teamColor}` }}
-											>
-												<div className="flex items-center gap-2.5 z-10 truncate flex-1 min-w-0 pr-2">
-													<span className="font-mono font-bold text-xs text-zinc-400 w-5 text-center shrink-0">
-														{row.pos}
-													</span>
-													{driverFlag && (
-														<img
-															src={`https://flagcdn.com/w20/${driverFlag}.png`}
-															alt=""
-															className="w-4 h-auto rounded-xs opacity-90 shadow-xs shrink-0"
-														/>
-													)}
-													<div className="shrink-0">
-														<TeamLogo teamName={row.team} />
-													</div>
-													<div className="flex items-center gap-2 truncate min-w-0">
-														<p className="text-xs md:text-sm truncate font-bold text-zinc-100">
-															{row.name}
-														</p>
-														<span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded border bg-zinc-900 text-zinc-400 border-zinc-800 shrink-0">
-															#{row.number}
-														</span>
-													</div>
+												<div className="shrink-0">
+													<TeamLogo teamName={row.team} />
 												</div>
 
-												{/* Datos de la derecha (Tiempos / Puntos / FL) */}
-												<div className="flex items-center gap-2 shrink-0 font-mono">
-													{row.isFastestLap && (
-														<span className="text-purple-400 font-bold text-[10px] px-1.5 py-0.5 rounded bg-purple-500/10 border border-purple-500/30">
-															🟣 FL {row.fastestLapTime}
-														</span>
-													)}
+												<div className="flex items-center gap-2 truncate min-w-0">
 													<p
-														className={`text-xs font-bold tracking-tight uppercase ${
-															row.isDNF ? "text-red-400/80 text-[10px]" : "text-zinc-300"
+														className={`text-xs md:text-sm truncate font-bold ${
+															isP1 ? "text-amber-200" : "text-zinc-100"
 														}`}
 													>
-														{row.gapTime}
+														{row.name}
 													</p>
-													{row.points && (
-														<span className="text-amber-400 font-bold text-xs pl-1">
-															{row.points}
-														</span>
-													)}
+													<span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded border bg-zinc-900/90 text-zinc-400 border-zinc-800 shrink-0">
+														#{row.number}
+													</span>
 												</div>
-											</motion.div>
-										</React.Fragment>
-									);
-								})}
-							</div>
+											</div>
+
+											{/* Datos derecha (Tiempos y Puntos) */}
+											<div className="flex items-center gap-2 shrink-0 font-mono">
+												<p
+													className={`text-xs font-bold tracking-tight uppercase ${
+														row.isDNF
+															? "text-red-400/80 text-[10px]"
+															: isP1
+															? "text-amber-300"
+															: "text-zinc-300"
+													}`}
+												>
+													{row.gapTime}
+												</p>
+												{row.points && (
+													<span className="text-amber-400 font-bold text-xs pl-1">
+														{row.points}
+													</span>
+												)}
+											</div>
+										</motion.div>
+									</React.Fragment>
+								);
+							})}
 						</div>
 					)}
 				</div>
