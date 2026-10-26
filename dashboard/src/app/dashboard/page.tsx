@@ -15,7 +15,7 @@ import { RaceControlAlertBanner } from "@/components/dashboard/RaceControlAlertB
 import { TeamRadioAlertPopup } from "@/components/dashboard/TeamRadioAlertPopup";
 import { HeadToHeadModal } from "@/components/dashboard/HeadToHeadModal";
 import { CircuitBackdrop } from "@/components/dashboard/CircuitBackdrop";
-import { Swords, Eye } from "lucide-react";
+import { Swords } from "lucide-react";
 import {
 	getUpcomingSessions,
 	evaluateSessionStatus,
@@ -176,29 +176,21 @@ export default function Page() {
 
 			{/* Contenido principal */}
 			{!showTelemetry ? (
-				<div className="flex flex-col gap-6 w-full relative">
-					{/* 🏎️ Fondo inteligente del circuito aéreo (solo en Parque Cerrado) */}
+				<div
+					onClick={(e) => {
+						if (e.target === e.currentTarget && !isCinematicTrackMode) {
+							setIsCinematicTrackMode(true);
+						}
+					}}
+					className="flex flex-col gap-6 w-full relative min-h-screen"
+				>
+					{/* 🏎️ Fondo inteligente del circuito aéreo y Easter Egg de telemetría */}
 					<CircuitBackdrop
 						gpName={scheduleStatus.nextSessionName || session?.Name}
 						country={session?.Meeting?.Country?.Name}
 						isCinematic={isCinematicTrackMode}
 						onToggleCinematic={() => setIsCinematicTrackMode((prev) => !prev)}
 					/>
-
-					{/* Botón de acceso directo a vista completa del circuito */}
-					{!isCinematicTrackMode && (
-						<div className="flex justify-center w-full relative z-20 -mb-2">
-							<button
-								type="button"
-								onClick={() => setIsCinematicTrackMode(true)}
-								className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950/80 border border-zinc-800 text-zinc-300 hover:text-white hover:border-amber-500/60 transition-all backdrop-blur-xl shadow-lg text-xs font-mono font-bold tracking-wider cursor-pointer active:scale-95"
-								title="Ocultar resultados y admirar el circuito completo"
-							>
-								<Eye className="w-3.5 h-3.5 text-amber-400" />
-								<span>Ver Circuito Completo (Modo Cinemático)</span>
-							</button>
-						</div>
-					)}
 
 					{/* Contenedor de resultados que se oculta suavemente en Modo Cinemático */}
 					<div
