@@ -1,41 +1,66 @@
 "use client";
 
-import SegmentedControls from "@/components/ui/SegmentedControls";
+import { useSettingsStore, type GoldTheme } from "@/stores/useSettingsStore";
+import { triggerHaptic } from "@/lib/haptics";
+import Toggle from "@/components/ui/Toggle";
 import Slider from "@/components/ui/Slider";
 import Input from "@/components/ui/Input";
+import SegmentedControls from "@/components/ui/SegmentedControls";
 import FavoriteDrivers from "@/components/settings/FavoriteDrivers";
-import Toggle from "@/components/ui/Toggle";
-import { useSettingsStore, type GoldTheme } from "@/stores/useSettingsStore";
 import Footer from "@/components/Footer";
-import { Sparkles, Monitor, Radio, Sliders, Volume2, ShieldCheck, Flame, SunMedium, Smartphone } from "lucide-react";
+import { 
+	Volume2, 
+	Monitor, 
+	Sliders, 
+	Sparkles, 
+	Smartphone, 
+	Vibrate, 
+	Layers, 
+	Clock3 
+} from "lucide-react";
 
-export default function SettingsPage() {
+export default function Settings() {
 	const settings = useSettingsStore();
 
-	const themeOptions: { label: string; value: GoldTheme; desc: string; icon: string }[] = [
+	const themeOptions: {
+		value: GoldTheme;
+		label: string;
+		desc: string;
+		icon: string;
+		swatchGradient: string;
+		glowBorder: string;
+	}[] = [
 		{
-			label: "Oro 24K",
 			value: "classic",
-			desc: "El tono oficial de Blackbox-F1. Oro clásico con sombras ámbar y fibra de carbono.",
-			icon: "👑",
+			label: "Oro 24K Blackbox Clásico",
+			desc: "El tono ámbar dorado oficial de la plataforma con contraste cinematográfico y sombras profundas.",
+			icon: "🏆",
+			swatchGradient: "from-amber-600 via-amber-400 to-amber-500",
+			glowBorder: "border-amber-500/60 shadow-[0_0_20px_rgba(245,158,11,0.25)]",
 		},
 		{
-			label: "Oro Neón",
 			value: "neon",
-			desc: "Máximo resplandor luminoso con destellos amarillos vibrantes en números y bordes.",
+			label: "Oro Neón Ultra-Glow",
+			desc: "Dorado electrizante de alta luminosidad (#FFD700) para máxima visibilidad nocturna.",
 			icon: "⚡",
+			swatchGradient: "from-yellow-400 via-yellow-200 to-amber-300",
+			glowBorder: "border-yellow-400/80 shadow-[0_0_25px_rgba(255,215,0,0.4)]",
 		},
 		{
-			label: "Oro Rosa",
 			value: "rose",
-			desc: "Matiz cobrizo cálido / champagne de súper lujo para un look sofisticado.",
-			icon: "✨",
+			label: "Oro Rosa / Champagne",
+			desc: "Matiz cobrizo cálido de súper lujo con acabado de metal pulido rosáceo (#F43F5E).",
+			icon: "💎",
+			swatchGradient: "from-rose-500 via-rose-300 to-amber-300",
+			glowBorder: "border-rose-400/80 shadow-[0_0_20px_rgba(244,63,94,0.35)]",
 		},
 		{
-			label: "Modo OLED",
 			value: "oled",
-			desc: "Negro absoluto #000000 sin brillos de fondo para pantallas OLED y ahorro de energía.",
-			icon: "🖤",
+			label: "Modo OLED Negro Puro",
+			desc: "Negro absoluto (#000000) con oro de alto contraste para ahorrar batería en pantallas OLED.",
+			icon: "🌙",
+			swatchGradient: "from-amber-500 via-amber-300 to-black",
+			glowBorder: "border-amber-400/70 shadow-[0_0_20px_rgba(234,179,8,0.3)]",
 		},
 	];
 
@@ -55,7 +80,7 @@ export default function SettingsPage() {
 					{/* Badge Wake Lock siempre activo */}
 					<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold uppercase tracking-wider mt-3 shadow-xs">
 						<Smartphone className="w-3.5 h-3.5" />
-						<span>Modo Segunda Pantalla: Pantalla siempre encendida activa</span>
+						<span>Modo Segunda Pantalla: Wake Lock permanente activo (pantalla encendida)</span>
 					</div>
 				</div>
 
@@ -82,24 +107,33 @@ export default function SettingsPage() {
 								<button
 									key={opt.value}
 									type="button"
-									onClick={() => settings.setGoldTheme(opt.value)}
+									onClick={() => {
+										settings.setGoldTheme(opt.value);
+										triggerHaptic("medium");
+									}}
 									className={`flex flex-col text-left p-3.5 rounded-xl border transition-all duration-300 relative cursor-pointer group ${
 										isSelected
-											? "bg-amber-500/15 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.2)] text-white"
+											? `bg-amber-500/15 ${opt.glowBorder} text-white`
 											: "bg-zinc-900/40 border-zinc-800/80 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-900/70 hover:text-zinc-200"
 									}`}
 								>
-									<div className="flex items-center justify-between w-full mb-1">
+									<div className="flex items-center justify-between w-full mb-2">
 										<span className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5 text-zinc-100">
 											<span>{opt.icon}</span>
 											<span>{opt.label}</span>
 										</span>
 										{isSelected && (
-											<span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500 text-black uppercase">
+											<span className="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-500 text-black uppercase">
 												Activo
 											</span>
 										)}
 									</div>
+
+									{/* Muestra visual de color (swatch) */}
+									<div className="w-full h-2 rounded-full overflow-hidden bg-zinc-800 mb-2">
+										<div className={`h-full w-full bg-gradient-to-r ${opt.swatchGradient}`} />
+									</div>
+
 									<p className="text-[11px] text-zinc-400 font-sans font-medium leading-relaxed">
 										{opt.desc}
 									</p>
@@ -109,7 +143,110 @@ export default function SettingsPage() {
 					</div>
 				</section>
 
-				{/* SECCIÓN 2: VISUALIZACIÓN & LIVE-HUD */}
+				{/* SECCIÓN 2: INTERACCIÓN TÁCTIL & RENDIMIENTO EN MÓVIL */}
+				<section className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 backdrop-blur-xl space-y-5 shadow-2xl">
+					<div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
+						<Vibrate className="w-4 h-4 text-amber-400" />
+						<div>
+							<h2 className="text-sm font-bold text-amber-400 uppercase tracking-widest">
+								Interacción Táctil & Densidad
+							</h2>
+							<p className="text-[11px] text-zinc-400 font-sans">
+								Personalizá la respuesta física en mano y el tamaño de las grillas de telemetría.
+							</p>
+						</div>
+					</div>
+
+					<div className="space-y-4 pt-1">
+						{/* Respuesta Háptica */}
+						<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-zinc-900/30 p-3.5 rounded-xl border border-zinc-900">
+							<div className="flex items-start gap-3">
+								<Toggle 
+									enabled={settings.hapticFeedback} 
+									setEnabled={(v) => {
+										settings.setHapticFeedback(v);
+										if (v) triggerHaptic("heavy");
+									}} 
+								/>
+								<div className="flex flex-col">
+									<span className="text-xs font-bold text-zinc-200 uppercase">Respuesta Háptica Táctil</span>
+									<span className="text-[11px] text-zinc-400 font-sans mt-0.5 leading-snug">
+										Emite una micro-vibración física estilo volante F1 al tocar botones, pestañas de sesión y pilotos (en celulares compatibles).
+									</span>
+								</div>
+							</div>
+							{settings.hapticFeedback && (
+								<button
+									type="button"
+									onClick={() => triggerHaptic("heavy")}
+									className="px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-bold uppercase tracking-wider hover:bg-amber-500/20 transition-all shrink-0 cursor-pointer self-start sm:self-center"
+								>
+									📳 Probar Vibración
+								</button>
+							)}
+						</div>
+
+						{/* Densidad de la Grilla */}
+						<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-zinc-900/30 p-3.5 rounded-xl border border-zinc-900">
+							<div className="flex items-start gap-3">
+								<div className="p-2 rounded-lg bg-zinc-800 text-amber-400 shrink-0">
+									<Layers className="w-4 h-4" />
+								</div>
+								<div className="flex flex-col">
+									<span className="text-xs font-bold text-zinc-200 uppercase">Densidad de Grilla de Pilotos</span>
+									<span className="text-[11px] text-zinc-400 font-sans mt-0.5 leading-snug">
+										Confort muestra fotos y filas holgadas. Pit-Wall compacta las filas para ver los 20 autos sin scrollear.
+									</span>
+								</div>
+							</div>
+							<div className="shrink-0 self-start sm:self-center">
+								<SegmentedControls
+									id="grid-density"
+									selected={settings.gridDensity}
+									onSelect={(v) => {
+										settings.setGridDensity(v as "compact" | "comfort");
+										triggerHaptic("light");
+									}}
+									options={[
+										{ label: "Confort", value: "comfort" },
+										{ label: "Pit-Wall", value: "compact" },
+									]}
+								/>
+							</div>
+						</div>
+
+						{/* Formato de Tiempos Preferido */}
+						<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-zinc-900/30 p-3.5 rounded-xl border border-zinc-900">
+							<div className="flex items-start gap-3">
+								<div className="p-2 rounded-lg bg-zinc-800 text-amber-400 shrink-0">
+									<Clock3 className="w-4 h-4" />
+								</div>
+								<div className="flex flex-col">
+									<span className="text-xs font-bold text-zinc-200 uppercase">Visualización de Tiempos</span>
+									<span className="text-[11px] text-zinc-400 font-sans mt-0.5 leading-snug">
+										Elegí si preferís ver por defecto el intervalo con el auto de adelante o la diferencia acumulada respecto al líder (P1).
+									</span>
+								</div>
+							</div>
+							<div className="shrink-0 self-start sm:self-center">
+								<SegmentedControls
+									id="time-format"
+									selected={settings.timeFormat}
+									onSelect={(v) => {
+										settings.setTimeFormat(v as "interval" | "leader");
+										triggerHaptic("light");
+									}}
+									options={[
+										{ label: "Intervalo (+0.4s)", value: "interval" },
+										{ label: "Diferencia P1", value: "leader" },
+									]}
+								/>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				{/* SECCIÓN 3: VISUALIZACIÓN & LIVE-HUD */}
 				<section className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 backdrop-blur-xl space-y-4 shadow-2xl">
 					<div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
 						<Monitor className="w-4 h-4 text-amber-400" />
@@ -192,7 +329,7 @@ export default function SettingsPage() {
 					</div>
 				</section>
 
-				{/* SECCIÓN 3: PILOTOS FAVORITOS */}
+				{/* SECCIÓN 4: PILOTOS FAVORITOS */}
 				<section className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 backdrop-blur-xl space-y-4 shadow-2xl flex flex-col items-center text-center">
 					<div className="flex flex-col items-center border-b border-zinc-800/80 pb-3 w-full">
 						<h2 className="text-sm font-bold text-amber-400 uppercase tracking-widest">
@@ -208,7 +345,7 @@ export default function SettingsPage() {
 					</div>
 				</section>
 
-				{/* SECCIÓN 4: DIRECCIÓN DE CARRERA & AUDIO */}
+				{/* SECCIÓN 5: DIRECCIÓN DE CARRERA & AUDIO */}
 				<section className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 backdrop-blur-xl space-y-4 shadow-2xl">
 					<div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
 						<Volume2 className="w-4 h-4 text-amber-400" />
@@ -267,7 +404,7 @@ export default function SettingsPage() {
 					</div>
 				</section>
 
-				{/* SECCIÓN 5: UNIDADES DE MEDIDA */}
+				{/* SECCIÓN 6: UNIDADES DE MEDIDA */}
 				<section className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 backdrop-blur-xl space-y-4 shadow-2xl">
 					<div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
 						<Sliders className="w-4 h-4 text-amber-400" />

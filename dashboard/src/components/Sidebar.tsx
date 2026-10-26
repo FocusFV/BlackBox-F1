@@ -17,6 +17,7 @@ import {
 
 import ConnectionStatus from "@/components/ConnectionStatus";
 import SidenavButton from "@/components/SidenavButton";
+import { triggerHaptic } from "@/lib/haptics";
 
 import { 
 	LayoutDashboard, 
@@ -225,7 +226,7 @@ export default function Sidebar({ connected }: Props) {
 					<div className="flex-1 space-y-5 overflow-y-auto no-scrollbar">
 						{filteredCategories.map((cat: MenuCategory, idx: number) => (
 							<div key={idx} className="space-y-1.5">
-								<p className="px-2.5 text-[9px] font-extrabold text-amber-500/60 uppercase tracking-widest">
+								<p className="px-2.5 text-[10px] font-black text-amber-400/90 uppercase tracking-widest font-mono">
 									{cat.titulo}
 								</p>
 								<div className="flex flex-col gap-1">
@@ -244,9 +245,9 @@ export default function Sidebar({ connected }: Props) {
 					</div>
 
 					{/* Pie */}
-					<div className="border-t border-zinc-900/80 pt-3 mt-4 flex items-center justify-between text-[9px] font-bold tracking-widest text-zinc-600 uppercase">
+					<div className="border-t border-zinc-800/80 pt-3 mt-4 flex items-center justify-between text-[10px] font-bold tracking-widest text-zinc-400 font-mono uppercase">
 						<span>v4.0.3</span>
-						<span className="text-zinc-600">FocusFV</span>
+						<span className="text-zinc-400">FocusFV</span>
 					</div>
 				</nav>
 			</motion.div>
@@ -265,7 +266,12 @@ const Item = ({ target, item, icon: Icon, pathname }: ItemProps) => {
 	const active = pathname === item.href;
 
 	return (
-		<Link href={item.href} target={target} className="block relative group">
+		<Link 
+			href={item.href} 
+			target={target} 
+			onClick={() => triggerHaptic("light")}
+			className="block relative group"
+		>
 			<div
 				className={clsx(
 					"rounded-xl p-2.5 px-3 flex items-center gap-3 font-mono text-xs font-bold uppercase tracking-wide transition-all duration-300 relative overflow-hidden border",

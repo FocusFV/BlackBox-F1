@@ -7,6 +7,7 @@ import type { Driver, TimingDataDriver } from "@/types/state.type";
 
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useDataStore } from "@/stores/useDataStore";
+import { triggerHaptic } from "@/lib/haptics";
 
 import DriverTag from "./DriverTag";
 import DriverDRS from "./DriverDRS";
@@ -49,18 +50,26 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 	const hasFastest = timingStatsDriver?.PersonalBestLapTime.Position == 1;
 
 	const carMetrics = useSettingsStore((state) => state.carMetrics);
+	const gridDensity = useSettingsStore((state) => state.gridDensity);
+	const isCompact = gridDensity === "compact";
 
 	const favoriteDriver = useSettingsStore((state) => state.favoriteDrivers.includes(driver.RacingNumber));
 
 	return (
 		<motion.div
 			layout="position"
-			className={clsx("flex flex-col gap-1 rounded-lg p-1.5 select-none", {
-				"opacity-50": timingDriver.KnockedOut || timingDriver.Retired || timingDriver.Stopped,
-				"bg-sky-800/30": favoriteDriver,
-				"bg-violet-800/30": hasFastest,
-				"bg-red-800/30": sessionPart != undefined && inDangerZone(position, sessionPart),
-			})}
+			whileHover={{ x: 3 }}
+			onClick={() => triggerHaptic("light")}
+			className={clsx(
+				"group/driver flex flex-col gap-1 rounded-lg select-none transition-all duration-200 cursor-pointer border border-transparent hover:border-zinc-700/60",
+				isCompact ? "p-1" : "p-1.5",
+				{
+					"opacity-50": timingDriver.KnockedOut || timingDriver.Retired || timingDriver.Stopped,
+					"bg-sky-800/30": favoriteDriver,
+					"bg-violet-800/30": hasFastest,
+					"bg-red-800/30": sessionPart != undefined && inDangerZone(position, sessionPart),
+				}
+			)}
 		>
 			<div
 				className="grid items-center gap-2"

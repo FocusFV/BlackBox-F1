@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import Flag from "@/components/Flag";
 import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
+import { useSettingsStore } from "@/stores/useSettingsStore";
+import { triggerHaptic } from "@/lib/haptics";
 
 interface DriverResult {
 	pos: string;
@@ -103,6 +105,9 @@ interface ParcFermeProps {
 }
 
 export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
+	const gridDensity = useSettingsStore((state) => state.gridDensity);
+	const isCompact = gridDensity === "compact";
+
 	const [activeTab, setActiveTab] = useState<SessionTab>("RACE");
 	const [results, setResults] = useState<DriverResult[]>([]);
 	const [gpName, setGpName] = useState("Gran Premio");
@@ -237,10 +242,10 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 					</div>
 					<div>
 						<div className="flex items-center gap-2">
-							<span className="text-[10px] uppercase font-mono font-bold tracking-wider text-amber-400">
+							<span className="text-[11px] uppercase font-mono font-bold tracking-wider text-amber-400">
 								Última Ronda Oficial
 							</span>
-							<span className="text-[9px] px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-mono font-bold uppercase group-hover:border-amber-500/40 group-hover:text-amber-300 transition-colors">
+							<span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono font-bold uppercase group-hover:border-amber-500/40 group-hover:text-amber-300 transition-colors">
 								Ver Circuito 🏁
 							</span>
 						</div>
@@ -256,10 +261,10 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 						<span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
 					</span>
 					<div className="text-left font-mono">
-						<p className="text-[10px] font-bold text-zinc-300 uppercase tracking-tight leading-none">
+						<p className="text-[11px] font-bold text-zinc-200 uppercase tracking-tight leading-none">
 							Pista en Pausa
 						</p>
-						<p className="text-[8px] text-zinc-500 font-medium tracking-normal leading-tight mt-0.5">
+						<p className="text-[10px] text-zinc-400 font-medium tracking-normal leading-tight mt-0.5">
 							Telemetría en espera
 						</p>
 					</div>
@@ -292,7 +297,10 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 								return (
 									<button
 										key={tab.id}
-										onClick={() => setActiveTab(tab.id)}
+										onClick={() => {
+											setActiveTab(tab.id);
+											triggerHaptic("light");
+										}}
 										className={`relative flex-1 py-2.5 px-3 min-w-[65px] rounded-xl text-center font-mono transition-colors duration-200 select-none cursor-pointer border ${
 											isActive
 												? "border-amber-400/80 text-black shadow-[0_0_25px_rgba(245,158,11,0.35)]"
@@ -399,14 +407,21 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 										<motion.div
 											initial={{ opacity: 0, x: 8 }}
 											animate={{ opacity: 1, x: 0 }}
+											whileHover={{ x: 3 }}
 											transition={{ delay: index * 0.015 }}
-											className={`relative flex items-center justify-between p-2.5 rounded-xl border transition-all duration-200 h-12 overflow-hidden ${rowBg}`}
+											onClick={() => triggerHaptic("light")}
+											className={`group/row relative flex items-center justify-between p-2.5 rounded-xl border transition-all duration-200 ${
+												isCompact ? "h-10 py-1.5" : "h-12"
+											} overflow-hidden ${rowBg} hover:border-zinc-700/80 cursor-pointer`}
 										>
 											<div className="flex items-center gap-2.5 z-10 truncate flex-1 min-w-0 pr-2">
-												{/* Franja vertical recta de escudería (sin arcos ni paréntesis) */}
+												{/* Franja vertical de escudería con ensanchamiento reactivo en hover/touch de 4px a 6px con resplandor */}
 												<div
-													className="w-1 self-stretch rounded-full shrink-0 my-0.5"
-													style={{ backgroundColor: row.isDNF ? "#3f3f46" : teamColor }}
+													className="w-1 group-hover/row:w-1.5 self-stretch rounded-full shrink-0 my-0.5 transition-all duration-300"
+													style={{ 
+														backgroundColor: row.isDNF ? "#3f3f46" : teamColor,
+														boxShadow: row.isDNF ? "none" : `0 0 12px ${teamColor}90`
+													}}
 												/>
 
 												<div className="w-5 flex justify-center items-center shrink-0">

@@ -14,11 +14,26 @@ export default function OledModeProvider({ children }: Props) {
 	// 🎨 Aplicar clases globales de tema y fondo OLED
 	useEffect(() => {
 		const root = document.documentElement;
-		root.classList.toggle("bg-zinc-950", !oledMode);
-		root.classList.toggle("bg-black", oledMode);
+		const body = document.body;
+		const effectiveTheme = oledMode ? "oled" : goldTheme;
 
-		root.classList.remove("theme-classic", "theme-neon", "theme-rose", "theme-oled");
-		root.classList.add(`theme-${goldTheme}`);
+		const themeClasses = ["theme-classic", "theme-neon", "theme-rose", "theme-oled"];
+		root.classList.remove(...themeClasses);
+		if (body) body.classList.remove(...themeClasses);
+
+		root.classList.add(`theme-${effectiveTheme}`);
+		if (body) body.classList.add(`theme-${effectiveTheme}`);
+
+		root.setAttribute("data-theme", effectiveTheme);
+		if (body) body.setAttribute("data-theme", effectiveTheme);
+
+		const isOled = effectiveTheme === "oled";
+		root.classList.toggle("bg-black", isOled);
+		root.classList.toggle("bg-zinc-950", !isOled);
+		if (body) {
+			body.classList.toggle("bg-black", isOled);
+			body.classList.toggle("bg-zinc-950", !isOled);
+		}
 	}, [oledMode, goldTheme]);
 
 	// 📱 WAKE LOCK GLOBAL (Pantalla siempre activa en segundo plano, sin apagar pantalla)

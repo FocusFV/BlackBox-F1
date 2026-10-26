@@ -11,6 +11,15 @@ type SettingsStore = {
 	goldTheme: GoldTheme;
 	setGoldTheme: (goldTheme: GoldTheme) => void;
 
+	hapticFeedback: boolean;
+	setHapticFeedback: (hapticFeedback: boolean) => void;
+
+	gridDensity: "compact" | "comfort";
+	setGridDensity: (gridDensity: "compact" | "comfort") => void;
+
+	timeFormat: "interval" | "leader";
+	setTimeFormat: (timeFormat: "interval" | "leader") => void;
+
 	speedUnit: SpeedUnit;
 	setSpeedUnit: (speedUnit: SpeedUnit) => void;
 
@@ -65,6 +74,15 @@ export const useSettingsStore = create<SettingsStore>()(
 						goldTheme,
 						oledMode: goldTheme === "oled",
 					}),
+
+				hapticFeedback: true,
+				setHapticFeedback: (hapticFeedback: boolean) => set({ hapticFeedback }),
+
+				gridDensity: "comfort",
+				setGridDensity: (gridDensity: "compact" | "comfort") => set({ gridDensity }),
+
+				timeFormat: "interval",
+				setTimeFormat: (timeFormat: "interval" | "leader") => set({ timeFormat }),
 
 				speedUnit: "metric",
 				setSpeedUnit: (speedUnit: SpeedUnit) => set({ speedUnit }),

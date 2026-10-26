@@ -26,6 +26,73 @@
 	--color-vsc-bg: #713f12;
 }
 
+/* 🏆 SISTEMA DE TEMAS DE ORO BLACKBOX */
+:root, .theme-classic {
+	--color-amber-50: #fffbeb;
+	--color-amber-100: #fef3c7;
+	--color-amber-200: #fde68a;
+	--color-amber-300: #fcd34d;
+	--color-amber-400: #fbbf24;
+	--color-amber-500: #f59e0b;
+	--color-amber-600: #d97706;
+	--color-amber-700: #b45309;
+	--color-amber-800: #92400e;
+	--color-amber-900: #78350f;
+	--color-amber-950: #451a03;
+	--theme-glow: rgba(245, 158, 11, 0.35);
+}
+
+html.theme-neon, body.theme-neon, .theme-neon {
+	/* Neón Dorado Ultra Eléctrico */
+	--color-amber-50: #ffffe6;
+	--color-amber-100: #ffffb3;
+	--color-amber-200: #ffff80;
+	--color-amber-300: #ffff33;
+	--color-amber-400: #ffea00;
+	--color-amber-500: #ffd700;
+	--color-amber-600: #e6b800;
+	--color-amber-700: #b38f00;
+	--color-amber-800: #806600;
+	--color-amber-900: #4d3d00;
+	--color-amber-950: #261e00;
+	--theme-glow: rgba(255, 215, 0, 0.55);
+}
+
+html.theme-rose, body.theme-rose, .theme-rose {
+	/* Oro Rosa / Champagne Cobrizo de Lujo */
+	--color-amber-50: #fff1f2;
+	--color-amber-100: #ffe4e6;
+	--color-amber-200: #fecdd3;
+	--color-amber-300: #fda4af;
+	--color-amber-400: #fb7185;
+	--color-amber-500: #f43f5e;
+	--color-amber-600: #e11d48;
+	--color-amber-700: #be123c;
+	--color-amber-800: #9f1239;
+	--color-amber-900: #881337;
+	--color-amber-950: #4c0519;
+	--theme-glow: rgba(244, 63, 94, 0.45);
+}
+
+html.theme-oled, body.theme-oled, .theme-oled {
+	/* Oro Alto Contraste para Fondo OLED Negro Puro */
+	--color-amber-50: #fefce8;
+	--color-amber-100: #fef9c3;
+	--color-amber-200: #fef08a;
+	--color-amber-300: #fde047;
+	--color-amber-400: #facc15;
+	--color-amber-500: #eab308;
+	--color-amber-600: #ca8a04;
+	--color-amber-700: #a16207;
+	--color-amber-800: #854d0e;
+	--color-amber-900: #713f12;
+	--color-amber-950: #422006;
+	--color-zinc-950: #000000;
+	--color-zinc-900: #050505;
+	--color-zinc-800: #121214;
+	--theme-glow: rgba(234, 179, 8, 0.4);
+}
+
 /* 🏎️ SCROLLBAR ULTRAFINA ESTILO F1-HUD */
 ::-webkit-scrollbar {
 	width: 5px;
