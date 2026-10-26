@@ -200,28 +200,30 @@ export default function Page() {
 								: "opacity-100 scale-100"
 						}`}
 					>
-						{/* Historial y resultados del último GP */}
-						<ParcFerme onOpenCircuit={() => setIsCinematicTrackMode(true)} />
+						{/* Historial y resultados del último GP (con laterales táctiles restringidos solo a esta altura) */}
+						<div className="relative w-full">
+							<ParcFerme onOpenCircuit={() => setIsCinematicTrackMode(true)} />
 
-						{/* Feed oficial de YouTube */}
+							{/* 🏎️ Franjas laterales táctiles que terminan exactamente donde termina Parque Cerrado (no tocan YouTube) */}
+							{!isCinematicTrackMode && (
+								<>
+									<div
+										onClick={() => setIsCinematicTrackMode(true)}
+										className="hidden lg:block absolute left-0 top-0 bottom-0 w-[18%] z-20 cursor-pointer"
+										title="Toca el margen para ver el circuito completo"
+									/>
+									<div
+										onClick={() => setIsCinematicTrackMode(true)}
+										className="hidden lg:block absolute right-0 top-0 bottom-0 w-[18%] z-20 cursor-pointer"
+										title="Toca el margen para ver el circuito completo"
+									/>
+								</>
+							)}
+						</div>
+
+						{/* Feed oficial de YouTube (100% libre para interactuar, scrollear y ver videos) */}
 						<YouTubeFeed />
 					</div>
-
-					{/* 🏎️ Franjas laterales táctiles para activar el circuito al hacer clic en los márgenes exteriores */}
-					{!isCinematicTrackMode && (
-						<>
-							<div
-								onClick={() => setIsCinematicTrackMode(true)}
-								className="hidden lg:block absolute left-0 top-0 bottom-0 w-[18%] z-20 cursor-pointer"
-								title="Toca para ver el circuito completo"
-							/>
-							<div
-								onClick={() => setIsCinematicTrackMode(true)}
-								className="hidden lg:block absolute right-0 top-0 bottom-0 w-[18%] z-20 cursor-pointer"
-								title="Toca para ver el circuito completo"
-							/>
-						</>
-					)}
 				</div>
 			) : (
 				<>
