@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { motion, AnimatePresence } from "motion/react";
 import clsx from "clsx";
@@ -23,10 +23,12 @@ function AnimatedCounter({
 	value,
 	duration = 700,
 	className = "",
+	style,
 }: {
 	value: number;
 	duration?: number;
 	className?: string;
+	style?: React.CSSProperties;
 }) {
 	const [count, setCount] = useState(0);
 
@@ -60,7 +62,245 @@ function AnimatedCounter({
 		return () => cancelAnimationFrame(frameId);
 	}, [value, duration]);
 
-	return <span className={className}>{count}</span>;
+	return <span className={className} style={style}>{count}</span>;
+}
+
+export type TeamTheme = {
+	primary: string;         // Color principal (título, puntos destacados)
+	secondary: string;       // Color secundario (puntos de pilotos, contraste)
+	bgSubtle: string;        // Fondo de badges
+	borderSubtle: string;    // Borde de badges y tarjetas
+	barGradient: string;     // Gradiente CSS para la barrita
+	glowShadow: string;      // Sombra luminosa
+};
+
+function getTeamTheme(nameOrId?: string): TeamTheme {
+	const raw = (nameOrId || "").toLowerCase().trim();
+
+	// FERRARI (Rosso Corsa & Giallo Modena)
+	if (raw.includes("ferrari")) {
+		return {
+			primary: "#ff2800",
+			secondary: "#ffd700",
+			bgSubtle: "rgba(255, 40, 0, 0.15)",
+			borderSubtle: "rgba(255, 40, 0, 0.45)",
+			barGradient: "linear-gradient(90deg, #b91c1c 0%, #ff2800 65%, #ffd700 100%)",
+			glowShadow: "rgba(255, 40, 0, 0.55)",
+		};
+	}
+
+	// MERCEDES (Petronas Turquoise & Silver)
+	if (raw.includes("mercedes")) {
+		return {
+			primary: "#00d2be",
+			secondary: "#f1f5f9",
+			bgSubtle: "rgba(0, 210, 190, 0.15)",
+			borderSubtle: "rgba(0, 210, 190, 0.45)",
+			barGradient: "linear-gradient(90deg, #0f766e 0%, #00d2be 65%, #f1f5f9 100%)",
+			glowShadow: "rgba(0, 210, 190, 0.55)",
+		};
+	}
+
+	// MCLAREN (Papaya Orange & Papaya Yellow)
+	if (raw.includes("mclaren")) {
+		return {
+			primary: "#ff8700",
+			secondary: "#ffd000",
+			bgSubtle: "rgba(255, 135, 0, 0.15)",
+			borderSubtle: "rgba(255, 135, 0, 0.45)",
+			barGradient: "linear-gradient(90deg, #c2410c 0%, #ff8700 65%, #ffd000 100%)",
+			glowShadow: "rgba(255, 135, 0, 0.55)",
+		};
+	}
+
+	// RED BULL (Oracle Navy & Bulls Red)
+	if (raw.includes("red bull") || raw.includes("red_bull")) {
+		return {
+			primary: "#3b82f6",
+			secondary: "#ef4444",
+			bgSubtle: "rgba(59, 130, 246, 0.15)",
+			borderSubtle: "rgba(59, 130, 246, 0.45)",
+			barGradient: "linear-gradient(90deg, #1d4ed8 0%, #3b82f6 65%, #ef4444 100%)",
+			glowShadow: "rgba(59, 130, 246, 0.55)",
+		};
+	}
+
+	// ASTON MARTIN (British Racing Green & Lime)
+	if (raw.includes("aston")) {
+		return {
+			primary: "#00d4aa",
+			secondary: "#cedc00",
+			bgSubtle: "rgba(0, 111, 98, 0.2)",
+			borderSubtle: "rgba(0, 212, 170, 0.45)",
+			barGradient: "linear-gradient(90deg, #004d40 0%, #00a887 60%, #cedc00 100%)",
+			glowShadow: "rgba(0, 212, 170, 0.5)",
+		};
+	}
+
+	// ALPINE (Alpine Blue & BWT Pink)
+	if (raw.includes("alpine")) {
+		return {
+			primary: "#0090ff",
+			secondary: "#ff40b4",
+			bgSubtle: "rgba(0, 144, 255, 0.15)",
+			borderSubtle: "rgba(255, 64, 180, 0.45)",
+			barGradient: "linear-gradient(90deg, #0284c7 0%, #0090ff 50%, #ff40b4 100%)",
+			glowShadow: "rgba(255, 64, 180, 0.55)",
+		};
+	}
+
+	// WILLIAMS (Williams Electric Blue & Cyan)
+	if (raw.includes("williams")) {
+		return {
+			primary: "#0090ff",
+			secondary: "#00e5ff",
+			bgSubtle: "rgba(0, 90, 255, 0.15)",
+			borderSubtle: "rgba(0, 144, 255, 0.45)",
+			barGradient: "linear-gradient(90deg, #1e40af 0%, #0077ff 60%, #00e5ff 100%)",
+			glowShadow: "rgba(0, 144, 255, 0.55)",
+		};
+	}
+
+	// RACING BULLS / RB / TORO ROSSO / ALPHATAURI
+	if (raw.includes("rb") || raw.includes("bulls") || raw.includes("toro rosso") || raw.includes("alphatauri")) {
+		return {
+			primary: "#5c8aff",
+			secondary: "#ff3b30",
+			bgSubtle: "rgba(92, 138, 255, 0.15)",
+			borderSubtle: "rgba(92, 138, 255, 0.45)",
+			barGradient: "linear-gradient(90deg, #1e3a8a 0%, #5c8aff 65%, #ff3b30 100%)",
+			glowShadow: "rgba(92, 138, 255, 0.55)",
+		};
+	}
+
+	// HAAS (Haas Red & Bright White)
+	if (raw.includes("haas")) {
+		return {
+			primary: "#e10600",
+			secondary: "#ffffff",
+			bgSubtle: "rgba(225, 6, 0, 0.15)",
+			borderSubtle: "rgba(225, 6, 0, 0.45)",
+			barGradient: "linear-gradient(90deg, #7f1d1d 0%, #e10600 65%, #ffffff 100%)",
+			glowShadow: "rgba(225, 6, 0, 0.55)",
+		};
+	}
+
+	// AUDI (Audi Silver & Sport Red)
+	if (raw.includes("audi")) {
+		return {
+			primary: "#f3f4f6",
+			secondary: "#e10600",
+			bgSubtle: "rgba(243, 244, 246, 0.12)",
+			borderSubtle: "rgba(225, 6, 0, 0.45)",
+			barGradient: "linear-gradient(90deg, #374151 0%, #9ca3af 50%, #e10600 100%)",
+			glowShadow: "rgba(225, 6, 0, 0.5)",
+		};
+	}
+
+	// CADILLAC (Cadillac Gold & Platinum)
+	if (raw.includes("cadillac")) {
+		return {
+			primary: "#fbbf24",
+			secondary: "#ffffff",
+			bgSubtle: "rgba(251, 191, 36, 0.15)",
+			borderSubtle: "rgba(251, 191, 36, 0.45)",
+			barGradient: "linear-gradient(90deg, #b45309 0%, #f59e0b 60%, #ffffff 100%)",
+			glowShadow: "rgba(251, 191, 36, 0.5)",
+		};
+	}
+
+	// RENAULT (Renault Yellow)
+	if (raw.includes("renault")) {
+		return {
+			primary: "#ffe600",
+			secondary: "#ffffff",
+			bgSubtle: "rgba(255, 230, 0, 0.15)",
+			borderSubtle: "rgba(255, 230, 0, 0.45)",
+			barGradient: "linear-gradient(90deg, #ca8a04 0%, #ffe600 70%, #ffffff 100%)",
+			glowShadow: "rgba(255, 230, 0, 0.5)",
+		};
+	}
+
+	// BENETTON (United Colors Green & Blue)
+	if (raw.includes("benetton")) {
+		return {
+			primary: "#00a850",
+			secondary: "#0090ff",
+			bgSubtle: "rgba(0, 168, 80, 0.15)",
+			borderSubtle: "rgba(0, 168, 80, 0.45)",
+			barGradient: "linear-gradient(90deg, #006b33 0%, #00a850 60%, #0090ff 100%)",
+			glowShadow: "rgba(0, 168, 80, 0.5)",
+		};
+	}
+
+	// BRAWN GP (Fluorescent Neon Yellow)
+	if (raw.includes("brawn")) {
+		return {
+			primary: "#d2f500",
+			secondary: "#ffffff",
+			bgSubtle: "rgba(210, 245, 0, 0.15)",
+			borderSubtle: "rgba(210, 245, 0, 0.45)",
+			barGradient: "linear-gradient(90deg, #849c00 0%, #d2f500 70%, #ffffff 100%)",
+			glowShadow: "rgba(210, 245, 0, 0.55)",
+		};
+	}
+
+	// RACING POINT / FORCE INDIA
+	if (raw.includes("racing point") || raw.includes("racing_point")) {
+		return {
+			primary: "#f596c8",
+			secondary: "#ffffff",
+			bgSubtle: "rgba(245, 150, 200, 0.15)",
+			borderSubtle: "rgba(245, 150, 200, 0.45)",
+			barGradient: "linear-gradient(90deg, #be185d 0%, #f596c8 70%, #ffffff 100%)",
+			glowShadow: "rgba(245, 150, 200, 0.5)",
+		};
+	}
+
+	if (raw.includes("force india") || raw.includes("force_india")) {
+		return {
+			primary: "#f58220",
+			secondary: "#00a850",
+			bgSubtle: "rgba(245, 130, 32, 0.15)",
+			borderSubtle: "rgba(245, 130, 32, 0.45)",
+			barGradient: "linear-gradient(90deg, #c2410c 0%, #f58220 50%, #00a850 100%)",
+			glowShadow: "rgba(245, 130, 32, 0.5)",
+		};
+	}
+
+	// LOTUS (British Racing Green & Gold)
+	if (raw.includes("lotus")) {
+		return {
+			primary: "#ffd700",
+			secondary: "#00d4aa",
+			bgSubtle: "rgba(0, 66, 37, 0.3)",
+			borderSubtle: "rgba(255, 215, 0, 0.45)",
+			barGradient: "linear-gradient(90deg, #00361e 0%, #005a32 50%, #ffd700 100%)",
+			glowShadow: "rgba(255, 215, 0, 0.45)",
+		};
+	}
+
+	// SAUBER / ALFA ROMEO
+	if (raw.includes("alfa") || raw.includes("sauber")) {
+		return {
+			primary: "#c01823",
+			secondary: "#ffffff",
+			bgSubtle: "rgba(192, 24, 35, 0.15)",
+			borderSubtle: "rgba(192, 24, 35, 0.45)",
+			barGradient: "linear-gradient(90deg, #7a0c13 0%, #c01823 65%, #ffffff 100%)",
+			glowShadow: "rgba(192, 24, 35, 0.5)",
+		};
+	}
+
+	// DEFAULT
+	return {
+		primary: "#f59e0b",
+		secondary: "#ffffff",
+		bgSubtle: "rgba(245, 158, 11, 0.15)",
+		borderSubtle: "rgba(245, 158, 11, 0.45)",
+		barGradient: "linear-gradient(90deg, #d97706 0%, #f59e0b 65%, #ffffff 100%)",
+		glowShadow: "rgba(245, 158, 11, 0.5)",
+	};
 }
 
 const nationalityToCountryCode: { [key: string]: string } = {
@@ -744,336 +984,412 @@ export default function Standings() {
 
 			{/* 🏎️ MODAL 1: DESGLOSE DE TEMPORADA DEL PILOTO (CLICK EN PILOTO) */}
 			<AnimatePresence>
-				{selectedDriver && (
-					<div
-						className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-md"
-						onClick={() => setSelectedDriver(null)}
-					>
-						<motion.div
-							initial={{ opacity: 0, scale: 0.95, y: 15 }}
-							animate={{ opacity: 1, scale: 1, y: 0 }}
-							exit={{ opacity: 0, scale: 0.95, y: 15 }}
-							transition={{ duration: 0.25 }}
-							onClick={(e) => e.stopPropagation()}
-							className="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-3xl p-5 sm:p-6 shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
+				{selectedDriver && (() => {
+					const pTheme = getTeamTheme(selectedDriver.historicTeamName);
+
+					return (
+						<div
+							className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-md"
+							onClick={() => setSelectedDriver(null)}
 						>
-							{/* Botón de cierre */}
-							<button
-								onClick={() => setSelectedDriver(null)}
-								className="absolute top-4 right-4 p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all cursor-pointer z-10"
+							<motion.div
+								initial={{ opacity: 0, scale: 0.95, y: 15 }}
+								animate={{ opacity: 1, scale: 1, y: 0 }}
+								exit={{ opacity: 0, scale: 0.95, y: 15 }}
+								transition={{ duration: 0.25 }}
+								onClick={(e) => e.stopPropagation()}
+								className="relative w-full max-w-2xl bg-zinc-950 border rounded-3xl p-5 sm:p-6 shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
+								style={{ borderColor: pTheme.borderSubtle }}
 							>
-								<X className="w-4 h-4" />
-							</button>
+								{/* Botón de cierre */}
+								<button
+									onClick={() => setSelectedDriver(null)}
+									className="absolute top-4 right-4 p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all cursor-pointer z-10"
+								>
+									<X className="w-4 h-4" />
+								</button>
 
-							{/* Cabecera del Piloto: Foto con Mono oficial, Nombre y Puntos con contador animado */}
-							<div className="flex items-center gap-4 pb-4 border-b border-zinc-800/80">
-								{(() => {
-									const avatarUrl = getDriverAvatarUrl(
-										selectedDriver.driverCode,
-										selectedDriver.driverId,
-										selectedDriver.familyName
-									);
-									return avatarUrl ? (
-										<img
-											src={avatarUrl}
-											alt={selectedDriver.familyName}
-											className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover object-top border-2 border-amber-500/60 shadow-lg bg-zinc-900 shrink-0"
-										/>
-									) : (
-										<div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-amber-500/20 to-zinc-900 border border-amber-500/40 flex items-center justify-center text-xl font-black text-amber-400 shrink-0">
-											{selectedDriver.driverCode || "F1"}
-										</div>
-									);
-								})()}
-
-								<div className="flex flex-col min-w-0 flex-1">
-									<div className="flex items-center gap-2">
-										<span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400 uppercase">
-											{year} · Posición #{selectedDriver.position}
-										</span>
-										{selectedDriver.countryCode && (
+								{/* Cabecera del Piloto con mono oficial y colores de su escudería */}
+								<div className="flex items-center gap-4 pb-4 border-b border-zinc-800/80">
+									{(() => {
+										const avatarUrl = getDriverAvatarUrl(
+											selectedDriver.driverCode,
+											selectedDriver.driverId,
+											selectedDriver.familyName
+										);
+										return avatarUrl ? (
 											<img
-												src={`https://flagcdn.com/w20/${selectedDriver.countryCode}.png`}
-												alt=""
-												className="w-4 h-auto rounded-xs shadow-xs"
+												src={avatarUrl}
+												alt={selectedDriver.familyName}
+												className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover object-top border-2 shadow-lg bg-zinc-900 shrink-0"
+												style={{ borderColor: pTheme.primary }}
 											/>
-										)}
+										) : (
+											<div
+												className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border flex items-center justify-center text-xl font-black shrink-0"
+												style={{
+													backgroundColor: pTheme.bgSubtle,
+													borderColor: pTheme.borderSubtle,
+													color: pTheme.primary,
+												}}
+											>
+												{selectedDriver.driverCode || "F1"}
+											</div>
+										);
+									})()}
+
+									<div className="flex flex-col min-w-0 flex-1">
+										<div className="flex items-center gap-2">
+											<span
+												className="text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase border shadow-xs"
+												style={{
+													backgroundColor: pTheme.bgSubtle,
+													borderColor: pTheme.borderSubtle,
+													color: pTheme.primary,
+												}}
+											>
+												{year} · Posición #{selectedDriver.position}
+											</span>
+											{selectedDriver.countryCode && (
+												<img
+													src={`https://flagcdn.com/w20/${selectedDriver.countryCode}.png`}
+													alt=""
+													className="w-4 h-auto rounded-xs shadow-xs"
+												/>
+											)}
+										</div>
+
+										<h3 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight truncate mt-1">
+											{selectedDriver.givenName} {selectedDriver.familyName}
+										</h3>
+
+										<div className="flex items-center gap-2 mt-0.5 text-xs text-zinc-300 font-bold uppercase truncate">
+											<TeamLogo teamName={selectedDriver.historicTeamName} className="w-4 h-4" />
+											<span style={{ color: pTheme.primary }}>{selectedDriver.historicTeamName}</span>
+										</div>
 									</div>
 
-									<h3 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight truncate mt-1">
-										{selectedDriver.givenName} {selectedDriver.familyName}
-									</h3>
-
-									<div className="flex items-center gap-2 mt-0.5 text-xs text-zinc-300 font-bold uppercase truncate">
-										<TeamLogo teamName={selectedDriver.historicTeamName} className="w-4 h-4" />
-										<span>{selectedDriver.historicTeamName}</span>
+									{/* Puntos acumulados en grande a súper velocidad con brillo temático */}
+									<div className="text-right shrink-0">
+										<AnimatedCounter
+											value={parseFloat(selectedDriver.points) || 0}
+											duration={750}
+											className="text-2xl sm:text-4xl font-black tracking-tight"
+											style={{
+												color: pTheme.primary,
+												textShadow: `0 0 25px ${pTheme.glowShadow}`,
+											}}
+										/>
+										<span className="text-[10px] text-zinc-400 block font-bold uppercase">Puntos Totales</span>
 									</div>
 								</div>
 
-								{/* Puntos acumulados en grande a súper velocidad */}
-								<div className="text-right shrink-0">
-									<AnimatedCounter
-										value={parseFloat(selectedDriver.points) || 0}
-										duration={750}
-										className="text-2xl sm:text-4xl font-black text-amber-400 tracking-tight"
-									/>
-									<span className="text-[10px] text-zinc-400 block font-bold uppercase">Puntos Totales</span>
-								</div>
-							</div>
-
-							{/* Tabla de carreras disputadas (Desglose oficial de la temporada) */}
-							<div className="flex flex-col flex-1 overflow-hidden mt-4">
-								<div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-900 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-									<span>Carreras Disputadas en {year} ({driverSeasonResults.length})</span>
-									<span>Posición & Puntos</span>
-								</div>
-
-								{loadingDriverModal ? (
-									<div className="h-48 flex items-center justify-center text-zinc-500 text-xs font-mono uppercase tracking-widest animate-pulse">
-										Cargando telemetría oficial de la temporada...
+								{/* Tabla de carreras disputadas (Desglose oficial de la temporada) */}
+								<div className="flex flex-col flex-1 overflow-hidden mt-4">
+									<div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-900 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+										<span>Carreras Disputadas en {year} ({driverSeasonResults.length})</span>
+										<span>Posición & Puntos</span>
 									</div>
-								) : driverSeasonResults.length === 0 ? (
-									<div className="h-48 flex items-center justify-center text-zinc-500 text-xs text-center p-4">
-										Sin resultados de carrera registrados para este piloto en esta temporada.
-									</div>
-								) : (
-									<div className="flex flex-col gap-1.5 overflow-y-auto pr-1 no-scrollbar flex-1">
-										{driverSeasonResults.map((race: any, i: number) => {
-											const res = race.Results?.[0];
-											const pos = res ? res.position : "-";
-											const pts = res ? parseFloat(res.points) : 0;
-											const status = res?.status || "Finalizado";
-											const isDNF = status !== "Finished" && !status.startsWith("+");
-											const isWin = pos === "1";
-											const isPodium = pos === "2" || pos === "3";
 
-											return (
-												<motion.div
-													key={i}
-													initial={{ opacity: 0, y: 6 }}
-													animate={{ opacity: 1, y: 0 }}
-													transition={{ delay: Math.min(i * 0.02, 0.4) }}
-													className={clsx(
-														"flex items-center justify-between p-2.5 rounded-xl border text-xs transition-all",
-														isWin
-															? "bg-amber-500/10 border-amber-500/40 text-amber-200"
-															: isPodium
-															? "bg-zinc-800/40 border-zinc-700/60 text-zinc-200"
-															: isDNF
-															? "bg-red-950/20 border-red-900/30 text-zinc-400"
-															: "bg-zinc-900/30 border-zinc-800/60 text-zinc-300"
-													)}
-												>
-													<div className="flex items-center gap-2.5 min-w-0 truncate">
-														<span className="font-mono text-[10px] text-zinc-400 font-bold w-6 shrink-0">
-															R{race.round}
-														</span>
-														<p className="font-bold truncate text-white uppercase">
-															{race.raceName}
-														</p>
-														<span className="text-[10px] text-zinc-400 truncate hidden sm:inline">
-															({race.Circuit?.circuitName || ""})
-														</span>
-													</div>
+									{loadingDriverModal ? (
+										<div className="h-48 flex items-center justify-center text-zinc-500 text-xs font-mono uppercase tracking-widest animate-pulse">
+											Cargando telemetría oficial de la temporada...
+										</div>
+									) : driverSeasonResults.length === 0 ? (
+										<div className="h-48 flex items-center justify-center text-zinc-500 text-xs text-center p-4">
+											Sin resultados de carrera registrados para este piloto en esta temporada.
+										</div>
+									) : (
+										<div className="flex flex-col gap-1.5 overflow-y-auto pr-1 no-scrollbar flex-1">
+											{driverSeasonResults.map((race: any, i: number) => {
+												const res = race.Results?.[0];
+												const pos = res ? res.position : "-";
+												const pts = res ? parseFloat(res.points) : 0;
+												const status = res?.status || "Finalizado";
+												const isDNF = status !== "Finished" && !status.startsWith("+");
+												const isWin = pos === "1";
+												const isPodium = pos === "2" || pos === "3";
 
-													<div className="flex items-center gap-3 shrink-0 font-mono">
-														<span
-															className={clsx(
-																"font-black px-1.5 py-0.5 rounded text-[10px]",
-																isWin
-																	? "bg-amber-500 text-black shadow-[0_0_10px_rgba(245,158,11,0.4)]"
-																	: isPodium
-																	? "bg-zinc-300 text-black"
-																	: isDNF
-																	? "bg-red-900/60 text-red-300"
-																	: "bg-zinc-800 text-zinc-300"
-															)}
-														>
-															{isDNF ? "DNF" : `P${pos}`}
-														</span>
-
-														<span className={clsx("font-black text-xs min-w-10 text-right", pts > 0 ? "text-amber-400" : "text-zinc-500")}>
-															{pts > 0 ? `+${pts}` : "0"} <span className="text-[9px] font-normal text-zinc-400">PTS</span>
-														</span>
-													</div>
-												</motion.div>
-											);
-										})}
-
-										{/* Sección sutil con las carreras que AÚN NO SE CORRIERON en la temporada actual */}
-										{upcoming2026Races.length > 0 && (
-											<div className="mt-4 pt-3 border-t border-zinc-800/80">
-												<p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-													<Calendar className="w-3 h-3 text-amber-500" />
-													<span>Próximas carreras de la temporada 2026 (Aún no disputadas)</span>
-												</p>
-												<div className="flex flex-col gap-1.5 opacity-65">
-													{upcoming2026Races.map((ur: any, idx: number) => (
-														<div
-															key={idx}
-															className="flex items-center justify-between p-2 rounded-xl bg-zinc-900/20 border border-dashed border-zinc-800 text-xs"
-														>
-															<div className="flex items-center gap-2 min-w-0 truncate">
-																<span className="font-mono text-[10px] text-zinc-500 font-bold w-6 shrink-0">
-																	R{ur.round}
-																</span>
-																<p className="font-semibold truncate text-zinc-400 uppercase">
-																	{ur.raceName}
-																</p>
-															</div>
-															<span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-zinc-800/80 text-amber-400/90 border border-zinc-700/60 shrink-0">
-																{ur.date} · POR DISPUTAR
+												return (
+													<motion.div
+														key={i}
+														initial={{ opacity: 0, y: 6 }}
+														animate={{ opacity: 1, y: 0 }}
+														transition={{ delay: Math.min(i * 0.02, 0.4) }}
+														className={clsx(
+															"flex items-center justify-between p-2.5 rounded-xl border text-xs transition-all",
+															isWin
+																? "bg-zinc-900/60 text-white"
+																: isPodium
+																? "bg-zinc-800/40 border-zinc-700/60 text-zinc-200"
+																: isDNF
+																? "bg-red-950/20 border-red-900/30 text-zinc-400"
+																: "bg-zinc-900/30 border-zinc-800/60 text-zinc-300"
+														)}
+														style={isWin ? { borderColor: pTheme.borderSubtle } : undefined}
+													>
+														<div className="flex items-center gap-2.5 min-w-0 truncate">
+															<span className="font-mono text-[10px] text-zinc-400 font-bold w-6 shrink-0">
+																R{race.round}
+															</span>
+															<p className="font-bold truncate text-white uppercase">
+																{race.raceName}
+															</p>
+															<span className="text-[10px] text-zinc-400 truncate hidden sm:inline">
+																({race.Circuit?.circuitName || ""})
 															</span>
 														</div>
-													))}
+
+														<div className="flex items-center gap-3 shrink-0 font-mono">
+															<span
+																className={clsx(
+																	"font-black px-1.5 py-0.5 rounded text-[10px]",
+																	isWin
+																		? "text-black font-extrabold"
+																		: isPodium
+																		? "bg-zinc-300 text-black"
+																		: isDNF
+																		? "bg-red-900/60 text-red-300"
+																		: "bg-zinc-800 text-zinc-300"
+																)}
+																style={
+																	isWin
+																		? {
+																				backgroundColor: pTheme.secondary || pTheme.primary,
+																				boxShadow: `0 0 10px ${pTheme.glowShadow}`,
+																		  }
+																		: undefined
+																}
+															>
+																{isDNF ? "DNF" : `P${pos}`}
+															</span>
+
+															<span
+																className="font-black text-xs min-w-10 text-right"
+																style={pts > 0 ? { color: pTheme.primary } : { color: "#71717a" }}
+															>
+																{pts > 0 ? `+${pts}` : "0"} <span className="text-[9px] font-normal text-zinc-400">PTS</span>
+															</span>
+														</div>
+													</motion.div>
+												);
+											})}
+
+											{/* Sección sutil con las carreras que AÚN NO SE CORRIERON en la temporada actual */}
+											{upcoming2026Races.length > 0 && (
+												<div className="mt-4 pt-3 border-t border-zinc-800/80">
+													<p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+														<Calendar className="w-3 h-3 text-amber-500" />
+														<span>Próximas carreras de la temporada 2026 (Aún no disputadas)</span>
+													</p>
+													<div className="flex flex-col gap-1.5 opacity-65">
+														{upcoming2026Races.map((ur: any, idx: number) => (
+															<div
+																key={idx}
+																className="flex items-center justify-between p-2 rounded-xl bg-zinc-900/20 border border-dashed border-zinc-800 text-xs"
+															>
+																<div className="flex items-center gap-2 min-w-0 truncate">
+																	<span className="font-mono text-[10px] text-zinc-500 font-bold w-6 shrink-0">
+																		R{ur.round}
+																	</span>
+																	<p className="font-semibold truncate text-zinc-400 uppercase">
+																		{ur.raceName}
+																	</p>
+																</div>
+																<span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-zinc-800/80 text-amber-400/90 border border-zinc-700/60 shrink-0">
+																	{ur.date} · POR DISPUTAR
+																</span>
+															</div>
+														))}
+													</div>
 												</div>
-											</div>
-										)}
-									</div>
-								)}
-							</div>
-						</motion.div>
-					</div>
-				)}
+											)}
+										</div>
+									)}
+								</div>
+							</motion.div>
+						</div>
+					);
+				})()}
 			</AnimatePresence>
 
 			{/* 🛠️ MODAL 2: DESGLOSE DE ESCUDERÍA Y APORTE DE SUS PILOTOS (CLICK EN CONSTRUCTOR) */}
 			<AnimatePresence>
-				{selectedConstructor && (
-					<div
-						className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-md"
-						onClick={() => setSelectedConstructor(null)}
-					>
-						<motion.div
-							initial={{ opacity: 0, scale: 0.95, y: 15 }}
-							animate={{ opacity: 1, scale: 1, y: 0 }}
-							exit={{ opacity: 0, scale: 0.95, y: 15 }}
-							transition={{ duration: 0.25 }}
-							onClick={(e) => e.stopPropagation()}
-							className="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-3xl p-5 sm:p-6 shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
+				{selectedConstructor && (() => {
+					const cTheme = getTeamTheme(selectedConstructor.teamName || selectedConstructor.constructorId);
+
+					return (
+						<div
+							className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-md"
+							onClick={() => setSelectedConstructor(null)}
 						>
-							{/* Botón de cierre */}
-							<button
-								onClick={() => setSelectedConstructor(null)}
-								className="absolute top-4 right-4 p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all cursor-pointer z-10"
+							<motion.div
+								initial={{ opacity: 0, scale: 0.95, y: 15 }}
+								animate={{ opacity: 1, scale: 1, y: 0 }}
+								exit={{ opacity: 0, scale: 0.95, y: 15 }}
+								transition={{ duration: 0.25 }}
+								onClick={(e) => e.stopPropagation()}
+								className="relative w-full max-w-2xl bg-zinc-950 border rounded-3xl p-5 sm:p-6 shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
+								style={{ borderColor: cTheme.borderSubtle }}
 							>
-								<X className="w-4 h-4" />
-							</button>
+								{/* Botón de cierre */}
+								<button
+									onClick={() => setSelectedConstructor(null)}
+									className="absolute top-4 right-4 p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all cursor-pointer z-10"
+								>
+									<X className="w-4 h-4" />
+								</button>
 
-							{/* Cabecera de la Escudería */}
-							<div className="flex items-center gap-4 pb-4 border-b border-zinc-800/80">
-								<div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-zinc-900 border border-zinc-800 p-2.5 flex items-center justify-center shrink-0 shadow-lg">
-									<TeamLogo teamName={selectedConstructor.teamName} className="w-12 h-12" />
-								</div>
-
-								<div className="flex flex-col min-w-0 flex-1">
-									<span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 uppercase w-fit">
-										{year} · Posición #{selectedConstructor.position}
-									</span>
-
-									<h3 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight truncate mt-1">
-										{selectedConstructor.teamName}
-									</h3>
-
-									<p className="text-xs text-zinc-400 font-medium">
-										Aporte oficial de los pilotos a la escudería
-									</p>
-								</div>
-
-								{/* Puntos totales de la escudería a súper velocidad */}
-								<div className="text-right shrink-0">
-									<AnimatedCounter
-										value={parseFloat(selectedConstructor.points) || 0}
-										duration={750}
-										className="text-2xl sm:text-4xl font-black text-emerald-400 tracking-tight"
-									/>
-									<span className="text-[10px] text-zinc-400 block font-bold uppercase">Puntos del Equipo</span>
-								</div>
-							</div>
-
-							{/* Desglose de los pilotos que sumaron esos puntos con animación en barritas y súper velocidad */}
-							<div className="flex flex-col flex-1 overflow-hidden mt-4">
-								<div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-900 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-									<span>Pilotos de la Escudería en {year}</span>
-									<span>Aporte al Equipo</span>
-								</div>
-
-								{loadingConstructorModal ? (
-									<div className="h-48 flex items-center justify-center text-zinc-500 text-xs font-mono uppercase tracking-widest animate-pulse">
-										Calculando aporte de los pilotos de la escudería...
+								{/* Cabecera de la Escudería con identidad cromática oficial */}
+								<div className="flex items-center gap-4 pb-4 border-b border-zinc-800/80">
+									<div
+										className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-zinc-900 border p-2.5 flex items-center justify-center shrink-0 shadow-lg"
+										style={{ borderColor: cTheme.borderSubtle }}
+									>
+										<TeamLogo teamName={selectedConstructor.teamName} className="w-12 h-12" />
 									</div>
-								) : teamDriverBreakdown.length === 0 ? (
-									<div className="h-48 flex items-center justify-center text-zinc-500 text-xs text-center p-4">
-										Sin resultados registrados para esta escudería en este año.
-									</div>
-								) : (
-									<div className="flex flex-col gap-3 overflow-y-auto pr-1 no-scrollbar flex-1">
-										{teamDriverBreakdown.map((driver, i) => {
-											const teamPts = parseFloat(selectedConstructor.points) || 1;
-											const pct = Math.min(Math.round((driver.points / teamPts) * 100), 100);
-											const avatarUrl = getDriverAvatarUrl(driver.code, driver.driverId, driver.fullName || driver.name);
 
-											return (
-												<motion.div
-													key={i}
-													initial={{ opacity: 0, y: 10 }}
-													animate={{ opacity: 1, y: 0 }}
-													transition={{ delay: i * 0.1, duration: 0.3 }}
-													className="flex flex-col gap-2.5 p-3.5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 shadow-md"
-												>
-													<div className="flex items-center justify-between">
-														<div className="flex items-center gap-3">
-															{avatarUrl ? (
-																<img
-																	src={avatarUrl}
-																	alt={driver.name}
-																	className="w-11 h-11 rounded-xl object-cover object-top border-2 border-zinc-700 bg-zinc-900 shrink-0 shadow-md"
-																/>
-															) : (
-																<div className="w-11 h-11 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs font-black text-amber-400 shrink-0">
-																	{driver.code || "F1"}
+									<div className="flex flex-col min-w-0 flex-1">
+										<span
+											className="text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase w-fit border shadow-xs"
+											style={{
+												backgroundColor: cTheme.bgSubtle,
+												borderColor: cTheme.borderSubtle,
+												color: cTheme.primary,
+											}}
+										>
+											{year} · Posición #{selectedConstructor.position}
+										</span>
+
+										<h3 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight truncate mt-1">
+											{selectedConstructor.teamName}
+										</h3>
+
+										<p className="text-xs text-zinc-400 font-medium">
+											Aporte oficial de los pilotos a la escudería
+										</p>
+									</div>
+
+									{/* Puntos totales de la escudería a súper velocidad con color oficial */}
+									<div className="text-right shrink-0">
+										<AnimatedCounter
+											value={parseFloat(selectedConstructor.points) || 0}
+											duration={750}
+											className="text-2xl sm:text-4xl font-black tracking-tight"
+											style={{
+												color: cTheme.primary,
+												textShadow: `0 0 25px ${cTheme.glowShadow}`,
+											}}
+										/>
+										<span className="text-[10px] text-zinc-400 block font-bold uppercase">Puntos del Equipo</span>
+									</div>
+								</div>
+
+								{/* Desglose de los pilotos que sumaron esos puntos con animación en barritas y súper velocidad */}
+								<div className="flex flex-col flex-1 overflow-hidden mt-4">
+									<div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-900 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+										<span>Pilotos de la Escudería en {year}</span>
+										<span>Aporte al Equipo</span>
+									</div>
+
+									{loadingConstructorModal ? (
+										<div className="h-48 flex items-center justify-center text-zinc-500 text-xs font-mono uppercase tracking-widest animate-pulse">
+											Calculando aporte de los pilotos de la escudería...
+										</div>
+									) : teamDriverBreakdown.length === 0 ? (
+										<div className="h-48 flex items-center justify-center text-zinc-500 text-xs text-center p-4">
+											Sin resultados registrados para esta escudería en este año.
+										</div>
+									) : (
+										<div className="flex flex-col gap-3 overflow-y-auto pr-1 no-scrollbar flex-1">
+											{teamDriverBreakdown.map((driver, i) => {
+												const teamPts = parseFloat(selectedConstructor.points) || 1;
+												const pct = Math.min(Math.round((driver.points / teamPts) * 100), 100);
+												const avatarUrl = getDriverAvatarUrl(driver.code, driver.driverId, driver.fullName || driver.name);
+
+												return (
+													<motion.div
+														key={i}
+														initial={{ opacity: 0, y: 10 }}
+														animate={{ opacity: 1, y: 0 }}
+														transition={{ delay: i * 0.1, duration: 0.3 }}
+														className="flex flex-col gap-2.5 p-3.5 rounded-2xl bg-zinc-900/50 border transition-all shadow-md"
+														style={{ borderColor: cTheme.borderSubtle }}
+													>
+														<div className="flex items-center justify-between">
+															<div className="flex items-center gap-3">
+																{avatarUrl ? (
+																	<img
+																		src={avatarUrl}
+																		alt={driver.name}
+																		className="w-11 h-11 rounded-xl object-cover object-top border-2 bg-zinc-900 shrink-0 shadow-md"
+																		style={{ borderColor: cTheme.primary }}
+																	/>
+																) : (
+																	<div
+																		className="w-11 h-11 rounded-xl bg-zinc-800 border flex items-center justify-center text-xs font-black shrink-0"
+																		style={{ borderColor: cTheme.primary, color: cTheme.primary }}
+																	>
+																		{driver.code || "F1"}
+																	</div>
+																)}
+
+																<div>
+																	<p className="text-sm font-bold text-white uppercase tracking-tight">
+																		{driver.name}
+																	</p>
+																	<p className="text-[10px] text-zinc-400 font-medium">
+																		{driver.races} Carreras · {driver.wins} {driver.wins === 1 ? "Victoria" : "Victorias"} · {driver.podiums} Podios
+																	</p>
 																</div>
-															)}
+															</div>
 
-															<div>
-																<p className="text-sm font-bold text-white uppercase tracking-tight">
-																	{driver.name}
-																</p>
-																<p className="text-[10px] text-zinc-400 font-medium">
-																	{driver.races} Carreras · {driver.wins} {driver.wins === 1 ? "Victoria" : "Victorias"} · {driver.podiums} Podios
-																</p>
+															<div className="text-right font-mono">
+																<span
+																	className="text-lg font-black"
+																	style={{
+																		color: cTheme.secondary,
+																		textShadow: `0 0 15px ${cTheme.glowShadow}`,
+																	}}
+																>
+																	<AnimatedCounter value={driver.points} duration={700} />{" "}
+																	<span className="text-xs text-zinc-400 font-normal">PTS</span>
+																</span>
+																<span
+																	className="text-[10px] block font-bold"
+																	style={{ color: cTheme.primary }}
+																>
+																	<AnimatedCounter value={pct} duration={700} />% del equipo
+																</span>
 															</div>
 														</div>
 
-														<div className="text-right font-mono">
-															<span className="text-lg font-black text-amber-300">
-																<AnimatedCounter value={driver.points} duration={700} />{" "}
-																<span className="text-xs text-zinc-400 font-normal">PTS</span>
-															</span>
-															<span className="text-[10px] text-emerald-400 block font-bold">
-																<AnimatedCounter value={pct} duration={700} />% del equipo
-															</span>
+														{/* 🚀 Barrita animada con el gradiente y resplandor oficial de la escudería */}
+														<div
+															className="w-full h-2 bg-zinc-800/80 rounded-full overflow-hidden p-0.5 border"
+															style={{ borderColor: cTheme.borderSubtle }}
+														>
+															<motion.div
+																initial={{ width: 0 }}
+																animate={{ width: `${pct}%` }}
+																transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+																className="h-full rounded-full"
+																style={{
+																	background: cTheme.barGradient,
+																	boxShadow: `0 0 14px ${cTheme.glowShadow}`,
+																}}
+															/>
 														</div>
-													</div>
-
-													{/* 🚀 Barrita animada de aporte porcentual con resplandor y gradiente */}
-													<div className="w-full h-2 bg-zinc-800/80 rounded-full overflow-hidden p-0.5 border border-zinc-700/40">
-														<motion.div
-															initial={{ width: 0 }}
-															animate={{ width: `${pct}%` }}
-															transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
-															className="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400 rounded-full shadow-[0_0_12px_rgba(16,185,129,0.5)]"
-														/>
-													</div>
-												</motion.div>
-											);
-										})}
-									</div>
-								)}
-							</div>
-						</motion.div>
-					</div>
-				)}
+													</motion.div>
+												);
+											})}
+										</div>
+									)}
+								</div>
+							</motion.div>
+						</div>
+					);
+				})()}
 			</AnimatePresence>
 		</div>
 	);
