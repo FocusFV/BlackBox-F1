@@ -14,7 +14,6 @@ import {
 	Activity,
 	Eye,
 	EyeOff,
-	Milestone,
 } from "lucide-react";
 
 interface Props {
@@ -50,6 +49,51 @@ function playHudChime() {
 		osc.start(now);
 		osc.stop(now + 0.2);
 	} catch {}
+}
+
+// Helper para parsear la información del poseedor del récord y su foto con el mono de la época
+function getRecordDriverInfo(lapRecord: string): {
+	driverName: string;
+	team: string;
+	year: string;
+	time: string;
+	photoUrl: string;
+} {
+	// Parseamos el string ej: "1:36.169 · C. Leclerc (Ferrari, 2019)"
+	const match = lapRecord.match(/^([\d:.]+)\s*·\s*([^()]+)\s*(?:\(([^,]+),\s*(\d{4})\))?/);
+	const time = match ? match[1].trim() : lapRecord;
+	const driverName = match ? match[2].trim() : "FIA";
+	const team = match && match[3] ? match[3].trim() : "";
+	const year = match && match[4] ? match[4].trim() : "";
+
+	let photoUrl = "/drivers/records/leclerc.jpg";
+	const lower = (driverName + " " + lapRecord).toLowerCase();
+
+	if (lower.includes("schumacher")) {
+		photoUrl = "/drivers/records/schumacher.jpg";
+	} else if (lower.includes("de la rosa") || lower.includes("rosa")) {
+		photoUrl = "/drivers/records/delarosa.jpg";
+	} else if (lower.includes("barrichello")) {
+		photoUrl = "/drivers/records/barrichello.jpg";
+	} else if (lower.includes("hamilton")) {
+		photoUrl = "/drivers/records/hamilton.jpg";
+	} else if (lower.includes("bottas")) {
+		photoUrl = "/drivers/records/bottas.jpg";
+	} else if (lower.includes("leclerc")) {
+		photoUrl = "/drivers/records/leclerc.jpg";
+	} else if (lower.includes("verstappen")) {
+		photoUrl = "/drivers/records/verstappen.jpg";
+	} else if (lower.includes("sainz")) {
+		photoUrl = "/drivers/records/sainz.jpg";
+	} else if (lower.includes("ricciardo")) {
+		photoUrl = "/drivers/records/ricciardo.jpg";
+	} else if (lower.includes("norris")) {
+		photoUrl = "/drivers/records/norris.jpg";
+	} else if (lower.includes("alonso")) {
+		photoUrl = "/alonso.png";
+	}
+
+	return { driverName, team, year, time, photoUrl };
 }
 
 // Helper para calcular la posición de la Línea de Meta y la Flecha de Sentido de Giro
@@ -192,6 +236,11 @@ export function CircuitBackdrop({
 	const finishLine = useMemo(() => {
 		return getStartFinishCoords(circuit.svgPath);
 	}, [circuit.svgPath]);
+
+	// Información del récord y avatar del piloto
+	const recordInfo = useMemo(() => {
+		return getRecordDriverInfo(circuit.lapRecord);
+	}, [circuit.lapRecord]);
 
 	if (oledMode) {
 		return null;
@@ -395,15 +444,15 @@ export function CircuitBackdrop({
 														strokeWidth="1.2"
 													/>
 
-													{/* ➔ Flecha de sentido colocada delante de la meta siguiendo el asfalto */}
+													{/* ➔ Flecha de sentido en BLANCO BRILLANTE de alto contraste */}
 													<g
 														transform={`translate(${finishLine.arrowX}, ${finishLine.arrowY}) rotate(${finishLine.arrowAngleDeg})`}
 													>
 														<polygon
-															points="-6,-5 7,0 -6,5 -3,0"
-															fill="#f59e0b"
-															stroke="#ffffff"
-															strokeWidth="1"
+															points="-7,-6 9,0 -7,6 -4,0"
+															fill="#ffffff"
+															stroke="#000000"
+															strokeWidth="1.2"
 														/>
 													</g>
 
@@ -444,7 +493,7 @@ export function CircuitBackdrop({
 							</AnimatePresence>
 						</div>
 
-						{/* 📊 BARRA INFERIOR DE TELEMETRÍA (4 BLOQUES AMPLIOS, SIN CORTES NI REDUNDANCIA) */}
+						{/* 📊 BARRA INFERIOR DE TELEMETRÍA (4 BLOQUES AMPLIOS CON CARITA DEL PILOTO RÉCORD) */}
 						<AnimatePresence>
 							{showHud && (
 								<motion.div
@@ -454,17 +503,34 @@ export function CircuitBackdrop({
 									transition={{ duration: 0.4 }}
 									className="w-full max-w-7xl mx-auto z-10 pointer-events-auto mb-2"
 								>
-									<div className="bg-black/55 backdrop-blur-xl border border-white/15 rounded-2xl p-3 sm:p-4 shadow-[0_8px_32px_rgba(0,0,0,0.8)] grid grid-cols-2 lg:grid-cols-4 gap-3 text-left font-mono">
-										{/* 1. RÉCORD OFICIAL */}
-										<div className="flex flex-col justify-center gap-1 bg-purple-950/30 p-3 sm:p-3.5 rounded-xl border border-purple-500/30">
-											<span className="text-[10px] sm:text-xs text-purple-300 uppercase tracking-wider flex items-center gap-1.5 font-bold">
-												<Timer className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-												Récord de Vuelta
-											</span>
-											<span className="text-sm sm:text-base md:text-lg font-black text-purple-200">
-												{circuit.lapRecord}
-											</span>
-											<span className="text-[10px] text-purple-400/80 font-medium">Vuelta Rápida Oficial FIA</span>
+									<div className="bg-black/55 backdrop-blur-xl border border-white/15 rounded-2xl p-3 sm:p-4 shadow-[0_8px_32px_rgba(0,0,0,0.8)] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-left font-mono">
+										{/* 1. RÉCORD OFICIAL CON LA CARITA DEL PILOTO Y SU MONO DE LA ÉPOCA */}
+										<div className="flex items-center gap-3 bg-purple-950/40 p-2.5 sm:p-3 rounded-xl border border-purple-500/40 shadow-inner">
+											<div className="relative shrink-0">
+												<img
+													src={recordInfo.photoUrl}
+													alt={recordInfo.driverName}
+													className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover object-top border-2 border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.6)] bg-zinc-900"
+												/>
+												{recordInfo.year && (
+													<span className="absolute -bottom-1 -right-1 text-[9px] bg-purple-950 border border-purple-400 text-purple-200 px-1 py-0.2 rounded-full font-bold">
+														{recordInfo.year}
+													</span>
+												)}
+											</div>
+
+											<div className="flex flex-col min-w-0">
+												<span className="text-[10px] sm:text-xs text-purple-300 uppercase tracking-wider flex items-center gap-1.5 font-bold">
+													<Timer className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+													Récord Oficial
+												</span>
+												<span className="text-sm sm:text-base md:text-lg font-black text-purple-200 truncate">
+													{recordInfo.time}
+												</span>
+												<span className="text-[10px] sm:text-[11px] text-zinc-300 font-semibold truncate">
+													{recordInfo.driverName} {recordInfo.team ? `· ${recordInfo.team}` : ""}
+												</span>
+											</div>
 										</div>
 
 										{/* 2. VELOCIDAD PUNTA (SPEED TRAP) */}
