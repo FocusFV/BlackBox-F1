@@ -10,6 +10,7 @@ import { Lock, Unlock, Radio } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import SidenavButton from "@/components/SidenavButton";
 import SupportModal from "@/components/SupportModal";
+import { triggerHaptic } from "@/lib/haptics";
 import {
 	getUpcomingSessions,
 	evaluateSessionStatus,
@@ -123,24 +124,29 @@ export default function StreamsPage() {
 
 	const STREAMS_CONFIG_RAW: Record<string, { label: string; token: string }[]> = {
 		FOX: [
-			{ label: "Servidor 1", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWZveDFhcg==" },
-			{ label: "Servidor 2 (Respaldo)", token: "aHR0cHM6Ly9sYTE4aGQuc3Uvdml2by9jYW5hbGVzLnBocD9zdHJlYW09Zm94c3BvcnRz" },
+			{ label: "Servidor 1 (DaddyLive)", token: "aHR0cHM6Ly90aGVkYWRkeS5way9zdHJlYW0vc3RyZWFtLTc4Ny5waHA=" },
+			{ label: "Servidor 2 (Embed)", token: "aHR0cHM6Ly9lbWJlZC5zYW9oZ2Rhc3NyZWdpb25zLmNvbS9lbWJlZDIvZm94c3BvcnRzLnBocA==" },
+			{ label: "Servidor 3 (NTV)", token: "aHR0cHM6Ly9udHYuc3QvZW1iZWQ/dD1kbUpHTVRWaVowWjFlV1JoWWxSYVJHSnpiVFpZT0dSTFREUXJNRzVNY1RSMlpVMXZWR1JaVmxONGRXdzBkM2hvVVhkTVFVYzRUbnB4TWxwcU1FeE5jZw==" },
+			{ label: "Servidor 4 (DeporteLibre)", token: "aHR0cHM6Ly9kZXBvcnRlbGlicmUudG9wL3RvdGFsL3N0cmVhbS03ODcucGhw" },
+			{ label: "Servidor 5 (StreamTP)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWZveDFhcg==" },
+			{ label: "Servidor 6 (Respaldo)", token: "aHR0cHM6Ly9sYTE4aGQuc3Uvdml2by9jYW5hbGVzLnBocD9zdHJlYW09Zm94c3BvcnRz" },
 		],
 		DISNEY: [
-			{ label: "Servidor 1", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRpc25leTg=" },
-			{ label: "Servidor 2 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW14NzIzLnNicy9nbG9iYWwxLnBocD9jaGFubmVsPWRpc25leTg=" },
+			{ label: "Servidor 1 (DaddyLive)", token: "aHR0cHM6Ly9kYWRkeWxpdmUubW92L3BsYXllci9lbWJlZC5waHA/aWQ9ZDM0Yjg=" },
+			{ label: "Servidor 2 (StreamTP)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRpc25leTg=" },
+			{ label: "Servidor 3 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/Y2hhbm5lbD1kaXNuZXk4" },
 		],
 		DAZN: [
-			{ label: "Servidor 1", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRhem5mMQ==" },
-			{ label: "Servidor 2 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW14NzIzLnNicy9nbG9iYWwxLnBocD9jaGFubmVsPWRhem5mMQ==" },
+			{ label: "Servidor 1 (StreamTP)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRhem5mMQ==" },
+			{ label: "Servidor 2 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/Y2hhbm5lbD1kYXpuZjE=" },
 		],
 		COLAPINTO: [
-			{ label: "Servidor 1", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRpc25leTk=" },
-			{ label: "Servidor 2 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW14NzIzLnNicy9nbG9iYWwxLnBocD9jaGFubmVsPWRpc25leTk=" },
+			{ label: "Servidor 1 (StreamTP)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRpc25leTk=" },
+			{ label: "Servidor 2 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/Y2hhbm5lbD1kaXNuZXk5" },
 		],
 		GENERAL: [
-			{ label: "Servidor 1", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWVzcG4y" },
-			{ label: "Servidor 2 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW14NzIzLnNicy9nbG9iYWwxLnBocD9jaGFubmVsPWVzcG4y" },
+			{ label: "Servidor 1 (StreamTP)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWVzcG4y" },
+			{ label: "Servidor 2 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/Y2hhbm5lbD1lc3BuMg==" },
 			{ label: "Servidor 3 (HD)", token: "aHR0cHM6Ly90dmY5MC5jb20vaGQucGhwP3N0cmVhbT1lc3BuMg==" },
 			{ label: "Servidor 4 (Opción 1)", token: "aHR0cHM6Ly90dmY5MC5jb20vMS5waHA/c3RyZWFtPWVzcG4y" },
 			{ label: "Servidor 5 (Opción 2)", token: "aHR0cHM6Ly90dmY5MC5jb20vMi5waHA/c3RyZWFtPWVzcG4y" },
@@ -160,42 +166,11 @@ export default function StreamsPage() {
 	const [serverIndex, setServerIndex] = useState<number>(0);
 	const [switchNotice, setSwitchNotice] = useState<string | null>(null);
 
-	// 🔍 Sonda automática: si el Servidor 1 está caído/inaccesible, salta al Servidor 2 automáticamente
-	useEffect(() => {
-		let isCancelled = false;
-		const sources = STREAMS_CONFIG[activeTab] || [];
-		if (sources.length <= 1) return;
-
-		const currentSource = sources[serverIndex] || sources[0];
-
-		const controller = new AbortController();
-		const timeoutId = setTimeout(() => controller.abort(), 2500);
-
-		fetch(currentSource.url, { mode: "no-cors", signal: controller.signal })
-			.then(() => {
-				clearTimeout(timeoutId);
-			})
-			.catch(() => {
-				clearTimeout(timeoutId);
-				if (isCancelled) return;
-				// Si falla el servidor primario (índice 0), conmutamos al servidor secundario (índice 1)
-				if (serverIndex === 0 && sources.length > 1) {
-					setServerIndex(1);
-					setSwitchNotice(`Servidor 1 no disponible, cambiando automáticamente a ${sources[1].label}...`);
-					setTimeout(() => setSwitchNotice(null), 5000);
-				}
-			});
-
-		return () => {
-			isCancelled = true;
-			clearTimeout(timeoutId);
-		};
-	}, [activeTab, serverIndex]);
-
 	const handleTabSelect = (tab: keyof typeof STREAMS_CONFIG) => {
 		setActiveTab(tab);
 		setServerIndex(0);
 		setSwitchNotice(null);
+		triggerHaptic("light");
 	};
 
 	const trackStatus = useDataStore((state) => state.state?.TrackStatus?.Status);
@@ -456,10 +431,11 @@ export default function StreamsPage() {
 											<div className="flex items-center gap-1.5 flex-wrap">
 												{sources.map((source, idx) => (
 													<button
-														key={source.url}
+														key={`${source.label}-${idx}`}
 														onClick={() => {
 															setServerIndex(idx);
 															setSwitchNotice(null);
+															triggerHaptic("light");
 														}}
 														className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
 															serverIndex === idx
@@ -488,7 +464,7 @@ export default function StreamsPage() {
 											title="F1 Live Stream"
 											className="w-full h-full border-0"
 											allowFullScreen
-											allow="autoplay; encrypted-media; picture-in-picture"
+											allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
 										/>
 									</div>
 								</>
