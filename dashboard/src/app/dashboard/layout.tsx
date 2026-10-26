@@ -91,7 +91,7 @@ function MobileStaticBar({ show, connected }: { show: boolean; connected: boolea
 	const open = useSidebarStore((state) => state.open);
 
 	return (
-		<div className="flex w-full items-center justify-between overflow-hidden border-b border-zinc-800 p-2 md:hidden">
+		<div className="relative z-20 flex w-full items-center justify-between overflow-hidden border-b border-zinc-800/90 bg-zinc-950/90 backdrop-blur-md p-2 md:hidden shadow-md">
 			<div className="flex items-center gap-2">
 				<SidenavButton key="mobile" onClick={() => open()} />
 
@@ -111,7 +111,7 @@ function DesktopStaticBar({ show }: { show: boolean }) {
 	const pin = useSidebarStore((state) => state.pin);
 
 	return (
-		<div className="hidden w-full flex-row justify-between overflow-hidden rounded-lg border border-zinc-800 p-2 md:flex">
+		<div className="relative z-20 hidden w-full flex-row justify-between overflow-hidden rounded-xl border border-zinc-800/90 bg-zinc-950/85 backdrop-blur-xl p-2.5 shadow-xl md:flex">
 			<div className="flex items-center gap-2">
 				<AnimatePresence>
 					{!pinned && <SidenavButton key="desktop" className="shrink-0" onClick={() => pin()} />}

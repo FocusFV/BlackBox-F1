@@ -28,6 +28,7 @@ const frameDisableHeaders = [
 const config: NextConfig = {
 	output,
 	compress,
+	productionBrowserSourceMaps: false,
 	env: {
 		version: pack.version,
 	},

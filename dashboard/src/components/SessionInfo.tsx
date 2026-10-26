@@ -18,16 +18,6 @@ const sessionPartPrefix = (name: string) => {
 	}
 };
 
-const countryCodeMap: Record<string, string> = {
-	Australia: "aus", Austria: "aut", Azerbaijan: "aze", Bahrain: "brn",
-	Belgium: "bel", Brazil: "bra", Canada: "can", China: "chn", Spain: "esp",
-	France: "fra", "Great Britain": "gbr", "United Kingdom": "gbr", Germany: "ger",
-	Hungary: "hun", Italy: "ita", Japan: "jpn", "Saudi Arabia": "ksa",
-	Mexico: "mex", Monaco: "mon", Netherlands: "ned", Portugal: "por",
-	Qatar: "qat", Singapore: "sgp", "United Arab Emirates": "uae", "United States": "usa",
-	USA: "usa", UK: "gbr"
-};
-
 export default function SessionInfo() {
 	const clock = useDataStore((state) => state.state?.ExtrapolatedClock);
 	const session = useDataStore((state) => state.state?.SessionInfo);
@@ -38,18 +28,32 @@ export default function SessionInfo() {
 
 	const delay = useSettingsStore((state) => state.delay);
 
-	// Detectar si estamos fuera de sesión / parque cerrado
-	const isOfflineOrFinished = 
-		!session || 
-		!trackStatus ||
-		sessionStatus === "Ends" || 
-		sessionStatus === "Finalised" || 
-		(session?.Name === "Race" && !!lapCount && lapCount.CurrentLap > 0 && lapCount.CurrentLap >= lapCount.TotalLaps);
+	// Una sesión se considera en vivo ÚNICAMENTE si está formalmente iniciada/corriendo y no ha finalizado
+	const isLive = Boolean(
+		session &&
+		(sessionStatus === "Started" || sessionStatus === "Running") &&
+		!(session?.Name === "Race" && !!lapCount && lapCount.CurrentLap > 0 && lapCount.CurrentLap >= lapCount.TotalLaps)
+	);
+
+	const isOfflineOrFinished = !isLive;
 
 	const [nextGpName, setNextGpName] = useState("Próximo Gran Premio");
 	const [nextSessionName, setNextSessionName] = useState("Sesión Oficial");
-	const [countdown, setCountdown] = useState("00:00:00");
+	const [countdown, setCountdown] = useState("Cargando...");
 	const [countryCode, setCountryCode] = useState<string | undefined>("mex");
+
+	const calcCountdown = (target: Date) => {
+		const difference = target.getTime() - Date.now();
+		if (difference <= 0) return "00:00:00";
+		const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+		const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+		const minutes = Math.floor((difference % (1000 * 60)) / (1000 * 60));
+		const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+		const pad = (n: number) => n.toString().padStart(2, "0");
+		return days > 0
+			? `${days}D ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+			: `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+	};
 
 	// Obtener la próxima carrera y calcular el contador
 	useEffect(() => {
@@ -85,34 +89,23 @@ export default function SessionInfo() {
 
 					setNextSessionName(closestSession.name);
 					targetDate = new Date(`${closestSession.date}T${closestSession.time || "13:00:00Z"}`);
+					setCountdown(calcCountdown(targetDate));
 				}
 			} catch {
 				const d = new Date();
 				d.setDate(d.getDate() + ((7 - d.getDay()) % 7 || 7));
 				d.setHours(14, 0, 0, 0);
 				targetDate = d;
+				setCountdown(calcCountdown(targetDate));
+			}
+
+			if (targetDate) {
+				setCountdown(calcCountdown(targetDate));
 			}
 
 			intervalId = setInterval(() => {
 				if (!targetDate) return;
-				const difference = targetDate.getTime() - new Date().getTime();
-
-				if (difference <= 0) {
-					setCountdown("00:00:00");
-					return;
-				}
-
-				const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-				const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-				const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-				const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
-				const pad = (n: number) => n.toString().padStart(2, "0");
-				const formatted = days > 0
-					? `${days}D ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
-					: `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-
-				setCountdown(formatted);
+				setCountdown(calcCountdown(targetDate));
 			}, 1000);
 		}
 
@@ -134,14 +127,14 @@ export default function SessionInfo() {
 
 				<div className="flex flex-col justify-center">
 					<div className="flex items-center gap-2">
-						<span className="truncate text-xs leading-none font-bold text-amber-400 uppercase tracking-widest font-mono">
+						<span className="truncate text-xs leading-none font-black text-amber-400 uppercase tracking-widest font-mono drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
 							{nextGpName}
 						</span>
-						<span className="rounded bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 text-[9px] font-bold text-zinc-400 uppercase tracking-wider">
+						<span className="rounded bg-zinc-900/90 border border-zinc-800 px-1.5 py-0.5 text-[9px] font-bold text-zinc-300 uppercase tracking-wider">
 							{nextSessionName}
 						</span>
 					</div>
-					<p className="text-xl md:text-2xl leading-none font-black text-zinc-100 font-mono tracking-wider mt-1.5">
+					<p className="text-xl md:text-2xl leading-none font-black text-white font-mono tracking-wider mt-1.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
 						{countdown}
 					</p>
 				</div>
@@ -167,14 +160,14 @@ export default function SessionInfo() {
 
 			<div className="flex flex-col justify-center">
 				<h1 className="truncate text-sm leading-none font-medium text-white">
-					{session.Meeting?.Name}: {session.Name ?? "En Vivo"}
-					{timingData?.SessionPart ? ` ${sessionPartPrefix(session.Name)}${timingData.SessionPart}` : ""}
+					{session?.Meeting?.Name}: {session?.Name ?? "En Vivo"}
+					{timingData?.SessionPart && session?.Name ? ` ${sessionPartPrefix(session.Name)}${timingData.SessionPart}` : ""}
 				</h1>
 
 				{timeRemaining !== undefined ? (
-					<p className="text-2xl leading-none font-extrabold">{timeRemaining}</p>
+					<p className="text-2xl leading-none font-extrabold text-white">{timeRemaining}</p>
 				) : (
-					<div className="mt-1 h-6 w-[150px] animate-pulse rounded-md bg-zinc-800 font-semibold" />
+					<p className="text-lg leading-none font-bold text-zinc-300 font-mono mt-1">Pista Abierta</p>
 				)}
 			</div>
 		</div>

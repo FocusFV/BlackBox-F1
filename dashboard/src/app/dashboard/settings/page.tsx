@@ -1,14 +1,10 @@
 "use client";
 
 import SegmentedControls from "@/components/ui/SegmentedControls";
-import Button from "@/components/ui/Button";
 import Slider from "@/components/ui/Slider";
 import Input from "@/components/ui/Input";
 
 import FavoriteDrivers from "@/components/settings/FavoriteDrivers";
-
-import DelayInput from "@/components/DelayInput";
-import DelayTimer from "@/components/DelayTimer";
 import Toggle from "@/components/ui/Toggle";
 
 import { useSettingsStore } from "@/stores/useSettingsStore";
@@ -27,7 +23,7 @@ export default function SettingsPage() {
 						<span className="text-amber-500">⚙️</span> Ajustes de Telemetría
 					</h1>
 					<p className="text-xs text-zinc-400 font-mono mt-1">
-						Configurá el comportamiento visual, alertas de sonido y sincronización del Live-HUD.
+						Configurá el comportamiento visual, alertas de sonido y preferencias del Live-HUD.
 					</p>
 				</div>
 
@@ -128,13 +124,13 @@ export default function SettingsPage() {
 					)}
 				</section>
 
-				{/* SECCIÓN 4: UNIDADES & DELAY */}
-				<section className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 backdrop-blur-xl space-y-6 shadow-2xl">
+				{/* SECCIÓN 4: UNIDADES */}
+				<section className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 backdrop-blur-xl space-y-4 shadow-2xl">
 					<h2 className="text-sm font-bold font-mono text-amber-400 uppercase tracking-widest border-b border-zinc-900 pb-2 text-center md:text-left">
-						Unidades & Sincronización
+						Unidades del Sistema
 					</h2>
 
-					<div className="space-y-2 flex flex-col items-center md:items-start">
+					<div className="space-y-2 flex flex-col items-center md:items-start pt-2">
 						<p className="text-xs font-bold font-mono text-zinc-300 uppercase">Unidad de Velocidad</p>
 						<SegmentedControls
 							id="speed-unit"
@@ -145,21 +141,9 @@ export default function SettingsPage() {
 								{ label: "mp/h", value: "imperial" },
 							]}
 						/>
-					</div>
-
-					<div className="border-t border-zinc-900 pt-4 space-y-3 flex flex-col items-center md:items-start text-center md:text-left">
-						<p className="text-xs font-bold font-mono text-zinc-300 uppercase">Sincronización de Retraso (Delay)</p>
-						<p className="text-xs text-zinc-400 leading-relaxed max-w-xl">
-							Si tu transmisión de TV/Streaming tiene delay respecto al WebSocket en vivo, podés pausar la telemetría los segundos exactos que necesites para matchear el audio de la transmisión.
+						<p className="text-[11px] text-zinc-500 font-mono">
+							Configura la escala de visualización de velocímetro y telemetría de monoplazas.
 						</p>
-
-						<div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-1">
-							<DelayTimer />
-							<DelayInput />
-							<Button className="bg-red-500/20 text-red-300 border border-red-500/30 hover:bg-red-500/40 text-xs py-1.5 px-3 rounded-lg" onClick={() => settings.setDelay(0)}>
-								Reiniciar a 0s
-							</Button>
-						</div>
 					</div>
 				</section>
 

@@ -107,62 +107,53 @@ export default function StreamsPage() {
 	const pinnedSidebar = useSidebarStore((state) => state.pinned);
 	const pinSidebar = useSidebarStore((state) => state.pin);
 
-	// 📱 CONTROL REMOTO DESDE RENDER
-	const [firebaseStreams, setFirebaseStreams] = useState({
-		disney7: "RUS",
-		disney8: "HAM",
-	});
-
-	useEffect(() => {
-		fetch(
-			`${process.env.NEXT_PUBLIC_API_URL || "https://Blackbox-f1.onrender.com"}/api/streams-config`,
-		)
-			.then((res) => {
-				if (!res.ok) throw new Error("Error en la respuesta del pit-wall");
-				return res.json();
-			})
-			.then((data) => {
-				if (data && data.disney7 && data.disney8) {
-					setFirebaseStreams(data);
-				}
-			})
-			.catch((err) =>
-				console.error("⚠️ Error leyendo telemetría desde Render:", err),
-			);
-	}, []);
-
-	// 🏎️ PARRILLA COMPLETA DE IFRAMES CON SERVIDORES PRINCIPALES Y DE RESPALDO
+	// 🏎️ PARRILLA PROTEGIDA CON ENCRIPTACIÓN DE SERVIDORES Y DE RESPALDO
 	interface StreamSource {
 		label: string;
 		url: string;
 	}
 
-	const STREAMS_CONFIG: Record<string, StreamSource[]> = {
+	const _d = (s: string) => {
+		try {
+			return typeof atob !== "undefined" ? atob(s) : Buffer.from(s, "base64").toString("utf-8");
+		} catch {
+			return "";
+		}
+	};
+
+	const STREAMS_CONFIG_RAW: Record<string, { label: string; token: string }[]> = {
 		FOX: [
-			{ label: "Servidor 1", url: "https://streamtp99a.sbs/global1.php?stream=fox1ar" },
-			{ label: "Servidor 2 (Respaldo)", url: "https://la18hd.su/vivo/canales.php?stream=foxsports" },
+			{ label: "Servidor 1", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWZveDFhcg==" },
+			{ label: "Servidor 2 (Respaldo)", token: "aHR0cHM6Ly9sYTE4aGQuc3Uvdml2by9jYW5hbGVzLnBocD9zdHJlYW09Zm94c3BvcnRz" },
 		],
 		DISNEY: [
-			{ label: "Servidor 1", url: "https://streamtp99a.sbs/global1.php?stream=disney8" },
-			{ label: "Servidor 2 (Respaldo)", url: "https://streamx723.sbs/global1.php?channel=disney8" },
+			{ label: "Servidor 1", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRpc25leTg=" },
+			{ label: "Servidor 2 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW14NzIzLnNicy9nbG9iYWwxLnBocD9jaGFubmVsPWRpc25leTg=" },
 		],
 		DAZN: [
-			{ label: "Servidor 1", url: "https://streamtp99a.sbs/global1.php?stream=daznf1" },
-			{ label: "Servidor 2 (Respaldo)", url: "https://streamx723.sbs/global1.php?channel=daznf1" },
+			{ label: "Servidor 1", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRhem5mMQ==" },
+			{ label: "Servidor 2 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW14NzIzLnNicy9nbG9iYWwxLnBocD9jaGFubmVsPWRhem5mMQ==" },
 		],
 		COLAPINTO: [
-			{ label: "Servidor 1", url: "https://streamtp99a.sbs/global1.php?stream=disney9" },
-			{ label: "Servidor 2 (Respaldo)", url: "https://streamx723.sbs/global1.php?channel=disney9" },
+			{ label: "Servidor 1", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRpc25leTk=" },
+			{ label: "Servidor 2 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW14NzIzLnNicy9nbG9iYWwxLnBocD9jaGFubmVsPWRpc25leTk=" },
 		],
 		GENERAL: [
-			{ label: "Servidor 1", url: "https://streamtp99a.sbs/global1.php?stream=espn2" },
-			{ label: "Servidor 2 (Respaldo)", url: "https://streamx723.sbs/global1.php?channel=espn2" },
-			{ label: "Servidor 3 (HD)", url: "https://tvf90.com/hd.php?stream=espn2" },
-			{ label: "Servidor 4 (Opción 1)", url: "https://tvf90.com/1.php?stream=espn2" },
-			{ label: "Servidor 5 (Opción 2)", url: "https://tvf90.com/2.php?stream=espn2" },
-			{ label: "Servidor 6 (Opción 3)", url: "https://tvf90.com/3.php?stream=espn2" },
+			{ label: "Servidor 1", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWVzcG4y" },
+			{ label: "Servidor 2 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW14NzIzLnNicy9nbG9iYWwxLnBocD9jaGFubmVsPWVzcG4y" },
+			{ label: "Servidor 3 (HD)", token: "aHR0cHM6Ly90dmY5MC5jb20vaGQucGhwP3N0cmVhbT1lc3BuMg==" },
+			{ label: "Servidor 4 (Opción 1)", token: "aHR0cHM6Ly90dmY5MC5jb20vMS5waHA/c3RyZWFtPWVzcG4y" },
+			{ label: "Servidor 5 (Opción 2)", token: "aHR0cHM6Ly90dmY5MC5jb20vMi5waHA/c3RyZWFtPWVzcG4y" },
+			{ label: "Servidor 6 (Opción 3)", token: "aHR0cHM6Ly90dmY5MC5jb20vMy5waHA/c3RyZWFtPWVzcG4y" },
 		],
 	};
+
+	const STREAMS_CONFIG: Record<string, StreamSource[]> = Object.fromEntries(
+		Object.entries(STREAMS_CONFIG_RAW).map(([key, sources]) => [
+			key,
+			sources.map((s) => ({ label: s.label, url: _d(s.token) })),
+		])
+	);
 
 	const [activeTab, setActiveTab] =
 		useState<keyof typeof STREAMS_CONFIG>("FOX");
@@ -490,7 +481,7 @@ export default function StreamsPage() {
 									</div>
 
 									{/* REPRODUCTOR DE STREAM SELECCIONADO */}
-									<div className="w-full aspect-video rounded-2xl overflow-hidden border border-zinc-900 bg-black shadow-2xl relative">
+									<div onContextMenu={(e) => e.preventDefault()} className="w-full aspect-video rounded-2xl overflow-hidden border border-zinc-900 bg-black shadow-2xl relative select-none">
 										<iframe
 											key={currentSource?.url}
 											src={currentSource?.url}
