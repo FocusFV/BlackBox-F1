@@ -2,25 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Coffee, X, Flag, CheckSquare, Square } from "lucide-react";
+import { X, CheckSquare, Square, Heart, Coffee } from "lucide-react";
 
-// Ícono personalizado estilo Monoplaza F1
-function CarIcon(props: React.SVGProps<SVGSVGElement>) {
+function PayPalIcon(props: React.SVGProps<SVGSVGElement>) {
 	return (
-		<svg
-			{...props}
-			xmlns="http://www.w3.org/2000/svg"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-		>
-			<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-1.1 0-2 .9-2 2v7c0 .6.4 1 1 1h2" />
-			<circle cx="7" cy="17" r="2" />
-			<circle cx="17" cy="17" r="2" />
-			<path d="M5 10l2-4h4" />
+		<svg {...props} viewBox="0 0 24 24" fill="currentColor">
+			<path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.784.784 0 0 1 .773-.655h6.643c3.082 0 5.485 1.258 5.485 4.39 0 2.686-1.745 4.793-4.333 5.428-.488.119-.884.181-1.378.181H9.86l-1.42 7.643a.643.643 0 0 1-.632.536l-.732.094zm10.748-12.79c-.067-.323-.178-.636-.334-.932-.452-.862-1.328-1.524-2.52-1.895-.873-.271-1.954-.374-3.238-.374H7.957a.784.784 0 0 0-.773.655L4.975 19.34h3.693l1.096-5.903a.64.64 0 0 1 .632-.536h1.737c3.342 0 5.96-1.358 6.726-5.283.351-1.796.066-3.081-1.035-3.971z" />
 		</svg>
 	);
 }
@@ -29,15 +16,12 @@ export default function SupportModal() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [dontShowToday, setDontShowToday] = useState(false);
 
-	// 💡 Para pruebas usá 5000 (5 seg). En producción: 30 * 60 * 1000 (30 min)
-	const TIMER_DELAY = 30 * 60 * 1000; 
+	const TIMER_DELAY = 30 * 60 * 1000; // 30 minutos
 
-	// Función para programar la apertura del modal
 	const scheduleModal = useCallback(() => {
 		const modalDismissed = localStorage.getItem("blackbox_support_dismissed");
 		const today = new Date().toDateString();
 
-		// Si ya eligió no verlo por hoy, no programamos nada
 		if (modalDismissed === today) {
 			return;
 		}
@@ -56,117 +40,112 @@ export default function SupportModal() {
 		};
 	}, [scheduleModal]);
 
-	// Cierre suave (X o "Más tarde") -> Reinicia el temporizador para dentro de X min
 	const handleLater = () => {
 		if (dontShowToday) {
 			const today = new Date().toDateString();
 			localStorage.setItem("blackbox_support_dismissed", today);
 		}
 		setIsOpen(false);
-		scheduleModal(); // 🔄 Vuelve a armar el reloj de tiempo
+		scheduleModal();
 	};
 
 	return (
 		<AnimatePresence>
 			{isOpen && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-					{/* Fondo oscuro esmerilado */}
 					<motion.div
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
 						onClick={handleLater}
-						className="absolute inset-0 bg-black/80 backdrop-blur-md"
+						className="absolute inset-0 bg-black/85 backdrop-blur-md"
 					/>
 
-					{/* Tarjeta del Modal */}
 					<motion.div
-						initial={{ scale: 0.9, opacity: 0, y: 20 }}
+						initial={{ scale: 0.92, opacity: 0, y: 15 }}
 						animate={{ scale: 1, opacity: 1, y: 0 }}
-						exit={{ scale: 0.9, opacity: 0, y: 20 }}
-						transition={{ type: "spring", duration: 0.5 }}
-						className="relative w-full max-w-md overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-b from-zinc-900 via-zinc-950 to-black p-6 sm:p-8 shadow-[0_0_50px_rgba(245,158,11,0.2)] font-sans"
+						exit={{ scale: 0.92, opacity: 0, y: 15 }}
+						transition={{ type: "spring", damping: 25, stiffness: 300 }}
+						className="relative w-full max-w-md overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-6 sm:p-7 shadow-2xl font-sans text-white select-none"
 					>
-						{/* Resplandor dorado de fondo */}
-						<div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+						{/* Barra decorativa superior estilo Pit-Wall */}
+						<div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600" />
 
-						{/* Botón Cerrar (X) -> También activa el "Más tarde" */}
+						{/* Botón Cerrar */}
 						<button
 							onClick={handleLater}
-							className="absolute right-4 top-4 p-2 text-zinc-400 hover:text-white transition-colors rounded-xl bg-zinc-900/50 border border-zinc-800"
+							className="absolute right-4 top-4 p-1.5 text-zinc-400 hover:text-white transition-colors rounded-lg bg-zinc-900 border border-zinc-800 cursor-pointer"
 							title="Cerrar"
 						>
 							<X className="w-4 h-4" />
 						</button>
 
-						<div className="flex flex-col items-center text-center space-y-4">
-							
-							{/* ÍCONO DE MONOPLAZA F1 */}
-							<div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.25)]">
-								<CarIcon className="w-9 h-9 text-amber-400 animate-pulse" />
+						<div className="flex flex-col items-center text-center space-y-4 pt-1">
+							{/* Ícono sobrio de telemetría/comunidad */}
+							<div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.15)]">
+								<Heart className="w-6 h-6 fill-amber-500/20 text-amber-400" />
 							</div>
 
-							{/* BADGE CON ESTILO F1 */}
 							<div className="space-y-1">
-								<div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[10px] font-mono font-bold text-amber-400 uppercase tracking-widest">
-									<Flag className="w-3 h-3 text-amber-500" /> F1 LIVE TELEMETRY
-								</div>
-								<h3 className="text-2xl font-black uppercase text-white tracking-tight pt-1">
-									¿Te sirve la plataforma?
+								<span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-widest">
+									BlackBox F1 · Pit-Wall
+								</span>
+								<h3 className="text-xl font-black uppercase text-zinc-100 tracking-tight">
+									Apoyá el Proyecto
 								</h3>
 							</div>
 
-							{/* Mensaje amigable */}
-							<p className="text-sm text-zinc-300 font-medium leading-relaxed">
-								Llevás un buen rato navegando por la app y parece que te gusta. Mantener los servidores de baja latencia cuesta sus mangos. ¡Si te sirve el proyecto, podés bancar la app con una donación!
+							<p className="text-xs text-zinc-400 leading-relaxed font-sans max-w-xs">
+								Desarrollamos esta plataforma en vivo de forma independiente y sin publicidad invasiva. Si disfrutás de la telemetría y las transmisiones durante los Grandes Premios, tu colaboración nos ayuda a mantener los servidores activos.
 							</p>
 
-							{/* BOTONES DE DONACIÓN */}
-							<div className="w-full space-y-2.5 pt-2">
+							{/* Botones de Donación */}
+							<div className="w-full space-y-2 pt-1">
 								<div className="grid grid-cols-2 gap-2.5">
-									{/* Opción Cafecito / Buy Me a Coffee */}
+									{/* Cafecito / Buy Me a Coffee */}
 									<a
 										href="https://buymeacoffee.com/focusfv"
 										target="_blank"
 										rel="noopener noreferrer"
-										className="flex items-center justify-center gap-2 py-3 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black uppercase tracking-wider text-[11px] shadow-lg hover:scale-[1.02] active:scale-95 transition-all duration-200"
+										className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-mono font-black uppercase tracking-wider text-[11px] shadow-md hover:shadow-amber-500/20 transition-all duration-200 cursor-pointer"
 									>
-										<Coffee className="w-4 h-4" /> Cafecito
+										<Coffee className="w-4 h-4" />
+										<span>Cafecito</span>
 									</a>
 
-									{/* Opción PayPal */}
+									{/* PayPal con link directo */}
 									<a
-										href="https://github.com/sponsors/FocusFV" 
+										href="https://paypal.me/fvillalba4423"
 										target="_blank"
 										rel="noopener noreferrer"
-										className="flex items-center justify-center gap-2 py-3 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-wider text-[11px] shadow-lg hover:scale-[1.02] active:scale-95 transition-all duration-200"
+										className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-[#0070BA] hover:bg-[#005ea6] text-white font-mono font-black uppercase tracking-wider text-[11px] shadow-md hover:shadow-blue-500/20 transition-all duration-200 cursor-pointer"
 									>
-										💳 PayPal
+										<PayPalIcon className="w-4 h-4 fill-white" />
+										<span>PayPal</span>
 									</a>
 								</div>
 
-								{/* BOTÓN SECUNDARIO "MÁS TARDE" */}
+								{/* Botón Cerrar / Más Tarde */}
 								<button
 									onClick={handleLater}
-									className="w-full py-2.5 px-4 rounded-xl bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 text-zinc-300 text-xs font-bold uppercase tracking-wider transition-all duration-200"
+									className="w-full py-2 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs font-mono font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer"
 								>
-									Más tarde
+									Continuar a la app
 								</button>
 							</div>
 
-							{/* CHECKBOX DISCRETO ABAJO DE TODO */}
-							<div 
+							{/* Checkbox No volver a mostrar por hoy */}
+							<div
 								onClick={() => setDontShowToday(!dontShowToday)}
-								className="pt-2 flex items-center justify-center gap-2 text-zinc-500 hover:text-zinc-300 text-xs cursor-pointer select-none transition-colors"
+								className="pt-1 flex items-center justify-center gap-2 text-zinc-500 hover:text-zinc-300 text-xs font-sans cursor-pointer select-none transition-colors"
 							>
 								{dontShowToday ? (
-									<CheckSquare className="w-4 h-4 text-amber-500" />
+									<CheckSquare className="w-3.5 h-3.5 text-amber-500" />
 								) : (
-									<Square className="w-4 h-4 text-zinc-600" />
+									<Square className="w-3.5 h-3.5 text-zinc-600" />
 								)}
-								<span>No volver a mostrar por hoy</span>
+								<span className="text-[11px]">No volver a mostrar por hoy</span>
 							</div>
-
 						</div>
 					</motion.div>
 				</div>
