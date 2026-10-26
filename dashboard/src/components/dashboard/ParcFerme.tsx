@@ -261,106 +261,142 @@ export const ParcFerme: React.FC = () => {
 			{/* GRILLA DE RESULTADOS PRINCIPAL */}
 			<div className="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full justify-center">
 				<div className="lg:col-start-3 lg:col-span-8 flex flex-col bg-zinc-950/50 border border-zinc-800/80 rounded-2xl p-4 md:p-5 backdrop-blur-xl max-w-full shadow-2xl">
-					{/* SELECTOR DE SESIÓN ESTILO CONSOLA F1 */}
-					<div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4 border-b border-zinc-900 pb-3">
-						<div className="flex items-center gap-2 self-start sm:self-auto overflow-x-auto max-w-full no-scrollbar">
-							<div className="bg-zinc-950 p-1 rounded-xl border border-zinc-800/80 inline-flex items-center gap-1 shadow-inner select-none shrink-0">
-								<button
-									onClick={() => setActiveTab("FP1")}
-									className={`text-xs font-mono font-bold px-3.5 py-1.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
-										activeTab === "FP1"
-											? "bg-zinc-800 text-white border border-zinc-700 shadow-md flex items-center gap-1.5"
-											: "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
-									}`}
-								>
-									{activeTab === "FP1" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
-									FP1
-								</button>
-								{hasSprint ? (
-									<>
-										<button
-											onClick={() => setActiveTab("SQ")}
-											className={`text-xs font-mono font-bold px-3.5 py-1.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
-												activeTab === "SQ"
-													? "bg-zinc-800 text-cyan-300 border border-zinc-700 shadow-md flex items-center gap-1.5"
-													: "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
-											}`}
-										>
-											{activeTab === "SQ" && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />}
-											SQ
-										</button>
-										<button
-											onClick={() => setActiveTab("SPRINT")}
-											className={`text-xs font-mono font-bold px-3.5 py-1.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
-												activeTab === "SPRINT"
-													? "bg-zinc-800 text-amber-300 border border-zinc-700 shadow-md flex items-center gap-1.5"
-													: "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
-											}`}
-										>
-											{activeTab === "SPRINT" && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />}
-											SPRINT
-										</button>
-									</>
-								) : (
-									<>
-										<button
-											onClick={() => setActiveTab("FP2")}
-											className={`text-xs font-mono font-bold px-3.5 py-1.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
-												activeTab === "FP2"
-													? "bg-zinc-800 text-white border border-zinc-700 shadow-md flex items-center gap-1.5"
-													: "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
-											}`}
-										>
-											{activeTab === "FP2" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
-											FP2
-										</button>
-										<button
-											onClick={() => setActiveTab("FP3")}
-											className={`text-xs font-mono font-bold px-3.5 py-1.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
-												activeTab === "FP3"
-													? "bg-zinc-800 text-white border border-zinc-700 shadow-md flex items-center gap-1.5"
-													: "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
-											}`}
-										>
-											{activeTab === "FP3" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
-											FP3
-										</button>
-									</>
+					{/* SELECTOR PANORÁMICO DE SESIONES ESTILO PIT-WALL */}
+					<div className="flex flex-col gap-2.5 mb-5 border-b border-zinc-900/80 pb-4">
+						<div className="w-full bg-zinc-950/80 p-1.5 rounded-2xl border border-zinc-800/80 shadow-[0_8px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl flex flex-wrap sm:flex-nowrap gap-1.5 select-none">
+							{/* FP1 */}
+							<button
+								onClick={() => setActiveTab("FP1")}
+								className={`flex-1 py-2.5 px-3 min-w-[65px] rounded-xl text-center font-mono transition-all duration-300 relative overflow-hidden group cursor-pointer ${
+									activeTab === "FP1"
+										? "bg-gradient-to-b from-emerald-500/15 via-zinc-900/90 to-zinc-950/95 border border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.2)] text-emerald-300 font-black"
+										: "bg-zinc-900/40 border border-zinc-800/60 hover:bg-zinc-800/60 hover:border-zinc-700/80 text-zinc-400 hover:text-white"
+								}`}
+							>
+								{activeTab === "FP1" && (
+									<div className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 rounded-full shadow-[0_0_8px_#10b981]" />
 								)}
-								<button
-									onClick={() => setActiveTab("QUALY")}
-									className={`text-xs font-mono font-bold px-3.5 py-1.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
-										activeTab === "QUALY"
-											? "bg-zinc-800 text-purple-300 border border-zinc-700 shadow-md flex items-center gap-1.5"
-											: "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
-									}`}
-								>
-									{activeTab === "QUALY" && <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />}
-									QUALY
-								</button>
-								<button
-									onClick={() => setActiveTab("RACE")}
-									className={`text-xs font-mono font-bold px-3.5 py-1.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
-										activeTab === "RACE"
-											? "bg-zinc-800 text-amber-300 border border-zinc-700 shadow-md flex items-center gap-1.5"
-											: "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
-									}`}
-								>
-									{activeTab === "RACE" && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
-									CARRERA
-								</button>
-							</div>
+								<span className="text-xs font-black tracking-wider block">FP1</span>
+								<span className="text-[9px] text-zinc-500 font-medium tracking-tight uppercase block mt-0.5">Libres 1</span>
+							</button>
+
+							{hasSprint ? (
+								<>
+									{/* SQ */}
+									<button
+										onClick={() => setActiveTab("SQ")}
+										className={`flex-1 py-2.5 px-3 min-w-[65px] rounded-xl text-center font-mono transition-all duration-300 relative overflow-hidden group cursor-pointer ${
+											activeTab === "SQ"
+												? "bg-gradient-to-b from-cyan-500/15 via-zinc-900/90 to-zinc-950/95 border border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.2)] text-cyan-300 font-black"
+												: "bg-zinc-900/40 border border-zinc-800/60 hover:bg-zinc-800/60 hover:border-zinc-700/80 text-zinc-400 hover:text-white"
+										}`}
+									>
+										{activeTab === "SQ" && (
+											<div className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-cyan-400 via-sky-300 to-cyan-500 rounded-full shadow-[0_0_8px_#06b6d4]" />
+										)}
+										<span className="text-xs font-black tracking-wider block">SQ</span>
+										<span className="text-[9px] text-zinc-500 font-medium tracking-tight uppercase block mt-0.5">Shootout</span>
+									</button>
+
+									{/* SPRINT */}
+									<button
+										onClick={() => setActiveTab("SPRINT")}
+										className={`flex-1 py-2.5 px-3 min-w-[65px] rounded-xl text-center font-mono transition-all duration-300 relative overflow-hidden group cursor-pointer ${
+											activeTab === "SPRINT"
+												? "bg-gradient-to-b from-amber-500/15 via-zinc-900/90 to-zinc-950/95 border border-amber-500/50 shadow-[0_0_20px_rgba(245,158,11,0.2)] text-amber-300 font-black"
+												: "bg-zinc-900/40 border border-zinc-800/60 hover:bg-zinc-800/60 hover:border-zinc-700/80 text-zinc-400 hover:text-white"
+										}`}
+									>
+										{activeTab === "SPRINT" && (
+											<div className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 rounded-full shadow-[0_0_8px_#f59e0b]" />
+										)}
+										<span className="text-xs font-black tracking-wider block">SPRINT</span>
+										<span className="text-[9px] text-zinc-500 font-medium tracking-tight uppercase block mt-0.5">Carrera</span>
+									</button>
+								</>
+							) : (
+								<>
+									{/* FP2 */}
+									<button
+										onClick={() => setActiveTab("FP2")}
+										className={`flex-1 py-2.5 px-3 min-w-[65px] rounded-xl text-center font-mono transition-all duration-300 relative overflow-hidden group cursor-pointer ${
+											activeTab === "FP2"
+												? "bg-gradient-to-b from-emerald-500/15 via-zinc-900/90 to-zinc-950/95 border border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.2)] text-emerald-300 font-black"
+												: "bg-zinc-900/40 border border-zinc-800/60 hover:bg-zinc-800/60 hover:border-zinc-700/80 text-zinc-400 hover:text-white"
+										}`}
+									>
+										{activeTab === "FP2" && (
+											<div className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 rounded-full shadow-[0_0_8px_#10b981]" />
+										)}
+										<span className="text-xs font-black tracking-wider block">FP2</span>
+										<span className="text-[9px] text-zinc-500 font-medium tracking-tight uppercase block mt-0.5">Libres 2</span>
+									</button>
+
+									{/* FP3 */}
+									<button
+										onClick={() => setActiveTab("FP3")}
+										className={`flex-1 py-2.5 px-3 min-w-[65px] rounded-xl text-center font-mono transition-all duration-300 relative overflow-hidden group cursor-pointer ${
+											activeTab === "FP3"
+												? "bg-gradient-to-b from-emerald-500/15 via-zinc-900/90 to-zinc-950/95 border border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.2)] text-emerald-300 font-black"
+												: "bg-zinc-900/40 border border-zinc-800/60 hover:bg-zinc-800/60 hover:border-zinc-700/80 text-zinc-400 hover:text-white"
+										}`}
+									>
+										{activeTab === "FP3" && (
+											<div className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 rounded-full shadow-[0_0_8px_#10b981]" />
+										)}
+										<span className="text-xs font-black tracking-wider block">FP3</span>
+										<span className="text-[9px] text-zinc-500 font-medium tracking-tight uppercase block mt-0.5">Libres 3</span>
+									</button>
+								</>
+							)}
+
+							{/* QUALY */}
+							<button
+								onClick={() => setActiveTab("QUALY")}
+								className={`flex-1 py-2.5 px-3 min-w-[65px] rounded-xl text-center font-mono transition-all duration-300 relative overflow-hidden group cursor-pointer ${
+									activeTab === "QUALY"
+										? "bg-gradient-to-b from-purple-500/15 via-zinc-900/90 to-zinc-950/95 border border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.2)] text-purple-300 font-black"
+										: "bg-zinc-900/40 border border-zinc-800/60 hover:bg-zinc-800/60 hover:border-zinc-700/80 text-zinc-400 hover:text-white"
+								}`}
+							>
+								{activeTab === "QUALY" && (
+									<div className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-purple-400 via-fuchsia-300 to-purple-500 rounded-full shadow-[0_0_8px_#a855f7]" />
+								)}
+								<span className="text-xs font-black tracking-wider block">QUALY</span>
+								<span className="text-[9px] text-zinc-500 font-medium tracking-tight uppercase block mt-0.5">Clasificación</span>
+							</button>
+
+							{/* CARRERA */}
+							<button
+								onClick={() => setActiveTab("RACE")}
+								className={`flex-1 py-2.5 px-3 min-w-[65px] rounded-xl text-center font-mono transition-all duration-300 relative overflow-hidden group cursor-pointer ${
+									activeTab === "RACE"
+										? "bg-gradient-to-b from-amber-500/20 via-zinc-900/90 to-zinc-950/95 border border-amber-500/50 shadow-[0_0_25px_rgba(245,158,11,0.25)] text-amber-200 font-black"
+										: "bg-zinc-900/40 border border-zinc-800/60 hover:bg-zinc-800/60 hover:border-zinc-700/80 text-zinc-400 hover:text-white"
+								}`}
+							>
+								{activeTab === "RACE" && (
+									<div className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 rounded-full shadow-[0_0_8px_#f59e0b]" />
+								)}
+								<span className="text-xs font-black tracking-wider block">CARRERA</span>
+								<span className="text-[9px] text-zinc-500 font-medium tracking-tight uppercase block mt-0.5">Gran Premio</span>
+							</button>
 						</div>
 
-						<span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest self-end sm:self-auto shrink-0">
-							{activeTab === "RACE"
-								? "Clasificación Final Oficial"
-								: activeTab === "QUALY"
-								? "Tiempos Oficiales FIA"
-								: activeTab.startsWith("FP")
-								? "Tiempos de Vuelta en Pista"
-								: "Puntos Oficiales Sprint"}
-						</span>
+						<div className="flex items-center justify-between px-1">
+							<span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
+								{activeTab === "RACE"
+									? "Clasificación Final Oficial"
+									: activeTab === "QUALY"
+									? "Tiempos Oficiales FIA"
+									: activeTab.startsWith("FP")
+									? "Mejores Vueltas en Pista"
+									: "Puntos Oficiales Sprint"}
+							</span>
+							<span className="text-[10px] font-mono text-amber-400/80 font-bold uppercase tracking-wider hidden sm:inline-block">
+								Blackbox Timing Console
+							</span>
+						</div>
 					</div>
 
 					{loading ? (

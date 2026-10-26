@@ -14,6 +14,7 @@ import { TvSyncControl } from "@/components/dashboard/TvSyncControl";
 import { RaceControlAlertBanner } from "@/components/dashboard/RaceControlAlertBanner";
 import { TeamRadioAlertPopup } from "@/components/dashboard/TeamRadioAlertPopup";
 import { HeadToHeadModal } from "@/components/dashboard/HeadToHeadModal";
+import { CircuitBackdrop } from "@/components/dashboard/CircuitBackdrop";
 import { Swords } from "lucide-react";
 import {
 	getUpcomingSessions,
@@ -161,7 +162,13 @@ export default function Page() {
 
 			{/* Contenido principal */}
 			{!showTelemetry ? (
-				<div className="flex flex-col gap-6 w-full">
+				<div className="flex flex-col gap-6 w-full relative z-10">
+					{/* 🏎️ Fondo inteligente del circuito aéreo (solo en Parque Cerrado) */}
+					<CircuitBackdrop
+						gpName={scheduleStatus.nextSessionName || session?.Name}
+						country={session?.Meeting?.Country?.Name}
+					/>
+
 					{/* Historial y resultados del último GP */}
 					<ParcFerme />
 
