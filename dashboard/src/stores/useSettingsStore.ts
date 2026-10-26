@@ -2,10 +2,14 @@ import { persist, createJSONStorage, subscribeWithSelector } from "zustand/middl
 import { create } from "zustand";
 
 type SpeedUnit = "metric" | "imperial";
+export type GoldTheme = "classic" | "neon" | "rose" | "oled";
 
 type SettingsStore = {
 	delay: number;
 	setDelay: (delay: number) => void;
+
+	goldTheme: GoldTheme;
+	setGoldTheme: (goldTheme: GoldTheme) => void;
 
 	speedUnit: SpeedUnit;
 	setSpeedUnit: (speedUnit: SpeedUnit) => void;
@@ -54,6 +58,13 @@ export const useSettingsStore = create<SettingsStore>()(
 			(set) => ({
 				delay: 0,
 				setDelay: (delay: number) => set({ delay }),
+
+				goldTheme: "classic",
+				setGoldTheme: (goldTheme: GoldTheme) =>
+					set({
+						goldTheme,
+						oledMode: goldTheme === "oled",
+					}),
 
 				speedUnit: "metric",
 				setSpeedUnit: (speedUnit: SpeedUnit) => set({ speedUnit }),
