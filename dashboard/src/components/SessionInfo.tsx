@@ -47,7 +47,7 @@ export default function SessionInfo() {
 		if (difference <= 0) return "00:00:00";
 		const days = Math.floor(difference / (1000 * 60 * 60 * 24));
 		const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-		const minutes = Math.floor((difference % (1000 * 60)) / (1000 * 60));
+		const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
 		const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 		const pad = (n: number) => n.toString().padStart(2, "0");
 		return days > 0
@@ -62,6 +62,14 @@ export default function SessionInfo() {
 		let targetDate: Date | null = null;
 		let intervalId: any = null;
 
+		const parseSessionDate = (dateStr?: string, timeStr?: string): Date | null => {
+			if (!dateStr) return null;
+			const cleanTime = (timeStr || "12:00:00Z").trim();
+			const cleanTimeZ = cleanTime.endsWith("Z") ? cleanTime : `${cleanTime}Z`;
+			const dt = new Date(`${dateStr.trim()}T${cleanTimeZ}`);
+			return isNaN(dt.getTime()) ? null : dt;
+		};
+
 		async function fetchNextSchedule() {
 			try {
 				const res = await fetch("https://api.jolpi.ca/ergast/f1/current/next.json");
@@ -74,22 +82,36 @@ export default function SessionInfo() {
 					const countryRaw = nextRace.Circuit?.Location?.country || "";
 					setCountryCode(getCountryCodeForGp(nextRace.raceName, countryRaw));
 
-					const now = new Date().getTime();
-					const sessionsToCheck = [
-						{ name: "Práctica 1", date: nextRace.FirstPractice?.date, time: nextRace.FirstPractice?.time },
-						{ name: "Clasificación", date: nextRace.Qualifying?.date, time: nextRace.Qualifying?.time },
-						{ name: "Sprint", date: nextRace.Sprint?.date, time: nextRace.Sprint?.time },
-						{ name: "Gran Premio", date: nextRace.date, time: nextRace.time },
+					const now = Date.now();
+					const candidateDefs = [
+						{ name: "Práctica 1", dt: parseSessionDate(nextRace.FirstPractice?.date, nextRace.FirstPractice?.time) },
+						{ name: "Práctica 2", dt: parseSessionDate(nextRace.SecondPractice?.date, nextRace.SecondPractice?.time) },
+						{ name: "Práctica 3", dt: parseSessionDate(nextRace.ThirdPractice?.date, nextRace.ThirdPractice?.time) },
+						{
+							name: "Sprint Shootout",
+							dt: parseSessionDate(
+								nextRace.SprintQualifying?.date || nextRace.SprintShootout?.date,
+								nextRace.SprintQualifying?.time || nextRace.SprintShootout?.time
+							),
+						},
+						{ name: "Carrera Sprint", dt: parseSessionDate(nextRace.Sprint?.date, nextRace.Sprint?.time) },
+						{ name: "Clasificación", dt: parseSessionDate(nextRace.Qualifying?.date, nextRace.Qualifying?.time) },
+						{ name: "Gran Premio", dt: parseSessionDate(nextRace.date, nextRace.time) },
 					];
 
-					let closestSession = sessionsToCheck.find((s) => s.date && new Date(`${s.date}T${s.time || "12:00:00Z"}`).getTime() > now);
-					if (!closestSession) {
-						closestSession = { name: "Gran Premio", date: nextRace.date, time: nextRace.time };
-					}
+					const validSessions = candidateDefs
+						.filter((s): s is { name: string; dt: Date } => s.dt !== null)
+						.sort((a, b) => a.dt.getTime() - b.dt.getTime());
 
-					setNextSessionName(closestSession.name);
-					targetDate = new Date(`${closestSession.date}T${closestSession.time || "13:00:00Z"}`);
-					setCountdown(calcCountdown(targetDate));
+					const closestSession =
+						validSessions.find((s) => s.dt.getTime() > now) ||
+						validSessions[validSessions.length - 1];
+
+					if (closestSession) {
+						setNextSessionName(closestSession.name);
+						targetDate = closestSession.dt;
+						setCountdown(calcCountdown(targetDate));
+					}
 				}
 			} catch {
 				const d = new Date();

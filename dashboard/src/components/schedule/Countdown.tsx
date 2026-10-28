@@ -74,18 +74,18 @@ export default function Countdown({ next, type, countryName }: Props) {
 	}, [next.start, nextMoment]);
 
 	const actionText = (() => {
-		const kind = next.kind.toLowerCase();
-		if (kind === "race") {
+		const raw = (next.kind || "").toLowerCase().replace(/\s+/g, "");
+		if (raw === "race") {
 			const translatedCountry = countryName ? (countryTranslation[countryName] || countryName) : "";
 			return translatedCountry ? `COMIENZA LA CARRERA DE ${translatedCountry.toUpperCase()}` : "COMIENZA LA CARRERA";
 		}
-		if (kind === "qualifying") return "COMIENZA LA CLASIFICACIÓN";
-		if (kind === "sprint" || kind === "sprint race") return "COMIENZA LA CARRERA SPRINT";
-		if (kind === "sprint qualification" || kind === "sprint shootout") return "COMIENZA LA CLASIF. SPRINT";
-		if (kind === "practice 1") return "COMIENZAN LOS LIBRES 1";
-		if (kind === "practice 2") return "COMIENZAN LOS LIBRES 2";
-		if (kind === "practice 3") return "COMIENZAN LOS LIBRES 3";
-		return `COMIENZA ${kind.toUpperCase()}`;
+		if (raw === "qualifying" || raw === "qualy") return "COMIENZA LA CLASIFICACIÓN";
+		if (raw === "sprint" || raw === "sprintrace") return "COMIENZA LA CARRERA SPRINT";
+		if (raw.includes("sprint") && (raw.includes("shootout") || raw.includes("qualif"))) return "COMIENZA LA CLASIF. SPRINT";
+		if (raw === "practice1" || raw === "fp1") return "COMIENZAN LOS LIBRES 1";
+		if (raw === "practice2" || raw === "fp2") return "COMIENZAN LOS LIBRES 2";
+		if (raw === "practice3" || raw === "fp3") return "COMIENZAN LOS LIBRES 3";
+		return `COMIENZA ${(next.kind || "").toUpperCase()}`;
 	})();
 
 	return (
