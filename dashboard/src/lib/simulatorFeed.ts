@@ -350,9 +350,42 @@ class SimulatorService {
 			LastLapTime: { Value: lastLap, Status: 2049, OverallFastest: isFastest, PersonalFastest: isPersonalFastest },
 			NumberOfLaps: 28,
 			Sectors: [
-				{ Stopped: false, Value: s1, Status: 2049, OverallFastest: isFastest, PersonalFastest: isPersonalFastest, Segments: [] },
-				{ Stopped: false, Value: s2, Status: 2049, OverallFastest: false, PersonalFastest: isPersonalFastest, Segments: [] },
-				{ Stopped: false, Value: s3, Status: 2049, OverallFastest: false, PersonalFastest: false, Segments: [] },
+				{
+					Stopped: false,
+					Value: s1,
+					Status: isFastest ? 2051 : isPersonalFastest ? 2049 : 2048,
+					OverallFastest: isFastest,
+					PersonalFastest: isPersonalFastest,
+					Segments: [
+						{ Status: isFastest ? 2051 : isPersonalFastest ? 2049 : 2048 },
+						{ Status: isFastest ? 2051 : 2049 },
+						{ Status: 2048 },
+					],
+				},
+				{
+					Stopped: false,
+					Value: s2,
+					Status: isPersonalFastest ? 2049 : 2048,
+					OverallFastest: false,
+					PersonalFastest: isPersonalFastest,
+					Segments: [
+						{ Status: 2049 },
+						{ Status: 2048 },
+						{ Status: isPersonalFastest ? 2049 : 2048 },
+					],
+				},
+				{
+					Stopped: false,
+					Value: s3,
+					Status: 2048,
+					OverallFastest: false,
+					PersonalFastest: false,
+					Segments: [
+						{ Status: 2048 },
+						{ Status: 2048 },
+						{ Status: 2049 },
+					],
+				},
 			],
 			Speeds: {
 				St: { Value: speed, Status: 2049, OverallFastest: isFastest, PersonalFastest: isPersonalFastest },
@@ -501,7 +534,11 @@ class SimulatorService {
 			},
 		};
 
+		// Inyectar estado inicial en el store
 		useDataStore.getState().setState(initialState);
+
+		// Inyectar telemetría en vivo (RPM, velocidad, marcha, acelerador, MOM) para TODOS los 22 autos
+		useDataStore.getState().setCarsData(this.generateAllCarsData());
 
 		// Loop de actualización viva
 		this.intervalId = setInterval(() => {
@@ -509,65 +546,39 @@ class SimulatorService {
 		}, 1500);
 	}
 
+	private generateAllCarsData(): CarsData {
+		const allNumbers = [
+			"4", "1", "16", "81", "44", "63", "12", "43", "11", "55",
+			"14", "23", "10", "30", "22", "87", "31", "18", "27", "5", "77", "6"
+		];
+
+		const mock: CarsData = {};
+		allNumbers.forEach((num, idx) => {
+			// Activar MOM en Franco, Checo, Verstappen, Norris y algunos pilotos estratégicos
+			const isMom = num === "43" || num === "11" || num === "1" || num === "4" || (idx % 2 === 0);
+			const baseSpeed = num === "43" ? 343 : num === "11" ? 341 : num === "4" ? 345 : 332;
+
+			mock[num] = {
+				Channels: {
+					0: Math.floor(10500 + Math.random() * 1400), // RPM
+					2: Math.floor(baseSpeed - 3 + Math.random() * 6), // Velocidad km/h
+					3: 8, // Marcha 8
+					4: Math.floor(88 + Math.random() * 12), // Acelerador %
+					5: 0, // Freno
+					45: isMom ? 10 : 8, // 10 = MOM Activo, 8 = MOM Disponible
+				},
+			};
+		});
+
+		return mock;
+	}
+
 	private tick() {
 		const state = useDataStore.getState().state;
 		if (!state?.TimingData?.Lines) return;
 
-		// Variación de telemetría de autos en vivo (RPM, velocidad ~340 km/h, marcha 8, acelerador, MOM 2026)
-		const mockCarsData: CarsData = {
-			"43": { // Franco Colapinto (Alpine)
-				Channels: {
-					0: Math.floor(10800 + Math.random() * 1500),
-					2: Math.floor(338 + Math.random() * 8),
-					3: 8,
-					4: Math.floor(92 + Math.random() * 8),
-					5: 0,
-					45: 10, // MOM activo
-				},
-			},
-			"11": { // Checo Pérez (Cadillac)
-				Channels: {
-					0: Math.floor(10900 + Math.random() * 1400),
-					2: Math.floor(339 + Math.random() * 7),
-					3: 8,
-					4: Math.floor(94 + Math.random() * 6),
-					5: 0,
-					45: 10, // MOM activo
-				},
-			},
-			"4": { // Norris
-				Channels: {
-					0: Math.floor(11100 + Math.random() * 1200),
-					2: Math.floor(342 + Math.random() * 6),
-					3: 8,
-					4: 100,
-					5: 0,
-					45: 0,
-				},
-			},
-			"1": { // Verstappen
-				Channels: {
-					0: Math.floor(11050 + Math.random() * 1300),
-					2: Math.floor(341 + Math.random() * 6),
-					3: 8,
-					4: 100,
-					5: 0,
-					45: 10,
-				},
-			},
-			"16": { // Leclerc
-				Channels: {
-					0: Math.floor(11000 + Math.random() * 1300),
-					2: Math.floor(340 + Math.random() * 7),
-					3: 8,
-					4: 98,
-					5: 0,
-					45: 0,
-				},
-			},
-		};
-
-		useDataStore.getState().setCarsData(mockCarsData);
+		// Actualizamos telemetría oscilante de todos los 22 autos
+		useDataStore.getState().setCarsData(this.generateAllCarsData());
 
 		// Mantener Heartbeat vivo para que los widgets reconozcan actividad continua
 		useDataStore.getState().setState({

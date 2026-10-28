@@ -61,13 +61,13 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 			whileHover={{ x: 3 }}
 			onClick={() => triggerHaptic("light")}
 			className={clsx(
-				"group/driver flex flex-col gap-1 rounded-lg select-none transition-all duration-200 cursor-pointer border border-transparent hover:border-zinc-700/60",
+				"group/driver flex flex-col gap-1 rounded-lg select-none transition-all duration-200 cursor-pointer border bg-zinc-950/40 border-zinc-900/60 hover:border-zinc-700/70 hover:bg-zinc-900/50",
 				isCompact ? "p-1" : "p-1.5",
 				{
-					"opacity-50": timingDriver.KnockedOut || timingDriver.Retired || timingDriver.Stopped,
-					"bg-sky-800/30": favoriteDriver,
-					"bg-violet-800/30": hasFastest,
-					"bg-red-800/30": sessionPart != undefined && inDangerZone(position, sessionPart),
+					"opacity-40 grayscale": timingDriver.KnockedOut || timingDriver.Retired || timingDriver.Stopped,
+					"bg-sky-950/40 border-sky-500/50 shadow-[0_0_12px_rgba(14,165,233,0.15)]": favoriteDriver,
+					"bg-violet-950/40 border-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.15)]": hasFastest,
+					"bg-red-950/40 border-red-500/50": sessionPart != undefined && inDangerZone(position, sessionPart),
 				}
 			)}
 		>

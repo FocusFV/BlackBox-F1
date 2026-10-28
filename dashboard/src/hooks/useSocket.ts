@@ -13,6 +13,12 @@ export const useSocket = ({ handleInitial, handleUpdate }: Props) => {
 	const [connected, setConnected] = useState<boolean>(false);
 
 	useEffect(() => {
+		// 🛡️ Si estamos en la ruta de demostración (/dashboard/demo), no nos conectamos al servidor
+		// remoto para evitar que sesiones viejas o en pausa pisen la simulación activa de 2026.
+		if (typeof window !== "undefined" && window.location.pathname.includes("/demo")) {
+			return;
+		}
+
 		let isMounted = true;
 
 		// 🚀 Carga inicial instantánea vía HTTP GET para hidratar la grilla en milisegundos

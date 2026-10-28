@@ -161,7 +161,8 @@ export default function Map({ filter }: { filter?: string[] }) {
 		if (hasLivePositions) return;
 		let frameId: number;
 		const updateFrame = () => {
-			setTimeOffset((Date.now() / 24000) % 1);
+			// 🏎️ Ritmo de vuelta realista en modo simulación: ~88s por vuelta (1m28s en México)
+			setTimeOffset((Date.now() / 88000) % 1);
 			frameId = requestAnimationFrame(updateFrame);
 		};
 		frameId = requestAnimationFrame(updateFrame);
