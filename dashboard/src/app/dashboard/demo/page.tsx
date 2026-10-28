@@ -42,15 +42,12 @@ export default function DemoPage() {
 					</Link>
 
 					<div className="flex items-center gap-2 border-l border-zinc-800 pl-3">
-						<span className="relative flex h-3 w-3">
+						<span className="relative flex h-2.5 w-2.5">
 							<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-							<span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500"></span>
+							<span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
 						</span>
-						<span className="text-xs font-black tracking-wider text-emerald-400 uppercase">
-							GRAN PREMIO DE MÉXICO 2026 • CARRERA EN VIVO
-						</span>
-						<span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-500/40 uppercase">
-							VUELTA 28 / 53 • REGS 2026 (MOM)
+						<span className="text-xs font-black tracking-wider text-emerald-400 uppercase font-mono">
+							GRAN PREMIO DE LA CIUDAD DE MÉXICO 2026 • CARRERA EN VIVO
 						</span>
 					</div>
 				</div>

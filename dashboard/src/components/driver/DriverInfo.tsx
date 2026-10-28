@@ -13,25 +13,25 @@ export default function DriverInfo({ timingDriver, gridPos }: Props) {
 	const loss = positionChange && positionChange < 0;
 
 	const status = timingDriver.KnockedOut
-		? "OUT"
+		? "ELIM"
 		: !!timingDriver.Cutoff
-			? "CUTOFF"
+			? "CORTE"
 			: timingDriver.Retired
-				? "RETIRED"
+				? "ABAN"
 				: timingDriver.Stopped
-					? "STOPPED"
+					? "DET"
 					: timingDriver.InPit
-						? "PIT"
+						? "BOX"
 						: timingDriver.PitOut
-							? "PIT OUT"
+							? "SALIDA"
 							: null;
 
 	return (
-		<div className="place-self-start">
+		<div className="place-self-start font-mono text-center min-w-[2.5rem]">
 			<p
-				className={clsx("text-lg leading-none font-medium tabular-nums", {
-					"text-emerald-500": gain,
-					"text-red-500": loss,
+				className={clsx("text-base leading-none font-bold tabular-nums", {
+					"text-emerald-400": gain,
+					"text-red-400": loss,
 					"text-zinc-500": !gain && !loss,
 				})}
 			>
@@ -41,10 +41,10 @@ export default function DriverInfo({ timingDriver, gridPos }: Props) {
 						: loss
 							? positionChange
 							: "-"
-					: `${timingDriver.NumberOfLaps}L`}
+					: `${timingDriver.NumberOfLaps}V`}
 			</p>
 
-			<p className="text-sm leading-none text-zinc-500">{status ?? "-"}</p>
+			<p className="text-[10px] font-bold leading-none text-zinc-500 mt-1 uppercase tracking-tight">{status ?? "-"}</p>
 		</div>
 	);
 }

@@ -14,19 +14,17 @@ import { useDataStore } from "@/stores/useDataStore";
 import type { Driver, TimingDataDriver } from "@/types/state.type";
 
 const driverTeamColorMap: { [key: string]: string } = {
-	NOR: "#ff8700", PIA: "#ff8700",
-	LEC: "#e10600", HAM: "#e10600", BEA: "#e10600",
-	// 🔵 Red Bull / VCARB alternativos: Azules cyan ultra brillantes para que resalten sobre negro
-	VER: "#2ab4ff", HAD: "#2ab4ff", PER: "#f0f0f0", LIN: "#00d2ff",
-	RUS: "#00d2be", ANT: "#00d2be",
-	ALO: "#00ffc4", STR: "#00ffc4", // Aston Martin tirando a verde aqua brillante
-	GAS: "#ff00ff", COL: "#ff00ff", OCO: "#ff00ff",
-	// ⚪ Haas: Blanco tiza brillante para sacarlo del gris invisible
-	MAG: "#f0f0f0",
-	LAW: "#4b77ff", TSU: "#4b77ff",
-	ALB: "#005aff", SAI: "#005aff",
-	// Sauber / Audi / Otros: Verde lima flúor e internacional para que explote en la pantalla
-	BOT: "#f0f0f0", HUL: "#bfff00", BOR: "#bfff00",
+	NOR: "#ff8000", PIA: "#ff8000",
+	LEC: "#e80020", HAM: "#e80020",
+	VER: "#3671c6", HAD: "#3671c6",
+	RUS: "#27f4d2", ANT: "#27f4d2",
+	COL: "#0093cc", GAS: "#0093cc", // Alpine F1 Team
+	PER: "#94a3b8", BOT: "#94a3b8", // Cadillac F1 Team
+	SAI: "#005aff", ALB: "#005aff", // Williams Racing
+	HUL: "#c0c0c0", BOR: "#c0c0c0", // Audi F1
+	ALO: "#229971", STR: "#229971", // Aston Martin
+	LAW: "#6692ff", TSU: "#6692ff", LIN: "#6692ff", // Racing Bulls
+	OCO: "#b6babd", BEA: "#b6babd", MAG: "#b6babd", // Haas
 };
 
 export default function TrackMap() {

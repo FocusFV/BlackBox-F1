@@ -53,21 +53,25 @@ const TableHeaders = () => {
 
     return (
         <div
-            className="grid items-center gap-2 p-1 px-2 text-sm font-medium text-zinc-500"
+            className="grid items-center gap-2 p-1.5 px-2 text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 select-none border-b border-zinc-900 pb-1.5"
             style={{
                 gridTemplateColumns: carMetrics
-                    ? "5.5rem 3.5rem 5.5rem 4rem 5rem 5.5rem auto 10.5rem"
-                    : "5.5rem 3.5rem 5.5rem 4rem 5rem 5.5rem auto",
+                    ? "5.5rem 3.5rem 5.5rem 4rem 5.5rem 6.2rem auto 13rem"
+                    : "5.5rem 3.5rem 5.5rem 4rem 5.5rem 6.2rem auto",
             }}
         >
-            <p>Posición</p>
-            <p>MOM</p>
-            <p>Neumático</p>
-            <p>Info</p>
-            <p>Diferencia</p>
-            <p>Tiempo de Vuelta</p>
-            <p>Sectores</p>
-            {carMetrics && <p>Datos del Auto</p>}
+            <p>POS</p>
+            <p className="text-center">MOM</p>
+            <p className="text-center">GOMA</p>
+            <p className="text-center">INFO</p>
+            <p className="text-left pl-1">BRECHA / INT</p>
+            <p className="text-left pl-1">VUELTA</p>
+            <div className="flex gap-2">
+                <p className="w-[4.75rem] text-center">S1</p>
+                <p className="w-[4.75rem] text-center">S2</p>
+                <p className="w-[4.75rem] text-center">S3</p>
+            </div>
+            {carMetrics && <p className="pl-1">TELEMETRÍA</p>}
         </div>
     );
 };
@@ -82,8 +86,8 @@ const SkeletonDriver = () => {
             className="grid items-center gap-2 p-1.5"
             style={{
                 gridTemplateColumns: carMetrics
-                    ? "5.5rem 3.5rem 5.5rem 4rem 5rem 5.5rem auto 10.5rem"
-                    : "5.5rem 3.5rem 5.5rem 4rem 5rem 5.5rem auto",
+                    ? "5.5rem 3.5rem 5.5rem 4rem 5.5rem 6.2rem auto 13rem"
+                    : "5.5rem 3.5rem 5.5rem 4rem 5.5rem 6.2rem auto",
             }}
         >
             <div className={animateClass} style={{ width: "100%" }} />

@@ -31,13 +31,13 @@ export default function DriverTire({ stints }: Props) {
 
 			{!currentStint && <div className="h-8 w-8 animate-pulse rounded-full bg-zinc-800 font-semibold" />}
 
-			<div>
-				<p className="leading-none font-medium tabular-nums">
-					L {currentStint?.TotalLaps ?? 0}
+			<div className="font-mono">
+				<p className="text-xs leading-none font-bold text-zinc-200 tabular-nums">
+					V {currentStint?.TotalLaps ?? 0}
 					{currentStint && !currentStint.New ? "*" : ""}
 				</p>
 
-				<p className="text-xs leading-none text-zinc-500 font-mono mt-0.5">PIT {stops}</p>
+				<p className="text-[10px] leading-none text-zinc-500 font-bold mt-1">BOX {stops}</p>
 			</div>
 		</div>
 	);

@@ -80,9 +80,6 @@ function MobileDynamicBar() {
 			<div className="p-2">
 				<SessionInfo />
 			</div>
-			<div className="p-2">
-				<WeatherInfo />
-			</div>
 		</div>
 	);
 }
@@ -121,8 +118,6 @@ function DesktopStaticBar({ show }: { show: boolean }) {
 					</motion.div>
 				</AnimatePresence>
 			</div>
-
-			<div className="hidden md:items-center lg:flex">{show && <WeatherInfo />}</div>
 
 			<div className="flex justify-end">{show && <TrackInfo />}</div>
 		</div>

@@ -28,18 +28,18 @@ export default function DriverGap({ timingDriver, sessionPart }: Props) {
 	const secondary = timeFormat === "leader" ? gapToFront : gapToLeader;
 
 	return (
-		<div className="place-self-start font-mono">
+		<div className="place-self-start font-mono min-w-[4.8rem]">
 			<p
-				className={clsx("text-lg leading-none font-bold tabular-nums", {
-					"text-emerald-500": catching,
+				className={clsx("text-base leading-none font-bold tabular-nums", {
+					"text-emerald-400": catching,
 					"text-zinc-500": !primary,
 				})}
 			>
-				{!!primary ? primary : "-- ---"}
+				{!!primary ? primary : "--.---"}
 			</p>
 
-			<p className="text-xs leading-none text-zinc-500 tabular-nums mt-0.5">
-				{!!secondary ? secondary : "-- ---"}
+			<p className="text-xs leading-none text-zinc-500 tabular-nums mt-1">
+				{!!secondary ? secondary : "--.---"}
 			</p>
 		</div>
 	);

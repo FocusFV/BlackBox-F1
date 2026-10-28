@@ -17,7 +17,8 @@ export default function WeatherPage() {
 	const infoSesionMilitar = sessionInfo as any;
 	
 	const gpNombre = infoSesionMilitar?.Meeting?.OfficialName ? infoSesionMilitar.Meeting.OfficialName.toUpperCase() : "GRAN PREMIO DE FÓRMULA 1";
-	const sesionNombre = infoSesionMilitar?.Name ? infoSesionMilitar.Name.toUpperCase() : (infoSesionMilitar?.Type ? infoSesionMilitar.Type.toUpperCase() : "SESIÓN ACTIVA");
+	const rawSesion = infoSesionMilitar?.Name ? infoSesionMilitar.Name.toUpperCase() : (infoSesionMilitar?.Type ? infoSesionMilitar.Type.toUpperCase() : "SESIÓN ACTIVA");
+	const sesionNombre = rawSesion === "RACE" ? "CARRERA" : rawSesion === "QUALIFYING" ? "CLASIFICACIÓN" : rawSesion === "PRACTICE 1" ? "PRÁCTICA 1" : rawSesion === "PRACTICE 2" ? "PRÁCTICA 2" : rawSesion === "PRACTICE 3" ? "PRÁCTICA 3" : rawSesion;
 	const circuitoNombre = infoSesionMilitar?.Meeting?.Circuit?.ShortName ? infoSesionMilitar.Meeting.Circuit.ShortName.toUpperCase() : "TRAZADO DE COMPETICIÓN";
 	const paisGP = infoSesionMilitar?.Meeting?.Country?.Name ? infoSesionMilitar.Meeting.Country.Name.toUpperCase() : "SITUACIÓN GEOGRÁFICA";
 

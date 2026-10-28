@@ -7,6 +7,19 @@ import { useSettingsStore } from "@/stores/useSettingsStore";
 import Flag from "@/components/Flag";
 import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
 
+const translateSessionName = (name?: string) => {
+	if (!name) return "En Vivo";
+	const clean = name.toLowerCase().trim();
+	if (clean === "race") return "Carrera";
+	if (clean === "qualifying") return "Clasificación";
+	if (clean === "sprint") return "Carrera Sprint";
+	if (clean === "sprint shootout" || clean === "sprint qualifying") return "Clasif. Sprint";
+	if (clean === "practice 1") return "Práctica 1";
+	if (clean === "practice 2") return "Práctica 2";
+	if (clean === "practice 3") return "Práctica 3";
+	return name;
+};
+
 const sessionPartPrefix = (name: string) => {
 	switch (name) {
 		case "Sprint Qualifying":
@@ -177,19 +190,21 @@ export default function SessionInfo() {
 			: undefined;
 
 	return (
-		<div className="flex items-center gap-2">
+		<div className="flex items-center gap-2.5">
 			<Flag countryCode={session?.Meeting?.Country?.Code} />
 
 			<div className="flex flex-col justify-center">
-				<h1 className="truncate text-sm leading-none font-medium text-white">
-					{session?.Meeting?.Name}: {session?.Name ?? "En Vivo"}
+				<h1 className="truncate text-xs md:text-sm leading-none font-bold text-white font-mono uppercase tracking-wide">
+					{session?.Meeting?.Name}: {translateSessionName(session?.Name)}
 					{timingData?.SessionPart && session?.Name ? ` ${sessionPartPrefix(session.Name)}${timingData.SessionPart}` : ""}
 				</h1>
 
 				{timeRemaining !== undefined ? (
-					<p className="text-2xl leading-none font-extrabold text-white">{timeRemaining}</p>
+					<p className="text-xl md:text-2xl leading-none font-black text-white font-mono mt-1">{timeRemaining}</p>
 				) : (
-					<p className="text-lg leading-none font-bold text-zinc-300 font-mono mt-1">Pista Abierta</p>
+					<p className="text-xs leading-none font-bold text-zinc-400 font-mono mt-1 uppercase tracking-wider">
+						{session?.Meeting?.Circuit?.ShortName || session?.Meeting?.Location || "Trazado Oficial"}
+					</p>
 				)}
 			</div>
 		</div>
