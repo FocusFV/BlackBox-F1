@@ -12,28 +12,31 @@ import { useSettingsStore } from "@/stores/useSettingsStore";
 import DriverTag from "@/components/driver/DriverTag";
 import SelectMultiple from "@/components/ui/SelectMultiple";
 
-// 🏎️ LISTA DE RESPALDO (Temporada F1): Garantiza que siempre puedas buscar aunque la telemetría esté apagarla
+// 🏎️ LISTA DE RESPALDO (Temporada 2026 - 22 Pilotos): Garantiza que siempre puedas buscar aunque la telemetría esté apagada
 const FALLBACK_DRIVERS = [
-	{ number: "1", name: "Max Verstappen", tla: "VER", color: "#061d43" },
-	{ number: "44", name: "Lewis Hamilton", tla: "HAM", color: "#e10600" },
-	{ number: "16", name: "Charles Leclerc", tla: "LEC", color: "#e10600" },
-	{ number: "4", name: "Lando Norris", tla: "NOR", color: "#ff8700" },
-	{ number: "81", name: "Oscar Piastri", tla: "PIA", color: "#ff8700" },
-	{ number: "63", name: "George Russell", tla: "RUS", color: "#00d2be" },
-	{ number: "12", name: "Kimi Antonelli", tla: "ANT", color: "#00d2be" },
-	{ number: "14", name: "Fernando Alonso", tla: "ALO", color: "#006f62" },
-	{ number: "18", name: "Lance Stroll", tla: "STR", color: "#006f62" },
-	{ number: "10", name: "Pierre Gasly", tla: "GAS", color: "#ff00ff" },
-	{ number: "43", name: "Franco Colapinto", tla: "COL", color: "#ff00ff" },
-	{ number: "23", name: "Alexander Albon", tla: "ALB", color: "#005aff" },
-	{ number: "55", name: "Carlos Sainz", tla: "SAI", color: "#005aff" },
-	{ number: "30", name: "Liam Lawson", tla: "LAW", color: "#4b77ff" },
-	{ number: "22", name: "Yuki Tsunoda", tla: "TSU", color: "#4b77ff" },
-	{ number: "27", name: "Nico Hulkenberg", tla: "HUL", color: "#1f1f1f" },
-	{ number: "5", name: "Gabriel Bortoleto", tla: "BOR", color: "#1f1f1f" },
-	{ number: "31", name: "Esteban Ocon", tla: "OCO", color: "#e10600" },
-	{ number: "87", name: "Oliver Bearman", tla: "BEA", color: "#e10600" },
-	{ number: "41", name: "Arvid Lindblad", tla: "LIN", color: "#061d43" },
+	{ number: "1", name: "Max Verstappen", tla: "VER", color: "#3671C6" },
+	{ number: "6", name: "Isack Hadjar", tla: "HAD", color: "#3671C6" },
+	{ number: "4", name: "Lando Norris", tla: "NOR", color: "#FF8000" },
+	{ number: "81", name: "Oscar Piastri", tla: "PIA", color: "#FF8000" },
+	{ number: "16", name: "Charles Leclerc", tla: "LEC", color: "#E80020" },
+	{ number: "44", name: "Lewis Hamilton", tla: "HAM", color: "#E80020" },
+	{ number: "63", name: "George Russell", tla: "RUS", color: "#27F4D2" },
+	{ number: "12", name: "Kimi Antonelli", tla: "ANT", color: "#27F4D2" },
+	{ number: "43", name: "Franco Colapinto", tla: "COL", color: "#0093CC" },
+	{ number: "10", name: "Pierre Gasly", tla: "GAS", color: "#0093CC" },
+	{ number: "11", name: "Sergio Pérez", tla: "PER", color: "#94A3B8" },
+	{ number: "77", name: "Valtteri Bottas", tla: "BOT", color: "#94A3B8" },
+	{ number: "55", name: "Carlos Sainz", tla: "SAI", color: "#005AFF" },
+	{ number: "23", name: "Alexander Albon", tla: "ALB", color: "#005AFF" },
+	{ number: "14", name: "Fernando Alonso", tla: "ALO", color: "#229971" },
+	{ number: "18", name: "Lance Stroll", tla: "STR", color: "#229971" },
+	{ number: "30", name: "Liam Lawson", tla: "LAW", color: "#6692FF" },
+	{ number: "22", name: "Yuki Tsunoda", tla: "TSU", color: "#6692FF" },
+	{ number: "41", name: "Arvid Lindblad", tla: "LIN", color: "#6692FF" },
+	{ number: "27", name: "Nico Hülkenberg", tla: "HUL", color: "#C0C0C0" },
+	{ number: "5", name: "Gabriel Bortoleto", tla: "BOR", color: "#C0C0C0" },
+	{ number: "31", name: "Esteban Ocon", tla: "OCO", color: "#B6BABD" },
+	{ number: "87", name: "Oliver Bearman", tla: "BEA", color: "#B6BABD" },
 ];
 
 export default function FavoriteDrivers() {

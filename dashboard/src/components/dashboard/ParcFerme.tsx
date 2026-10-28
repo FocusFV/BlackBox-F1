@@ -38,22 +38,23 @@ const driverTeamColorMap: Record<string, { bg: string; text: string }> = {
 	VER: { bg: "#061d43", text: "#ffffff" },
 	HAD: { bg: "#061d43", text: "#ffffff" },
 	LIN: { bg: "#061d43", text: "#ffffff" },
-	PER: { bg: "#061d43", text: "#ffffff" },
+	PER: { bg: "#94a3b8", text: "#000000" }, // Cadillac F1 Team
 	RUS: { bg: "#00d2be", text: "#ffffff" },
 	ANT: { bg: "#00d2be", text: "#ffffff" },
 	ALO: { bg: "#006f62", text: "#ffffff" },
 	STR: { bg: "#006f62", text: "#ffffff" },
-	GAS: { bg: "#ff00ff", text: "#ffffff" },
-	COL: { bg: "#00a0de", text: "#ffffff" },
+	GAS: { bg: "#0093cc", text: "#ffffff" }, // Alpine
+	COL: { bg: "#0093cc", text: "#ffffff" }, // Alpine
 	BEA: { bg: "#e10600", text: "#ffffff" },
-	OCO: { bg: "#b6babd", text: "#ffffff" },
+	OCO: { bg: "#e10600", text: "#ffffff" },
 	MAG: { bg: "#373737", text: "#ffffff" },
-	LAW: { bg: "#6692ff", text: "#ffffff" },
-	TSU: { bg: "#6692ff", text: "#ffffff" },
-	ALB: { bg: "#00a0de", text: "#ffffff" },
-	SAI: { bg: "#00a0de", text: "#ffffff" },
-	BOT: { bg: "#52e252", text: "#ffffff" },
-	ZHO: { bg: "#52e252", text: "#ffffff" }
+	LAW: { bg: "#4b77ff", text: "#ffffff" },
+	TSU: { bg: "#4b77ff", text: "#ffffff" },
+	ALB: { bg: "#005aff", text: "#ffffff" },
+	SAI: { bg: "#005aff", text: "#ffffff" },
+	BOT: { bg: "#94a3b8", text: "#000000" }, // Cadillac F1 Team
+	HUL: { bg: "#c0c0c0", text: "#000000" }, // Audi
+	BOR: { bg: "#c0c0c0", text: "#000000" }, // Audi
 };
 
 const TeamLogo: React.FC<{ teamName: string }> = ({ teamName }) => {
@@ -63,6 +64,8 @@ const TeamLogo: React.FC<{ teamName: string }> = ({ teamName }) => {
 	const fallbacks: string[] = [];
 	if (cleanName.includes("red bull")) {
 		fallbacks.push("/team-logos/red-bull.svg", "/team-logos/red-bull-racing.svg");
+	} else if (cleanName.includes("cadillac")) {
+		fallbacks.push("/team-logos/cadillac-f1-team.svg", "/team-logos/cadillac.svg");
 	} else if (cleanName.includes("alpine")) {
 		fallbacks.push("/team-logos/alpine-f1-team.svg", "/team-logos/alpine.svg");
 	} else if (cleanName.includes("rb") || cleanName.includes("racing bulls")) {

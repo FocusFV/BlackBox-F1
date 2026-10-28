@@ -61,7 +61,7 @@ const TableHeaders = () => {
             }}
         >
             <p>Posición</p>
-            <p>DRS</p>
+            <p>MOM</p>
             <p>Neumático</p>
             <p>Info</p>
             <p>Diferencia</p>

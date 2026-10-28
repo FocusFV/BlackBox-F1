@@ -22,7 +22,7 @@ export default function DriverDRS({ on, possible, inPit, pitOut }: Props) {
 				},
 			)}
 		>
-			{pit ? "PIT" : "DRS"}
+			{pit ? "PIT" : "MOM"}
 		</span>
 	);
 }
