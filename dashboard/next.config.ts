@@ -7,19 +7,26 @@ import "@/env";
 const output = "standalone";
 const compress = process.env.NEXT_NO_COMPRESS === "1";
 
-const frameDisableHeaders = [
+const securityAndRobotsHeaders = [
 	{
 		source: "/(.*)",
 		headers: [
 			{
-				type: "header",
 				key: "X-Frame-Options",
 				value: "SAMEORIGIN",
 			},
 			{
-				type: "header",
 				key: "Content-Security-Policy",
 				value: "frame-ancestors 'self';",
+			},
+		],
+	},
+	{
+		source: "/streams(.*)",
+		headers: [
+			{
+				key: "X-Robots-Tag",
+				value: "noindex, nofollow, noarchive, nosnippet",
 			},
 		],
 	},
@@ -41,7 +48,7 @@ const config: NextConfig = {
 			},
 		],
 	},
-	headers: async () => frameDisableHeaders,
+	headers: async () => securityAndRobotsHeaders,
 
 	webpack: (config, { dev }) => {
 		if (dev) {
