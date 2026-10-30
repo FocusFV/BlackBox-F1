@@ -8,6 +8,7 @@ import type { Driver, TimingDataDriver } from "@/types/state.type";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useDataStore } from "@/stores/useDataStore";
 import { triggerHaptic } from "@/lib/haptics";
+import { getTeamColor } from "@/lib/teamcolors";
 
 import DriverTag from "./DriverTag";
 import DriverDRS from "./DriverDRS";
@@ -79,8 +80,20 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 						: "5.5rem 3.8rem 5.5rem 4rem 5.5rem 6.2rem auto",
 				}}
 			>
-				{/* 🌟 Usamos la prop teamColor que viene desde LeaderBoard */}
-				<DriverTag className="min-w-full!" short={driver.Tla} teamColor={teamColor || `#${driver.TeamColour}` || "#A1A1AA"} position={position} />
+				{/* 🌟 Color oficial normalizado para evitar tonos erróneos de FOM (ej. Williams cyan en vez de azul marino) */}
+				<DriverTag
+					className="min-w-full!"
+					short={driver.Tla}
+					teamColor={
+						teamColor ||
+						(driver?.TeamName && getTeamColor(driver.TeamName) !== "#A1A1AA"
+							? getTeamColor(driver.TeamName)
+							: driver?.TeamColour
+								? `#${driver.TeamColour}`
+								: "#A1A1AA")
+					}
+					position={position}
+				/>
 				<DriverDRS
 					on={carData ? hasDRS(carData[45]) : false}
 					possible={carData ? possibleDRS(carData[45]) : false}

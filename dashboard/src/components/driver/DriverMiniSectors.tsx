@@ -1,6 +1,6 @@
 import clsx from "clsx";
 
-import type { TimingDataDriver, TimingStatsDriver } from "@/types/state.type";
+import type { Sector, TimingDataDriver, TimingStatsDriver } from "@/types/state.type";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 
 type Props = {
@@ -12,9 +12,14 @@ export default function DriverMiniSectors({ sectors = [], bestSectors }: Props) 
 	const showMiniSectors = useSettingsStore((state) => state.showMiniSectors);
 	const showBestSectors = useSettingsStore((state) => state.showBestSectors);
 
+	// 🛡️ En F1 reglamentariamente solo existen 3 sectores por vuelta (S1, S2, S3).
+	// Tomamos siempre como máximo 3 sectores para evitar que desborde la cuadrícula.
+	const rawSectors: Sector[] = Array.isArray(sectors) ? sectors : (Object.values(sectors || {}) as Sector[]);
+	const activeSectors = rawSectors.length > 3 ? rawSectors.slice(-3) : rawSectors;
+
 	return (
 		<div className="flex gap-1.5 select-none font-mono">
-			{sectors.map((sector, i) => {
+			{activeSectors.map((sector, i) => {
 				const isRecord = Boolean(sector.OverallFastest);
 				const isPersonal = Boolean(sector.PersonalFastest);
 

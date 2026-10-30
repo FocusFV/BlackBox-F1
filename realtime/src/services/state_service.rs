@@ -62,11 +62,9 @@ pub fn merge(base: &mut Value, update: Value) {
         (Value::Object(_), Value::Array(_)) => {
             // Ignoramos o manejamos arrays a nivel raíz para proteger el objeto global
         }
-        // 3. Merge de array con array
-        (Value::Array(prev), Value::Array(update)) => {
-            for v in update {
-                prev.push(v);
-            }
+        // 3. Merge de array con array: reemplaza la lista para evitar acumulación infinita
+        (Value::Array(_), Value::Array(update)) => {
+            *base = Value::Array(update);
         }
         // 4. Merge de array con indices pasados como objeto
         (Value::Array(prev), Value::Object(update)) => {
