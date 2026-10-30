@@ -18,7 +18,7 @@ const driverTeamColorMap: { [key: string]: string } = {
 	LEC: "#e80020", HAM: "#e80020",
 	VER: "#3671c6", HAD: "#3671c6",
 	RUS: "#27f4d2", ANT: "#27f4d2",
-	COL: "#0093cc", GAS: "#0093cc", // Alpine F1 Team
+	COL: "#ff00ff", GAS: "#ff00ff", // Alpine F1 Team (Rosa BWT)
 	PER: "#94a3b8", BOT: "#94a3b8", // Cadillac F1 Team
 	SAI: "#005aff", ALB: "#005aff", // Williams Racing
 	HUL: "#c0c0c0", BOR: "#c0c0c0", // Audi F1

@@ -8,7 +8,7 @@ import type { Driver, TimingDataDriver } from "@/types/state.type";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useDataStore } from "@/stores/useDataStore";
 import { triggerHaptic } from "@/lib/haptics";
-import { getTeamColor } from "@/lib/teamcolors";
+import { resolveDriverColor } from "@/lib/teamcolors";
 
 import DriverTag from "./DriverTag";
 import DriverDRS from "./DriverDRS";
@@ -80,18 +80,11 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 						: "5.5rem 3.8rem 5.5rem 4rem 5.5rem 6.2rem auto",
 				}}
 			>
-				{/* 🌟 Color oficial normalizado para evitar tonos erróneos de FOM (ej. Williams cyan en vez de azul marino) */}
+				{/* 🌟 Color oficial normalizado (ej. Alpine Rosa BWT, Ferrari Rojo, Williams Azul) */}
 				<DriverTag
 					className="min-w-full!"
-					short={driver.Tla}
-					teamColor={
-						teamColor ||
-						(driver?.TeamName && getTeamColor(driver.TeamName) !== "#A1A1AA"
-							? getTeamColor(driver.TeamName)
-							: driver?.TeamColour
-								? `#${driver.TeamColour}`
-								: "#A1A1AA")
-					}
+					short={driver?.Tla || ""}
+					teamColor={teamColor || resolveDriverColor(driver?.Tla, driver?.TeamName, driver?.TeamColour)}
 					position={position}
 				/>
 				<DriverDRS
@@ -106,7 +99,35 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 				<DriverLapTime last={timingDriver.LastLapTime} best={timingDriver.BestLapTime} hasFastest={hasFastest} />
 				<DriverMiniSectors sectors={timingDriver.Sectors} bestSectors={timingStatsDriver?.BestSectors} />
 
-				{carMetrics && carData && <DriverCarMetrics carData={carData} />}
+				{carMetrics && (
+					carData ? (
+						<DriverCarMetrics carData={carData} />
+					) : (
+						<div className="flex items-center gap-2 place-self-start font-mono select-none opacity-40">
+							<div className="flex h-7 w-8 items-center justify-center rounded-md border border-zinc-800 bg-zinc-900/60 text-[10px] font-black text-zinc-500">
+								{timingDriver?.InPit ? "BOX" : "M-"}
+							</div>
+							<div className="min-w-[3.4rem]">
+								<p className="text-right text-sm font-black text-zinc-600 tabular-nums leading-none tracking-tight">---</p>
+								<p className="text-right text-[8px] font-bold text-zinc-700 uppercase leading-none mt-0.5">km/h</p>
+							</div>
+							<div className="flex flex-col gap-1 text-[8px] font-bold">
+								<div className="flex items-center gap-1">
+									<span className="w-4 text-right text-[7px] text-zinc-600 font-bold leading-none">FRE</span>
+									<div className="h-1.5 w-14 rounded-full bg-zinc-900 border border-zinc-800/80" />
+								</div>
+								<div className="flex items-center gap-1">
+									<span className="w-4 text-right text-[7px] text-zinc-600 font-bold leading-none">ACE</span>
+									<div className="h-1.5 w-14 rounded-full bg-zinc-900 border border-zinc-800/80" />
+								</div>
+								<div className="flex items-center gap-1">
+									<span className="w-4 text-right text-[7px] text-zinc-600 font-bold leading-none">RPM</span>
+									<div className="h-1.5 w-14 rounded-full bg-zinc-900 border border-zinc-800/80" />
+								</div>
+							</div>
+						</div>
+					)
+				)}
 			</div>
 		</motion.div>
 	);
