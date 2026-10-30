@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useDataStore } from "@/stores/useDataStore";
 import { useSidebarStore } from "@/stores/useSidebarStore";
-import { Lock, Unlock, Radio } from "lucide-react";
+import { Lock, Unlock, Radio, RefreshCw, ShieldCheck } from "lucide-react";
 
 // 🚀 IMPORTAMOS COMPONENTES DE NAVEGACIÓN Y APOYO
 import Sidebar from "@/components/Sidebar";
@@ -173,13 +173,65 @@ export default function StreamsPage() {
 		useState<keyof typeof STREAMS_CONFIG>("FOX");
 	const [serverIndex, setServerIndex] = useState<number>(0);
 	const [switchNotice, setSwitchNotice] = useState<string | null>(null);
+	const [iframeLoaded, setIframeLoaded] = useState<boolean>(false);
+	const [autoFailoverEnabled, setAutoFailoverEnabled] = useState<boolean>(true);
+	const failoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+	const handleNextServer = (isAuto = false) => {
+		const sources = STREAMS_CONFIG[activeTab] || [];
+		if (sources.length <= 1) return;
+
+		const nextIdx = (serverIndex + 1) % sources.length;
+		setServerIndex(nextIdx);
+		setIframeLoaded(false);
+		setSwitchNotice(
+			isAuto
+				? `⚠️ Servidor anterior no respondió. Conmutando a: ${sources[nextIdx]?.label}`
+				: `Conectando con: ${sources[nextIdx]?.label}`
+		);
+		triggerHaptic("medium");
+	};
 
 	const handleTabSelect = (tab: keyof typeof STREAMS_CONFIG) => {
 		setActiveTab(tab);
 		setServerIndex(0);
+		setIframeLoaded(false);
 		setSwitchNotice(null);
 		triggerHaptic("light");
 	};
+
+	useEffect(() => {
+		setIframeLoaded(false);
+		if (failoverTimeoutRef.current) {
+			clearTimeout(failoverTimeoutRef.current);
+		}
+
+		if (!autoFailoverEnabled) return;
+
+		const sources = STREAMS_CONFIG[activeTab] || [];
+		// Si quedan espejos por probar antes de agotar la lista
+		if (serverIndex < sources.length - 1) {
+			failoverTimeoutRef.current = setTimeout(() => {
+				setIframeLoaded((loaded) => {
+					if (!loaded) {
+						const nextIdx = serverIndex + 1;
+						setServerIndex(nextIdx);
+						setSwitchNotice(
+							`⚠️ El servidor actual no respondió a tiempo. Conmutando automáticamente a: ${sources[nextIdx]?.label}`
+						);
+						triggerHaptic("heavy");
+					}
+					return loaded;
+				});
+			}, 7500);
+		}
+
+		return () => {
+			if (failoverTimeoutRef.current) {
+				clearTimeout(failoverTimeoutRef.current);
+			}
+		};
+	}, [serverIndex, activeTab, autoFailoverEnabled]);
 
 	const trackStatus = useDataStore((state) => state.state?.TrackStatus?.Status);
 	const sessionInfo = useDataStore((state) => state.state?.SessionInfo);
@@ -442,6 +494,7 @@ export default function StreamsPage() {
 														key={`${source.label}-${idx}`}
 														onClick={() => {
 															setServerIndex(idx);
+															setIframeLoaded(false);
 															setSwitchNotice(null);
 															triggerHaptic("light");
 														}}
@@ -457,22 +510,63 @@ export default function StreamsPage() {
 											</div>
 										</div>
 
+										<div className="flex items-center gap-2 flex-wrap">
+											{/* Botón de cambio rápido manual */}
+											<button
+												onClick={() => handleNextServer(false)}
+												className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-[10px] font-bold text-amber-400 border border-zinc-800 transition-all cursor-pointer"
+												title="Saltar al siguiente servidor de respaldo"
+											>
+												<RefreshCw className="w-3 h-3" />
+												<span>¿No carga? Probar siguiente</span>
+											</button>
+
+											{/* Indicador de Failover Automático */}
+											<div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-bold">
+												<ShieldCheck className="w-3 h-3 text-emerald-400" />
+												<span>Auto-Failover Activo</span>
+											</div>
+										</div>
+
 										{switchNotice && (
-											<span className="text-[10px] font-bold text-amber-400 animate-pulse bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">
-												{switchNotice}
-											</span>
+											<div className="w-full mt-1">
+												<span className="text-[10px] font-bold text-amber-400 animate-pulse bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg block">
+													{switchNotice}
+												</span>
+											</div>
 										)}
 									</div>
 
 									{/* REPRODUCTOR DE STREAM SELECCIONADO */}
 									<div onContextMenu={(e) => e.preventDefault()} className="w-full aspect-video rounded-2xl overflow-hidden border border-zinc-900 bg-black shadow-2xl relative select-none">
+										{!iframeLoaded && (
+											<div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950 text-zinc-400 z-10 pointer-events-none gap-2">
+												<div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
+												<p className="text-[11px] font-mono font-bold text-zinc-300 uppercase tracking-widest">
+													Conectando con {currentSource?.label}...
+												</p>
+												<p className="text-[9px] text-zinc-500">
+													Conmutación automática de respaldo activa (7.5s)
+												</p>
+											</div>
+										)}
+
 										<iframe
 											key={currentSource?.url}
 											src={currentSource?.url}
 											title="F1 Live Stream"
-											className="w-full h-full border-0"
+											className="w-full h-full border-0 relative z-20"
 											allowFullScreen
 											allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+											onLoad={() => {
+												setIframeLoaded(true);
+												if (failoverTimeoutRef.current) {
+													clearTimeout(failoverTimeoutRef.current);
+												}
+											}}
+											onError={() => {
+												handleNextServer(true);
+											}}
 										/>
 									</div>
 								</>
