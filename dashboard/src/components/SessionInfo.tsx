@@ -38,8 +38,16 @@ export default function SessionInfo() {
 	const lapCount = useDataStore((state) => state.state?.LapCount);
 	const sessionStatus = useDataStore((state) => state.state?.SessionStatus?.Status);
 	const trackStatus = useDataStore((state) => state.state?.TrackStatus?.Status);
+	const raceControlMessages = useDataStore((state) => state.state?.RaceControlMessages?.Messages);
 
 	const delay = useSettingsStore((state) => state.delay);
+
+	// Actualización fluida cada segundo para el reloj de Qualy / Prácticas
+	const [, setTick] = useState(0);
+	useEffect(() => {
+		const timer = setInterval(() => setTick((t) => t + 1), 1000);
+		return () => clearInterval(timer);
+	}, []);
 
 	// Una sesión se considera en vivo ÚNICAMENTE si está formalmente iniciada/corriendo y no ha finalizado
 	const isSessionTerminated =
@@ -259,16 +267,66 @@ export default function SessionInfo() {
 	}
 
 	// Render en vivo
-	const timeRemaining =
-		!!clock && !!clock.Remaining
-			? clock.Extrapolating
-				? utc(
-						duration(clock.Remaining)
-							.subtract(utc().diff(utc(clock.Utc)))
-							.asMilliseconds() + (delay ? delay * 1000 : 0),
-					).format("HH:mm:ss")
-				: clock.Remaining
-			: undefined;
+	let timeRemaining: string | undefined;
+	if (clock?.Remaining) {
+		let ms = duration(clock.Remaining).asMilliseconds();
+		if (clock.Extrapolating && clock.Utc) {
+			ms = ms - utc().diff(utc(clock.Utc)) + (delay ? delay * 1000 : 0);
+		}
+		if (ms > 0) {
+			const d = duration(ms);
+			const hours = d.hours();
+			const minutes = d.minutes();
+			const seconds = d.seconds();
+			const pad = (n: number) => n.toString().padStart(2, "0");
+			timeRemaining = hours > 0
+				? `${hours}:${pad(minutes)}:${pad(seconds)}`
+				: `${pad(minutes)}:${pad(seconds)}`;
+		} else {
+			timeRemaining = "00:00";
+		}
+	} else if (isLive && (session?.Name !== "Race" && session?.Name !== "Sprint")) {
+		// ⏱️ Fallback inteligente para Qualy (Q1: 18m, Q2: 15m, Q3: 12m) y Prácticas (60m)
+		const sessionPart = timingData?.SessionPart || 1;
+		const isQualy = session?.Name?.toLowerCase().includes("qual") || Boolean(timingData?.SessionPart);
+
+		const partDurationMs = isQualy
+			? (sessionPart === 2 ? 15 : sessionPart === 3 ? 12 : 18) * 60 * 1000
+			: 60 * 60 * 1000;
+
+		const greenMessages = raceControlMessages?.filter(
+			(m) => m.Flag === "GREEN" || m.Message?.includes("GREEN LIGHT") || m.Message?.includes("PIT LANE OPEN")
+		);
+		const lastGreen = greenMessages && greenMessages.length > 0 ? greenMessages[greenMessages.length - 1] : null;
+
+		let partStartMs: number | null = null;
+		if (lastGreen?.Utc) {
+			partStartMs = new Date(lastGreen.Utc).getTime();
+		} else if (session?.StartDate) {
+			partStartMs = new Date(session.StartDate).getTime();
+		}
+
+		if (!partStartMs) {
+			const now = Date.now();
+			const topOfHour = new Date(now);
+			topOfHour.setMinutes(0, 0, 0);
+			const halfHour = new Date(now);
+			halfHour.setMinutes(30, 0, 0);
+			partStartMs = (now - halfHour.getTime() < now - topOfHour.getTime() && halfHour.getTime() <= now)
+				? halfHour.getTime()
+				: topOfHour.getTime();
+		}
+
+		if (partStartMs) {
+			const elapsed = Date.now() - partStartMs;
+			const remainingMs = Math.max(0, partDurationMs - elapsed + (delay ? delay * 1000 : 0));
+			const totalSecs = Math.floor(remainingMs / 1000);
+			const mins = Math.floor(totalSecs / 60);
+			const secs = totalSecs % 60;
+			const pad = (n: number) => n.toString().padStart(2, "0");
+			timeRemaining = `${pad(mins)}:${pad(secs)}`;
+		}
+	}
 
 	return (
 		<div className="flex items-center gap-2.5">

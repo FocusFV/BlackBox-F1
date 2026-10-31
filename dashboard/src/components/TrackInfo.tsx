@@ -15,7 +15,15 @@ export default function TrackInfo() {
 	const heartbeatUtc = useDataStore((state) => state.state?.Heartbeat?.Utc);
 	const timingData = useDataStore((state) => state.state?.TimingData);
 	const clock = useDataStore((state) => state.state?.ExtrapolatedClock);
+	const raceControlMessages = useDataStore((state) => state.state?.RaceControlMessages?.Messages);
 	const delay = useSettingsStore((state) => state.delay);
+
+	// Actualización suave cada segundo para cuenta regresiva en vivo
+	const [, setTick] = useState(0);
+	useEffect(() => {
+		const timer = setInterval(() => setTick((t) => t + 1), 1000);
+		return () => clearInterval(timer);
+	}, []);
 
 	// Telemetría con heartbeat activo en los últimos 3 minutos (descarta datos viejos o cacheados)
 	const isRecentHeartbeat = Boolean(
@@ -113,6 +121,47 @@ export default function TrackInfo() {
 				: `${pad(minutes)}:${pad(seconds)}`;
 		} else {
 			formattedTime = "00:00";
+		}
+	} else if (!isRaceOrSprint && isTrackLive) {
+		// ⏱️ Fallback inteligente para Qualy (Q1: 18m, Q2: 15m, Q3: 12m) y Prácticas (60m)
+		const sessionPart = timingData?.SessionPart || 1;
+		const isQualy = session?.Name?.toLowerCase().includes("qual") || Boolean(timingData?.SessionPart);
+
+		const partDurationMs = isQualy
+			? (sessionPart === 2 ? 15 : sessionPart === 3 ? 12 : 18) * 60 * 1000
+			: 60 * 60 * 1000;
+
+		const greenMessages = raceControlMessages?.filter(
+			(m) => m.Flag === "GREEN" || m.Message?.includes("GREEN LIGHT") || m.Message?.includes("PIT LANE OPEN")
+		);
+		const lastGreen = greenMessages && greenMessages.length > 0 ? greenMessages[greenMessages.length - 1] : null;
+
+		let partStartMs: number | null = null;
+		if (lastGreen?.Utc) {
+			partStartMs = new Date(lastGreen.Utc).getTime();
+		} else if (session?.StartDate) {
+			partStartMs = new Date(session.StartDate).getTime();
+		}
+
+		if (!partStartMs) {
+			const now = Date.now();
+			const topOfHour = new Date(now);
+			topOfHour.setMinutes(0, 0, 0);
+			const halfHour = new Date(now);
+			halfHour.setMinutes(30, 0, 0);
+			partStartMs = (now - halfHour.getTime() < now - topOfHour.getTime() && halfHour.getTime() <= now)
+				? halfHour.getTime()
+				: topOfHour.getTime();
+		}
+
+		if (partStartMs) {
+			const elapsed = Date.now() - partStartMs;
+			const remainingMs = Math.max(0, partDurationMs - elapsed + (delay ? delay * 1000 : 0));
+			const totalSecs = Math.floor(remainingMs / 1000);
+			const mins = Math.floor(totalSecs / 60);
+			const secs = totalSecs % 60;
+			const pad = (n: number) => n.toString().padStart(2, "0");
+			formattedTime = `${pad(mins)}:${pad(secs)}`;
 		}
 	}
 
