@@ -145,6 +145,8 @@ export default function Map({ filter }: { filter?: string[] }) {
 	const positions = useDataStore((state) => state.positions);
 	const prevCarsRef = useRef<Record<string, { x: number; y: number; angle: number }>>({});
 
+	const isRaceOrSprint = sessionInfo?.Name === "Race" || sessionInfo?.Name === "Sprint";
+
 	const isSessionTerminated = Boolean(
 		sessionStatus === "Ends" ||
 		sessionStatus === "Finalised" ||
@@ -152,14 +154,18 @@ export default function Map({ filter }: { filter?: string[] }) {
 		(sessionInfo as any)?.SessionStatus === "Finalised" ||
 		(sessionInfo as any)?.SessionStatus === "Ends" ||
 		sessionInfo?.ArchiveStatus?.Status === "Complete" ||
-		(sessionInfo?.Name === "Race" && !!lapCount && lapCount.CurrentLap > 0 && lapCount.CurrentLap >= lapCount.TotalLaps)
+		(isRaceOrSprint && !!lapCount && lapCount.CurrentLap > 0 && lapCount.CurrentLap >= lapCount.TotalLaps)
 	);
 
-	const hasChequeredFlag = Boolean(
-		raceControlMessages?.some((m) => m.Flag === "CHEQUERED" || m.Message?.includes("CHEQUERED FLAG"))
+	const hasCarsRunning = Boolean(
+		rawTiming?.Lines &&
+		Object.values(rawTiming.Lines).some((l: any) => !l.InPit && !l.KnockedOut && !l.Retired)
 	);
 
-	const isEnded = isSessionTerminated || hasChequeredFlag;
+	// 🛡️ Si la pista está en verde ("1"), o hay monoplazas rodando, la sesión NUNCA está terminada.
+	// Esto previene que banderas a cuadros viejas de la Q1 o Q2 bloqueen la Q2 o Q3.
+	const isTrackActive = trackStatus?.Status === "1" || hasCarsRunning;
+	const isEnded = !isTrackActive && isSessionTerminated;
 
 	// Detectar si todos los monoplazas están en boxes o en pausa entre fases de Qualy
 	const isQualy = sessionInfo?.Name?.toLowerCase().includes("qual") || Boolean(rawTiming?.SessionPart);
@@ -171,7 +177,7 @@ export default function Map({ filter }: { filter?: string[] }) {
 	const sessionPart = rawTiming?.SessionPart || 1;
 	const isQualyBreak = isQualy && sessionPart < 3 && allInPit && !isEnded;
 
-	const parsedClockMs = parseFomClockRemaining(clock?.Remaining);
+	const parsedClockMs = parseFomClockRemaining(clock?.Remaining, isRaceOrSprint);
 	const breakTimeFormatted = parsedClockMs !== null ? formatMsToClock(parsedClockMs) : null;
 
 	const hasLivePositions = useMemo(() => {
@@ -327,7 +333,7 @@ export default function Map({ filter }: { filter?: string[] }) {
 					{Object.values(drivers).reverse().filter((driver: any) => (filter ? filter.includes(driver.RacingNumber) : true)).map((driver: any) => {
 						const timingDriver = timingDrivers?.Lines?.[driver.RacingNumber];
 						const rawPos = positions?.[driver.RacingNumber];
-						const isInPit = Boolean(timingDriver?.InPit || rawPos?.Status === "InPit");
+						const isInPit = Boolean(timingDriver?.InPit);
 						const isOut = Boolean(timingDriver?.KnockedOut || timingDriver?.Stopped || timingDriver?.Retired);
 
 						// 🛑 Si el piloto está en boxes, retirado, eliminado o la sesión terminó, NO se dibuja en el trazado

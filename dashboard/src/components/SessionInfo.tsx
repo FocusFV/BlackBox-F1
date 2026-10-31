@@ -269,8 +269,9 @@ export default function SessionInfo() {
 	}
 
 	// Render en vivo
+	const isRaceOrSprint = session?.Name === "Race" || session?.Name === "Sprint";
 	let timeRemaining: string | undefined;
-	const parsedClockMs = parseFomClockRemaining(clock?.Remaining);
+	const parsedClockMs = parseFomClockRemaining(clock?.Remaining, isRaceOrSprint);
 
 	if (parsedClockMs !== null) {
 		let ms = parsedClockMs;

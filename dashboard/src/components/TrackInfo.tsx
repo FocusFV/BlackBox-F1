@@ -106,7 +106,7 @@ export default function TrackInfo() {
 
 	// En prácticas o qualy, calculamos el tiempo restante oficial para sincronizar con la TV
 	let formattedTime: string | undefined;
-	const parsedClockMs = parseFomClockRemaining(clock?.Remaining);
+	const parsedClockMs = parseFomClockRemaining(clock?.Remaining, isRaceOrSprint);
 
 	if (parsedClockMs !== null) {
 		let ms = parsedClockMs;
