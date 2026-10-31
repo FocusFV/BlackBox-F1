@@ -16,6 +16,7 @@ import { TeamRadioAlertPopup } from "@/components/dashboard/TeamRadioAlertPopup"
 import { HeadToHeadModal } from "@/components/dashboard/HeadToHeadModal";
 import { CircuitBackdrop } from "@/components/dashboard/CircuitBackdrop";
 import { Swords } from "lucide-react";
+import { translateSessionName } from "@/lib/f1Translations";
 import {
 	getUpcomingSessions,
 	evaluateSessionStatus,
@@ -103,10 +104,41 @@ export default function Page() {
 	);
 	const hasLiveTelemetry = hasTimingData || hasCarData || hasPositionData;
 
-	const isSessionFinished =
+	const isSessionFinished = Boolean(
 		sessionStatus === "Ends" ||
 		sessionStatus === "Finalised" ||
-		(session?.Name === "Race" && !!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps && lapCount.TotalLaps > 0);
+		sessionStatus === "Finished" ||
+		(session as any)?.SessionStatus === "Finalised" ||
+		(session as any)?.SessionStatus === "Ends" ||
+		session?.ArchiveStatus?.Status === "Complete" ||
+		(session?.Name === "Race" && !!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps && lapCount.TotalLaps > 0)
+	);
+
+	// Guardamos el timestamp de fin de sesión para mantener la vista de resultados por 15 minutos
+	const [sessionEndTime, setSessionEndTime] = useState<number | null>(null);
+
+	useEffect(() => {
+		if (isSessionFinished && session?.Name) {
+			const storageKey = `f1_session_end_${session?.Key || session?.Name}`;
+			const stored = typeof window !== "undefined" ? sessionStorage.getItem(storageKey) : null;
+			if (stored) {
+				setSessionEndTime(parseInt(stored, 10));
+			} else {
+				const now = Date.now();
+				if (typeof window !== "undefined") sessionStorage.setItem(storageKey, String(now));
+				setSessionEndTime(now);
+			}
+		} else if (!isSessionFinished) {
+			setSessionEndTime(null);
+		}
+	}, [isSessionFinished, session?.Key, session?.Name]);
+
+	// ¿Estamos en los 15 minutos posteriores al fin de la sesión? (15 min = 900,000 ms)
+	const isPostSessionWindow = Boolean(
+		isSessionFinished &&
+		sessionEndTime &&
+		Date.now() - sessionEndTime < 15 * 60 * 1000
+	);
 
 	// Telemetría con heartbeat activo en los últimos 3 minutos (descarta datos viejos cacheados)
 	const isRecentHeartbeat = Boolean(
@@ -126,10 +158,10 @@ export default function Page() {
 	// Sesión activa por calendario (ventana de ±15 minutos)
 	const isCalendarLive = scheduleStatus.isLiveWindow;
 
-	// Determinación de modo en vivo automática: Si la carrera terminó o expiró la ventana, pasa a Parque Cerrado
+	// Determinación de modo en vivo automática: Si la sesión terminó pero estamos en los 15 min de resultados, seguimos mostrando telemetría
 	const isLiveAuto =
-		!isSessionFinished &&
-		(isCalendarLive || (isTrackActive && isSessionStarted));
+		(!isSessionFinished && (isCalendarLive || (isTrackActive && isSessionStarted))) ||
+		isPostSessionWindow;
 
 	// Vista activa (por defecto automático)
 	const showTelemetry = isLiveAuto;
@@ -138,33 +170,63 @@ export default function Page() {
 		<div className="flex w-full flex-col gap-4 px-4 py-4 text-zinc-100">
 			{showTelemetry && (
 				<>
-					{/* 🏎️ Barra de estado HUD en Vivo */}
-					<div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950/80 px-4 py-2.5 backdrop-blur-md">
-						<div className="flex items-center gap-2">
-							<span className="relative flex h-3 w-3">
-								<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-								<span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500"></span>
-							</span>
-							<span className="text-xs font-bold tracking-wider text-emerald-400 uppercase">
-								{scheduleStatus.activeSessionName || session?.Name || "Telemetría en Vivo"}
-							</span>
-						</div>
+					{/* 🏎️ Barra de estado HUD en Vivo o Resultados Finales */}
+					{isPostSessionWindow ? (
+						<div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-zinc-950 to-zinc-950 px-4 py-2.5 backdrop-blur-md">
+							<div className="flex items-center gap-2.5">
+								<span className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500/20 border border-amber-500/40 text-xs">
+									🏁
+								</span>
+								<div className="flex flex-col">
+									<span className="text-[10px] font-black uppercase tracking-widest text-amber-400 font-mono">
+										SESIÓN FINALIZADA
+									</span>
+									<span className="text-xs sm:text-sm font-black uppercase tracking-wider text-white font-mono">
+										RESULTADOS FINALES DE {session?.Name ? translateSessionName(session.Name) : "SESIÓN"} {session?.Meeting?.Country?.Name || "MÉXICO"}
+									</span>
+								</div>
+							</div>
 
-						{/* Controles de la derecha: Cara a Cara y TV Sync */}
-						<div className="flex flex-wrap items-center gap-2">
-							<button
-								type="button"
-								onClick={() => setIsH2HOpen(true)}
-								className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/90 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 hover:border-red-500/50 hover:bg-zinc-800 hover:text-white transition-all cursor-pointer"
-								title="Abrir comparador Cara a Cara entre dos pilotos"
-							>
-								<Swords className="h-3.5 w-3.5 text-red-500" />
-								<span>Cara a Cara</span>
-							</button>
-
-							<TvSyncControl />
+							<div className="flex flex-wrap items-center gap-2">
+								<button
+									type="button"
+									onClick={() => setIsH2HOpen(true)}
+									className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/90 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 hover:border-red-500/50 hover:bg-zinc-800 hover:text-white transition-all cursor-pointer"
+									title="Abrir comparador Cara a Cara entre dos pilotos"
+								>
+									<Swords className="h-3.5 w-3.5 text-red-500" />
+									<span>Cara a Cara</span>
+								</button>
+							</div>
 						</div>
-					</div>
+					) : (
+						<div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950/80 px-4 py-2.5 backdrop-blur-md">
+							<div className="flex items-center gap-2">
+								<span className="relative flex h-3 w-3">
+									<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+									<span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500"></span>
+								</span>
+								<span className="text-xs font-bold tracking-wider text-emerald-400 uppercase">
+									{scheduleStatus.activeSessionName || session?.Name || "Telemetría en Vivo"}
+								</span>
+							</div>
+
+							{/* Controles de la derecha: Cara a Cara y TV Sync */}
+							<div className="flex flex-wrap items-center gap-2">
+								<button
+									type="button"
+									onClick={() => setIsH2HOpen(true)}
+									className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/90 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 hover:border-red-500/50 hover:bg-zinc-800 hover:text-white transition-all cursor-pointer"
+									title="Abrir comparador Cara a Cara entre dos pilotos"
+								>
+									<Swords className="h-3.5 w-3.5 text-red-500" />
+									<span>Cara a Cara</span>
+								</button>
+
+								<TvSyncControl />
+							</div>
+						</div>
+					)}
 
 					{/* Alertas dinámicas de Dirección de Carrera (SC, VSC, Banderas, Sanciones) */}
 					<RaceControlAlertBanner />

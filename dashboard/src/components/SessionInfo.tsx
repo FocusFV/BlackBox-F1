@@ -49,6 +49,31 @@ export default function SessionInfo() {
 		(session as any)?.SessionStatus === "Finalised" ||
 		(session as any)?.SessionStatus === "Ends";
 
+	// Detectar ventana de 15 minutos post-sesión
+	const [sessionEndTime, setSessionEndTime] = useState<number | null>(null);
+
+	useEffect(() => {
+		if (isSessionTerminated && session?.Name) {
+			const storageKey = `f1_session_end_${session?.Key || session?.Name}`;
+			const stored = typeof window !== "undefined" ? sessionStorage.getItem(storageKey) : null;
+			if (stored) {
+				setSessionEndTime(parseInt(stored, 10));
+			} else {
+				const now = Date.now();
+				if (typeof window !== "undefined") sessionStorage.setItem(storageKey, String(now));
+				setSessionEndTime(now);
+			}
+		} else if (!isSessionTerminated) {
+			setSessionEndTime(null);
+		}
+	}, [isSessionTerminated, session?.Key, session?.Name]);
+
+	const isPostSession = Boolean(
+		isSessionTerminated &&
+		sessionEndTime &&
+		Date.now() - sessionEndTime < 15 * 60 * 1000
+	);
+
 	// Detecta actividad real de telemetría en pista
 	const hasActiveTiming = Boolean(
 		timingData?.Lines &&
@@ -171,6 +196,28 @@ export default function SessionInfo() {
 			if (intervalId) clearInterval(intervalId);
 		};
 	}, [isOfflineOrFinished]);
+
+	// Render post-sesión (15 minutos tras finalizar para revisar resultados con calma)
+	if (isPostSession) {
+		return (
+			<div className="flex items-center gap-3 font-mono">
+				<Flag countryCode={session?.Meeting?.Country?.Code} />
+				<div className="flex flex-col justify-center">
+					<div className="flex items-center gap-2">
+						<span className="text-[10px] font-black uppercase tracking-widest text-amber-400">
+							SESIÓN FINALIZADA
+						</span>
+						<span className="rounded bg-zinc-900/90 border border-amber-500/30 px-1.5 py-0.5 text-[9px] font-bold text-amber-300 uppercase tracking-wider">
+							RESULTADOS FINALES
+						</span>
+					</div>
+					<h1 className="text-sm md:text-base leading-none font-black text-white mt-1 uppercase tracking-wide">
+						{translateSessionName(session?.Name)} {session?.Meeting?.Country?.Name || session?.Meeting?.Name || ""}
+					</h1>
+				</div>
+			</div>
+		);
+	}
 
 	// Render fuera de sesión (diseño con bandera oficial y estilo Pit-Wall)
 	if (isOfflineOrFinished) {

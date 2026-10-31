@@ -137,8 +137,27 @@ export default function Map({ filter }: { filter?: string[] }) {
 
 	const trackStatus = useDataStore((state) => state?.state?.TrackStatus);
 	const raceControlMessages = useDataStore((state) => state?.state?.RaceControlMessages?.Messages ?? undefined);
+	const sessionInfo = useDataStore((state) => state?.state?.SessionInfo);
+	const sessionStatus = useDataStore((state) => state?.state?.SessionStatus?.Status);
+	const lapCount = useDataStore((state) => state?.state?.LapCount);
 	const positions = useDataStore((state) => state.positions);
 	const prevCarsRef = useRef<Record<string, { x: number; y: number; angle: number }>>({});
+
+	const isSessionTerminated = Boolean(
+		sessionStatus === "Ends" ||
+		sessionStatus === "Finalised" ||
+		sessionStatus === "Finished" ||
+		(sessionInfo as any)?.SessionStatus === "Finalised" ||
+		(sessionInfo as any)?.SessionStatus === "Ends" ||
+		sessionInfo?.ArchiveStatus?.Status === "Complete" ||
+		(sessionInfo?.Name === "Race" && !!lapCount && lapCount.CurrentLap > 0 && lapCount.CurrentLap >= lapCount.TotalLaps)
+	);
+
+	const hasChequeredFlag = Boolean(
+		raceControlMessages?.some((m) => m.Flag === "CHEQUERED" || m.Message?.includes("CHEQUERED FLAG"))
+	);
+
+	const isEnded = isSessionTerminated || hasChequeredFlag;
 
 	const hasLivePositions = useMemo(() => {
 		if (!positions) return false;
@@ -158,7 +177,7 @@ export default function Map({ filter }: { filter?: string[] }) {
 
 	const [timeOffset, setTimeOffset] = useState(0);
 	useEffect(() => {
-		if (hasLivePositions) return;
+		if (hasLivePositions || isEnded) return;
 		let frameId: number;
 		const updateFrame = () => {
 			// 🏎️ Ritmo de vuelta realista en modo simulación: ~88s por vuelta (1m28s en México)
@@ -167,7 +186,7 @@ export default function Map({ filter }: { filter?: string[] }) {
 		};
 		frameId = requestAnimationFrame(updateFrame);
 		return () => cancelAnimationFrame(frameId);
-	}, [hasLivePositions]);
+	}, [hasLivePositions, isEnded]);
 
 	useEffect(() => {
 		(async () => {
@@ -337,6 +356,9 @@ export default function Map({ filter }: { filter?: string[] }) {
 
 							prevCarsRef.current[driver.RacingNumber] = { x: carX, y: carY, angle: carAngle };
 						} else if (!hasLivePositions) {
+							// 🛑 Si la sesión terminó, no simular autos fantasma dando vueltas
+							if (isEnded) return null;
+
 							// 🕒 MODO DEMO: Fallback únicamente cuando NO hay sesión con GPS en vivo
 							const data = getDriverPositionAndAngle(timingDriver, points, timeOffset);
 							if (!data) return null;
