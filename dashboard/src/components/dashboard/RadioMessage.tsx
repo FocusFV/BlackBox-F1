@@ -28,6 +28,27 @@ export default function RadioMessage({ driver, capture, basePath, gmtOffset }: P
 	const [duration, setDuration] = useState<number>(10);
 	const [progress, setProgress] = useState<number>(0);
 
+	const [subtitle, setSubtitle] = useState<string | null>(null);
+	const [subLoading, setSubLoading] = useState<boolean>(false);
+
+	const audioUrl = `${basePath}${capture.Path}`;
+
+	const fetchSubtitle = async () => {
+		if (subtitle || subLoading) return;
+		setSubLoading(true);
+		try {
+			const res = await fetch(`/api/radio-transcribe?url=${encodeURIComponent(audioUrl)}`);
+			const json = await res.json();
+			if (json.success && json.data?.translated) {
+				setSubtitle(json.data.translated);
+			}
+		} catch {
+			// Fallback silencioso si no hay API key configurada
+		} finally {
+			setSubLoading(false);
+		}
+	};
+
 	const loadMeta = () => {
 		if (!audioRef.current) return;
 		setDuration(audioRef.current.duration);
@@ -53,6 +74,7 @@ export default function RadioMessage({ driver, capture, basePath, gmtOffset }: P
 
 			if (!old) {
 				audioRef.current.play();
+				fetchSubtitle();
 				intervalRef.current = setInterval(updateProgress, 10);
 			} else {
 				audioRef.current.pause();
@@ -104,6 +126,15 @@ export default function RadioMessage({ driver, capture, basePath, gmtOffset }: P
 					onLoadedMetadata={() => loadMeta()}
 				/>
 			</div>
+
+			{subtitle && (
+				<div className="mt-1 flex items-start gap-1.5 rounded-lg bg-zinc-900/90 border border-zinc-800/80 p-2 text-xs font-sans text-zinc-300">
+					<span className="font-mono text-[9px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 shrink-0">
+						SUB
+					</span>
+					<p className="italic leading-snug">"{subtitle}"</p>
+				</div>
+			)}
 		</motion.li>
 	);
 }

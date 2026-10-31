@@ -103,25 +103,33 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 					carData ? (
 						<DriverCarMetrics carData={carData} />
 					) : (
-						<div className="flex items-center gap-2 place-self-start font-mono select-none opacity-40">
-							<div className="flex h-7 w-8 items-center justify-center rounded-md border border-zinc-800 bg-zinc-900/60 text-[10px] font-black text-zinc-500">
+						<div className="flex items-center gap-2 place-self-start font-mono select-none">
+							<div
+								className={clsx(
+									"flex h-7 w-8 items-center justify-center rounded-md border text-[10px] font-black transition-all",
+									timingDriver?.InPit || !carData
+										? "border-amber-500/50 bg-amber-950/40 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.25)]"
+										: "border-zinc-800 bg-zinc-900/60 text-zinc-500"
+								)}
+								title={timingDriver?.InPit ? "Monoplaza en Boxes" : "Telemetría en espera"}
+							>
 								{timingDriver?.InPit ? "BOX" : "M-"}
 							</div>
 							<div className="min-w-[3.4rem]">
-								<p className="text-right text-sm font-black text-zinc-600 tabular-nums leading-none tracking-tight">---</p>
-								<p className="text-right text-[8px] font-bold text-zinc-700 uppercase leading-none mt-0.5">km/h</p>
+								<p className="text-right text-sm font-black text-zinc-400 tabular-nums leading-none tracking-tight">0</p>
+								<p className="text-right text-[8px] font-bold text-zinc-600 uppercase leading-none mt-0.5">km/h</p>
 							</div>
-							<div className="flex flex-col gap-1 text-[8px] font-bold">
+							<div className="flex flex-col gap-1 text-[8px] font-bold opacity-60">
 								<div className="flex items-center gap-1">
-									<span className="w-4 text-right text-[7px] text-zinc-600 font-bold leading-none">FRE</span>
+									<span className="w-4 text-right text-[7px] text-zinc-500 font-bold leading-none">FRE</span>
 									<div className="h-1.5 w-14 rounded-full bg-zinc-900 border border-zinc-800/80" />
 								</div>
 								<div className="flex items-center gap-1">
-									<span className="w-4 text-right text-[7px] text-zinc-600 font-bold leading-none">ACE</span>
+									<span className="w-4 text-right text-[7px] text-zinc-500 font-bold leading-none">ACE</span>
 									<div className="h-1.5 w-14 rounded-full bg-zinc-900 border border-zinc-800/80" />
 								</div>
 								<div className="flex items-center gap-1">
-									<span className="w-4 text-right text-[7px] text-zinc-600 font-bold leading-none">RPM</span>
+									<span className="w-4 text-right text-[7px] text-zinc-500 font-bold leading-none">RPM</span>
 									<div className="h-1.5 w-14 rounded-full bg-zinc-900 border border-zinc-800/80" />
 								</div>
 							</div>

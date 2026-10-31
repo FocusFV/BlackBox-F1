@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { resolveDriverColor } from "@/lib/teamcolors";
 
 type Props = {
 	teamColor: string;
@@ -8,8 +9,9 @@ type Props = {
 };
 
 export default function DriverTag({ position, teamColor, short, className }: Props) {
-	// 🛡️ Prevenimos el error del doble "#" si teamColor ya trae el hashtag
-	const hexColor = teamColor ? (teamColor.startsWith("#") ? teamColor : `#${teamColor}`) : "#3f3f46";
+	// 🌟 Resuelve el color oficial normalizado 2026 (ej. Alpine Rosa BWT, Ferrari Rojo, Williams Azul)
+	const resolved = resolveDriverColor(short, undefined, teamColor);
+	const hexColor = resolved.startsWith("#") ? resolved : `#${resolved}`;
 
 	return (
 		<div

@@ -15,7 +15,7 @@ import { RaceControlAlertBanner } from "@/components/dashboard/RaceControlAlertB
 import { TeamRadioAlertPopup } from "@/components/dashboard/TeamRadioAlertPopup";
 import { HeadToHeadModal } from "@/components/dashboard/HeadToHeadModal";
 import { CircuitBackdrop } from "@/components/dashboard/CircuitBackdrop";
-import { Swords } from "lucide-react";
+import { Swords, Radio, Flag, AlertTriangle } from "lucide-react";
 import { translateSessionName } from "@/lib/f1Translations";
 import {
 	getUpcomingSessions,
@@ -299,15 +299,76 @@ export default function Page() {
 						</div>
 					</div>
 
-					<div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
-						<div>
-							<RaceControl />
+					{/* 🏎️ Paneles Pit-Wall: Mensajes FIA, Radios oficiales e Infracciones */}
+					<div className="grid grid-cols-1 gap-4 lg:grid-cols-3 font-mono">
+						{/* Panel 1: Dirección de Carrera */}
+						<div className="flex flex-col rounded-2xl border border-zinc-800/80 bg-zinc-950/70 p-4 shadow-xl backdrop-blur-md">
+							<div className="flex items-center justify-between border-b border-zinc-800/80 pb-3 mb-3">
+								<div className="flex items-center gap-2">
+									<div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/10 border border-red-500/30 text-red-400">
+										<Flag className="h-3.5 w-3.5" />
+									</div>
+									<div>
+										<h3 className="text-xs font-black uppercase tracking-wider text-zinc-100">
+											Dirección de Carrera
+										</h3>
+										<p className="text-[10px] text-zinc-500 font-sans">Avisos y banderas FIA</p>
+									</div>
+								</div>
+								<span className="rounded bg-zinc-900 border border-zinc-800 px-2 py-0.5 text-[9px] font-bold text-zinc-400">
+									OFICIAL
+								</span>
+							</div>
+							<div className="flex-1 overflow-y-auto max-h-[30rem] no-scrollbar">
+								<RaceControl />
+							</div>
 						</div>
-						<div>
-							<TeamRadios />
+
+						{/* Panel 2: Radios de Equipo */}
+						<div className="flex flex-col rounded-2xl border border-zinc-800/80 bg-zinc-950/70 p-4 shadow-xl backdrop-blur-md">
+							<div className="flex items-center justify-between border-b border-zinc-800/80 pb-3 mb-3">
+								<div className="flex items-center gap-2">
+									<div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400">
+										<Radio className="h-3.5 w-3.5" />
+									</div>
+									<div>
+										<h3 className="text-xs font-black uppercase tracking-wider text-zinc-100">
+											Radios de Equipo
+										</h3>
+										<p className="text-[10px] text-zinc-500 font-sans">Comunicaciones de boxes</p>
+									</div>
+								</div>
+								<span className="flex items-center gap-1.5 rounded bg-emerald-950/40 border border-emerald-500/30 px-2 py-0.5 text-[9px] font-black text-emerald-400">
+									<span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+									EN VIVO
+								</span>
+							</div>
+							<div className="flex-1 overflow-y-auto max-h-[30rem] no-scrollbar">
+								<TeamRadios />
+							</div>
 						</div>
-						<div>
-							<TrackViolations />
+
+						{/* Panel 3: Límites de Pista */}
+						<div className="flex flex-col rounded-2xl border border-zinc-800/80 bg-zinc-950/70 p-4 shadow-xl backdrop-blur-md">
+							<div className="flex items-center justify-between border-b border-zinc-800/80 pb-3 mb-3">
+								<div className="flex items-center gap-2">
+									<div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-500/10 border border-sky-500/30 text-sky-400">
+										<AlertTriangle className="h-3.5 w-3.5" />
+									</div>
+									<div>
+										<h3 className="text-xs font-black uppercase tracking-wider text-zinc-100">
+											Límites de Pista
+										</h3>
+										<p className="text-[10px] text-zinc-500 font-sans">Infracciones y sanciones</p>
+									</div>
+								</div>
+								<span className="rounded bg-zinc-900 border border-zinc-800 px-2 py-0.5 text-[9px] font-bold text-zinc-400">
+									TABLA
+								</span>
+							</div>
+							<div className="flex-1 overflow-y-auto max-h-[30rem] no-scrollbar">
+								<TrackViolations />
+							</div>
 						</div>
 					</div>
 				</>
