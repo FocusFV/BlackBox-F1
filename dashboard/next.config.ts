@@ -38,6 +38,10 @@ const config: NextConfig = {
 	productionBrowserSourceMaps: false,
 	env: {
 		version: pack.version,
+		buildId:
+			process.env.VERCEL_GIT_COMMIT_SHA ||
+			process.env.VERCEL_DEPLOYMENT_ID ||
+			`${pack.version}-${Date.now()}`,
 	},
 	images: {
 		remotePatterns: [

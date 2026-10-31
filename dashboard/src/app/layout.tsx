@@ -8,6 +8,7 @@ import { env } from "@/env";
 import EnvScript from "@/env-script";
 import OledModeProvider from "@/components/OledModeProvider";
 import Navbar from "@/components/Navbar";
+import VersionGuard from "@/components/VersionGuard";
 
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
@@ -42,6 +43,9 @@ export default function RootLayout({ children }: Props) {
 					<main className="w-full">
 						{children}
 					</main>
+
+					{/* 🚀 MONITOR DE ACTUALIZACIONES EN VIVO */}
+					<VersionGuard />
 				</OledModeProvider>
 
 				<Analytics />
