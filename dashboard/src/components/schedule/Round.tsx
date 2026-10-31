@@ -68,7 +68,9 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 		: utc(round.end).endOf("day").isBefore(utc());
 
 	const isTargetRound = nextName ? round.name === nextName : !hideBadge;
-	const isLiveNow = utc().isBetween(utc(round.start), utc(round.end).endOf("day"));
+	// 🟢 CORRECCIÓN: Solo está en vivo si hay una sesión actualmente transcurriendo en pista
+	const liveSession = round.sessions.find((s) => utc().isBetween(utc(s.start), utc(s.end)));
+	const isLiveNow = Boolean(liveSession);
 
 	const upcomingSession = isTargetRound
 		? round.sessions.filter((s) => utc(s.start) > utc())[0]
@@ -81,7 +83,9 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 			className={clsx(
 				"group/card relative overflow-hidden rounded-3xl border font-mono select-none flex flex-col justify-between p-5 sm:p-6 transition-all duration-500",
 				isTargetRound
-					? "border-amber-500/40 bg-zinc-950/95 shadow-[0_0_35px_rgba(245,158,11,0.08)] ring-1 ring-amber-500/20"
+					? isLiveNow
+						? "border-emerald-500/50 bg-zinc-950/95 shadow-[0_0_35px_rgba(16,185,129,0.1)] ring-1 ring-emerald-500/30"
+						: "border-amber-500/40 bg-zinc-950/95 shadow-[0_0_35px_rgba(245,158,11,0.08)] ring-1 ring-amber-500/20"
 					: "border-zinc-800/60 bg-gradient-to-b from-zinc-950 via-zinc-900/60 to-black hover:border-zinc-700 hover:shadow-[0_10px_30px_rgba(0,0,0,0.8)]"
 			)}
 		>
@@ -180,7 +184,10 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 									{/* LISTA DE SESIONES */}
 									<div className="flex flex-col gap-2.5 flex-1 justify-around">
 										{day.sessions.map((session, j) => {
+											const isCurrentLive = utc().isBetween(utc(session.start), utc(session.end));
+											const isPast = utc(session.end).isBefore(utc());
 											const isNextTarget =
+												!isCurrentLive &&
 												isTargetRound &&
 												upcomingSession &&
 												upcomingSession.start === session.start &&
@@ -191,25 +198,37 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 													key={`round.day.${i}.session.${j}`}
 													className={clsx(
 														"relative overflow-hidden flex flex-col items-center justify-center text-center p-2.5 rounded-xl transition-all duration-300",
-														isNextTarget
-															? "bg-gradient-to-b from-amber-500/20 via-amber-500/10 to-transparent border border-amber-500/60 shadow-[0_0_18px_rgba(245,158,11,0.18)]"
-															: "bg-zinc-900/40 border border-zinc-900/80 hover:bg-zinc-900/70 hover:border-zinc-800"
+														isCurrentLive
+															? "bg-gradient-to-b from-emerald-500/25 via-emerald-500/10 to-transparent border border-emerald-500/60 shadow-[0_0_18px_rgba(16,185,129,0.22)]"
+															: isNextTarget
+																? "bg-gradient-to-b from-amber-500/20 via-amber-500/10 to-transparent border border-amber-500/60 shadow-[0_0_18px_rgba(245,158,11,0.18)]"
+																: isPast
+																	? "bg-zinc-900/20 border border-zinc-900/50 opacity-40 hover:opacity-75"
+																	: "bg-zinc-900/40 border border-zinc-900/80 hover:bg-zinc-900/70 hover:border-zinc-800"
 													)}
 												>
-													{/* Badge de Próximo */}
-													{isNextTarget && (
+													{/* Badge de En Vivo o Próximo */}
+													{isCurrentLive ? (
+														<span className="absolute top-1.5 right-1.5 flex items-center gap-1 text-[7px] font-black uppercase tracking-wider text-emerald-300 bg-emerald-950/90 border border-emerald-500/40 px-1.5 py-0.2 rounded shadow-sm animate-pulse">
+															<Radio className="w-2 h-2" /> EN VIVO
+														</span>
+													) : isNextTarget ? (
 														<span className="absolute top-1.5 right-1.5 flex items-center gap-1 text-[7px] font-black uppercase tracking-wider text-black bg-gradient-to-r from-amber-300 to-amber-500 px-1.5 py-0.2 rounded shadow-sm">
 															<Activity className="w-2 h-2 animate-spin" /> PRÓX
 														</span>
-													)}
+													) : null}
 
 													{/* Nombre de la Sesión */}
 													<span
 														className={clsx(
 															"uppercase tracking-wide",
-															isNextTarget
-																? "text-xs font-black text-amber-300 font-sans"
-																: "text-[11px] font-bold text-zinc-200"
+															isCurrentLive
+																? "text-xs font-black text-emerald-300 font-sans"
+																: isNextTarget
+																	? "text-xs font-black text-amber-300 font-sans"
+																	: isPast
+																		? "text-[11px] font-medium text-zinc-400"
+																		: "text-[11px] font-bold text-zinc-200"
 														)}
 													>
 														{(() => {
@@ -234,9 +253,13 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 													<span
 														className={clsx(
 															"font-mono tracking-tight text-center mt-1 w-full",
-															isNextTarget
-																? "text-sm font-black text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.6)]"
-																: "text-xs font-bold text-amber-400/90"
+															isCurrentLive
+																? "text-sm font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+																: isNextTarget
+																	? "text-sm font-black text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.6)]"
+																	: isPast
+																		? "text-xs font-medium text-zinc-500"
+																		: "text-xs font-bold text-amber-400/90"
 														)}
 														suppressHydrationWarning
 													>

@@ -42,9 +42,18 @@ export default function SessionInfo() {
 	const delay = useSettingsStore((state) => state.delay);
 
 	// Una sesión se considera en vivo ÚNICAMENTE si está formalmente iniciada/corriendo y no ha finalizado
+	const isSessionTerminated =
+		sessionStatus === "Ends" ||
+		sessionStatus === "Finalised" ||
+		sessionStatus === "Finished" ||
+		(session as any)?.SessionStatus === "Finalised" ||
+		(session as any)?.SessionStatus === "Ends" ||
+		session?.ArchiveStatus?.Status === "Complete";
+
 	const isLive = Boolean(
 		session &&
 		(sessionStatus === "Started" || sessionStatus === "Running") &&
+		!isSessionTerminated &&
 		!(session?.Name === "Race" && !!lapCount && lapCount.CurrentLap > 0 && lapCount.CurrentLap >= lapCount.TotalLaps)
 	);
 
@@ -53,7 +62,7 @@ export default function SessionInfo() {
 	const [nextGpName, setNextGpName] = useState("Próximo Gran Premio");
 	const [nextSessionName, setNextSessionName] = useState("Sesión Oficial");
 	const [countdown, setCountdown] = useState("Cargando...");
-	const [countryCode, setCountryCode] = useState<string | undefined>("mex");
+	const [countryCode, setCountryCode] = useState<string | undefined>(undefined);
 
 	const calcCountdown = (target: Date) => {
 		const difference = target.getTime() - Date.now();
@@ -157,7 +166,7 @@ export default function SessionInfo() {
 			<div className="flex items-center gap-3">
 				{/* Banderita del país del próximo GP */}
 				<div className="flex items-center justify-center overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/80 p-0.5 shadow-md shrink-0">
-					<Flag countryCode={countryCode || "mex"} className="h-6 w-9 object-cover rounded-md" />
+					<Flag countryCode={countryCode} className="h-6 w-9 object-cover rounded-md" />
 				</div>
 
 				<div className="flex flex-col justify-center">

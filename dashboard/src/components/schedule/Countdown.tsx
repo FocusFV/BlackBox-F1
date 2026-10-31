@@ -2,7 +2,8 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { duration, utc } from "moment"; // Cambiamos 'now' por 'utc'
+import { duration, utc } from "moment";
+import clsx from "clsx";
 
 import type { Session } from "@/types/schedule.type";
 
@@ -73,75 +74,106 @@ export default function Countdown({ next, type, countryName }: Props) {
 	// Moment no va a poder romper el bucle ahora porque el string no cambia de referencia.
 	}, [next.start, nextMoment]);
 
+	const isLiveNow = utc().isBetween(utc(next.start), utc(next.end));
+
 	const actionText = (() => {
 		const raw = (next.kind || "").toLowerCase().replace(/\s+/g, "");
+		let title = "";
+		let isPlural = false;
 		if (raw === "race") {
 			const translatedCountry = countryName ? (countryTranslation[countryName] || countryName) : "";
-			return translatedCountry ? `COMIENZA LA CARRERA DE ${translatedCountry.toUpperCase()}` : "COMIENZA LA CARRERA";
+			title = translatedCountry ? `LA CARRERA DE ${translatedCountry.toUpperCase()}` : "LA CARRERA";
+		} else if (raw === "qualifying" || raw === "qualy") {
+			title = "LA CLASIFICACIÓN";
+		} else if (raw === "sprint" || raw === "sprintrace") {
+			title = "LA CARRERA SPRINT";
+		} else if (raw.includes("sprint") && (raw.includes("shootout") || raw.includes("qualif"))) {
+			title = "LA CLASIF. SPRINT";
+		} else if (raw === "practice1" || raw === "fp1") {
+			title = "LOS LIBRES 1";
+			isPlural = true;
+		} else if (raw === "practice2" || raw === "fp2") {
+			title = "LOS LIBRES 2";
+			isPlural = true;
+		} else if (raw === "practice3" || raw === "fp3") {
+			title = "LOS LIBRES 3";
+			isPlural = true;
+		} else {
+			title = (next.kind || "").toUpperCase();
 		}
-		if (raw === "qualifying" || raw === "qualy") return "COMIENZA LA CLASIFICACIÓN";
-		if (raw === "sprint" || raw === "sprintrace") return "COMIENZA LA CARRERA SPRINT";
-		if (raw.includes("sprint") && (raw.includes("shootout") || raw.includes("qualif"))) return "COMIENZA LA CLASIF. SPRINT";
-		if (raw === "practice1" || raw === "fp1") return "COMIENZAN LOS LIBRES 1";
-		if (raw === "practice2" || raw === "fp2") return "COMIENZAN LOS LIBRES 2";
-		if (raw === "practice3" || raw === "fp3") return "COMIENZAN LOS LIBRES 3";
-		return `COMIENZA ${(next.kind || "").toUpperCase()}`;
+
+		if (isLiveNow) {
+			return `${title} EN CURSO`;
+		}
+		return isPlural ? `COMIENZAN ${title} EN` : `COMIENZA ${title} EN`;
 	})();
 
 	return (
 		<div className="flex flex-col gap-2.5 py-1 first:border-b first:border-zinc-900 first:pb-4">
-			<p className="text-xs font-black uppercase tracking-widest text-amber-500/90 flex items-center gap-2">
-				<span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-				{actionText} EN
+			<p className={clsx(
+				"text-xs font-black uppercase tracking-widest flex items-center gap-2",
+				isLiveNow ? "text-emerald-400" : "text-amber-500/90"
+			)}>
+				<span className={clsx("h-1.5 w-1.5 rounded-full", isLiveNow ? "bg-emerald-400 animate-ping" : "bg-amber-500 animate-pulse")} />
+				{actionText}
 			</p>
 
-			<AnimatePresence mode="popLayout">
-				<div className="grid auto-cols-max grid-flow-col gap-5 text-3xl font-mono font-black tracking-tighter">
-					<div className="text-center min-w-12">
-						{days != undefined && days != null ? (
-							<motion.p className="text-neutral-100" key={days} initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 6, opacity: 0 }} transition={{ duration: 0.15 }}>
-								{days}
-							</motion.p>
-						) : (
-							<div className="h-9 w-12 animate-pulse rounded-md bg-zinc-900/80 border border-zinc-800/40" />
-						)}
-						<p className="text-[10px] font-sans font-bold uppercase tracking-widest text-zinc-500 mt-1">Días</p>
-					</div>
-
-					<div className="text-center min-w-12">
-						{hours != undefined && hours != null ? (
-							<motion.p className="text-neutral-100" key={hours} initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 6, opacity: 0 }} transition={{ duration: 0.15 }}>
-								{hours}
-							</motion.p>
-						) : (
-							<div className="h-9 w-12 animate-pulse rounded-md bg-zinc-900/80 border border-zinc-800/40" />
-						)}
-						<p className="text-[10px] font-sans font-bold uppercase tracking-widest text-zinc-500 mt-1">Hs</p>
-					</div>
-
-					<div className="text-center min-w-12">
-						{minutes != undefined && minutes != null ? (
-							<motion.p className="text-neutral-100" key={minutes} initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 6, opacity: 0 }} transition={{ duration: 0.15 }}>
-								{minutes}
-							</motion.p>
-						) : (
-							<div className="h-9 w-12 animate-pulse rounded-md bg-zinc-900/80 border border-zinc-800/40" />
-						)}
-						<p className="text-[10px] font-sans font-bold uppercase tracking-widest text-zinc-500 mt-1">Min</p>
-					</div>
-
-					<div className="text-center min-w-12">
-						{seconds != undefined && seconds != null ? (
-							<motion.p className="text-amber-400 font-extrabold" key={seconds} initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 6, opacity: 0 }} transition={{ duration: 0.12 }}>
-								{String(seconds).padStart(2, "0")}
-							</motion.p>
-						) : (
-							<div className="h-9 w-12 animate-pulse rounded-md bg-zinc-900/80 border border-zinc-800/40" />
-						)}
-						<p className="text-[10px] font-sans font-bold uppercase tracking-widest text-zinc-500 mt-1">Seg</p>
-					</div>
+			{isLiveNow ? (
+				<div className="flex items-center gap-3 py-1.5">
+					<span className="flex items-center gap-2 text-xs font-mono font-black uppercase tracking-widest text-emerald-300 bg-emerald-950/80 px-3 py-1.5 rounded-xl border border-emerald-500/40 animate-pulse">
+						<span className="h-2 w-2 rounded-full bg-emerald-400" />
+						SESIÓN EN VIVO EN PISTA
+					</span>
 				</div>
-			</AnimatePresence>
+			) : (
+				<AnimatePresence mode="popLayout">
+					<div className="grid auto-cols-max grid-flow-col gap-5 text-3xl font-mono font-black tracking-tighter">
+						<div className="text-center min-w-12">
+							{days != undefined && days != null ? (
+								<motion.p className="text-neutral-100" key={days} initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 6, opacity: 0 }} transition={{ duration: 0.15 }}>
+									{days}
+								</motion.p>
+							) : (
+								<div className="h-9 w-12 animate-pulse rounded-md bg-zinc-900/80 border border-zinc-800/40" />
+							)}
+							<p className="text-[10px] font-sans font-bold uppercase tracking-widest text-zinc-500 mt-1">Días</p>
+						</div>
+
+						<div className="text-center min-w-12">
+							{hours != undefined && hours != null ? (
+								<motion.p className="text-neutral-100" key={hours} initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 6, opacity: 0 }} transition={{ duration: 0.15 }}>
+									{hours}
+								</motion.p>
+							) : (
+								<div className="h-9 w-12 animate-pulse rounded-md bg-zinc-900/80 border border-zinc-800/40" />
+							)}
+							<p className="text-[10px] font-sans font-bold uppercase tracking-widest text-zinc-500 mt-1">Hs</p>
+						</div>
+
+						<div className="text-center min-w-12">
+							{minutes != undefined && minutes != null ? (
+								<motion.p className="text-neutral-100" key={minutes} initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 6, opacity: 0 }} transition={{ duration: 0.15 }}>
+									{minutes}
+								</motion.p>
+							) : (
+								<div className="h-9 w-12 animate-pulse rounded-md bg-zinc-900/80 border border-zinc-800/40" />
+							)}
+							<p className="text-[10px] font-sans font-bold uppercase tracking-widest text-zinc-500 mt-1">Min</p>
+						</div>
+
+						<div className="text-center min-w-12">
+							{seconds != undefined && seconds != null ? (
+								<motion.p className="text-amber-400 font-extrabold" key={seconds} initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 6, opacity: 0 }} transition={{ duration: 0.12 }}>
+									{String(seconds).padStart(2, "0")}
+								</motion.p>
+							) : (
+								<div className="h-9 w-12 animate-pulse rounded-md bg-zinc-900/80 border border-zinc-800/40" />
+							)}
+							<p className="text-[10px] font-sans font-bold uppercase tracking-widest text-zinc-500 mt-1">Seg</p>
+						</div>
+					</div>
+				</AnimatePresence>
+			)}
 		</div>
 	);
 }

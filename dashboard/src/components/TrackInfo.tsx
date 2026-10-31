@@ -9,29 +9,59 @@ export default function TrackInfo() {
 	const track = useDataStore((state) => state.state?.TrackStatus);
 	const session = useDataStore((state) => state.state?.SessionInfo);
 	const sessionStatus = useDataStore((state) => state.state?.SessionStatus?.Status);
+	const heartbeatUtc = useDataStore((state) => state.state?.Heartbeat?.Utc);
 
-	const isParcFerme =
-		!session ||
+	// Telemetría con heartbeat activo en los últimos 3 minutos (descarta datos viejos o cacheados)
+	const isRecentHeartbeat = Boolean(
+		heartbeatUtc &&
+		Math.abs(Date.now() - new Date(heartbeatUtc).getTime()) < 3 * 60 * 1000
+	);
+
+	const isSessionStarted = sessionStatus === "Started" || sessionStatus === "Running";
+
+	const isSessionTerminated =
 		sessionStatus === "Ends" ||
 		sessionStatus === "Finalised" ||
-		(!!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps);
+		sessionStatus === "Finished" ||
+		(session as any)?.SessionStatus === "Finalised" ||
+		(session as any)?.SessionStatus === "Ends" ||
+		session?.ArchiveStatus?.Status === "Complete";
 
-	// Si estamos en Parque Cerrado / Motores Apagados, no renderizamos nada a la derecha
-	if (isParcFerme) {
+	// Solo consideramos la pista verdaderamente activa si la sesión fue iniciada, no está terminada, y hay heartbeat reciente
+	const isTrackLive = Boolean(
+		session &&
+		isSessionStarted &&
+		!isSessionTerminated &&
+		isRecentHeartbeat &&
+		!(session?.Name === "Race" && !!lapCount && lapCount.CurrentLap > 0 && lapCount.CurrentLap >= lapCount.TotalLaps)
+	);
+
+	// Si no hay sesión activa en pista (ej: entre sesiones o antes de una práctica), no mostramos datos residuales
+	if (!isTrackLive) {
 		return null;
 	}
 
 	const currentTrackStatus = getTrackStatusMessage(track?.Status ? parseInt(track?.Status) : undefined);
 
+	// Solo las carreras principales o sprint tienen contador total de vueltas fijas (ej: 3 / 56)
+	const isRaceOrSprint = session?.Name === "Race" || session?.Name === "Sprint";
+	const hasValidLapCount = Boolean(
+		isRaceOrSprint &&
+		lapCount &&
+		typeof lapCount.CurrentLap === "number" &&
+		typeof lapCount.TotalLaps === "number" &&
+		lapCount.TotalLaps > 0
+	);
+
 	return (
 		<div className="flex flex-row items-center gap-4 md:justify-self-end">
-			{!!lapCount && (
+			{hasValidLapCount && (
 				<p className="text-3xl font-extrabold whitespace-nowrap">
 					{lapCount?.CurrentLap} / {lapCount?.TotalLaps}
 				</p>
 			)}
 
-			{!!currentTrackStatus ? (
+			{!!currentTrackStatus && (
 				<div
 					className={clsx("flex h-8 items-center truncate rounded-md px-2", currentTrackStatus.color)}
 					style={{
@@ -40,8 +70,6 @@ export default function TrackInfo() {
 				>
 					<p className="text-lg font-medium">{currentTrackStatus.message}</p>
 				</div>
-			) : (
-				<div className="relative h-8 w-28 animate-pulse overflow-hidden rounded-lg bg-zinc-800" />
 			)}
 		</div>
 	);

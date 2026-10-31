@@ -182,7 +182,9 @@ export default async function NextRound() {
 		);
 	}
 
-	const nextSession = next.sessions.find((s) => utc(s.start) > utc() && s.kind.toLowerCase() !== "race");
+	const nextSession =
+		next.sessions.find((s) => utc(s.end) > utc() && s.kind.toLowerCase() !== "race") ||
+		next.sessions.find((s) => utc(s.start) > utc() && s.kind.toLowerCase() !== "race");
 
 	const finalRaceSession =
 		next.sessions.find((s) => s.kind.toLowerCase() === "race") || {

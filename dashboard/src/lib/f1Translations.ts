@@ -103,7 +103,7 @@ export function getCountryCodeForGp(gpName?: string, countryRaw?: string): strin
 			}
 		}
 	}
-	return "mex";
+	return "";
 }
 
 export function translateSessionName(session?: string): string {
