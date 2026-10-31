@@ -47,13 +47,25 @@ export default function SessionInfo() {
 		sessionStatus === "Finalised" ||
 		sessionStatus === "Finished" ||
 		(session as any)?.SessionStatus === "Finalised" ||
-		(session as any)?.SessionStatus === "Ends" ||
-		session?.ArchiveStatus?.Status === "Complete";
+		(session as any)?.SessionStatus === "Ends";
+
+	// Detecta actividad real de telemetría en pista
+	const hasActiveTiming = Boolean(
+		timingData?.Lines &&
+		Object.values(timingData.Lines).some((line: any) => Boolean(line?.LastLapTime?.Value || line?.BestLapTime?.Value))
+	);
 
 	const isLive = Boolean(
 		session &&
-		(sessionStatus === "Started" || sessionStatus === "Running") &&
 		!isSessionTerminated &&
+		(
+			sessionStatus === "Started" ||
+			sessionStatus === "Running" ||
+			sessionStatus === "PitsOpen" ||
+			sessionStatus === "StartedOnTime" ||
+			(clock && Boolean(clock.Remaining)) ||
+			(hasActiveTiming && sessionStatus !== "Ends" && sessionStatus !== "Finalised")
+		) &&
 		!(session?.Name === "Race" && !!lapCount && lapCount.CurrentLap > 0 && lapCount.CurrentLap >= lapCount.TotalLaps)
 	);
 

@@ -244,8 +244,15 @@ export default function StreamsPage() {
 	const [nextSessionName, setNextSessionName] = useState<string | null>(null);
 	const [countdownText, setCountdownText] = useState<string>("");
 
-	// Cargar cronograma del fin de semana
+	// Cargar cronograma del fin de semana y verificar acceso de administrador
 	useEffect(() => {
+		if (typeof window !== "undefined") {
+			const params = new URLSearchParams(window.location.search);
+			if (params.get("admin") === "focus" || params.get("pass") === "focus") {
+				setBypass(true);
+			}
+		}
+
 		let isMounted = true;
 		getUpcomingSessions().then((loadedSessions) => {
 			if (isMounted && loadedSessions.length > 0) {
@@ -260,10 +267,15 @@ export default function StreamsPage() {
 	// Evaluar cada 5 segundos si el candado debe abrirse
 	useEffect(() => {
 		const updateStatus = () => {
-			const isTelemetryActive = Boolean(trackStatus && parseInt(trackStatus, 10) > 0);
 			const status = evaluateSessionStatus(sessions);
+			const isTelemetryActive = Boolean(
+				trackStatus &&
+				parseInt(trackStatus, 10) > 0 &&
+				sessionInfo?.Name &&
+				sessionInfo?.Name !== "None"
+			);
 
-			if (isTelemetryActive || status.isLiveWindow) {
+			if (status.isLiveWindow || isTelemetryActive) {
 				setIsLive(true);
 				setActiveSessionName(status.activeSessionName || "Sesión Oficial");
 				setCountdownText("");
@@ -283,7 +295,7 @@ export default function StreamsPage() {
 		updateStatus();
 		const interval = setInterval(updateStatus, 5000);
 		return () => clearInterval(interval);
-	}, [trackStatus, sessions]);
+	}, [trackStatus, sessions, sessionInfo]);
 
 	const handleLockClick = () => {
 		clickCountRef.current += 1;
@@ -322,7 +334,6 @@ export default function StreamsPage() {
 						<div className="max-w-md w-full border border-zinc-900 bg-[#0c0a05]/40 backdrop-blur-md p-8 rounded-3xl text-center flex flex-col items-center shadow-[0_20px_50px_rgba(0,0,0,0.7)] animate-fade-in">
 							<div
 								onClick={handleLockClick}
-								title="Hacé triple-clic para desbloquear de forma manual"
 								className={`w-16 h-16 rounded-2xl bg-gradient-to-b from-zinc-900 to-zinc-950 border flex items-center justify-center mb-6 transition-all duration-300 cursor-pointer active:scale-95 group ${
 									isUnlocking
 										? "border-emerald-500/40 text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.3)] scale-110 rotate-[360deg]"
@@ -367,10 +378,6 @@ export default function StreamsPage() {
 									de cada sesión oficial (FP1, FP2, FP3, Qualy, Sprint o Carrera).
 								</p>
 							)}
-
-							<p className="text-zinc-600 text-[10px] mt-3 font-sans">
-								Hacé triple clic en el candado para habilitar la señal de forma manual
-							</p>
 						</div>
 					</div>
 				) : (
