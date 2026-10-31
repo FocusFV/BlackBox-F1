@@ -7,7 +7,7 @@ import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import Flag from "@/components/Flag";
 import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
-import { parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
+import { parseUtcMs, parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
 
 const translateSessionName = (name?: string) => {
 	if (!name) return "En Vivo";
@@ -270,63 +270,73 @@ export default function SessionInfo() {
 
 	// Render en vivo
 	const isRaceOrSprint = session?.Name === "Race" || session?.Name === "Sprint";
-	let timeRemaining: string | undefined;
-	const parsedClockMs = parseFomClockRemaining(clock?.Remaining, isRaceOrSprint);
-
-	if (parsedClockMs !== null) {
-		let ms = parsedClockMs;
-		if (clock?.Extrapolating && clock.Utc) {
-			ms = ms - utc().diff(utc(clock.Utc)) + (delay ? delay * 1000 : 0);
-		}
-		timeRemaining = formatMsToClock(ms);
-	} else if (isLive && (session?.Name !== "Race" && session?.Name !== "Sprint")) {
-		// ⏱️ Fallback inteligente para Qualy (Q1: 18m, Q2: 15m, Q3: 12m) y Prácticas (60m)
-		const sessionPart = timingData?.SessionPart || 1;
-		const isQualy = session?.Name?.toLowerCase().includes("qual") || Boolean(timingData?.SessionPart);
-
-		const partDurationMs = isQualy
-			? (sessionPart === 2 ? 15 : sessionPart === 3 ? 12 : 18) * 60 * 1000
-			: 60 * 60 * 1000;
-
-		const greenMessages = raceControlMessages?.filter(
-			(m) => m.Flag === "GREEN" || m.Message?.includes("GREEN LIGHT") || m.Message?.includes("PIT LANE OPEN")
-		);
-		const lastGreen = greenMessages && greenMessages.length > 0 ? greenMessages[greenMessages.length - 1] : null;
-
-		let partStartMs: number | null = null;
-		if (lastGreen?.Utc) {
-			partStartMs = new Date(lastGreen.Utc).getTime();
-		} else if (session?.StartDate) {
-			partStartMs = new Date(session.StartDate).getTime();
-		}
-
-		if (!partStartMs) {
-			const now = Date.now();
-			const topOfHour = new Date(now);
-			topOfHour.setMinutes(0, 0, 0);
-			const halfHour = new Date(now);
-			halfHour.setMinutes(30, 0, 0);
-			partStartMs = (now - halfHour.getTime() < now - topOfHour.getTime() && halfHour.getTime() <= now)
-				? halfHour.getTime()
-				: topOfHour.getTime();
-		}
-
-		if (partStartMs) {
-			const elapsed = Date.now() - partStartMs;
-			const remainingMs = Math.max(0, partDurationMs - elapsed + (delay ? delay * 1000 : 0));
-			timeRemaining = formatMsToClock(remainingMs);
-		}
-	}
-
-	// Detectar descanso entre Q1 y Q2 o Q2 y Q3
 	const isQualy = session?.Name?.toLowerCase().includes("qual") || Boolean(timingData?.SessionPart);
+	const sessionPart = timingData?.SessionPart || 1;
 	const allInPit = Boolean(
 		timingData?.Lines &&
 		Object.values(timingData.Lines).length > 0 &&
 		Object.values(timingData.Lines).every((l: any) => l.InPit)
 	);
-	const sessionPart = timingData?.SessionPart || 1;
-	const isQualyBreak = isQualy && sessionPart < 3 && allInPit && (parsedClockMs !== null || hasActiveTiming);
+	const isQualyBreak = isQualy && sessionPart < 3 && allInPit;
+	const nextPartName = sessionPart === 1 ? "Q2" : "Q3";
+
+	let timeRemaining: string | undefined;
+
+	if (isQualyBreak) {
+		// ⏱️ CUENTA REGRESIVA OFICIAL ENTRE SESIONES DE QUALY
+		const chequeredMessages = raceControlMessages?.filter(
+			(m) => m.Flag === "CHEQUERED" || m.Message?.includes("CHEQUERED")
+		);
+		const lastChequered = chequeredMessages && chequeredMessages.length > 0
+			? chequeredMessages[chequeredMessages.length - 1]
+			: null;
+		const breakStartMs = parseUtcMs(lastChequered?.Utc);
+		const breakDurationMs = (sessionPart === 1 ? 7 : 8) * 60 * 1000;
+
+		let breakRemainingMs = breakDurationMs;
+		if (breakStartMs) {
+			const elapsed = Math.max(0, Date.now() - breakStartMs);
+			breakRemainingMs = Math.min(breakDurationMs, Math.max(0, breakDurationMs - elapsed));
+		}
+		timeRemaining = formatMsToClock(breakRemainingMs, true);
+	} else if (!isRaceOrSprint && isLive) {
+		const parsedClockMs = parseFomClockRemaining(clock?.Remaining, isRaceOrSprint);
+
+		if (parsedClockMs !== null) {
+			let ms = parsedClockMs;
+			if (clock?.Extrapolating && clock.Utc) {
+				const clockUtcMs = parseUtcMs(clock.Utc);
+				if (clockUtcMs) {
+					ms = ms - Math.max(0, Date.now() - clockUtcMs) + (delay ? delay * 1000 : 0);
+				}
+			}
+			timeRemaining = formatMsToClock(ms, true);
+		} else {
+			const partDurationMs = isQualy
+				? (sessionPart === 3 ? 12 : sessionPart === 2 ? 15 : 18) * 60 * 1000
+				: 60 * 60 * 1000;
+
+			const greenMessages = raceControlMessages?.filter(
+				(m) => m.Flag === "GREEN" || m.Message?.includes("GREEN LIGHT") || m.Message?.includes("PIT LANE OPEN")
+			);
+			const lastGreen = greenMessages && greenMessages.length > 0 ? greenMessages[greenMessages.length - 1] : null;
+
+			let partStartMs: number | null = null;
+			if (lastGreen?.Utc) {
+				partStartMs = parseUtcMs(lastGreen.Utc);
+			} else if (session?.StartDate) {
+				partStartMs = parseUtcMs(session.StartDate);
+			}
+
+			if (partStartMs) {
+				const elapsed = Math.max(0, Date.now() - partStartMs);
+				const remainingMs = Math.min(partDurationMs, Math.max(0, partDurationMs - elapsed + (delay ? delay * 1000 : 0)));
+				timeRemaining = formatMsToClock(remainingMs, true);
+			} else {
+				timeRemaining = formatMsToClock(partDurationMs, true);
+			}
+		}
+	}
 
 	return (
 		<div className="flex items-center gap-2.5">
@@ -345,9 +355,16 @@ export default function SessionInfo() {
 				</h1>
 
 				{timeRemaining !== undefined ? (
-					<p className={clsx("text-xl md:text-2xl leading-none font-black font-mono mt-1", isQualyBreak ? "text-amber-400" : "text-white")}>
-						{timeRemaining}
-					</p>
+					<div className="flex items-center gap-1.5 mt-1">
+						{isQualyBreak && (
+							<span className="text-[10px] font-black uppercase tracking-wider text-amber-400 font-mono">
+								{nextPartName} EMPIEZA EN:
+							</span>
+						)}
+						<p className={clsx("text-xl md:text-2xl leading-none font-black font-mono", isQualyBreak ? "text-amber-400" : "text-white")}>
+							{timeRemaining}
+						</p>
+					</div>
 				) : (
 					<p className="text-xs leading-none font-bold text-zinc-400 font-mono mt-1 uppercase tracking-wider">
 						{session?.Meeting?.Circuit?.ShortName || session?.Meeting?.Location || "Trazado Oficial"}

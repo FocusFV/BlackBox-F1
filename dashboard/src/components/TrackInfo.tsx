@@ -6,7 +6,7 @@ import { utc, duration } from "moment";
 import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { getTrackStatusMessage } from "@/lib/getTrackStatusMessage";
-import { parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
+import { parseUtcMs, parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
 
 export default function TrackInfo() {
 	const lapCount = useDataStore((state) => state.state?.LapCount);
@@ -104,65 +104,74 @@ export default function TrackInfo() {
 		lapCount.TotalLaps > 0
 	);
 
-	// En prácticas o qualy, calculamos el tiempo restante oficial para sincronizar con la TV
-	let formattedTime: string | undefined;
-	const parsedClockMs = parseFomClockRemaining(clock?.Remaining, isRaceOrSprint);
-
-	if (parsedClockMs !== null) {
-		let ms = parsedClockMs;
-		if (clock?.Extrapolating && clock.Utc) {
-			ms = ms - utc().diff(utc(clock.Utc)) + (delay ? delay * 1000 : 0);
-		}
-		formattedTime = formatMsToClock(ms);
-	} else if (!isRaceOrSprint && isTrackLive) {
-		// ⏱️ Fallback inteligente para Qualy (Q1: 18m, Q2: 15m, Q3: 12m) y Prácticas (60m)
-		const sessionPart = timingData?.SessionPart || 1;
-		const isQualy = session?.Name?.toLowerCase().includes("qual") || Boolean(timingData?.SessionPart);
-
-		const partDurationMs = isQualy
-			? (sessionPart === 2 ? 15 : sessionPart === 3 ? 12 : 18) * 60 * 1000
-			: 60 * 60 * 1000;
-
-		const greenMessages = raceControlMessages?.filter(
-			(m) => m.Flag === "GREEN" || m.Message?.includes("GREEN LIGHT") || m.Message?.includes("PIT LANE OPEN")
-		);
-		const lastGreen = greenMessages && greenMessages.length > 0 ? greenMessages[greenMessages.length - 1] : null;
-
-		let partStartMs: number | null = null;
-		if (lastGreen?.Utc) {
-			partStartMs = new Date(lastGreen.Utc).getTime();
-		} else if (session?.StartDate) {
-			partStartMs = new Date(session.StartDate).getTime();
-		}
-
-		if (!partStartMs) {
-			const now = Date.now();
-			const topOfHour = new Date(now);
-			topOfHour.setMinutes(0, 0, 0);
-			const halfHour = new Date(now);
-			halfHour.setMinutes(30, 0, 0);
-			partStartMs = (now - halfHour.getTime() < now - topOfHour.getTime() && halfHour.getTime() <= now)
-				? halfHour.getTime()
-				: topOfHour.getTime();
-		}
-
-		if (partStartMs) {
-			const elapsed = Date.now() - partStartMs;
-			const remainingMs = Math.max(0, partDurationMs - elapsed + (delay ? delay * 1000 : 0));
-			formattedTime = formatMsToClock(remainingMs);
-		}
-	}
-
-	// Detectar si estamos en pausa/intermedio entre segmentos de Qualy (todos en boxes)
 	const isQualy = session?.Name?.toLowerCase().includes("qual") || Boolean(timingData?.SessionPart);
+	const sessionPart = timingData?.SessionPart || 1;
 	const allInPit = Boolean(
 		timingData?.Lines &&
 		Object.values(timingData.Lines).length > 0 &&
 		Object.values(timingData.Lines).every((l: any) => l.InPit)
 	);
-	const sessionPart = timingData?.SessionPart || 1;
-	const isQualyBreak = isQualy && sessionPart < 3 && allInPit && (parsedClockMs !== null || hasActiveTiming);
-	const nextPartLabel = sessionPart === 1 ? "INICIO Q2" : sessionPart === 2 ? "INICIO Q3" : "TIEMPO";
+	const isQualyBreak = isQualy && sessionPart < 3 && allInPit;
+	const nextPartName = sessionPart === 1 ? "Q2" : "Q3";
+
+	let formattedTime: string | undefined;
+
+	if (isQualyBreak) {
+		// ⏱️ PANTALLA OFICIAL ESTILO F1 TV DURANTE LA PAUSA ENTRE TANDAS
+		const chequeredMessages = raceControlMessages?.filter(
+			(m) => m.Flag === "CHEQUERED" || m.Message?.includes("CHEQUERED")
+		);
+		const lastChequered = chequeredMessages && chequeredMessages.length > 0
+			? chequeredMessages[chequeredMessages.length - 1]
+			: null;
+		const breakStartMs = parseUtcMs(lastChequered?.Utc);
+		const breakDurationMs = (sessionPart === 1 ? 7 : 8) * 60 * 1000;
+
+		let breakRemainingMs = breakDurationMs;
+		if (breakStartMs) {
+			const elapsed = Math.max(0, Date.now() - breakStartMs);
+			breakRemainingMs = Math.min(breakDurationMs, Math.max(0, breakDurationMs - elapsed));
+		}
+		formattedTime = formatMsToClock(breakRemainingMs, true);
+	} else if (!isRaceOrSprint && isTrackLive) {
+		// ⏱️ RELOJ EN VIVO PARA QUALY O PRÁCTICAS (SIEMPRE EN MINUTOS Y SEGUNDOS MM:SS)
+		const parsedClockMs = parseFomClockRemaining(clock?.Remaining, isRaceOrSprint);
+
+		if (parsedClockMs !== null) {
+			let ms = parsedClockMs;
+			if (clock?.Extrapolating && clock.Utc) {
+				const clockUtcMs = parseUtcMs(clock.Utc);
+				if (clockUtcMs) {
+					ms = ms - Math.max(0, Date.now() - clockUtcMs) + (delay ? delay * 1000 : 0);
+				}
+			}
+			formattedTime = formatMsToClock(ms, true);
+		} else {
+			const partDurationMs = isQualy
+				? (sessionPart === 3 ? 12 : sessionPart === 2 ? 15 : 18) * 60 * 1000
+				: 60 * 60 * 1000;
+
+			const greenMessages = raceControlMessages?.filter(
+				(m) => m.Flag === "GREEN" || m.Message?.includes("GREEN LIGHT") || m.Message?.includes("PIT LANE OPEN")
+			);
+			const lastGreen = greenMessages && greenMessages.length > 0 ? greenMessages[greenMessages.length - 1] : null;
+
+			let partStartMs: number | null = null;
+			if (lastGreen?.Utc) {
+				partStartMs = parseUtcMs(lastGreen.Utc);
+			} else if (session?.StartDate) {
+				partStartMs = parseUtcMs(session.StartDate);
+			}
+
+			if (partStartMs) {
+				const elapsed = Math.max(0, Date.now() - partStartMs);
+				const remainingMs = Math.min(partDurationMs, Math.max(0, partDurationMs - elapsed + (delay ? delay * 1000 : 0)));
+				formattedTime = formatMsToClock(remainingMs, true);
+			} else {
+				formattedTime = formatMsToClock(partDurationMs, true);
+			}
+		}
+	}
 
 	if (isPostSession) {
 		return (
@@ -180,12 +189,28 @@ export default function TrackInfo() {
 				<p className="text-3xl font-extrabold whitespace-nowrap font-mono tracking-wider">
 					{lapCount?.CurrentLap} / {lapCount?.TotalLaps}
 				</p>
+			) : isQualyBreak ? (
+				/* 🏎️ BADGE ESTILO OFICIAL F1 TV: "Q3 EMPIEZA EN 02:45" */
+				<div className="flex flex-col items-end justify-center rounded-xl border border-red-500/40 bg-zinc-950/95 px-3.5 py-1.5 shadow-2xl backdrop-blur-md font-mono">
+					<div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-400">
+						<span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
+						<span>F1 CLASIFICACIÓN</span>
+					</div>
+					<div className="flex items-baseline gap-2 mt-0.5">
+						<span className="text-[10px] font-black uppercase tracking-wider text-amber-400">
+							{nextPartName} EMPIEZA EN
+						</span>
+						<span className="text-xl sm:text-2xl font-black text-white tracking-widest tabular-nums">
+							{formattedTime}
+						</span>
+					</div>
+				</div>
 			) : formattedTime ? (
 				<div className="flex items-center gap-2 font-mono">
-					<span className={clsx("text-[10px] font-bold uppercase tracking-widest hidden sm:inline", isQualyBreak ? "text-amber-400 animate-pulse font-black" : "text-zinc-400")}>
-						{isQualyBreak ? nextPartLabel : "TIEMPO"}
+					<span className="text-[10px] font-bold uppercase tracking-widest hidden sm:inline text-zinc-400">
+						TIEMPO
 					</span>
-					<p className={clsx("text-2xl sm:text-3xl font-black whitespace-nowrap tracking-wider", isQualyBreak ? "text-amber-400" : "text-emerald-400")}>
+					<p className="text-2xl sm:text-3xl font-black whitespace-nowrap tracking-wider text-emerald-400">
 						{formattedTime}
 					</p>
 				</div>

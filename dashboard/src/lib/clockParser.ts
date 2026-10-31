@@ -2,6 +2,17 @@
 // Evita el bug de Moment.js que interpreta "MM:SS" como "HH:MM" (348 min en lugar de 5m 48s)
 // y procesa formatos "MM:SS:cc" de Qualy (ej: "05:29:14" -> 5m 29s en lugar de 5 horas 29 minutos)
 
+export function parseUtcMs(utcStr?: string): number | null {
+	if (!utcStr) return null;
+	const clean = utcStr.trim();
+	if (clean.endsWith("Z") || /[+-]\d{2}:\d{2}$/.test(clean)) {
+		const ms = new Date(clean).getTime();
+		return isNaN(ms) ? null : ms;
+	}
+	const ms = new Date(`${clean}Z`).getTime();
+	return isNaN(ms) ? null : ms;
+}
+
 export function parseFomClockRemaining(remainingStr?: string, isRace: boolean = false): number | null {
 	if (!remainingStr) return null;
 	const clean = remainingStr.trim();
@@ -30,7 +41,7 @@ export function parseFomClockRemaining(remainingStr?: string, isRace: boolean = 
 	return null;
 }
 
-export function formatMsToClock(ms: number): string {
+export function formatMsToClock(ms: number, forceNoHours: boolean = false): string {
 	if (ms <= 0) return "00:00";
 	const totalSecs = Math.floor(ms / 1000);
 	const hours = Math.floor(totalSecs / 3600);
@@ -38,7 +49,10 @@ export function formatMsToClock(ms: number): string {
 	const seconds = totalSecs % 60;
 	const pad = (n: number) => n.toString().padStart(2, "0");
 
-	return hours > 0
-		? `${hours}:${pad(minutes)}:${pad(seconds)}`
-		: `${pad(minutes)}:${pad(seconds)}`;
+	if (forceNoHours || hours === 0) {
+		const totalMinutes = Math.floor(totalSecs / 60);
+		return `${pad(totalMinutes)}:${pad(seconds)}`;
+	}
+
+	return `${hours}:${pad(minutes)}:${pad(seconds)}`;
 }

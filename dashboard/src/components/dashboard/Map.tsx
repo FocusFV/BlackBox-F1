@@ -11,7 +11,7 @@ import { fetchMap } from "@/lib/fetchMap";
 import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { getTrackStatusMessage } from "@/lib/getTrackStatusMessage";
-import { parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
+import { parseUtcMs, parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
 import {
 	createSectors,
 	findYellowSectors,
@@ -176,9 +176,26 @@ export default function Map({ filter }: { filter?: string[] }) {
 	);
 	const sessionPart = rawTiming?.SessionPart || 1;
 	const isQualyBreak = isQualy && sessionPart < 3 && allInPit && !isEnded;
+	const nextPartName = sessionPart === 1 ? "Q2" : "Q3";
 
-	const parsedClockMs = parseFomClockRemaining(clock?.Remaining, isRaceOrSprint);
-	const breakTimeFormatted = parsedClockMs !== null ? formatMsToClock(parsedClockMs) : null;
+	let breakTimeFormatted: string | null = null;
+	if (isQualyBreak) {
+		const chequeredMessages = raceControlMessages?.filter(
+			(m) => m.Flag === "CHEQUERED" || m.Message?.includes("CHEQUERED")
+		);
+		const lastChequered = chequeredMessages && chequeredMessages.length > 0
+			? chequeredMessages[chequeredMessages.length - 1]
+			: null;
+		const breakStartMs = parseUtcMs(lastChequered?.Utc);
+		const breakDurationMs = (sessionPart === 1 ? 7 : 8) * 60 * 1000;
+
+		let breakRemainingMs = breakDurationMs;
+		if (breakStartMs) {
+			const elapsed = Math.max(0, Date.now() - breakStartMs);
+			breakRemainingMs = Math.min(breakDurationMs, Math.max(0, breakDurationMs - elapsed));
+		}
+		breakTimeFormatted = formatMsToClock(breakRemainingMs, true);
+	}
 
 	const hasLivePositions = useMemo(() => {
 		if (!positions) return false;
@@ -418,24 +435,35 @@ export default function Map({ filter }: { filter?: string[] }) {
 			)}
 		</svg>
 
-		{/* ⏸️ Indicador HUD de Estado en Pista */}
-		{allInPit && !isEnded && (
+		{/* 🏎️ TV BADGE OFICIAL F1: "Q3 EMPIEZA EN 02:45" */}
+		{isQualyBreak ? (
+			<div className="absolute top-4 right-4 pointer-events-none z-10 flex flex-col font-mono">
+				<div className="rounded-xl border border-red-600/50 bg-zinc-950/95 p-3.5 shadow-2xl backdrop-blur-md min-w-[13rem]">
+					<div className="flex items-center justify-between border-b border-zinc-800/80 pb-1.5 mb-2">
+						<span className="text-[10px] font-black tracking-widest text-red-500 uppercase flex items-center gap-1.5">
+							<span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
+							F1 CLASIFICACIÓN
+						</span>
+						<span className="text-[9px] font-bold text-zinc-500 uppercase">OFICIAL</span>
+					</div>
+					<p className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">
+						{nextPartName} EMPIEZA EN
+					</p>
+					<p className="text-3xl font-black text-white font-mono tracking-wider tabular-nums mt-0.5">
+						{breakTimeFormatted || "02:00"}
+					</p>
+				</div>
+			</div>
+		) : allInPit && !isEnded && (
 			<div className="absolute top-4 right-4 pointer-events-none z-10 flex flex-col items-end gap-1.5 font-mono">
 				<div className="flex items-center gap-2 rounded-lg bg-zinc-950/95 border border-amber-500/40 px-3.5 py-2 shadow-2xl backdrop-blur-md">
 					<span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
 					<span className="text-xs font-black text-amber-400 uppercase tracking-wider">
-						{isQualyBreak ? `Pausa Q${sessionPart} ➔ Q${sessionPart + 1}` : "Monoplazas en Boxes"}
+						Monoplazas en Boxes
 					</span>
-					{breakTimeFormatted && (
-						<span className="rounded bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 text-[11px] font-black text-amber-300 ml-1">
-							{breakTimeFormatted}
-						</span>
-					)}
 				</div>
 				<span className="text-[10px] font-semibold text-zinc-400 bg-zinc-900/90 px-2.5 py-1 rounded-md border border-zinc-800 shadow-sm backdrop-blur-sm">
-					{isQualyBreak 
-						? `Pilotos en garaje preparando la salida a Q${sessionPart + 1}`
-						: "Sin monoplazas rodando en circuito"}
+					Sin monoplazas rodando en circuito
 				</span>
 			</div>
 		)}
