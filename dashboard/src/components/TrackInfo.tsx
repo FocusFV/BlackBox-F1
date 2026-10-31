@@ -60,16 +60,22 @@ export default function TrackInfo() {
 
 	const hasActiveTiming = Boolean(
 		timingData?.Lines &&
-		Object.values(timingData.Lines).some((line: any) => Boolean(line?.LastLapTime?.Value || line?.BestLapTime?.Value))
+		Object.values(timingData.Lines).some((line: any) =>
+			Boolean(
+				line?.LastLapTime?.Value ||
+				line?.BestLapTime?.Value ||
+				line?.Sectors?.some((s: any) => Boolean(s?.Value))
+			)
+		)
 	);
 
-	// Solo consideramos la pista verdaderamente activa si la sesión fue iniciada, no está terminada, y hay heartbeat reciente
+	// Consideramos la pista activa si hay tiempos, reloj oficial, o sesión iniciada
 	const isTrackLive = Boolean(
-		session &&
-		(isSessionStarted || hasActiveTiming || Boolean(clock?.Remaining)) &&
-		!isSessionTerminated &&
-		isRecentHeartbeat &&
-		!(session?.Name === "Race" && !!lapCount && lapCount.CurrentLap > 0 && lapCount.CurrentLap >= lapCount.TotalLaps)
+		hasActiveTiming ||
+		Boolean(clock?.Remaining) ||
+		(session &&
+			isSessionStarted &&
+			!isSessionTerminated)
 	);
 
 	// Si no hay sesión activa en pista ni estamos en post-sesión, no mostramos datos residuales
@@ -135,7 +141,14 @@ export default function TrackInfo() {
 						{formattedTime}
 					</p>
 				</div>
-			) : null}
+			) : (
+				<div className="flex items-center gap-2 font-mono">
+					<span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
+					<span className="text-xs sm:text-sm font-black text-emerald-400 uppercase tracking-widest">
+						EN VIVO
+					</span>
+				</div>
+			)}
 
 			{!!currentTrackStatus && (
 				<div

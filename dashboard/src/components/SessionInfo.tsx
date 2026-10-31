@@ -74,24 +74,27 @@ export default function SessionInfo() {
 		Date.now() - sessionEndTime < 15 * 60 * 1000
 	);
 
-	// Detecta actividad real de telemetría en pista
+	// Detecta actividad real de telemetría en pista (tiempos de vuelta o sectores activos)
 	const hasActiveTiming = Boolean(
 		timingData?.Lines &&
-		Object.values(timingData.Lines).some((line: any) => Boolean(line?.LastLapTime?.Value || line?.BestLapTime?.Value))
+		Object.values(timingData.Lines).some((line: any) =>
+			Boolean(
+				line?.LastLapTime?.Value ||
+				line?.BestLapTime?.Value ||
+				line?.Sectors?.some((s: any) => Boolean(s?.Value))
+			)
+		)
 	);
 
 	const isLive = Boolean(
-		session &&
-		!isSessionTerminated &&
-		(
-			sessionStatus === "Started" ||
-			sessionStatus === "Running" ||
-			sessionStatus === "PitsOpen" ||
-			sessionStatus === "StartedOnTime" ||
-			(clock && Boolean(clock.Remaining)) ||
-			(hasActiveTiming && sessionStatus !== "Ends" && sessionStatus !== "Finalised")
-		) &&
-		!(session?.Name === "Race" && !!lapCount && lapCount.CurrentLap > 0 && lapCount.CurrentLap >= lapCount.TotalLaps)
+		hasActiveTiming ||
+		Boolean(clock?.Remaining) ||
+		(session &&
+			!isSessionTerminated &&
+			(sessionStatus === "Started" ||
+				sessionStatus === "Running" ||
+				sessionStatus === "PitsOpen" ||
+				sessionStatus === "StartedOnTime"))
 	);
 
 	const isOfflineOrFinished = !isLive;
@@ -162,14 +165,24 @@ export default function SessionInfo() {
 						.filter((s): s is { name: string; dt: Date } => s.dt !== null)
 						.sort((a, b) => a.dt.getTime() - b.dt.getTime());
 
-					const closestSession =
-						validSessions.find((s) => s.dt.getTime() > now) ||
-						validSessions[validSessions.length - 1];
+					// Verificamos si hay alguna sesión oficial en curso (iniciada hace menos de 2 horas)
+					const ongoingSession = validSessions.find(
+						(s) => s.dt.getTime() <= now && now <= s.dt.getTime() + 2 * 3600 * 1000
+					);
 
-					if (closestSession) {
-						setNextSessionName(closestSession.name);
-						targetDate = closestSession.dt;
-						setCountdown(calcCountdown(targetDate));
+					if (ongoingSession) {
+						setNextSessionName(ongoingSession.name);
+						setCountdown("EN PISTA");
+					} else {
+						const upcomingSession =
+							validSessions.find((s) => s.dt.getTime() > now) ||
+							validSessions[validSessions.length - 1];
+
+						if (upcomingSession) {
+							setNextSessionName(upcomingSession.name);
+							targetDate = upcomingSession.dt;
+							setCountdown(calcCountdown(targetDate));
+						}
 					}
 				}
 			} catch {

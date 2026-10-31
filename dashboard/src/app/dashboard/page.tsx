@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import LeaderBoard from "@/components/dashboard/LeaderBoard";
 import RaceControl from "@/components/dashboard/RaceControl";
 import TeamRadios from "@/components/dashboard/TeamRadios";
@@ -17,6 +17,7 @@ import { HeadToHeadModal } from "@/components/dashboard/HeadToHeadModal";
 import { CircuitBackdrop } from "@/components/dashboard/CircuitBackdrop";
 import { Swords, Radio, Flag, AlertTriangle } from "lucide-react";
 import { translateSessionName } from "@/lib/f1Translations";
+import { triggerHaptic } from "@/lib/haptics";
 import {
 	getUpcomingSessions,
 	evaluateSessionStatus,
@@ -49,12 +50,17 @@ export default function Page() {
 	// 🛰️ Modo Cinemático de Circuito Aéreo (pantalla completa sin resultados)
 	const [isCinematicTrackMode, setIsCinematicTrackMode] = useState(false);
 
+	// 🎬 Transición cinemática de Parque Cerrado a Telemetría en Vivo
+	const [isTransitioningToLive, setIsTransitioningToLive] = useState(false);
+	const prevShowTelemetryRef = useRef<boolean | null>(null);
+
 	useEffect(() => {
 		let isMounted = true;
 		getUpcomingSessions().then((data) => {
 			if (isMounted && data.length > 0) {
 				setSessions(data);
-				const status = evaluateSessionStatus(data);
+				// ⏱️ 5 minutos antes para telemetría en vivo
+				const status = evaluateSessionStatus(data, 5 * 60 * 1000);
 				setScheduleStatus(status);
 				if (status.nextSessionStart) {
 					setCountdownText(formatCountdown(status.nextSessionStart));
@@ -71,7 +77,8 @@ export default function Page() {
 		if (sessions.length === 0) return;
 
 		const timer = setInterval(() => {
-			const status = evaluateSessionStatus(sessions);
+			// ⏱️ 5 minutos antes para telemetría en vivo
+			const status = evaluateSessionStatus(sessions, 5 * 60 * 1000);
 			setScheduleStatus(status);
 			if (status.nextSessionStart) {
 				setCountdownText(formatCountdown(status.nextSessionStart));
@@ -166,8 +173,49 @@ export default function Page() {
 	// Vista activa (por defecto automático)
 	const showTelemetry = isLiveAuto;
 
+	// 🎬 Detectar cambio de Parque Cerrado a Telemetría en Vivo para lanzar la animación
+	useEffect(() => {
+		if (prevShowTelemetryRef.current === false && showTelemetry === true) {
+			setIsTransitioningToLive(true);
+			triggerHaptic("heavy");
+			const timer = setTimeout(() => {
+				setIsTransitioningToLive(false);
+			}, 1100);
+			return () => clearTimeout(timer);
+		}
+		prevShowTelemetryRef.current = showTelemetry;
+	}, [showTelemetry]);
+
 	return (
-		<div className="flex w-full flex-col gap-4 px-4 py-4 text-zinc-100">
+		<div className="flex w-full flex-col gap-4 px-4 py-4 text-zinc-100 relative">
+			{/* 🎬 OVERLAY DE TRANSICIÓN CINEMÁTICA A TELEMETRÍA EN VIVO */}
+			{isTransitioningToLive && (
+				<div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-xl animate-fade-in font-mono select-none px-4">
+					<div className="relative flex flex-col items-center max-w-md w-full text-center">
+						<div className="relative w-20 h-20 rounded-2xl bg-gradient-to-b from-emerald-950/80 to-zinc-950 border border-emerald-400/60 flex items-center justify-center mb-6 text-emerald-400 shadow-[0_0_50px_rgba(16,185,129,0.4)]">
+							<div className="absolute inset-0 rounded-2xl border-2 border-emerald-400/80 animate-ping pointer-events-none" />
+							<Radio className="w-10 h-10 animate-pulse text-emerald-300" />
+						</div>
+
+						<span className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2 mb-2">
+							<span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+							ENLACE PIT-WALL EN TIEMPO REAL
+						</span>
+
+						<h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white mb-2">
+							SINCRONIZANDO TELEMETRÍA EN VIVO
+						</h2>
+
+						<p className="text-xs text-zinc-400 mb-6 font-sans">
+							{translateSessionName(scheduleStatus.activeSessionName || session?.Name || "Sesión Oficial")} • {session?.Meeting?.Country?.Name || "FÓRMULA 1"}
+						</p>
+
+						<div className="w-full bg-zinc-900 h-2 rounded-full overflow-hidden border border-zinc-800 shadow-inner">
+							<div className="bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 h-full w-full animate-pulse" />
+						</div>
+					</div>
+				</div>
+			)}
 			{showTelemetry && (
 				<>
 					{/* 🏎️ Barra de estado HUD en Vivo o Resultados Finales */}

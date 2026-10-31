@@ -94,7 +94,10 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 					pitOut={timingDriver.PitOut}
 				/>
 				<DriverTire stints={appTimingDriver?.Stints} />
-				<DriverInfo timingDriver={timingDriver} gridPos={appTimingDriver ? parseInt(appTimingDriver.GridPos) : 0} />
+				<DriverInfo
+					timingDriver={timingDriver}
+					gridPos={appTimingDriver?.GridPos ? parseInt(appTimingDriver.GridPos, 10) : undefined}
+				/>
 				<DriverGap timingDriver={timingDriver} sessionPart={sessionPart} />
 				<DriverLapTime last={timingDriver.LastLapTime} best={timingDriver.BestLapTime} hasFastest={hasFastest} />
 				<DriverMiniSectors sectors={timingDriver.Sectors} bestSectors={timingStatsDriver?.BestSectors} />
@@ -107,16 +110,18 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 							<div
 								className={clsx(
 									"flex h-7 w-8 items-center justify-center rounded-md border text-[10px] font-black transition-all",
-									timingDriver?.InPit || !carData
+									timingDriver?.InPit
 										? "border-amber-500/50 bg-amber-950/40 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.25)]"
-										: "border-zinc-800 bg-zinc-900/60 text-zinc-500"
+										: "border-emerald-500/40 bg-emerald-950/30 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
 								)}
-								title={timingDriver?.InPit ? "Monoplaza en Boxes" : "Telemetría en espera"}
+								title={timingDriver?.InPit ? "Monoplaza en Boxes" : "Monoplaza en Pista"}
 							>
-								{timingDriver?.InPit ? "BOX" : "M-"}
+								{timingDriver?.InPit ? "BOX" : "PISTA"}
 							</div>
 							<div className="min-w-[3.4rem]">
-								<p className="text-right text-sm font-black text-zinc-400 tabular-nums leading-none tracking-tight">0</p>
+								<p className="text-right text-sm font-black text-zinc-400 tabular-nums leading-none tracking-tight">
+									{timingDriver?.InPit ? "0" : "--"}
+								</p>
 								<p className="text-right text-[8px] font-bold text-zinc-600 uppercase leading-none mt-0.5">km/h</p>
 							</div>
 							<div className="flex flex-col gap-1 text-[8px] font-bold opacity-60">

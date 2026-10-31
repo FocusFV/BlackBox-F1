@@ -175,18 +175,7 @@ export default function Map({ filter }: { filter?: string[] }) {
 	const [rotation, setRotation] = useState<number>(0);
 	const [finishLine, setFinishLine] = useState<null | { x: number; y: number; startAngle: number }>(null);
 
-	const [timeOffset, setTimeOffset] = useState(0);
-	useEffect(() => {
-		if (hasLivePositions || isEnded) return;
-		let frameId: number;
-		const updateFrame = () => {
-			// 🏎️ Ritmo de vuelta realista en modo simulación: ~88s por vuelta (1m28s en México)
-			setTimeOffset((Date.now() / 88000) % 1);
-			frameId = requestAnimationFrame(updateFrame);
-		};
-		frameId = requestAnimationFrame(updateFrame);
-		return () => cancelAnimationFrame(frameId);
-	}, [hasLivePositions, isEnded]);
+	const [timeOffset] = useState(0);
 
 	useEffect(() => {
 		(async () => {
@@ -356,15 +345,8 @@ export default function Map({ filter }: { filter?: string[] }) {
 
 							prevCarsRef.current[driver.RacingNumber] = { x: carX, y: carY, angle: carAngle };
 						} else if (!hasLivePositions) {
-							// 🛑 Si la sesión terminó, no simular autos fantasma dando vueltas
-							if (isEnded) return null;
-
-							// 🕒 MODO DEMO: Fallback únicamente cuando NO hay sesión con GPS en vivo
-							const data = getDriverPositionAndAngle(timingDriver, points, timeOffset);
-							if (!data) return null;
-							carX = data.x;
-							carY = data.y;
-							carAngle = data.angle;
+							// 🛑 Si no hay GPS en vivo de FOM, no dibujar monoplazas fantasma en el circuito
+							return null;
 						} else {
 							// Hay sesión en vivo pero este auto no tiene posición activa (ej. en garaje o retirado)
 							const prev = prevCarsRef.current[driver.RacingNumber];

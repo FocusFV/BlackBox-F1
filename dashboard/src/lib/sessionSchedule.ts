@@ -112,12 +112,15 @@ export async function getUpcomingSessions(): Promise<ScheduleSession[]> {
 }
 
 // ⏱️ Evalúa si en este instante hay alguna sesión activa o cuál es la próxima
-export function evaluateSessionStatus(sessions: ScheduleSession[]): SessionStatusResult {
+export function evaluateSessionStatus(
+	sessions: ScheduleSession[],
+	preWindowMs: number = 15 * 60 * 1000
+): SessionStatusResult {
 	const now = Date.now();
-	const FIFTEEN_MINUTES = 15 * 60 * 1000;
+	const POST_WINDOW = 15 * 60 * 1000;
 
-	// 🟢 1. ¿Hay alguna sesión cuya ventana esté activa ahora? (desde 15m antes hasta el final + 15m)
-	const active = sessions.find((s) => now >= s.start - FIFTEEN_MINUTES && now <= s.end + FIFTEEN_MINUTES);
+	// 🟢 1. ¿Hay alguna sesión cuya ventana esté activa ahora? (desde preWindowMs antes hasta el final + 15m)
+	const active = sessions.find((s) => now >= s.start - preWindowMs && now <= s.end + POST_WINDOW);
 
 	if (active) {
 		return {
