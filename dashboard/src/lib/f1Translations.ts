@@ -109,12 +109,12 @@ export function getCountryCodeForGp(gpName?: string, countryRaw?: string): strin
 export function translateSessionName(session?: string): string {
 	if (!session) return "Sesión Oficial";
 	const lower = session.toLowerCase().trim();
-	if (lower.includes("fp1") || lower.includes("practice 1") || lower.includes("práctica 1")) return "Práctica 1";
-	if (lower.includes("fp2") || lower.includes("practice 2") || lower.includes("práctica 2")) return "Práctica 2";
-	if (lower.includes("fp3") || lower.includes("practice 3") || lower.includes("práctica 3")) return "Práctica 3";
+	if (lower.includes("fp1") || lower.includes("practice 1") || lower.includes("práctica 1") || lower.includes("practica 1")) return "Práctica 1";
+	if (lower.includes("fp2") || lower.includes("practice 2") || lower.includes("práctica 2") || lower.includes("practica 2")) return "Práctica 2";
+	if (lower.includes("fp3") || lower.includes("practice 3") || lower.includes("práctica 3") || lower.includes("practica 3")) return "Práctica 3";
 	if (lower.includes("sprint shootout") || lower.includes("sprint qualifying") || lower.includes("sq")) return "Clasificación Sprint";
 	if (lower.includes("sprint")) return "Carrera Sprint";
-	if (lower.includes("qualifying") || lower.includes("qualy") || lower.includes("clasificación")) return "Clasificación";
+	if (lower.includes("qualifying") || lower.includes("qualy") || lower.includes("clasificación") || lower.includes("clasificacion")) return "Clasificación";
 	if (lower.includes("race") || lower.includes("carrera")) return "Gran Premio";
 	return session;
 }

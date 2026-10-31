@@ -16,6 +16,7 @@ import {
 	evaluateSessionStatus,
 	type ScheduleSession,
 } from "@/lib/sessionSchedule";
+import { translateSessionName } from "@/lib/f1Translations";
 
 // 🏎️ DICCIONARIO DE ESTILOS FOCUSFV
 const PILOTOS_CONFIG: Record<
@@ -244,6 +245,14 @@ export default function StreamsPage() {
 	const [nextSessionName, setNextSessionName] = useState<string | null>(null);
 	const [countdownText, setCountdownText] = useState<string>("");
 
+	// 🔒 Refs para sincronización limpia y continua del temporizador de 1 segundo
+	const isLiveRef = React.useRef(isLive);
+	isLiveRef.current = isLive;
+	const bypassRef = React.useRef(bypass);
+	bypassRef.current = bypass;
+	const isUnlockingRef = React.useRef(isUnlocking);
+	isUnlockingRef.current = isUnlocking;
+
 	// Cargar cronograma del fin de semana y verificar acceso de administrador
 	useEffect(() => {
 		if (typeof window !== "undefined") {
@@ -264,7 +273,7 @@ export default function StreamsPage() {
 		};
 	}, []);
 
-	// Evaluar cada 5 segundos si el candado debe abrirse
+	// Evaluar cada 1 segundo para cuenta regresiva 100% fluida y apertura automática
 	useEffect(() => {
 		const updateStatus = () => {
 			const status = evaluateSessionStatus(sessions);
@@ -275,43 +284,68 @@ export default function StreamsPage() {
 				sessionInfo?.Name !== "None"
 			);
 
-			if (status.isLiveWindow || isTelemetryActive) {
-				setIsLive(true);
-				setActiveSessionName(status.activeSessionName || "Sesión Oficial");
-				setCountdownText("");
-			} else {
-				setIsLive(false);
-				setActiveSessionName(null);
-				setNextSessionName(status.nextSessionName);
-				if (status.nextSessionStart) {
-					const diff = status.nextSessionStart - Date.now();
-					setCountdownText(formatRemainingTime(diff));
-				} else {
+			const shouldBeLive = status.isLiveWindow || isTelemetryActive;
+
+			if (shouldBeLive) {
+				if (!isLiveRef.current && !bypassRef.current && !isUnlockingRef.current) {
+					// 🚀 Secuencia animada de desbloqueo al llegar a los 15 min antes
+					setIsUnlocking(true);
+					triggerHaptic("heavy");
+					setTimeout(() => {
+						setIsLive(true);
+						setActiveSessionName(translateSessionName(status.activeSessionName || "Sesión Oficial"));
+						setCountdownText("");
+						setTimeout(() => {
+							setIsUnlocking(false);
+						}, 200);
+					}, 950);
+				} else if (isLiveRef.current) {
+					setActiveSessionName(translateSessionName(status.activeSessionName || "Sesión Oficial"));
 					setCountdownText("");
+				}
+			} else {
+				if (!bypassRef.current && !isUnlockingRef.current) {
+					setIsLive(false);
+					setActiveSessionName(null);
+					const rawNext = status.nextSessionName;
+					setNextSessionName(rawNext ? translateSessionName(rawNext) : null);
+					if (status.nextSessionStart) {
+						const diff = Math.max(0, status.nextSessionStart - Date.now());
+						setCountdownText(formatRemainingTime(diff));
+					} else {
+						setCountdownText("");
+					}
 				}
 			}
 		};
 
 		updateStatus();
-		const interval = setInterval(updateStatus, 5000);
+		const interval = setInterval(updateStatus, 1000);
 		return () => clearInterval(interval);
 	}, [trackStatus, sessions, sessionInfo]);
 
 	const handleLockClick = () => {
+		if (isUnlocking || isLive || bypass) return;
+
 		clickCountRef.current += 1;
+
 		if (clickCountRef.current >= 3) {
 			clickCountRef.current = 0;
 			if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
 			setIsUnlocking(true);
+			triggerHaptic("heavy");
 			setTimeout(() => {
 				setBypass(true);
-				setIsUnlocking(false);
-			}, 600);
+				setTimeout(() => {
+					setIsUnlocking(false);
+				}, 200);
+			}, 950);
 		} else {
+			triggerHaptic("light");
 			if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
 			clickTimeoutRef.current = setTimeout(() => {
 				clickCountRef.current = 0;
-			}, 1000);
+			}, 1200);
 		}
 	};
 
@@ -331,38 +365,68 @@ export default function StreamsPage() {
 							/>
 						</div>
 
-						<div className="max-w-md w-full border border-zinc-900 bg-[#0c0a05]/40 backdrop-blur-md p-8 rounded-3xl text-center flex flex-col items-center shadow-[0_20px_50px_rgba(0,0,0,0.7)] animate-fade-in">
+						<div
+							className={`max-w-md w-full border border-zinc-900 bg-[#0c0a05]/60 backdrop-blur-md p-8 rounded-3xl text-center flex flex-col items-center shadow-[0_20px_50px_rgba(0,0,0,0.7)] transition-all duration-700 ease-out ${
+								isUnlocking
+									? "opacity-0 scale-95 blur-xs pointer-events-none"
+									: "opacity-100 scale-100 blur-0 animate-fade-in"
+							}`}
+						>
 							<div
 								onClick={handleLockClick}
-								className={`w-16 h-16 rounded-2xl bg-gradient-to-b from-zinc-900 to-zinc-950 border flex items-center justify-center mb-6 transition-all duration-300 cursor-pointer active:scale-95 group ${
+								className={`relative w-20 h-20 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500 cursor-pointer select-none active:scale-90 group ${
 									isUnlocking
-										? "border-emerald-500/40 text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.3)] scale-110 rotate-[360deg]"
-										: "border-amber-500/20 hover:border-amber-500/50 text-amber-500/70 hover:text-amber-400"
+										? "bg-gradient-to-b from-emerald-950/90 to-zinc-950 border-2 border-emerald-400 text-emerald-300 shadow-[0_0_50px_rgba(16,185,129,0.6)] scale-110"
+										: "bg-gradient-to-b from-zinc-900 to-zinc-950 border border-amber-500/30 hover:border-amber-500/70 text-amber-500/80 hover:text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.15)] hover:shadow-[0_0_30px_rgba(245,158,11,0.3)]"
 								}`}
 							>
+								{isUnlocking && (
+									<>
+										<div className="absolute inset-0 rounded-2xl border-2 border-emerald-400/80 animate-ping pointer-events-none" />
+										<div className="absolute -inset-4 rounded-3xl bg-emerald-500/25 blur-xl animate-pulse pointer-events-none" />
+									</>
+								)}
 								{isUnlocking ? (
-									<Unlock className="w-7 h-7" />
+									<Unlock className="w-9 h-9 text-emerald-300 drop-shadow-[0_0_15px_rgba(52,211,153,0.9)] animate-bounce duration-500" />
 								) : (
-									<Lock className="w-7 h-7 group-hover:scale-110 duration-300" />
+									<Lock className="w-8 h-8 group-hover:scale-110 duration-300 transition-transform" />
 								)}
 							</div>
 
-							<span className="text-[11px] font-black text-zinc-500 uppercase tracking-widest mb-2">
-								FEED SATELITAL EN ESPERA
+							<span
+								className={`text-[11px] font-black uppercase tracking-widest mb-2 transition-colors duration-300 ${
+									isUnlocking ? "text-emerald-400 animate-pulse" : "text-zinc-500"
+								}`}
+							>
+								{isUnlocking ? "ACCESO SATELITAL CONCEDIDO" : "FEED SATELITAL EN ESPERA"}
 							</span>
-							<h2 className="text-xl font-black uppercase tracking-tight text-zinc-100">
-								MOTORES APAGADOS
+							<h2
+								className={`text-xl font-black uppercase tracking-tight transition-colors duration-300 ${
+									isUnlocking ? "text-emerald-300 animate-pulse" : "text-zinc-100"
+								}`}
+							>
+								{isUnlocking ? "CONECTANDO CON EL PIT-WALL..." : "MOTORES APAGADOS"}
 							</h2>
 
-							{nextSessionName && countdownText ? (
+							{isUnlocking ? (
+								<div className="my-5 w-full px-5 py-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/50 flex flex-col items-center gap-2 shadow-[0_0_25px_rgba(16,185,129,0.2)]">
+									<span className="text-[11px] text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-2">
+										<span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+										Sincronizando señal en vivo
+									</span>
+									<div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden mt-1">
+										<div className="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full w-full animate-pulse" />
+									</div>
+								</div>
+							) : nextSessionName && countdownText ? (
 								<div className="my-5 w-full px-4 py-3 rounded-2xl bg-zinc-950/80 border border-zinc-800/80 flex flex-col items-center">
 									<span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
 										Próxima Sesión:{" "}
 										<span className="text-amber-400 font-black">
-											{nextSessionName}
+											{translateSessionName(nextSessionName)}
 										</span>
 									</span>
-									<span className="text-3xl font-black text-white font-mono mt-1 tracking-widest text-emerald-400">
+									<span className="text-3xl font-black text-white font-mono mt-1 tracking-widest text-emerald-400 tabular-nums">
 										{countdownText}
 									</span>
 									<span className="text-[9px] text-zinc-500 mt-1">
@@ -382,7 +446,7 @@ export default function StreamsPage() {
 					</div>
 				) : (
 					/* 🟢 CASO 2: TRANSMISIONES EN VIVO (CANDADO ABIERTO) */
-					<div className="pt-2 w-full mx-auto px-4 sm:px-6 max-w-7xl">
+					<div className="pt-2 w-full mx-auto px-4 sm:px-6 max-w-7xl animate-in fade-in zoom-in-[0.98] duration-700 ease-out">
 						{/* CABECERA HUD CON BOTÓN DE SIDEBAR */}
 						<div className="my-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-900 pb-4">
 							<div className="flex items-center gap-3">

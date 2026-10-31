@@ -207,7 +207,7 @@ export default function Page() {
 									<span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500"></span>
 								</span>
 								<span className="text-xs font-bold tracking-wider text-emerald-400 uppercase">
-									{scheduleStatus.activeSessionName || session?.Name || "Telemetría en Vivo"}
+									{translateSessionName(scheduleStatus.activeSessionName || session?.Name || "Telemetría en Vivo")}
 								</span>
 							</div>
 

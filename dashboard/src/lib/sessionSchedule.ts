@@ -1,3 +1,5 @@
+import { translateSessionName } from "./f1Translations";
+
 export interface ScheduleSession {
 	name: string;
 	start: number; // ms
@@ -37,7 +39,7 @@ export async function getUpcomingSessions(): Promise<ScheduleSession[]> {
 					if (activeRound && Array.isArray(activeRound.sessions)) {
 						return activeRound.sessions
 							.map((s: any) => ({
-								name: s.kind || "Sesión Oficial",
+								name: translateSessionName(s.kind || s.name || "Sesión Oficial"),
 								start: new Date(s.start).getTime(),
 								end: new Date(s.end).getTime(),
 							}))
@@ -120,7 +122,7 @@ export function evaluateSessionStatus(sessions: ScheduleSession[]): SessionStatu
 	if (active) {
 		return {
 			isLiveWindow: true,
-			activeSessionName: active.name,
+			activeSessionName: translateSessionName(active.name),
 			nextSessionName: null,
 			nextSessionStart: null,
 		};
@@ -132,7 +134,7 @@ export function evaluateSessionStatus(sessions: ScheduleSession[]): SessionStatu
 		return {
 			isLiveWindow: false,
 			activeSessionName: null,
-			nextSessionName: upcoming.name,
+			nextSessionName: translateSessionName(upcoming.name),
 			nextSessionStart: upcoming.start,
 		};
 	}
