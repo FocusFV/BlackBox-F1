@@ -6,6 +6,7 @@ import { utc, duration } from "moment";
 import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { getTrackStatusMessage } from "@/lib/getTrackStatusMessage";
+import { parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
 
 export default function TrackInfo() {
 	const lapCount = useDataStore((state) => state.state?.LapCount);
@@ -105,23 +106,14 @@ export default function TrackInfo() {
 
 	// En prácticas o qualy, calculamos el tiempo restante oficial para sincronizar con la TV
 	let formattedTime: string | undefined;
-	if (clock?.Remaining) {
-		let ms = duration(clock.Remaining).asMilliseconds();
-		if (clock.Extrapolating && clock.Utc) {
+	const parsedClockMs = parseFomClockRemaining(clock?.Remaining);
+
+	if (parsedClockMs !== null) {
+		let ms = parsedClockMs;
+		if (clock?.Extrapolating && clock.Utc) {
 			ms = ms - utc().diff(utc(clock.Utc)) + (delay ? delay * 1000 : 0);
 		}
-		if (ms > 0) {
-			const d = duration(ms);
-			const hours = d.hours();
-			const minutes = d.minutes();
-			const seconds = d.seconds();
-			const pad = (n: number) => n.toString().padStart(2, "0");
-			formattedTime = hours > 0
-				? `${hours}:${pad(minutes)}:${pad(seconds)}`
-				: `${pad(minutes)}:${pad(seconds)}`;
-		} else {
-			formattedTime = "00:00";
-		}
+		formattedTime = formatMsToClock(ms);
 	} else if (!isRaceOrSprint && isTrackLive) {
 		// ⏱️ Fallback inteligente para Qualy (Q1: 18m, Q2: 15m, Q3: 12m) y Prácticas (60m)
 		const sessionPart = timingData?.SessionPart || 1;
@@ -157,13 +149,20 @@ export default function TrackInfo() {
 		if (partStartMs) {
 			const elapsed = Date.now() - partStartMs;
 			const remainingMs = Math.max(0, partDurationMs - elapsed + (delay ? delay * 1000 : 0));
-			const totalSecs = Math.floor(remainingMs / 1000);
-			const mins = Math.floor(totalSecs / 60);
-			const secs = totalSecs % 60;
-			const pad = (n: number) => n.toString().padStart(2, "0");
-			formattedTime = `${pad(mins)}:${pad(secs)}`;
+			formattedTime = formatMsToClock(remainingMs);
 		}
 	}
+
+	// Detectar si estamos en pausa/intermedio entre segmentos de Qualy (todos en boxes)
+	const isQualy = session?.Name?.toLowerCase().includes("qual") || Boolean(timingData?.SessionPart);
+	const allInPit = Boolean(
+		timingData?.Lines &&
+		Object.values(timingData.Lines).length > 0 &&
+		Object.values(timingData.Lines).every((l: any) => l.InPit)
+	);
+	const sessionPart = timingData?.SessionPart || 1;
+	const isQualyBreak = isQualy && sessionPart < 3 && allInPit && (parsedClockMs !== null || hasActiveTiming);
+	const nextPartLabel = sessionPart === 1 ? "INICIO Q2" : sessionPart === 2 ? "INICIO Q3" : "TIEMPO";
 
 	if (isPostSession) {
 		return (
@@ -183,10 +182,10 @@ export default function TrackInfo() {
 				</p>
 			) : formattedTime ? (
 				<div className="flex items-center gap-2 font-mono">
-					<span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest hidden sm:inline">
-						TIEMPO
+					<span className={clsx("text-[10px] font-bold uppercase tracking-widest hidden sm:inline", isQualyBreak ? "text-amber-400 animate-pulse font-black" : "text-zinc-400")}>
+						{isQualyBreak ? nextPartLabel : "TIEMPO"}
 					</span>
-					<p className="text-2xl sm:text-3xl font-black whitespace-nowrap text-emerald-400 tracking-wider">
+					<p className={clsx("text-2xl sm:text-3xl font-black whitespace-nowrap tracking-wider", isQualyBreak ? "text-amber-400" : "text-emerald-400")}>
 						{formattedTime}
 					</p>
 				</div>

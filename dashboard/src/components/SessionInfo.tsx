@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import clsx from "clsx";
 import { utc, duration } from "moment";
 import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import Flag from "@/components/Flag";
 import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
+import { parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
 
 const translateSessionName = (name?: string) => {
 	if (!name) return "En Vivo";
@@ -268,23 +270,14 @@ export default function SessionInfo() {
 
 	// Render en vivo
 	let timeRemaining: string | undefined;
-	if (clock?.Remaining) {
-		let ms = duration(clock.Remaining).asMilliseconds();
-		if (clock.Extrapolating && clock.Utc) {
+	const parsedClockMs = parseFomClockRemaining(clock?.Remaining);
+
+	if (parsedClockMs !== null) {
+		let ms = parsedClockMs;
+		if (clock?.Extrapolating && clock.Utc) {
 			ms = ms - utc().diff(utc(clock.Utc)) + (delay ? delay * 1000 : 0);
 		}
-		if (ms > 0) {
-			const d = duration(ms);
-			const hours = d.hours();
-			const minutes = d.minutes();
-			const seconds = d.seconds();
-			const pad = (n: number) => n.toString().padStart(2, "0");
-			timeRemaining = hours > 0
-				? `${hours}:${pad(minutes)}:${pad(seconds)}`
-				: `${pad(minutes)}:${pad(seconds)}`;
-		} else {
-			timeRemaining = "00:00";
-		}
+		timeRemaining = formatMsToClock(ms);
 	} else if (isLive && (session?.Name !== "Race" && session?.Name !== "Sprint")) {
 		// ⏱️ Fallback inteligente para Qualy (Q1: 18m, Q2: 15m, Q3: 12m) y Prácticas (60m)
 		const sessionPart = timingData?.SessionPart || 1;
@@ -320,13 +313,19 @@ export default function SessionInfo() {
 		if (partStartMs) {
 			const elapsed = Date.now() - partStartMs;
 			const remainingMs = Math.max(0, partDurationMs - elapsed + (delay ? delay * 1000 : 0));
-			const totalSecs = Math.floor(remainingMs / 1000);
-			const mins = Math.floor(totalSecs / 60);
-			const secs = totalSecs % 60;
-			const pad = (n: number) => n.toString().padStart(2, "0");
-			timeRemaining = `${pad(mins)}:${pad(secs)}`;
+			timeRemaining = formatMsToClock(remainingMs);
 		}
 	}
+
+	// Detectar descanso entre Q1 y Q2 o Q2 y Q3
+	const isQualy = session?.Name?.toLowerCase().includes("qual") || Boolean(timingData?.SessionPart);
+	const allInPit = Boolean(
+		timingData?.Lines &&
+		Object.values(timingData.Lines).length > 0 &&
+		Object.values(timingData.Lines).every((l: any) => l.InPit)
+	);
+	const sessionPart = timingData?.SessionPart || 1;
+	const isQualyBreak = isQualy && sessionPart < 3 && allInPit && (parsedClockMs !== null || hasActiveTiming);
 
 	return (
 		<div className="flex items-center gap-2.5">
@@ -335,11 +334,19 @@ export default function SessionInfo() {
 			<div className="flex flex-col justify-center">
 				<h1 className="truncate text-xs md:text-sm leading-none font-bold text-white font-mono uppercase tracking-wide">
 					{session?.Meeting?.Name}: {translateSessionName(session?.Name)}
-					{timingData?.SessionPart && session?.Name ? ` ${sessionPartPrefix(session.Name)}${timingData.SessionPart}` : ""}
+					{isQualyBreak ? (
+						<span className="text-amber-400 font-black ml-1.5 animate-pulse">
+							• PAUSA Q{sessionPart} ➔ Q{sessionPart + 1}
+						</span>
+					) : (
+						timingData?.SessionPart && session?.Name ? ` ${sessionPartPrefix(session.Name)}${timingData.SessionPart}` : ""
+					)}
 				</h1>
 
 				{timeRemaining !== undefined ? (
-					<p className="text-xl md:text-2xl leading-none font-black text-white font-mono mt-1">{timeRemaining}</p>
+					<p className={clsx("text-xl md:text-2xl leading-none font-black font-mono mt-1", isQualyBreak ? "text-amber-400" : "text-white")}>
+						{timeRemaining}
+					</p>
 				) : (
 					<p className="text-xs leading-none font-bold text-zinc-400 font-mono mt-1 uppercase tracking-wider">
 						{session?.Meeting?.Circuit?.ShortName || session?.Meeting?.Location || "Trazado Oficial"}

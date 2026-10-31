@@ -11,6 +11,7 @@ import { fetchMap } from "@/lib/fetchMap";
 import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { getTrackStatusMessage } from "@/lib/getTrackStatusMessage";
+import { parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
 import {
 	createSectors,
 	findYellowSectors,
@@ -140,6 +141,7 @@ export default function Map({ filter }: { filter?: string[] }) {
 	const sessionInfo = useDataStore((state) => state?.state?.SessionInfo);
 	const sessionStatus = useDataStore((state) => state?.state?.SessionStatus?.Status);
 	const lapCount = useDataStore((state) => state?.state?.LapCount);
+	const clock = useDataStore((state) => state?.state?.ExtrapolatedClock);
 	const positions = useDataStore((state) => state.positions);
 	const prevCarsRef = useRef<Record<string, { x: number; y: number; angle: number }>>({});
 
@@ -158,6 +160,19 @@ export default function Map({ filter }: { filter?: string[] }) {
 	);
 
 	const isEnded = isSessionTerminated || hasChequeredFlag;
+
+	// Detectar si todos los monoplazas están en boxes o en pausa entre fases de Qualy
+	const isQualy = sessionInfo?.Name?.toLowerCase().includes("qual") || Boolean(rawTiming?.SessionPart);
+	const allInPit = Boolean(
+		rawTiming?.Lines &&
+		Object.values(rawTiming.Lines).length > 0 &&
+		Object.values(rawTiming.Lines).every((l: any) => l.InPit)
+	);
+	const sessionPart = rawTiming?.SessionPart || 1;
+	const isQualyBreak = isQualy && sessionPart < 3 && allInPit && !isEnded;
+
+	const parsedClockMs = parseFomClockRemaining(clock?.Remaining);
+	const breakTimeFormatted = parsedClockMs !== null ? formatMsToClock(parsedClockMs) : null;
 
 	const hasLivePositions = useMemo(() => {
 		if (!positions) return false;
@@ -251,7 +266,8 @@ export default function Map({ filter }: { filter?: string[] }) {
 	}
 
 	return (
-		<svg viewBox={`${minX} ${minY} ${widthX} ${widthY}`} className="h-full w-full xl:max-h-screen" xmlns="http://www.w3.org/2000/svg">
+		<div className="relative h-full w-full flex items-center justify-center overflow-hidden">
+			<svg viewBox={`${minX} ${minY} ${widthX} ${widthY}`} className="h-full w-full xl:max-h-screen" xmlns="http://www.w3.org/2000/svg">
 			
 			<defs>
 				{/* 🏁 TEXTURA 1: Bandera a cuadros */}
@@ -311,11 +327,20 @@ export default function Map({ filter }: { filter?: string[] }) {
 					{Object.values(drivers).reverse().filter((driver: any) => (filter ? filter.includes(driver.RacingNumber) : true)).map((driver: any) => {
 						const timingDriver = timingDrivers?.Lines?.[driver.RacingNumber];
 						const rawPos = positions?.[driver.RacingNumber];
+						const isInPit = Boolean(timingDriver?.InPit || rawPos?.Status === "InPit");
+						const isOut = Boolean(timingDriver?.KnockedOut || timingDriver?.Stopped || timingDriver?.Retired);
+
+						// 🛑 Si el piloto está en boxes, retirado, eliminado o la sesión terminó, NO se dibuja en el trazado
+						if (isEnded || isInPit || isOut || !timingDriver) {
+							return null;
+						}
+
 						const hasCarPos = Boolean(
 							rawPos &&
 							typeof rawPos.X === "number" &&
 							typeof rawPos.Y === "number" &&
-							(rawPos.X !== 0 || rawPos.Y !== 0)
+							(rawPos.X !== 0 || rawPos.Y !== 0) &&
+							rawPos.Status !== "InPit"
 						);
 
 						let carX: number;
@@ -355,36 +380,19 @@ export default function Map({ filter }: { filter?: string[] }) {
 							}
 
 							prevCarsRef.current[driver.RacingNumber] = { x: carX, y: carY, angle: carAngle };
-						} else if (!hasLivePositions) {
-							// 🛑 Si el piloto está en boxes, retirado, o la sesión terminó, NO se dibuja en el circuito
-							if (isEnded || timingDriver?.InPit || !timingDriver) {
-								return null;
-							}
-
-							// 🏎️ Si el piloto está en PISTA, renderizamos su monoplaza recorriendo el trazado
+						} else {
+							// 🏎️ Si el piloto está en PISTA pero no hay GPS puntual en este frame,
+							// renderizamos su monoplaza recorriendo el trazado sincronizado
 							const data = getDriverPositionAndAngle(timingDriver, points, timeOffset);
 							if (!data) return null;
 							carX = data.x;
 							carY = data.y;
 							carAngle = data.angle;
-						} else {
-							// Hay sesión en vivo pero este auto no tiene posición activa (ej. en garaje o retirado)
-							const prev = prevCarsRef.current[driver.RacingNumber];
-							if (prev && timingDriver?.InPit) {
-								carX = prev.x;
-								carY = prev.y;
-								carAngle = prev.angle;
-							} else {
-								return null;
-							}
+							prevCarsRef.current[driver.RacingNumber] = { x: carX, y: carY, angle: carAngle };
 						}
 
 						const colorConfig = TEAM_COLORS_2026[driver.Tla] || { bg: "#ffffff", text: "#ffffff" };
 						const isFav = favoriteDrivers.includes(driver.RacingNumber);
-						const inPit = Boolean(timingDriver?.InPit || rawPos?.Status === "InPit");
-						const isHidden = Boolean(
-							timingDriver ? (timingDriver.KnockedOut || timingDriver.Stopped || timingDriver.Retired) : false
-						);
 
 						return (
 							<CarObject
@@ -395,14 +403,37 @@ export default function Map({ filter }: { filter?: string[] }) {
 								y={carY}
 								angle={carAngle}
 								favorite={isFav}
-								pit={inPit}
-								hidden={isHidden}
+								pit={false}
+								hidden={false}
 							/>
 						);
 					})}
 				</>
 			)}
 		</svg>
+
+		{/* ⏸️ Indicador HUD de Estado en Pista */}
+		{allInPit && !isEnded && (
+			<div className="absolute top-4 right-4 pointer-events-none z-10 flex flex-col items-end gap-1.5 font-mono">
+				<div className="flex items-center gap-2 rounded-lg bg-zinc-950/95 border border-amber-500/40 px-3.5 py-2 shadow-2xl backdrop-blur-md">
+					<span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+					<span className="text-xs font-black text-amber-400 uppercase tracking-wider">
+						{isQualyBreak ? `Pausa Q${sessionPart} ➔ Q${sessionPart + 1}` : "Monoplazas en Boxes"}
+					</span>
+					{breakTimeFormatted && (
+						<span className="rounded bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 text-[11px] font-black text-amber-300 ml-1">
+							{breakTimeFormatted}
+						</span>
+					)}
+				</div>
+				<span className="text-[10px] font-semibold text-zinc-400 bg-zinc-900/90 px-2.5 py-1 rounded-md border border-zinc-800 shadow-sm backdrop-blur-sm">
+					{isQualyBreak 
+						? `Pilotos en garaje preparando la salida a Q${sessionPart + 1}`
+						: "Sin monoplazas rodando en circuito"}
+				</span>
+			</div>
+		)}
+	</div>
 	);
 }
 
