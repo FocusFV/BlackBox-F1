@@ -175,7 +175,18 @@ export default function Map({ filter }: { filter?: string[] }) {
 	const [rotation, setRotation] = useState<number>(0);
 	const [finishLine, setFinishLine] = useState<null | { x: number; y: number; startAngle: number }>(null);
 
-	const [timeOffset] = useState(0);
+	const [timeOffset, setTimeOffset] = useState(0);
+
+	useEffect(() => {
+		if (isEnded) return;
+		let frameId: number;
+		const updateFrame = () => {
+			setTimeOffset((Date.now() / 88000) % 1);
+			frameId = requestAnimationFrame(updateFrame);
+		};
+		frameId = requestAnimationFrame(updateFrame);
+		return () => cancelAnimationFrame(frameId);
+	}, [isEnded]);
 
 	useEffect(() => {
 		(async () => {
@@ -345,8 +356,17 @@ export default function Map({ filter }: { filter?: string[] }) {
 
 							prevCarsRef.current[driver.RacingNumber] = { x: carX, y: carY, angle: carAngle };
 						} else if (!hasLivePositions) {
-							// 🛑 Si no hay GPS en vivo de FOM, no dibujar monoplazas fantasma en el circuito
-							return null;
+							// 🛑 Si el piloto está en boxes, retirado, o la sesión terminó, NO se dibuja en el circuito
+							if (isEnded || timingDriver?.InPit || !timingDriver) {
+								return null;
+							}
+
+							// 🏎️ Si el piloto está en PISTA, renderizamos su monoplaza recorriendo el trazado
+							const data = getDriverPositionAndAngle(timingDriver, points, timeOffset);
+							if (!data) return null;
+							carX = data.x;
+							carY = data.y;
+							carAngle = data.angle;
 						} else {
 							// Hay sesión en vivo pero este auto no tiene posición activa (ej. en garaje o retirado)
 							const prev = prevCarsRef.current[driver.RacingNumber];
