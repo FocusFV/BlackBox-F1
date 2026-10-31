@@ -147,11 +147,11 @@ export default function StreamsPage() {
 			{ label: "Servidor 5 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/Y2hhbm5lbD1kYXpuZjE=" },
 		],
 		COLAPINTO: [
-			{ label: "Servidor 1 (StreamXHD .sbs)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGlzbmV5MTE=" },
-			{ label: "Servidor 2 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXkxMQ==" },
-			{ label: "Servidor 3 (StreamXHD .click)", token: "aHR0cHM6Ly9zdHJlYW14aGQuY2xpY2svbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXkxMQ==" },
-			{ label: "Servidor 4 (StreamTP)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRpc25leTk=" },
-			{ label: "Servidor 5 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/Y2hhbm5lbD1kaXNuZXk5" },
+			{ label: "Servidor 1 (StreamTP Principal)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRpc25leTEz" },
+			{ label: "Servidor 2 (StreamXHD .sbs)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGlzbmV5MTM=" },
+			{ label: "Servidor 3 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXkxMw==" },
+			{ label: "Servidor 4 (StreamTP Respaldo)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRpc25leTk=" },
+			{ label: "Servidor 5 (Respaldo Disney 11)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGlzbmV5MTE=" },
 		],
 		GENERAL: [
 			{ label: "Servidor 1 (StreamXHD .sbs)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZXNwbjI=" },
