@@ -18,6 +18,7 @@ import {
 import ConnectionStatus from "@/components/ConnectionStatus";
 import SidenavButton from "@/components/SidenavButton";
 import { triggerHaptic } from "@/lib/haptics";
+import { useSupportModalStore } from "@/stores/useSupportModalStore";
 
 import { 
 	LayoutDashboard, 
@@ -269,7 +270,13 @@ const Item = ({ target, item, icon: Icon, pathname }: ItemProps) => {
 		<Link 
 			href={item.href} 
 			target={target} 
-			onClick={() => triggerHaptic("light")}
+			onClick={(e) => {
+				triggerHaptic("light");
+				if (item.href === "#support" || item.name === "Donar un Cafecito") {
+					e.preventDefault();
+					useSupportModalStore.getState().open();
+				}
+			}}
 			className="block relative group"
 		>
 			<div

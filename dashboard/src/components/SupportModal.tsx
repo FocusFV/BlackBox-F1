@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, CheckSquare, Square, Heart, Coffee } from "lucide-react";
+import { X, CheckSquare, Square, Heart, Coffee, ChevronDown, Copy, Check } from "lucide-react";
+import { useSupportModalStore } from "@/stores/useSupportModalStore";
+import { triggerHaptic } from "@/lib/haptics";
 
 function PayPalIcon(props: React.SVGProps<SVGSVGElement>) {
 	return (
@@ -13,13 +15,18 @@ function PayPalIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export default function SupportModal() {
-	const [isOpen, setIsOpen] = useState(false);
+	const isStoreOpen = useSupportModalStore((state) => state.isOpen);
+	const openStore = useSupportModalStore((state) => state.open);
+	const closeStore = useSupportModalStore((state) => state.close);
+
 	const [dontShowToday, setDontShowToday] = useState(false);
+	const [showArgentinaAlias, setShowArgentinaAlias] = useState(false);
+	const [copiedAlias, setCopiedAlias] = useState(false);
 
 	const TIMER_DELAY = 30 * 60 * 1000; // 30 minutos
 
 	const scheduleModal = useCallback(() => {
-		const modalDismissed = localStorage.getItem("blackbox_support_dismissed");
+		const modalDismissed = typeof window !== "undefined" ? localStorage.getItem("blackbox_support_dismissed") : null;
 		const today = new Date().toDateString();
 
 		if (modalDismissed === today) {
@@ -27,11 +34,11 @@ export default function SupportModal() {
 		}
 
 		const timer = setTimeout(() => {
-			setIsOpen(true);
+			openStore();
 		}, TIMER_DELAY);
 
 		return timer;
-	}, [TIMER_DELAY]);
+	}, [TIMER_DELAY, openStore]);
 
 	useEffect(() => {
 		const timer = scheduleModal();
@@ -40,24 +47,34 @@ export default function SupportModal() {
 		};
 	}, [scheduleModal]);
 
-	const handleLater = () => {
+	const handleClose = () => {
 		if (dontShowToday) {
 			const today = new Date().toDateString();
-			localStorage.setItem("blackbox_support_dismissed", today);
+			if (typeof window !== "undefined") localStorage.setItem("blackbox_support_dismissed", today);
 		}
-		setIsOpen(false);
+		closeStore();
 		scheduleModal();
+	};
+
+	const handleCopyAlias = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (typeof navigator !== "undefined" && navigator.clipboard) {
+			navigator.clipboard.writeText("focusfv.arq");
+		}
+		triggerHaptic("medium");
+		setCopiedAlias(true);
+		setTimeout(() => setCopiedAlias(false), 3000);
 	};
 
 	return (
 		<AnimatePresence>
-			{isOpen && (
+			{isStoreOpen && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
 					<motion.div
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
-						onClick={handleLater}
+						onClick={handleClose}
 						className="absolute inset-0 bg-black/85 backdrop-blur-md"
 					/>
 
@@ -73,7 +90,7 @@ export default function SupportModal() {
 
 						{/* Botón Cerrar */}
 						<button
-							onClick={handleLater}
+							onClick={handleClose}
 							className="absolute right-4 top-4 p-1.5 text-zinc-400 hover:text-white transition-colors rounded-lg bg-zinc-900 border border-zinc-800 cursor-pointer"
 							title="Cerrar"
 						>
@@ -100,14 +117,14 @@ export default function SupportModal() {
 							</p>
 
 							{/* Botones de Donación */}
-							<div className="w-full space-y-2 pt-1">
+							<div className="w-full space-y-2.5 pt-1">
 								<div className="grid grid-cols-2 gap-2.5">
 									{/* Cafecito / Buy Me a Coffee */}
 									<a
 										href="https://buymeacoffee.com/focusfv"
 										target="_blank"
 										rel="noopener noreferrer"
-										className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-mono font-black uppercase tracking-wider text-[11px] shadow-md hover:shadow-amber-500/20 transition-all duration-200 cursor-pointer"
+										className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-mono font-black uppercase tracking-wider text-[11px] shadow-md hover:shadow-amber-500/20 transition-all duration-200 cursor-pointer active:scale-95"
 									>
 										<Coffee className="w-4 h-4" />
 										<span>Cafecito</span>
@@ -118,16 +135,86 @@ export default function SupportModal() {
 										href="https://paypal.me/fvillalba4423"
 										target="_blank"
 										rel="noopener noreferrer"
-										className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-[#0070BA] hover:bg-[#005ea6] text-white font-mono font-black uppercase tracking-wider text-[11px] shadow-md hover:shadow-blue-500/20 transition-all duration-200 cursor-pointer"
+										className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-[#0070BA] hover:bg-[#005ea6] text-white font-mono font-black uppercase tracking-wider text-[11px] shadow-md hover:shadow-blue-500/20 transition-all duration-200 cursor-pointer active:scale-95"
 									>
 										<PayPalIcon className="w-4 h-4 fill-white" />
 										<span>PayPal</span>
 									</a>
 								</div>
 
+								{/* 🇦🇷 Desplegable Transferencia / Alias para Argentina */}
+								<div className="w-full">
+									<button
+										type="button"
+										onClick={() => setShowArgentinaAlias(!showArgentinaAlias)}
+										className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-sky-950/40 via-sky-900/30 to-sky-950/40 hover:from-sky-950/70 hover:to-sky-950/70 border border-sky-500/30 hover:border-sky-500/60 text-sky-200 font-mono text-xs flex items-center justify-between transition-all duration-200 cursor-pointer active:scale-[0.99]"
+									>
+										<div className="flex items-center gap-2">
+											<span className="text-sm">🇦🇷</span>
+											<span className="font-bold">¿Sos de Argentina? Transferí por Alias</span>
+										</div>
+										<ChevronDown
+											className={`w-4 h-4 transition-transform duration-200 text-sky-400 ${
+												showArgentinaAlias ? "rotate-180" : ""
+											}`}
+										/>
+									</button>
+
+									<AnimatePresence>
+										{showArgentinaAlias && (
+											<motion.div
+												initial={{ height: 0, opacity: 0 }}
+												animate={{ height: "auto", opacity: 1 }}
+												exit={{ height: 0, opacity: 0 }}
+												transition={{ duration: 0.2 }}
+												className="overflow-hidden"
+											>
+												<div className="mt-2 p-3 rounded-xl bg-zinc-900/90 border border-sky-500/20 text-left font-mono">
+													<div className="flex items-center justify-between text-[10px] text-zinc-400 font-bold uppercase tracking-wider mb-1.5">
+														<span>Alias Mercado Pago / Banco</span>
+														<span className="text-sky-400 font-bold">0% COMISIÓN</span>
+													</div>
+
+													<div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-zinc-950 border border-zinc-800">
+														<span className="text-sm font-black text-amber-400 tracking-wider select-all font-mono">
+															focusfv.arq
+														</span>
+
+														<button
+															type="button"
+															onClick={handleCopyAlias}
+															className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
+																copiedAlias
+																	? "bg-emerald-500 text-black font-black"
+																	: "bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40"
+															}`}
+														>
+															{copiedAlias ? (
+																<>
+																	<Check className="w-3.5 h-3.5 stroke-[3]" />
+																	<span>¡Copiado!</span>
+																</>
+															) : (
+																<>
+																	<Copy className="w-3.5 h-3.5" />
+																	<span>Copiar</span>
+																</>
+															)}
+														</button>
+													</div>
+
+													<p className="text-[10px] text-zinc-400 font-sans mt-2 text-center leading-normal">
+														Cualquier aporte de $500, $1.000 o lo que puedas ayuda directamente a mantener los servidores activos durante las carreras 🧉
+													</p>
+												</div>
+											</motion.div>
+										)}
+									</AnimatePresence>
+								</div>
+
 								{/* Botón Cerrar / Más Tarde */}
 								<button
-									onClick={handleLater}
+									onClick={handleClose}
 									className="w-full py-2 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs font-mono font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer"
 								>
 									Continuar a la app

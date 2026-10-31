@@ -9,6 +9,10 @@ import type { Message } from "@/types/state.type";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 
 import { toTrackTime } from "@/lib/toTrackTime";
+import {
+	prepareFiaMessageForTranslation,
+	postProcessFiaTranslation,
+} from "@/lib/raceControlTranslations";
 
 type Props = {
 	msg: Message;
@@ -34,18 +38,20 @@ export function RaceControlMessage({ msg, gmtOffset }: Props) {
 			if (!msg.Message) return;
 			setIsLoading(true);
 			try {
+				const preprocessed = prepareFiaMessageForTranslation(msg.Message);
 				const res = await fetch(
 					"https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=es&dt=t&q=" +
-						encodeURIComponent(msg.Message)
+						encodeURIComponent(preprocessed)
 				);
 				const data = await res.json();
 				
 				if (data && data[0] && data[0][0] && data[0][0][0]) {
-					setTranslatedText(data[0][0][0]);
+					const sanitized = postProcessFiaTranslation(data[0][0][0]);
+					setTranslatedText(sanitized);
 				}
 			} catch (error) {
 				console.error("Error al traducir el mensaje de Race Control:", error);
-				setTranslatedText(msg.Message);
+				setTranslatedText(prepareFiaMessageForTranslation(msg.Message));
 			} finally {
 				setIsLoading(false);
 			}
