@@ -75,30 +75,6 @@ function smoothAngle(prevAngle: number, newAngle: number): number {
 	return prevAngle + diff;
 }
 
-function getDriverPositionAndAngle(
-	timingDriver: TimingDataDriver | undefined,
-	rotatedPoints: { x: number; y: number }[] | null,
-	timeOffset: number
-): { x: number; y: number; angle: number } | null {
-	if (!rotatedPoints || rotatedPoints.length === 0) return null;
-
-	const carSeed = timingDriver ? (parseInt(timingDriver.RacingNumber) || 10) : 10;
-	const speedFactor = 1 + ((carSeed % 7) * 0.025); 
-	const progress = ((timeOffset * speedFactor) + (carSeed * 0.045)) % 1;
-
-	const positionIndex = Math.floor(progress * (rotatedPoints.length - 1));
-	const safeIndex = Math.min(Math.max(positionIndex, 0), rotatedPoints.length - 1);
-	
-	const nextIndex = (safeIndex + 3) % rotatedPoints.length;
-	
-	const currentPoint = rotatedPoints[safeIndex];
-	const nextPoint = rotatedPoints[nextIndex];
-	
-	const angle = Math.atan2(nextPoint.y - currentPoint.y, nextPoint.x - currentPoint.x) * (180 / Math.PI);
-
-	return { x: currentPoint.x, y: currentPoint.y, angle };
-}
-
 export default function Map({ filter }: { filter?: string[] }) {
 	const showCornerNumbers = useSettingsStore((state) => state.showCornerNumbers);
 	const favoriteDrivers = useSettingsStore((state) => state.favoriteDrivers);
@@ -224,18 +200,7 @@ export default function Map({ filter }: { filter?: string[] }) {
 	const [rotation, setRotation] = useState<number>(0);
 	const [finishLine, setFinishLine] = useState<null | { x: number; y: number; startAngle: number }>(null);
 
-	const [timeOffset, setTimeOffset] = useState(0);
 
-	useEffect(() => {
-		if (isEnded) return;
-		let frameId: number;
-		const updateFrame = () => {
-			setTimeOffset((Date.now() / 88000) % 1);
-			frameId = requestAnimationFrame(updateFrame);
-		};
-		frameId = requestAnimationFrame(updateFrame);
-		return () => cancelAnimationFrame(frameId);
-	}, [isEnded]);
 
 	useEffect(() => {
 		(async () => {
@@ -377,53 +342,45 @@ export default function Map({ filter }: { filter?: string[] }) {
 							rawPos.Status !== "InPit"
 						);
 
-						let carX: number;
-						let carY: number;
+						if (!hasCarPos || !rawPos) {
+							// 🛑 CERO DATOS FALSOS: Si FOM no transmite coordenadas GPS satelitales en vivo en este frame,
+							// NUNCA inventamos una posición simulada ni ponemos monoplazas en lugares falsos.
+							return null;
+						}
+
+						// 🏎️ TELEMETRÍA OFICIAL F1: Coordenadas GPS exactas en pista
+						const rotated = rotate(rawPos.X, rawPos.Y, rotation, centerX, centerY);
+						const carX = rotated.x;
+						const carY = rotated.y;
 						let carAngle: number;
 
-						if (hasCarPos && rawPos) {
-							// 🏎️ TELEMETRÍA OFICIAL F1: Coordenadas GPS exactas en pista
-							const rotated = rotate(rawPos.X, rawPos.Y, rotation, centerX, centerY);
-							carX = rotated.x;
-							carY = rotated.y;
-
-							const prev = prevCarsRef.current[driver.RacingNumber];
-							if (prev) {
-								const dx = carX - prev.x;
-								const dy = carY - prev.y;
-								const dist = Math.hypot(dx, dy);
-								if (dist > 3) {
-									const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI);
-									carAngle = smoothAngle(prev.angle, targetAngle);
-								} else {
-									carAngle = prev.angle;
-								}
-							} else if (points && points.length > 0) {
-								const closestIdx = findMinDistance({ x: carX, y: carY }, points);
-								if (closestIdx !== -1) {
-									const nextIdx = (closestIdx + 3) % points.length;
-									carAngle = Math.atan2(
-										points[nextIdx].y - points[closestIdx].y,
-										points[nextIdx].x - points[closestIdx].x
-									) * (180 / Math.PI);
-								} else {
-									carAngle = 0;
-								}
+						const prev = prevCarsRef.current[driver.RacingNumber];
+						if (prev) {
+							const dx = carX - prev.x;
+							const dy = carY - prev.y;
+							const dist = Math.hypot(dx, dy);
+							if (dist > 3) {
+								const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+								carAngle = smoothAngle(prev.angle, targetAngle);
+							} else {
+								carAngle = prev.angle;
+							}
+						} else if (points && points.length > 0) {
+							const closestIdx = findMinDistance({ x: carX, y: carY }, points);
+							if (closestIdx !== -1) {
+								const nextIdx = (closestIdx + 3) % points.length;
+								carAngle = Math.atan2(
+									points[nextIdx].y - points[closestIdx].y,
+									points[nextIdx].x - points[closestIdx].x
+								) * (180 / Math.PI);
 							} else {
 								carAngle = 0;
 							}
-
-							prevCarsRef.current[driver.RacingNumber] = { x: carX, y: carY, angle: carAngle };
 						} else {
-							// 🏎️ Si el piloto está en PISTA pero no hay GPS puntual en este frame,
-							// renderizamos su monoplaza recorriendo el trazado sincronizado
-							const data = getDriverPositionAndAngle(timingDriver, points, timeOffset);
-							if (!data) return null;
-							carX = data.x;
-							carY = data.y;
-							carAngle = data.angle;
-							prevCarsRef.current[driver.RacingNumber] = { x: carX, y: carY, angle: carAngle };
+							carAngle = 0;
 						}
+
+						prevCarsRef.current[driver.RacingNumber] = { x: carX, y: carY, angle: carAngle };
 
 						const colorConfig = TEAM_COLORS_2026[driver.Tla] || { bg: "#ffffff", text: "#ffffff" };
 						const isFav = favoriteDrivers.includes(driver.RacingNumber);
@@ -476,6 +433,20 @@ export default function Map({ filter }: { filter?: string[] }) {
 				<span className="text-[10px] font-semibold text-zinc-400 bg-zinc-900/90 px-2.5 py-1 rounded-md border border-zinc-800 shadow-sm backdrop-blur-sm">
 					Sin monoplazas rodando en circuito
 				</span>
+			</div>
+		)}
+
+		{/* 🛰️ BADGE TRANSPARENTE: Informa con total honestidad el estado del GPS FOM */}
+		{!hasLivePositions && !isEnded && isTrackActive && (
+			<div className="absolute bottom-4 left-4 pointer-events-none z-10 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950/85 border border-zinc-800/80 backdrop-blur-md shadow-lg select-none">
+				<span className="relative flex h-2 w-2">
+					<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+					<span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+				</span>
+				<div className="flex flex-col">
+					<span className="text-[10px] font-mono font-bold text-zinc-300 tracking-wide uppercase">TRAZADO OFICIAL EN VIVO</span>
+					<span className="text-[8px] font-mono text-zinc-500">Monoplazas: señal satelital en espera de coordenadas GPS oficiales</span>
+				</div>
 			</div>
 		)}
 	</div>

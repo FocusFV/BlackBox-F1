@@ -296,7 +296,7 @@ export default function Page() {
 				>
 					{/* 🏎️ Fondo inteligente del circuito aéreo y Easter Egg de telemetría */}
 					<CircuitBackdrop
-						gpName={scheduleStatus.nextSessionName || session?.Name}
+						gpName={session?.Meeting?.Name || scheduleStatus.nextSessionName || session?.Name}
 						country={session?.Meeting?.Country?.Name}
 						isCinematic={isCinematicTrackMode}
 						onToggleCinematic={() => setIsCinematicTrackMode((prev) => !prev)}

@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import Flag from "@/components/Flag";
 import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useDataStore } from "@/stores/useDataStore";
 import { triggerHaptic } from "@/lib/haptics";
 
 interface DriverResult {
@@ -111,11 +112,23 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 	const gridDensity = useSettingsStore((state) => state.gridDensity);
 	const isCompact = gridDensity === "compact";
 
+	const liveSession = useDataStore((state) => state.state?.SessionInfo);
+	const liveTiming = useDataStore((state) => state.state?.TimingData);
+	const liveDrivers = useDataStore((state) => state.state?.DriverList);
+	const liveLapCount = useDataStore((state) => state.state?.LapCount);
+	const liveSessionStatus = useDataStore((state) => state.state?.SessionStatus?.Status);
+
+	const roundNumber = (liveSession?.Meeting as any)?.Number || (liveSession as any)?.Number;
+	const currentGpName = liveSession?.Meeting?.Name;
+	const currentCountryName = liveSession?.Meeting?.Country?.Name;
+	const initialCountry = (currentGpName ? getCountryCodeForGp(currentGpName, currentCountryName) : null) || "mex";
+	const initialGpName = currentGpName ? translateGpName(currentGpName) : "Gran Premio";
+
 	const [activeTab, setActiveTab] = useState<SessionTab>("RACE");
 	const [results, setResults] = useState<DriverResult[]>([]);
-	const [gpName, setGpName] = useState("Gran Premio");
-	const [countryCode, setCountryCode] = useState<string>("usa");
-	const [raceDate, setRaceDate] = useState<string>("");
+	const [gpName, setGpName] = useState(initialGpName);
+	const [countryCode, setCountryCode] = useState<string>(initialCountry);
+	const [raceDate, setRaceDate] = useState<string>(() => (liveSession?.StartDate ? liveSession.StartDate.split("T")[0] : ""));
 	const [loading, setLoading] = useState(true);
 	const [hasSprint, setHasSprint] = useState(false);
 
@@ -125,11 +138,15 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 			try {
 				// 1. Si es práctica libre (FP1, FP2, FP3), consultamos nuestra API de OpenF1
 				if (activeTab === "FP1" || activeTab === "FP2" || activeTab === "FP3") {
-					const dateParam = raceDate ? `&date=${raceDate}` : "";
+					const dateParam = raceDate ? `&date=${raceDate}` : (liveSession?.StartDate ? `&date=${liveSession.StartDate.split("T")[0]}` : "");
 					const res = await fetch(`/api/practice?session=${activeTab}${dateParam}`);
 					if (res.ok) {
 						const data = await res.json();
 						if (Array.isArray(data.results) && data.results.length > 0) {
+							if (currentGpName) {
+								setGpName(translateGpName(currentGpName));
+								setCountryCode(getCountryCodeForGp(currentGpName, currentCountryName) || "mex");
+							}
 							setResults(data.results);
 							setLoading(false);
 							return;
@@ -137,24 +154,117 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 					}
 				}
 
-				// 2. Para Carrera, Qualy y Sprint consultamos Jolpica/Ergast
+				// 2. Para Carrera, si tenemos telemetría de la sesión que acaba de terminar en vivo
+				const isRaceSession = liveSession?.Name === "Race" || liveSession?.Type === "Race";
+				const isRaceFinished = Boolean(
+					liveSessionStatus === "Ends" ||
+					liveSessionStatus === "Finalised" ||
+					liveSessionStatus === "Finished" ||
+					(liveSession as any)?.SessionStatus === "Finalised" ||
+					(liveSession as any)?.SessionStatus === "Ends" ||
+					liveSession?.ArchiveStatus?.Status === "Complete" ||
+					(liveLapCount && liveLapCount.TotalLaps > 0 && liveLapCount.CurrentLap >= liveLapCount.TotalLaps)
+				);
+				const hasLiveRaceLines = Boolean(
+					isRaceSession &&
+					isRaceFinished &&
+					liveTiming?.Lines &&
+					Object.keys(liveTiming.Lines).length > 0
+				);
+
+				if (activeTab === "RACE" && hasLiveRaceLines) {
+					if (currentGpName) {
+						setGpName(translateGpName(currentGpName));
+						setCountryCode(getCountryCodeForGp(currentGpName, currentCountryName) || "mex");
+					}
+					if (liveSession?.StartDate) {
+						setRaceDate(liveSession.StartDate.split("T")[0]);
+					}
+
+					const f1Points = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
+					const lines = Object.values(liveTiming!.Lines).sort((a: any, b: any) => {
+						const posA = parseInt(a.Position, 10) || 99;
+						const posB = parseInt(b.Position, 10) || 99;
+						return posA - posB;
+					});
+
+					const liveResults: DriverResult[] = lines.map((line: any) => {
+						const posNum = parseInt(line.Position, 10) || 99;
+						const drv = liveDrivers?.[line.RacingNumber];
+						const isDNF = Boolean(line.Retired || line.Stopped);
+						const code = drv?.Tla || line.RacingNumber;
+						const name = drv?.FullName || drv?.BroadcastName || `Piloto #${line.RacingNumber}`;
+						const team = drv?.TeamName || "Equipo";
+
+						let gapTime = "";
+						if (posNum === 1) {
+							gapTime = `${line.NumberOfLaps || liveLapCount?.TotalLaps || 71} VUELTAS`;
+						} else if (isDNF) {
+							gapTime = line.NumberOfLaps ? `DNF (Vta ${line.NumberOfLaps})` : "DNF · RETIRADO";
+						} else {
+							gapTime = line.GapToLeader || line.IntervalToPositionAhead?.Value || "INTERVAL";
+						}
+
+						let pointsStr = "";
+						if (posNum <= 10 && !isDNF) {
+							pointsStr = `+${f1Points[posNum - 1]} PTS`;
+						}
+
+						return {
+							pos: String(posNum),
+							number: String(line.RacingNumber),
+							code,
+							name,
+							team,
+							constructorId: team.toLowerCase().replaceAll(" ", "-"),
+							points: pointsStr,
+							gapTime,
+							isDNF,
+							dnfReason: isDNF ? "DNF" : undefined,
+						};
+					});
+
+					if (liveResults.length > 0) {
+						setResults(liveResults);
+						setLoading(false);
+						return;
+					}
+				}
+
+				// 3. Consultamos Jolpica/Ergast: primero para la ronda actual (si existe roundNumber), luego fallback a last
 				let subpath = "results.json";
 				if (activeTab === "QUALY") subpath = "qualifying.json";
 				else if (activeTab === "SPRINT" || activeTab === "SQ") subpath = "sprint.json";
 
-				const endpoints = [
+				const endpoints: string[] = [];
+				if (roundNumber) {
+					endpoints.push(`https://api.jolpi.ca/ergast/f1/current/${roundNumber}/${subpath}`);
+					endpoints.push(`https://api.jolpi.ca/ergast/f1/2026/${roundNumber}/${subpath}`);
+				}
+				endpoints.push(
 					`https://api.jolpi.ca/ergast/f1/current/last/${subpath}`,
 					`https://api.jolpi.ca/ergast/f1/last/${subpath}`,
-					`https://ergast.com/api/f1/current/last/${subpath}`,
-				];
+					`https://ergast.com/api/f1/current/last/${subpath}`
+				);
 
 				let data: any = null;
 				for (const url of endpoints) {
 					try {
 						const res = await fetch(url);
 						if (res.ok) {
-							data = await res.json();
-							if (data?.MRData?.RaceTable?.Races?.length > 0) break;
+							const json = await res.json();
+							const races = json?.MRData?.RaceTable?.Races;
+							if (Array.isArray(races) && races.length > 0) {
+								const r = races[0];
+								const hasSessionResults =
+									(activeTab === "RACE" && r.Results?.length > 0) ||
+									(activeTab === "QUALY" && r.QualifyingResults?.length > 0) ||
+									((activeTab === "SPRINT" || activeTab === "SQ") && r.SprintResults?.length > 0);
+								if (hasSessionResults) {
+									data = json;
+									break;
+								}
+							}
 						}
 					} catch {
 						// Fallback loop
@@ -229,7 +339,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 		}
 
 		fetchSessionData();
-	}, [activeTab, raceDate]);
+	}, [activeTab, raceDate, roundNumber, liveSession, liveTiming, liveDrivers, liveLapCount, liveSessionStatus]);
 
 	return (
 		<div className="flex flex-col gap-4 w-full text-white items-center">
@@ -268,7 +378,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 							Pista en Pausa
 						</p>
 						<p className="text-[10px] text-zinc-400 font-medium tracking-normal leading-tight mt-0.5">
-							Telemetría en espera
+							Resultados Oficiales FIA
 						</p>
 					</div>
 				</div>

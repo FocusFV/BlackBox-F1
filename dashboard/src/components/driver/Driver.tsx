@@ -74,6 +74,10 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 
 	const favoriteDriver = useSettingsStore((state) => state.favoriteDrivers.includes(driver.RacingNumber));
 
+	const speeds = timingDriver?.Speeds as any;
+	const trapSpeed = speeds?.ST?.Value || speeds?.St?.Value || speeds?.FL?.Value || speeds?.Fl?.Value || speeds?.I2?.Value || speeds?.I1?.Value;
+	const trapLabel = (speeds?.ST?.Value || speeds?.St?.Value) ? "ST" : ((speeds?.FL?.Value || speeds?.Fl?.Value) ? "FL" : (speeds?.I2?.Value ? "I2" : ""));
+
 	return (
 		<motion.div
 			layout="position"
@@ -137,12 +141,17 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 								{timingDriver?.InPit ? "BOX" : "PISTA"}
 							</div>
 							<div className="min-w-[3.4rem]">
-								<p className="text-right text-sm font-black text-zinc-400 tabular-nums leading-none tracking-tight">
-									{timingDriver?.InPit ? "0" : "--"}
+								<p className="text-right text-sm font-black text-zinc-300 tabular-nums leading-none tracking-tight">
+									{timingDriver?.InPit ? "0" : (trapSpeed || "--")}
 								</p>
-								<p className="text-right text-[8px] font-bold text-zinc-600 uppercase leading-none mt-0.5">km/h</p>
+								<p className="text-right text-[8px] font-bold text-zinc-500 uppercase leading-none mt-0.5">
+									{timingDriver?.InPit ? "km/h" : (trapSpeed ? `${trapLabel || ""} km/h`.trim() : "km/h")}
+								</p>
 							</div>
-							<div className="flex flex-col gap-1 text-[8px] font-bold opacity-60">
+							<div 
+								className="flex flex-col gap-1 text-[8px] font-bold opacity-50 cursor-help"
+								title="Telemetría de pedales y RPM: Señal de ECU en espera (requiere transmisión oficial F1 TV Pro)"
+							>
 								<div className="flex items-center gap-1">
 									<span className="w-4 text-right text-[7px] text-zinc-500 font-bold leading-none">FRE</span>
 									<div className="h-1.5 w-14 rounded-full bg-zinc-900 border border-zinc-800/80" />

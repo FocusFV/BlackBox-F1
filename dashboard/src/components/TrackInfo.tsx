@@ -42,29 +42,18 @@ export default function TrackInfo() {
 		(session as any)?.SessionStatus === "Ends" ||
 		session?.ArchiveStatus?.Status === "Complete";
 
-	// Detectar ventana de 15 minutos post-sesión
-	const [sessionEndTime, setSessionEndTime] = useState<number | null>(null);
+	const isRaceOrSprint = session?.Name === "Race" || session?.Name === "Sprint";
+	const hasValidLapCount = Boolean(
+		isRaceOrSprint &&
+		lapCount &&
+		typeof lapCount.CurrentLap === "number" &&
+		typeof lapCount.TotalLaps === "number" &&
+		lapCount.TotalLaps > 0
+	);
 
-	useEffect(() => {
-		if (isSessionTerminated && session?.Name) {
-			const storageKey = `f1_session_end_${session?.Key || session?.Name}`;
-			const stored = typeof window !== "undefined" ? sessionStorage.getItem(storageKey) : null;
-			if (stored) {
-				setSessionEndTime(parseInt(stored, 10));
-			} else {
-				const now = Date.now();
-				if (typeof window !== "undefined") sessionStorage.setItem(storageKey, String(now));
-				setSessionEndTime(now);
-			}
-		} else if (!isSessionTerminated) {
-			setSessionEndTime(null);
-		}
-	}, [isSessionTerminated, session?.Key, session?.Name]);
-
-	const isPostSession = Boolean(
-		isSessionTerminated &&
-		sessionEndTime &&
-		Date.now() - sessionEndTime < 15 * 60 * 1000
+	const isRaceFinished = Boolean(
+		isSessionTerminated ||
+		(hasValidLapCount && !!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps)
 	);
 
 	const hasActiveTiming = Boolean(
@@ -78,31 +67,36 @@ export default function TrackInfo() {
 		)
 	);
 
-	// Consideramos la pista activa si hay tiempos, reloj oficial, o sesión iniciada
+	// Consideramos la pista activa solo si la sesión NO ha finalizado y hay actividad en pista o reloj
 	const isTrackLive = Boolean(
-		hasActiveTiming ||
-		Boolean(clock?.Remaining) ||
-		(session &&
-			isSessionStarted &&
-			!isSessionTerminated)
+		!isRaceFinished &&
+		!isSessionTerminated &&
+		(hasActiveTiming ||
+			Boolean(clock?.Remaining) ||
+			(session && isSessionStarted))
 	);
 
-	// Si no hay sesión activa en pista ni estamos en post-sesión, no mostramos datos residuales
-	if (!isTrackLive && !isPostSession) {
-		return null;
+	// Si la carrera o sesión terminó, mostramos el badge oficial de finalizada
+	if (isRaceFinished || isSessionTerminated) {
+		return (
+			<div className="flex flex-row items-center gap-3 md:justify-self-end font-mono">
+				{hasValidLapCount && (
+					<p className="text-2xl sm:text-3xl font-extrabold whitespace-nowrap font-mono tracking-wider text-zinc-300">
+						{lapCount?.CurrentLap} / {lapCount?.TotalLaps}
+					</p>
+				)}
+				<div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-400 text-sm font-black tracking-wider shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+					<span>🏁</span>
+					<span>FINALIZADA</span>
+				</div>
+			</div>
+		);
 	}
 
-	const currentTrackStatus = getTrackStatusMessage(track?.Status ? parseInt(track?.Status) : undefined);
-
-	// Solo las carreras principales o sprint tienen contador total de vueltas fijas (ej: 3 / 56)
-	const isRaceOrSprint = session?.Name === "Race" || session?.Name === "Sprint";
-	const hasValidLapCount = Boolean(
-		isRaceOrSprint &&
-		lapCount &&
-		typeof lapCount.CurrentLap === "number" &&
-		typeof lapCount.TotalLaps === "number" &&
-		lapCount.TotalLaps > 0
-	);
+	// Si no hay sesión activa en pista ni reloj, no mostramos datos residuales
+	if (!isTrackLive) {
+		return null;
+	}
 
 	const isQualy = session?.Name?.toLowerCase().includes("qual") || Boolean(timingData?.SessionPart);
 	const sessionPart = timingData?.SessionPart || 1;
@@ -173,15 +167,7 @@ export default function TrackInfo() {
 		}
 	}
 
-	if (isPostSession) {
-		return (
-			<div className="flex flex-row items-center gap-3 md:justify-self-end font-mono">
-				<span className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-zinc-900/90 border border-amber-500/30 text-amber-400 text-sm font-black tracking-wider shadow-sm">
-					🏁 FINAL
-				</span>
-			</div>
-		);
-	}
+	const currentTrackStatus = getTrackStatusMessage(track?.Status ? parseInt(track?.Status) : undefined);
 
 	return (
 		<div className="flex flex-row items-center gap-4 md:justify-self-end">
