@@ -90,15 +90,29 @@ pub async fn ingest_f1(
     info!(token = %connection_token, "¡Negociación exitosa con SignalR Core!");
 
     let encoded_token = urlencoding::encode(&connection_token);
-    let ws_url = format!(
-        "wss://livetiming.formula1.com/signalrcore?id={}",
-        encoded_token
-    );
+    let ws_url = if !f1_token.is_empty() {
+        format!(
+            "wss://livetiming.formula1.com/signalrcore?id={}&access_token={}",
+            encoded_token,
+            urlencoding::encode(&f1_token)
+        )
+    } else {
+        format!(
+            "wss://livetiming.formula1.com/signalrcore?id={}",
+            encoded_token
+        )
+    };
 
     let mut ws_req = ws_url.into_client_request()?;
     let headers = ws_req.headers_mut();
     headers.insert(USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64)".parse().unwrap());
     headers.insert(ORIGIN, "https://www.formula1.com".parse().unwrap());
+
+    if !f1_token.is_empty() {
+        if let Ok(hval) = HeaderValue::from_str(&format!("Bearer {}", f1_token)) {
+            headers.insert(reqwest::header::AUTHORIZATION, hval);
+        }
+    }
 
     let final_cookie_header = session_cookies.join("; ");
     if !final_cookie_header.is_empty() {
