@@ -145,7 +145,19 @@ export default function Map({ filter }: { filter?: string[] }) {
 	const positions = useDataStore((state) => state.positions);
 	const prevCarsRef = useRef<Record<string, { x: number; y: number; angle: number }>>({});
 
-	const isRaceOrSprint = sessionInfo?.Name === "Race" || sessionInfo?.Name === "Sprint";
+	const isRaceOrSprint = Boolean(
+		sessionInfo?.Name === "Race" ||
+		sessionInfo?.Name === "Sprint" ||
+		sessionInfo?.Type === "Race" ||
+		(lapCount?.TotalLaps && lapCount.TotalLaps > 0)
+	);
+
+	const isQualy = !isRaceOrSprint && Boolean(
+		sessionInfo?.Name?.toLowerCase().includes("qual") ||
+		sessionInfo?.Type?.toLowerCase().includes("qual") ||
+		sessionInfo?.Name?.toLowerCase().includes("shootout") ||
+		rawTiming?.SessionPart
+	);
 
 	const isSessionTerminated = Boolean(
 		sessionStatus === "Ends" ||
@@ -159,7 +171,7 @@ export default function Map({ filter }: { filter?: string[] }) {
 
 	const hasCarsRunning = Boolean(
 		rawTiming?.Lines &&
-		Object.values(rawTiming.Lines).some((l: any) => !l.InPit && !l.KnockedOut && !l.Retired)
+		Object.values(rawTiming.Lines).some((l: any) => !l.InPit && !(isQualy && l.KnockedOut) && !l.Retired && !l.Stopped)
 	);
 
 	// 🛡️ Si la pista está en verde ("1"), o hay monoplazas rodando, la sesión NUNCA está terminada.
@@ -168,7 +180,6 @@ export default function Map({ filter }: { filter?: string[] }) {
 	const isEnded = !isTrackActive && isSessionTerminated;
 
 	// Detectar si todos los monoplazas están en boxes o en pausa entre fases de Qualy
-	const isQualy = sessionInfo?.Name?.toLowerCase().includes("qual") || Boolean(rawTiming?.SessionPart);
 	const allInPit = Boolean(
 		rawTiming?.Lines &&
 		Object.values(rawTiming.Lines).length > 0 &&
@@ -351,7 +362,7 @@ export default function Map({ filter }: { filter?: string[] }) {
 						const timingDriver = timingDrivers?.Lines?.[driver.RacingNumber];
 						const rawPos = positions?.[driver.RacingNumber];
 						const isInPit = Boolean(timingDriver?.InPit);
-						const isOut = Boolean(timingDriver?.KnockedOut || timingDriver?.Stopped || timingDriver?.Retired);
+						const isOut = Boolean((isQualy && timingDriver?.KnockedOut) || timingDriver?.Stopped || timingDriver?.Retired);
 
 						// 🛑 Si el piloto está en boxes, retirado, eliminado o la sesión terminó, NO se dibuja en el trazado
 						if (isEnded || isInPit || isOut || !timingDriver) {

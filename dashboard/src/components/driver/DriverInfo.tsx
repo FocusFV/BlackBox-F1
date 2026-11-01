@@ -1,6 +1,7 @@
 import clsx from "clsx";
 
 import type { TimingDataDriver } from "@/types/state.type";
+import { useDataStore } from "@/stores/useDataStore";
 
 type Props = {
 	timingDriver: TimingDataDriver;
@@ -8,6 +9,26 @@ type Props = {
 };
 
 export default function DriverInfo({ timingDriver, gridPos }: Props) {
+	const session = useDataStore((state) => state.state?.SessionInfo);
+	const lapCount = useDataStore((state) => state.state?.LapCount);
+	const timingData = useDataStore((state) => state.state?.TimingData);
+
+	const isRaceOrSprint = Boolean(
+		session?.Name === "Race" ||
+		session?.Name === "Sprint" ||
+		session?.Type === "Race" ||
+		(lapCount?.TotalLaps && lapCount.TotalLaps > 0)
+	);
+
+	const isQualy = !isRaceOrSprint && Boolean(
+		session?.Name?.toLowerCase().includes("qual") ||
+		session?.Type?.toLowerCase().includes("qual") ||
+		session?.Name?.toLowerCase().includes("shootout") ||
+		timingData?.SessionPart
+	);
+
+	const isEliminated = isQualy && Boolean(timingDriver.KnockedOut);
+
 	const hasGridChange = typeof gridPos === "number" && gridPos > 0;
 	const positionChange = hasGridChange ? gridPos - parseInt(timingDriver.Position || "0", 10) : undefined;
 	const gain = positionChange !== undefined && positionChange > 0;
@@ -15,7 +36,7 @@ export default function DriverInfo({ timingDriver, gridPos }: Props) {
 
 	const laps = timingDriver.NumberOfLaps !== undefined ? `${timingDriver.NumberOfLaps}V` : "-";
 
-	const status = timingDriver.KnockedOut
+	const status = isEliminated
 		? "ELIM"
 		: timingDriver.Retired
 			? "ABAN"
@@ -25,7 +46,7 @@ export default function DriverInfo({ timingDriver, gridPos }: Props) {
 					? "BOX"
 					: timingDriver.PitOut
 						? "SALIDA"
-						: timingDriver.Cutoff
+						: timingDriver.Cutoff && isQualy
 							? "CORTE"
 							: "PISTA";
 

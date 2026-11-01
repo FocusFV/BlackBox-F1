@@ -43,10 +43,28 @@ const inDangerZone = (position: number, sessionPart: number) => {
 };
 
 export default function Driver({ driver, timingDriver, position, teamColor }: Props) {
+	const session = useDataStore((state) => state.state?.SessionInfo);
+	const lapCount = useDataStore((state) => state.state?.LapCount);
 	const sessionPart = useDataStore((state) => state.state?.TimingData?.SessionPart);
 	const timingStatsDriver = useDataStore((state) => state.state?.TimingStats?.Lines[driver.RacingNumber]);
 	const appTimingDriver = useDataStore((state) => state.state?.TimingAppData?.Lines[driver.RacingNumber]);
 	const carData = useDataStore((state) => (state?.carsData ? state.carsData[driver.RacingNumber]?.Channels : undefined));
+
+	const isRaceOrSprint = Boolean(
+		session?.Name === "Race" ||
+		session?.Name === "Sprint" ||
+		session?.Type === "Race" ||
+		(lapCount?.TotalLaps && lapCount.TotalLaps > 0)
+	);
+
+	const isQualy = !isRaceOrSprint && Boolean(
+		session?.Name?.toLowerCase().includes("qual") ||
+		session?.Type?.toLowerCase().includes("qual") ||
+		session?.Name?.toLowerCase().includes("shootout") ||
+		sessionPart
+	);
+
+	const isEliminated = isQualy && Boolean(timingDriver.KnockedOut);
 
 	const hasFastest = timingStatsDriver?.PersonalBestLapTime.Position == 1;
 
@@ -65,10 +83,10 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 				"group/driver flex flex-col gap-1 rounded-lg select-none transition-all duration-200 cursor-pointer border bg-zinc-950/40 border-zinc-900/60 hover:border-zinc-700/70 hover:bg-zinc-900/50",
 				isCompact ? "p-1" : "p-1.5",
 				{
-					"opacity-40 grayscale": timingDriver.KnockedOut || timingDriver.Retired || timingDriver.Stopped,
+					"opacity-40 grayscale": isEliminated || timingDriver.Retired || timingDriver.Stopped,
 					"bg-sky-950/40 border-sky-500/50 shadow-[0_0_12px_rgba(14,165,233,0.15)]": favoriteDriver,
 					"bg-violet-950/40 border-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.15)]": hasFastest,
-					"bg-red-950/40 border-red-500/50": sessionPart != undefined && inDangerZone(position, sessionPart),
+					"bg-red-950/40 border-red-500/50": isQualy && sessionPart != undefined && inDangerZone(position, sessionPart),
 				}
 			)}
 		>

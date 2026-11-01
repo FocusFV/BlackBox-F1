@@ -23,7 +23,7 @@ export function TvSyncControl() {
 	];
 
 	return (
-		<div className="relative">
+		<div className="relative z-40">
 			{/* Botón trigger compacto */}
 			<div className="flex items-center rounded-lg border border-zinc-800 bg-zinc-900/90 p-1 text-xs">
 				<button

@@ -248,7 +248,7 @@ export default function Page() {
 							</div>
 						</div>
 					) : (
-						<div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950/80 px-4 py-2.5 backdrop-blur-md">
+						<div className="relative z-30 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950/80 px-4 py-2.5 backdrop-blur-md">
 							<div className="flex items-center gap-2">
 								<span className="relative flex h-3 w-3">
 									<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
