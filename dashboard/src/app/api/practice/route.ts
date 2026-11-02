@@ -1,41 +1,40 @@
 import { NextResponse } from "next/server";
 
-export const revalidate = 3600; // Cache de 1 hora
+export const revalidate = 1800; // Cache de 30 minutos
 
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
-	const sessionName = searchParams.get("session") || "FP1"; // "FP1" | "FP2" | "FP3"
+	const sessionName = searchParams.get("session") || "FP1"; // "FP1" | "FP2" | "FP3" | "QUALY" | "RACE" | "SPRINT" | "SQ"
 	const raceDate = searchParams.get("date") || new Date().toISOString().split("T")[0];
 
 	try {
-		// 1. Mapear "FP1" -> "Practice 1", etc.
-		const openF1SessionName =
-			sessionName === "FP1"
-				? "Practice 1"
-				: sessionName === "FP2"
-				? "Practice 2"
-				: sessionName === "FP3"
-				? "Practice 3"
-				: "Practice 1";
-
-		// 2. Buscar sesiones en la ventana del fin de semana (±4 días de la carrera)
+		// 1. Mapear identificador de sesión a nombres de OpenF1
 		const targetDate = new Date(raceDate);
 		const minDate = new Date(targetDate.getTime() - 4 * 86400000).toISOString().split("T")[0];
 		const maxDate = new Date(targetDate.getTime() + 2 * 86400000).toISOString().split("T")[0];
 
 		const sessionsRes = await fetch(
 			`https://api.openf1.org/v1/sessions?date_start>=${minDate}&date_start<=${maxDate}`,
-			{ next: { revalidate: 3600 } }
+			{ next: { revalidate: 1800 } }
 		);
 
 		if (!sessionsRes.ok) {
 			return NextResponse.json({ error: "Error consultando OpenF1" }, { status: 502 });
 		}
 
-		const sessionsData = await sessionsRes.json();
-		const matchingSession = sessionsData.find(
-			(s: any) => (s.session_name || "").toLowerCase() === openF1SessionName.toLowerCase()
-		);
+		const sessionsData: any[] = await sessionsRes.json();
+		const matchingSession = sessionsData.find((s: any) => {
+			const sName = (s.session_name || "").toLowerCase();
+			const sType = (s.session_type || "").toLowerCase();
+			if (sessionName === "FP1") return sName === "practice 1";
+			if (sessionName === "FP2") return sName === "practice 2";
+			if (sessionName === "FP3") return sName === "practice 3";
+			if (sessionName === "QUALY") return sName === "qualifying" || sType === "qualifying";
+			if (sessionName === "SQ") return sName.includes("shootout") || sName.includes("sprint qual") || sType.includes("qualifying");
+			if (sessionName === "SPRINT") return sName === "sprint" || sType === "sprint";
+			if (sessionName === "RACE") return sName === "race" || sType === "race";
+			return false;
+		});
 
 		if (!matchingSession) {
 			return NextResponse.json({ error: `Sesión ${sessionName} no encontrada` }, { status: 404 });
@@ -43,11 +42,80 @@ export async function GET(request: Request) {
 
 		const sessionKey = matchingSession.session_key;
 
-		// 3. Consultar pilotos y vueltas de la sesión
+		// 2. Si es CARRERA o SPRINT, procesamos por posiciones finales e intervalos
+		if (sessionName === "RACE" || sessionName === "SPRINT") {
+			const [driversRes, posRes, intRes] = await Promise.all([
+				fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`, { next: { revalidate: 1800 } }),
+				fetch(`https://api.openf1.org/v1/position?session_key=${sessionKey}`, { next: { revalidate: 1800 } }),
+				fetch(`https://api.openf1.org/v1/intervals?session_key=${sessionKey}`, { next: { revalidate: 1800 } }).catch(() => null),
+			]);
+
+			if (!driversRes.ok || !posRes.ok) {
+				return NextResponse.json({ error: "Error obteniendo posiciones de OpenF1" }, { status: 502 });
+			}
+
+			const drivers: any[] = await driversRes.json();
+			const pos: any[] = await posRes.json();
+			const intervals: any[] = intRes && intRes.ok ? await intRes.json() : [];
+
+			const driverMap: Record<string, any> = {};
+			for (const d of drivers) driverMap[d.driver_number] = d;
+
+			const lastPos: Record<string, any> = {};
+			for (const p of pos) lastPos[p.driver_number] = p;
+
+			const lastInt: Record<string, any> = {};
+			for (const i of intervals) lastInt[i.driver_number] = i;
+
+			const f1Points = sessionName === "RACE"
+				? [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
+				: [8, 7, 6, 5, 4, 3, 2, 1];
+
+			const ranked = Object.values(lastPos).sort((a, b) => a.position - b.position);
+
+			const results = ranked.map((p) => {
+				const d = driverMap[p.driver_number];
+				const intr = lastInt[p.driver_number];
+				const isP1 = p.position === 1;
+
+				let gap = "";
+				if (isP1) {
+					gap = "FINAL";
+				} else if (intr && intr.gap_to_leader !== undefined && intr.gap_to_leader !== null) {
+					const g = intr.gap_to_leader;
+					gap = typeof g === "number" ? `+${g.toFixed(3)}s` : String(g);
+				} else {
+					gap = "INTERVAL";
+				}
+
+				const pts = p.position <= f1Points.length ? `+${f1Points[p.position - 1]} PTS` : "";
+
+				return {
+					pos: String(p.position),
+					number: String(p.driver_number),
+					code: d?.name_acronym || `P${p.driver_number}`,
+					name: d?.full_name || `Piloto #${p.driver_number}`,
+					team: d?.team_name || "Equipo",
+					constructorId: (d?.team_name || "").toLowerCase().replaceAll(" ", "-"),
+					gapTime: gap,
+					points: pts,
+					isDNF: false,
+				};
+			});
+
+			return NextResponse.json({
+				session: sessionName,
+				circuit: matchingSession.circuit_short_name,
+				total: results.length,
+				results,
+			});
+		}
+
+		// 3. Para PRÁCTICAS y CLASIFICACIÓN (FP1, FP2, FP3, QUALY, SQ), calculamos mejor vuelta por piloto
 		const [driversRes, lapsRes] = await Promise.all([
-			fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`, { next: { revalidate: 3600 } }),
+			fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`, { next: { revalidate: 1800 } }),
 			fetch(`https://api.openf1.org/v1/laps?session_key=${sessionKey}&is_pit_out_lap=false`, {
-				next: { revalidate: 3600 },
+				next: { revalidate: 1800 },
 			}),
 		]);
 
@@ -57,7 +125,6 @@ export async function GET(request: Request) {
 
 		const [drivers, laps] = await Promise.all([driversRes.json(), lapsRes.json()]);
 
-		// 4. Calcular mejor vuelta por piloto
 		const bestLaps: Record<string, number> = {};
 		for (const l of laps) {
 			if (l.lap_duration && (!bestLaps[l.driver_number] || l.lap_duration < bestLaps[l.driver_number])) {
@@ -89,8 +156,8 @@ export async function GET(request: Request) {
 			return {
 				pos: String(idx + 1),
 				number: r.number,
-				code: r.driver?.name_acronym || "DRV",
-				name: r.driver?.full_name || "Piloto",
+				code: r.driver?.name_acronym || `P${r.number}`,
+				name: r.driver?.full_name || `Piloto #${r.number}`,
 				team: r.driver?.team_name || "Equipo",
 				constructorId: (r.driver?.team_name || "").toLowerCase().replaceAll(" ", "-"),
 				gapTime: gap,
@@ -106,7 +173,7 @@ export async function GET(request: Request) {
 			results,
 		});
 	} catch (error: any) {
-		console.error("Error en API practice:", error);
+		console.error("Error en API practice/session:", error);
 		return NextResponse.json({ error: error.message }, { status: 500 });
 	}
 }

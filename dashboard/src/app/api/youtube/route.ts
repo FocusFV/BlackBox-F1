@@ -43,7 +43,8 @@ export interface YouTubeSessionVideo {
 
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
-	const gpQuery = searchParams.get("gp") || "United States";
+	const gpQuery = searchParams.get("gp") || "Mexico City";
+	const stage = (searchParams.get("stage") || "ALL").toUpperCase();
 
 	const allVideos: { id: string; title: string; thumbnail: string; publishedAt: string; embedUrl: string }[] = [];
 
@@ -265,10 +266,21 @@ export async function GET(request: Request) {
 	}
 
 	// Orden cronológico: FP1 -> SQ/FP2 -> Sprint/FP3 -> Qualy -> Carrera
-	const sorted = Object.values(sessionMap).sort((a, b) => a.sortOrder - b.sortOrder);
+	let sorted = Object.values(sessionMap).sort((a, b) => a.sortOrder - b.sortOrder);
+
+	// 🚦 Filtrado inteligente por etapa del fin de semana
+	if (stage === "FRIDAY") {
+		// Viernes: sólo libres (FP1, FP2) o Sprint Shootout (SQ)
+		sorted = sorted.filter((v) => ["practice", "shootout"].includes(v.badgeType));
+	} else if (stage === "SATURDAY") {
+		// Sábado: libres, shootout, sprint y qualy (excluye carrera)
+		sorted = sorted.filter((v) => ["practice", "shootout", "sprint", "qualy"].includes(v.badgeType));
+	}
+	// Domingo, POST_RACE, OFF_WEEK o ALL: muestra todos los videos disponibles
 
 	return NextResponse.json({
 		gp: gpQuery,
+		stage,
 		total: sorted.length,
 		sessions: sorted,
 	});

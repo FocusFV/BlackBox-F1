@@ -7,6 +7,7 @@ import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useDataStore } from "@/stores/useDataStore";
 import { triggerHaptic } from "@/lib/haptics";
+import { getSmartGpContext, type SmartGpContext } from "@/lib/sessionSchedule";
 
 interface DriverResult {
 	pos: string;
@@ -124,13 +125,36 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 	const initialCountry = (currentGpName ? getCountryCodeForGp(currentGpName, currentCountryName) : null) || "mex";
 	const initialGpName = currentGpName ? translateGpName(currentGpName) : "Gran Premio";
 
+	const [smartContext, setSmartContext] = useState<SmartGpContext | null>(null);
 	const [activeTab, setActiveTab] = useState<SessionTab>("RACE");
+	const [tabManuallySelected, setTabManuallySelected] = useState(false);
 	const [results, setResults] = useState<DriverResult[]>([]);
 	const [gpName, setGpName] = useState(initialGpName);
 	const [countryCode, setCountryCode] = useState<string>(initialCountry);
 	const [raceDate, setRaceDate] = useState<string>(() => (liveSession?.StartDate ? liveSession.StartDate.split("T")[0] : ""));
 	const [loading, setLoading] = useState(true);
 	const [hasSprint, setHasSprint] = useState(false);
+
+	// 🧠 Detección inteligente de GP y sesión según calendario y día de la semana
+	useEffect(() => {
+		let isMounted = true;
+		getSmartGpContext().then((ctx) => {
+			if (!isMounted) return;
+			setSmartContext(ctx);
+			const targetGp = liveSession?.Meeting?.Name || ctx.raceName;
+			const targetCountry = liveSession?.Meeting?.Country?.Name || ctx.country;
+			setGpName(translateGpName(targetGp));
+			setCountryCode(getCountryCodeForGp(targetGp, targetCountry) || ctx.countryCode);
+			setRaceDate(liveSession?.StartDate ? liveSession.StartDate.split("T")[0] : ctx.raceDate);
+			setHasSprint(ctx.hasSprint);
+			if (!tabManuallySelected || !ctx.availableTabs.includes(activeTab)) {
+				setActiveTab(ctx.defaultTab);
+			}
+		});
+		return () => {
+			isMounted = false;
+		};
+	}, [liveSession?.Meeting?.Name, liveSession?.StartDate, tabManuallySelected, activeTab]);
 
 	useEffect(() => {
 		async function fetchSessionData() {
@@ -139,19 +163,27 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 				// 1. Si es práctica libre (FP1, FP2, FP3), consultamos nuestra API de OpenF1
 				if (activeTab === "FP1" || activeTab === "FP2" || activeTab === "FP3") {
 					const dateParam = raceDate ? `&date=${raceDate}` : (liveSession?.StartDate ? `&date=${liveSession.StartDate.split("T")[0]}` : "");
-					const res = await fetch(`/api/practice?session=${activeTab}${dateParam}`);
-					if (res.ok) {
-						const data = await res.json();
-						if (Array.isArray(data.results) && data.results.length > 0) {
-							if (currentGpName) {
-								setGpName(translateGpName(currentGpName));
-								setCountryCode(getCountryCodeForGp(currentGpName, currentCountryName) || "mex");
+					try {
+						const res = await fetch(`/api/practice?session=${activeTab}${dateParam}`);
+						if (res.ok) {
+							const data = await res.json();
+							if (Array.isArray(data.results) && data.results.length > 0) {
+								if (currentGpName) {
+									setGpName(translateGpName(currentGpName));
+									setCountryCode(getCountryCodeForGp(currentGpName, currentCountryName) || "mex");
+								}
+								setResults(data.results);
+								setLoading(false);
+								return;
 							}
-							setResults(data.results);
-							setLoading(false);
-							return;
 						}
+					} catch (e) {
+						console.error("Error obteniendo prácticas libres:", e);
 					}
+					// 🚫 NUNCA consultar Jolpica para prácticas libres (evita cargar carreras anteriores)
+					setResults([]);
+					setLoading(false);
+					return;
 				}
 
 				// 2. Para Carrera, si tenemos telemetría de la sesión que acaba de terminar en vivo
@@ -231,21 +263,27 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 					}
 				}
 
-				// 3. Consultamos Jolpica/Ergast: primero para la ronda actual (si existe roundNumber), luego fallback a last
+				// 3. Consultamos Jolpica/Ergast para la ronda objetivo actual
 				let subpath = "results.json";
 				if (activeTab === "QUALY") subpath = "qualifying.json";
 				else if (activeTab === "SPRINT" || activeTab === "SQ") subpath = "sprint.json";
 
+				const targetRound = roundNumber || smartContext?.round;
 				const endpoints: string[] = [];
-				if (roundNumber) {
-					endpoints.push(`https://api.jolpi.ca/ergast/f1/current/${roundNumber}/${subpath}`);
-					endpoints.push(`https://api.jolpi.ca/ergast/f1/2026/${roundNumber}/${subpath}`);
+				if (targetRound) {
+					endpoints.push(`https://api.jolpi.ca/ergast/f1/current/${targetRound}/${subpath}`);
+					endpoints.push(`https://api.jolpi.ca/ergast/f1/2026/${targetRound}/${subpath}`);
 				}
-				endpoints.push(
-					`https://api.jolpi.ca/ergast/f1/current/last/${subpath}`,
-					`https://api.jolpi.ca/ergast/f1/last/${subpath}`,
-					`https://ergast.com/api/f1/current/last/${subpath}`
-				);
+
+				// ⚠️ Solo recurrir a /current/last/ si NO estamos en un fin de semana de carrera activo
+				// (evita mostrar el Gran Premio anterior cuando el actual recién termina o se está disputando)
+				if (!smartContext?.isWeekendActive && !targetRound) {
+					endpoints.push(
+						`https://api.jolpi.ca/ergast/f1/current/last/${subpath}`,
+						`https://api.jolpi.ca/ergast/f1/last/${subpath}`,
+						`https://ergast.com/api/f1/current/last/${subpath}`
+					);
+				}
 
 				let data: any = null;
 				for (const url of endpoints) {
@@ -267,7 +305,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 							}
 						}
 					} catch {
-						// Fallback loop
+						// Continuar búsqueda
 					}
 				}
 
@@ -330,7 +368,28 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 					});
 
 					setResults(fetchedResults);
+					setLoading(false);
+					return;
 				}
+
+				// 4. Si Jolpica no tiene datos aún para esta sesión, consultamos OpenF1
+				const dateParam = raceDate ? `&date=${raceDate}` : (liveSession?.StartDate ? `&date=${liveSession.StartDate.split("T")[0]}` : "");
+				try {
+					const openF1Res = await fetch(`/api/practice?session=${activeTab}${dateParam}`);
+					if (openF1Res.ok) {
+						const openF1Data = await openF1Res.json();
+						if (Array.isArray(openF1Data.results) && openF1Data.results.length > 0) {
+							setResults(openF1Data.results);
+							setLoading(false);
+							return;
+						}
+					}
+				} catch (e) {
+					console.error("Error consultando OpenF1 para sesión:", e);
+				}
+
+				// Si ninguna fuente tiene resultados aún para este GP, limpiamos lista sin tocar el nombre del GP ni la bandera
+				setResults([]);
 			} catch (error) {
 				console.error("Error al obtener resultados oficiales:", error);
 			} finally {
@@ -339,7 +398,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 		}
 
 		fetchSessionData();
-	}, [activeTab, raceDate, roundNumber, liveSession, liveTiming, liveDrivers, liveLapCount, liveSessionStatus]);
+	}, [activeTab, raceDate, roundNumber, smartContext, liveSession, liveTiming, liveDrivers, liveLapCount, liveSessionStatus]);
 
 	return (
 		<div className="flex flex-col gap-4 w-full text-white items-center">
@@ -356,7 +415,15 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 					<div>
 						<div className="flex items-center gap-2">
 							<span className="text-[11px] uppercase font-mono font-bold tracking-wider text-amber-400">
-								Última Ronda Oficial
+								{smartContext?.isWeekendActive
+									? smartContext.stage === "FRIDAY"
+										? "Fin de Semana en Vivo · Libres"
+										: smartContext.stage === "SATURDAY"
+										? "Fin de Semana en Vivo · Clasificación"
+										: smartContext.stage === "SUNDAY"
+										? "Fin de Semana en Vivo · Gran Premio"
+										: "Gran Premio Finalizado"
+									: "Última Ronda Oficial"}
 							</span>
 							<span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono font-bold uppercase group-hover:border-amber-500/40 group-hover:text-amber-300 transition-colors">
 								Ver Circuito 🏁
@@ -375,7 +442,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 					</span>
 					<div className="text-left font-mono">
 						<p className="text-[11px] font-bold text-zinc-200 uppercase tracking-tight leading-none">
-							Pista en Pausa
+							{smartContext?.isWeekendActive ? "Pista en Espera" : "Pista en Pausa"}
 						</p>
 						<p className="text-[10px] text-zinc-400 font-medium tracking-normal leading-tight mt-0.5">
 							Resultados Oficiales FIA
@@ -405,12 +472,21 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 										{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasificación" },
 										{ id: "RACE" as SessionTab, label: "CARRERA", sub: "Gran Premio" },
 								  ]
-							).map((tab) => {
+							)
+								.filter((tab) => {
+									// 🔒 Filtrado progresivo e inteligente: Solo se muestran las sesiones que YA fueron disputadas
+									if (smartContext?.availableTabs && smartContext.availableTabs.length > 0) {
+										return smartContext.availableTabs.includes(tab.id);
+									}
+									return true;
+								})
+								.map((tab) => {
 								const isActive = activeTab === tab.id;
 								return (
 									<button
 										key={tab.id}
 										onClick={() => {
+											setTabManuallySelected(true);
 											setActiveTab(tab.id);
 											triggerHaptic("light");
 										}}
@@ -464,8 +540,11 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 							Cargando tiempos oficiales...
 						</div>
 					) : results.length === 0 ? (
-						<div className="h-48 flex items-center justify-center text-zinc-500 font-mono text-xs text-center p-4">
-							Sin resultados registrados para esta sesión.
+						<div className="h-48 flex flex-col items-center justify-center gap-2 text-zinc-400 font-mono text-xs text-center p-6 bg-zinc-950/40 rounded-xl border border-zinc-900/80">
+							<span className="text-amber-400 font-bold text-xs uppercase tracking-wider">⏱️ Tiempos en Homologación FIA</span>
+							<p className="max-w-md text-zinc-400 text-[11px] leading-relaxed">
+								Aguardando la publicación de registros oficiales para esta sesión del {gpName}. Los resultados se actualizarán automáticamente en la consola apenas estén disponibles.
+							</p>
 						</div>
 					) : (
 						/* LISTA UNIFICADA Y COMPACTA (DE P1 A P20 SIN TARJETAS GIGANTES) */

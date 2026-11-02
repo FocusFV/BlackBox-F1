@@ -1,4 +1,4 @@
-import { translateSessionName } from "./f1Translations";
+import { translateSessionName, getCountryCodeForGp } from "./f1Translations";
 
 export interface ScheduleSession {
 	name: string;
@@ -168,4 +168,158 @@ export function formatCountdown(targetMs: number | null): string {
 	}
 	const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 	return `${minutes.toString().padStart(2, "0")}m ${seconds.toString().padStart(2, "0")}s`;
+}
+
+// 🧠 Contexto inteligente de Fin de Semana vs Entre Semana para ParcFerme y YouTube
+export interface SmartGpContext {
+	isWeekendActive: boolean; // ¿Estamos entre viernes mañana y domingo/lunes madrugada del GP?
+	round: number;            // Número de ronda activa o última completada
+	raceName: string;         // Nombre del GP (ej: "Mexico City Grand Prix")
+	country: string;          // País (ej: "Mexico")
+	countryCode: string;      // Código para bandera (ej: "mex")
+	stage: "FRIDAY" | "SATURDAY" | "SUNDAY" | "POST_RACE" | "OFF_WEEK";
+	defaultTab: "FP1" | "FP2" | "FP3" | "QUALY" | "SPRINT" | "SQ" | "RACE";
+	availableTabs: ("FP1" | "FP2" | "FP3" | "QUALY" | "SPRINT" | "SQ" | "RACE")[];
+	hasSprint: boolean;
+	raceDate: string;         // YYYY-MM-DD
+	firstPracticeDate: string;// YYYY-MM-DD
+}
+
+export async function getSmartGpContext(): Promise<SmartGpContext> {
+	try {
+		const res = await fetch("https://api.jolpi.ca/ergast/f1/current.json", {
+			next: { revalidate: 1800 },
+		}).catch(() => null);
+
+		if (res && res.ok) {
+			const data = await res.json();
+			const races: any[] = data?.MRData?.RaceTable?.Races || [];
+			const now = Date.now();
+
+			// 1. Buscamos si estamos dentro de un fin de semana de GP (viernes 00:00 UTC hasta fin de domingo / lunes mediodía UTC)
+			for (const race of races) {
+				const fp1Date = race.FirstPractice?.date || race.date;
+				// Viernes a las 00:00 UTC (para cubrir todas las zonas horarias)
+				const weekendStart = new Date(`${fp1Date}T00:00:00Z`).getTime();
+				const raceStart = parseDateToMs(race.date, race.time || "14:00:00Z");
+				// Domingo post-carrera (~14h tras inicio de carrera o lunes mediodía UTC)
+				const weekendEnd = (raceStart || new Date(`${race.date}T23:59:59Z`).getTime()) + 14 * 3600 * 1000;
+
+				if (now >= weekendStart && now <= weekendEnd) {
+					const satSession = race.ThirdPractice || race.Sprint || race.Qualifying;
+					const satDate = satSession?.date || race.date;
+					const satStart = new Date(`${satDate}T00:00:00Z`).getTime();
+					const sunStart = new Date(`${race.date}T00:00:00Z`).getTime();
+
+					const hasSprint = Boolean(race.Sprint || race.SprintQualifying || race.SprintShootout);
+
+					// ⏱️ Calculamos las fechas/horas exactas de cada sesión en ms
+					const fp1Start = parseDateToMs(race.FirstPractice?.date, race.FirstPractice?.time) || new Date(`${fp1Date}T12:00:00Z`).getTime();
+					const fp2Start = parseDateToMs(race.SecondPractice?.date, race.SecondPractice?.time) || fp1Start + 4 * 3600 * 1000;
+					const fp3Start = parseDateToMs(race.ThirdPractice?.date, race.ThirdPractice?.time) || fp2Start + 20 * 3600 * 1000;
+					const sqStart = parseDateToMs(race.SprintQualifying?.date, race.SprintQualifying?.time) ||
+						parseDateToMs(race.SprintShootout?.date, race.SprintShootout?.time) || fp1Start + 4 * 3600 * 1000;
+					const sprintStart = parseDateToMs(race.Sprint?.date, race.Sprint?.time) || fp3Start;
+					const qualyStart = parseDateToMs(race.Qualifying?.date, race.Qualifying?.time) || fp3Start + 3.5 * 3600 * 1000;
+					const raceStartMs = raceStart || qualyStart + 24 * 3600 * 1000;
+
+					// 🔒 Solo se agregan pestañas de sesiones que YA fueron disputadas
+					const availableTabs: ("FP1" | "FP2" | "FP3" | "QUALY" | "SPRINT" | "SQ" | "RACE")[] = [];
+
+					if (now >= fp1Start + 55 * 60 * 1000) availableTabs.push("FP1");
+
+					if (hasSprint) {
+						if (now >= sqStart + 44 * 60 * 1000) availableTabs.push("SQ");
+						if (now >= sprintStart + 40 * 60 * 1000) availableTabs.push("SPRINT");
+					} else {
+						if (now >= fp2Start + 55 * 60 * 1000) availableTabs.push("FP2");
+						if (now >= fp3Start + 55 * 60 * 1000) availableTabs.push("FP3");
+					}
+
+					if (now >= qualyStart + 55 * 60 * 1000) availableTabs.push("QUALY");
+					if (now >= raceStartMs + 90 * 60 * 1000) availableTabs.push("RACE");
+
+					// Si recién arranca el fin de semana y todavía no concluyó FP1, mostramos únicamente FP1
+					if (availableTabs.length === 0) {
+						availableTabs.push("FP1");
+					}
+
+					let stage: "FRIDAY" | "SATURDAY" | "SUNDAY" | "POST_RACE" = "SUNDAY";
+					if (now < satStart) {
+						stage = "FRIDAY";
+					} else if (now < sunStart) {
+						stage = "SATURDAY";
+					} else if (now < raceStartMs + 90 * 60 * 1000) {
+						stage = "SUNDAY";
+					} else {
+						stage = "POST_RACE";
+					}
+
+					// La pestaña activa por defecto es la última sesión ya corrida
+					const defaultTab = availableTabs[availableTabs.length - 1];
+
+					return {
+						isWeekendActive: true,
+						round: parseInt(race.round, 10),
+						raceName: race.raceName,
+						country: race.Circuit?.Location?.country || "Mexico",
+						countryCode: getCountryCodeForGp(race.raceName, race.Circuit?.Location?.country) || "mex",
+						stage,
+						defaultTab,
+						availableTabs,
+						hasSprint,
+						raceDate: race.date,
+						firstPracticeDate: fp1Date,
+					};
+				}
+			}
+
+			// 2. Si no es fin de semana de GP (lunes a jueves entre carreras), buscamos la última carrera completada
+			let lastCompleted = races[0];
+			for (const race of races) {
+				const raceStart = parseDateToMs(race.date, race.time || "14:00:00Z");
+				if (raceStart && raceStart <= now) {
+					lastCompleted = race;
+				}
+			}
+
+			if (lastCompleted) {
+				const isSprint = Boolean(lastCompleted.Sprint || lastCompleted.SprintQualifying);
+				const allTabs: ("FP1" | "FP2" | "FP3" | "QUALY" | "SPRINT" | "SQ" | "RACE")[] = isSprint
+					? ["FP1", "SQ", "SPRINT", "QUALY", "RACE"]
+					: ["FP1", "FP2", "FP3", "QUALY", "RACE"];
+
+				return {
+					isWeekendActive: false,
+					round: parseInt(lastCompleted.round, 10),
+					raceName: lastCompleted.raceName,
+					country: lastCompleted.Circuit?.Location?.country || "Mexico",
+					countryCode: getCountryCodeForGp(lastCompleted.raceName, lastCompleted.Circuit?.Location?.country) || "mex",
+					stage: "OFF_WEEK",
+					defaultTab: "RACE",
+					availableTabs: allTabs,
+					hasSprint: isSprint,
+					raceDate: lastCompleted.date,
+					firstPracticeDate: lastCompleted.FirstPractice?.date || lastCompleted.date,
+				};
+			}
+		}
+	} catch (e) {
+		console.error("Error resolviendo SmartGpContext:", e);
+	}
+
+	// Fallback por defecto a México
+	return {
+		isWeekendActive: true,
+		round: 19,
+		raceName: "Mexico City Grand Prix",
+		country: "Mexico",
+		countryCode: "mex",
+		stage: "POST_RACE",
+		defaultTab: "RACE",
+		availableTabs: ["FP1", "FP2", "FP3", "QUALY", "RACE"],
+		hasSprint: false,
+		raceDate: "2026-11-01",
+		firstPracticeDate: "2026-10-30",
+	};
 }

@@ -5,6 +5,7 @@ import { useDataStore } from "@/stores/useDataStore";
 import { VideoCard } from "./VideoCard";
 import type { YouTubeSessionVideo } from "@/app/api/youtube/route";
 import { translateGpName } from "@/lib/f1Translations";
+import { getSmartGpContext } from "@/lib/sessionSchedule";
 
 export function YouTubeFeed() {
 	const rawGpName = useDataStore((state) => state.state?.SessionInfo?.Meeting?.Name);
@@ -21,23 +22,14 @@ export function YouTubeFeed() {
 		async function fetchSessions() {
 			setLoading(true);
 			try {
-				let currentGp = "United States";
+				const ctx = await getSmartGpContext();
+				const targetGp = rawGpName || ctx.raceName;
+				const targetStage = ctx.stage;
 
-				try {
-					const gpRes = await fetch("https://api.jolpi.ca/ergast/f1/current/last/results.json");
-					const gpData = await gpRes.json();
-					if (gpData?.MRData?.RaceTable?.Races?.length > 0) {
-						const race = gpData.MRData.RaceTable.Races[0];
-						currentGp = race.raceName || "United States";
-					}
-				} catch {
-					if (rawGpName) currentGp = rawGpName;
-				}
+				if (isMounted) setDisplayGpName(translateGpName(targetGp));
 
-				if (isMounted) setDisplayGpName(translateGpName(currentGp));
-
-				// Consultamos la ruta API interna de Next.js
-				const res = await fetch(`/api/youtube?gp=${encodeURIComponent(currentGp)}`);
+				// Consultamos la ruta API interna con el GP y la etapa inteligente del fin de semana
+				const res = await fetch(`/api/youtube?gp=${encodeURIComponent(targetGp)}&stage=${encodeURIComponent(targetStage)}`);
 				if (res.ok) {
 					const data = await res.json();
 					if (isMounted && Array.isArray(data.sessions)) {
@@ -110,9 +102,18 @@ export function YouTubeFeed() {
 					ref={scrollContainerRef}
 					className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth pb-3 snap-x snap-mandatory w-full"
 				>
-					{videos.map((video) => (
-						<VideoCard key={video.id} video={video} />
-					))}
+					{videos.length === 0 ? (
+						<div className="flex-1 min-h-[140px] rounded-xl bg-zinc-950/60 border border-zinc-900/80 flex flex-col items-center justify-center p-6 text-center">
+							<span className="text-zinc-300 text-xs font-mono font-medium mb-1">
+								Los resúmenes oficiales se actualizarán aquí progresivamente a medida que la F1 los publique en YouTube durante este fin de semana.
+							</span>
+							<span className="text-zinc-500 text-[11px] font-sans">
+								Viernes (Libres) • Sábado (Qualy / Sprint) • Domingo (Carrera)
+							</span>
+						</div>
+					) : (
+						videos.map((video) => <VideoCard key={video.id} video={video} />)
+					)}
 
 					<a
 						href={`https://www.youtube.com/results?search_query=F1+Highlights+${encodeURIComponent(displayGpName)}`}
