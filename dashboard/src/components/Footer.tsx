@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { VisitorCounter } from "@/components/VisitorCounter";
 
 // Usamos el nombre exacto de tu archivo definitivo
 import logoFocus from "public/FocusFVLogo.png"; 
@@ -35,9 +36,13 @@ export default function Footer() {
 						</p>
 					</div>
 
-					{/* VERSIÓN DEL SOFTWARE */}
-					<div className="text-xs text-zinc-500 font-mono bg-zinc-900/20 px-2 py-0.5 rounded border border-zinc-900/40 mt-1">
-						v4.0.3
+					{/* VERSIÓN DEL SOFTWARE Y CONTADOR DISCRETO DE ESPECTADORES */}
+					<div className="flex flex-wrap items-center justify-center gap-2.5 mt-1.5">
+						<div className="text-xs text-zinc-500 font-mono bg-zinc-900/30 px-2.5 py-0.5 rounded-full border border-zinc-900/60">
+							v4.0.7
+						</div>
+						<span className="text-zinc-700 select-none">•</span>
+						<VisitorCounter />
 					</div>
 				</div>
 

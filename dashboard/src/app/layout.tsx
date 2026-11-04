@@ -2,6 +2,7 @@ import { type ReactNode } from "react";
 import Script from "next/script";
 
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "@/styles/globals.css";
 
 import { env } from "@/env";
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: Props) {
 				</OledModeProvider>
 
 				<Analytics />
+				<SpeedInsights />
 			</body>
 		</html>
 	);
