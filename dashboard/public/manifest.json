@@ -1,8 +1,8 @@
 {
 	"name": "Blackbox F1 · FocusFV",
 	"short_name": "Blackbox F1",
-	"start_url": "/",
-	"id": "/",
+	"start_url": "/?source=pwa",
+	"id": "/?source=pwa",
 	"scope": "/",
 	"display": "standalone",
 	"display_override": ["standalone", "window-controls-overlay"],
@@ -13,6 +13,7 @@
 	"categories": ["sports", "utilities", "entertainment"],
 	"lang": "es",
 	"dir": "ltr",
+	"prefer_related_applications": false,
 	"icons": [
 		{
 			"src": "/icons/icon-192x192.png",
@@ -37,6 +38,22 @@
 			"sizes": "512x512",
 			"type": "image/png",
 			"purpose": "maskable"
+		}
+	],
+	"screenshots": [
+		{
+			"src": "/screenshots/desktop.png",
+			"sizes": "1280x720",
+			"type": "image/png",
+			"form_factor": "wide",
+			"label": "Telemetría en Vivo de F1 en Tiempo Real"
+		},
+		{
+			"src": "/screenshots/mobile.png",
+			"sizes": "720x1280",
+			"type": "image/png",
+			"form_factor": "narrow",
+			"label": "Consola Pit-Wall Móvil"
 		}
 	],
 	"shortcuts": [
