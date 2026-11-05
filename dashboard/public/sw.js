@@ -51,3 +51,24 @@ self.addEventListener('fetch', (event) => {
 			})
 	);
 });
+
+// Sincronización en segundo plano (Background Sync)
+self.addEventListener('sync', (event) => {
+	// Mantiene sincronizada la sesión en segundo plano
+});
+
+// Sincronización periódica (Periodic Background Sync)
+self.addEventListener('periodicsync', (event) => {
+	// Verificación periódica de estados
+});
+
+// Notificaciones Push (Push Notifications)
+self.addEventListener('push', (event) => {
+	if (event.data) {
+		const data = event.data.json();
+		self.registration.showNotification(data.title || 'Blackbox F1', {
+			body: data.body || 'Alerta de carrera en vivo',
+			icon: '/icons/icon-192x192.png',
+		});
+	}
+});
