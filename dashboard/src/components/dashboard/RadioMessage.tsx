@@ -170,7 +170,7 @@ export default function RadioMessage({ driver, capture, basePath, gmtOffset }: P
 					<span className="font-mono text-[9px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 shrink-0">
 						SUB
 					</span>
-					<p className="italic leading-snug">"{subtitle}"</p>
+					<p className="italic leading-snug">&ldquo;{subtitle}&rdquo;</p>
 				</div>
 			)}
 

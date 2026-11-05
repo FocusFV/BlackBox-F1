@@ -248,11 +248,14 @@ export default function StreamsPage() {
 
 	// 🔒 Refs para sincronización limpia y continua del temporizador de 1 segundo
 	const isLiveRef = React.useRef(isLive);
-	isLiveRef.current = isLive;
 	const bypassRef = React.useRef(bypass);
-	bypassRef.current = bypass;
 	const isUnlockingRef = React.useRef(isUnlocking);
-	isUnlockingRef.current = isUnlocking;
+
+	useEffect(() => {
+		isLiveRef.current = isLive;
+		bypassRef.current = bypass;
+		isUnlockingRef.current = isUnlocking;
+	}, [isLive, bypass, isUnlocking]);
 
 	// Cargar cronograma del fin de semana y verificar acceso de administrador
 	useEffect(() => {

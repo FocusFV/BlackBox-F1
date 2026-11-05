@@ -93,6 +93,13 @@ export default function Sidebar({ connected }: Props) {
 	const unpin = useSidebarStore((state) => state.unpin);
 
 	const oledMode = useSettingsStore((state) => state.oledMode);
+	const [currentTime, setCurrentTime] = useState<number>(0);
+
+	useEffect(() => {
+		setCurrentTime(Date.now());
+		const timer = setInterval(() => setCurrentTime(Date.now()), 5000);
+		return () => clearInterval(timer);
+	}, []);
 
 	// 📡 Detección de sesión activa para mostrar u ocultar opciones dinámicas
 	const sessionStatus = useDataStore((state) => state?.state?.SessionStatus?.Status);
@@ -108,7 +115,8 @@ export default function Sidebar({ connected }: Props) {
 
 	const isRecentHeartbeat = Boolean(
 		heartbeatUtc &&
-		Math.abs(Date.now() - new Date(heartbeatUtc).getTime()) < 3 * 60 * 1000
+		currentTime > 0 &&
+		Math.abs(currentTime - new Date(heartbeatUtc).getTime()) < 3 * 60 * 1000
 	);
 
 	const isTrackActive = Boolean(

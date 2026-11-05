@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable react-hooks/refs */
 import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 
@@ -120,6 +121,13 @@ export default function Map({ filter }: { filter?: string[] }) {
 	const clock = useDataStore((state) => state?.state?.ExtrapolatedClock);
 	const positions = useDataStore((state) => state.positions);
 	const prevCarsRef = useRef<Record<string, { x: number; y: number; angle: number }>>({});
+	const [currentTime, setCurrentTime] = useState<number>(0);
+
+	useEffect(() => {
+		setCurrentTime(Date.now());
+		const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
+		return () => clearInterval(timer);
+	}, []);
 
 	const isRaceOrSprint = Boolean(
 		sessionInfo?.Name === "Race" ||
@@ -178,7 +186,7 @@ export default function Map({ filter }: { filter?: string[] }) {
 
 		let breakRemainingMs = breakDurationMs;
 		if (breakStartMs) {
-			const elapsed = Math.max(0, Date.now() - breakStartMs);
+			const elapsed = Math.max(0, (currentTime || breakStartMs) - breakStartMs);
 			breakRemainingMs = Math.min(breakDurationMs, Math.max(0, breakDurationMs - elapsed));
 		}
 		breakTimeFormatted = formatMsToClock(breakRemainingMs, true);

@@ -20,16 +20,18 @@ export default function TrackInfo() {
 	const delay = useSettingsStore((state) => state.delay);
 
 	// Actualización suave cada segundo para cuenta regresiva en vivo
-	const [, setTick] = useState(0);
+	const [currentTime, setCurrentTime] = useState<number>(0);
 	useEffect(() => {
-		const timer = setInterval(() => setTick((t) => t + 1), 1000);
+		setCurrentTime(Date.now());
+		const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
 		return () => clearInterval(timer);
 	}, []);
 
 	// Telemetría con heartbeat activo en los últimos 3 minutos (descarta datos viejos o cacheados)
 	const isRecentHeartbeat = Boolean(
 		heartbeatUtc &&
-		Math.abs(Date.now() - new Date(heartbeatUtc).getTime()) < 3 * 60 * 1000
+		currentTime > 0 &&
+		Math.abs(currentTime - new Date(heartbeatUtc).getTime()) < 3 * 60 * 1000
 	);
 
 	const isSessionStarted = sessionStatus === "Started" || sessionStatus === "Running";
@@ -123,7 +125,7 @@ export default function TrackInfo() {
 
 		let breakRemainingMs = breakDurationMs;
 		if (breakStartMs) {
-			const elapsed = Math.max(0, Date.now() - breakStartMs);
+			const elapsed = Math.max(0, (currentTime || breakStartMs) - breakStartMs);
 			breakRemainingMs = Math.min(breakDurationMs, Math.max(0, breakDurationMs - elapsed));
 		}
 		formattedTime = formatMsToClock(breakRemainingMs, true);
@@ -136,7 +138,7 @@ export default function TrackInfo() {
 			if (clock?.Extrapolating && clock.Utc) {
 				const clockUtcMs = parseUtcMs(clock.Utc);
 				if (clockUtcMs) {
-					ms = ms - Math.max(0, Date.now() - clockUtcMs) + (delay ? delay * 1000 : 0);
+					ms = ms - Math.max(0, (currentTime || clockUtcMs) - clockUtcMs) + (delay ? delay * 1000 : 0);
 				}
 			}
 			formattedTime = formatMsToClock(ms, true);
@@ -158,7 +160,7 @@ export default function TrackInfo() {
 			}
 
 			if (partStartMs) {
-				const elapsed = Math.max(0, Date.now() - partStartMs);
+				const elapsed = Math.max(0, (currentTime || partStartMs) - partStartMs);
 				const remainingMs = Math.min(partDurationMs, Math.max(0, partDurationMs - elapsed + (delay ? delay * 1000 : 0)));
 				formattedTime = formatMsToClock(remainingMs, true);
 			} else {

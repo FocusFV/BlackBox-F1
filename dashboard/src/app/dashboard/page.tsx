@@ -52,6 +52,13 @@ export default function Page() {
 
 	// 🎬 Transición cinemática de Parque Cerrado a Telemetría en Vivo
 	const [isTransitioningToLive, setIsTransitioningToLive] = useState(false);
+	const [currentTime, setCurrentTime] = useState<number>(0);
+
+	useEffect(() => {
+		setCurrentTime(Date.now());
+		const timer = setInterval(() => setCurrentTime(Date.now()), 5000);
+		return () => clearInterval(timer);
+	}, []);
 	const prevShowTelemetryRef = useRef<boolean | null>(null);
 
 	useEffect(() => {
@@ -144,13 +151,15 @@ export default function Page() {
 	const isPostSessionWindow = Boolean(
 		isSessionFinished &&
 		sessionEndTime &&
-		Date.now() - sessionEndTime < 15 * 60 * 1000
+		currentTime > 0 &&
+		currentTime - sessionEndTime < 15 * 60 * 1000
 	);
 
 	// Telemetría con heartbeat activo en los últimos 3 minutos (descarta datos viejos cacheados)
 	const isRecentHeartbeat = Boolean(
 		dataStore.state?.Heartbeat?.Utc &&
-		Math.abs(Date.now() - new Date(dataStore.state.Heartbeat.Utc).getTime()) < 3 * 60 * 1000
+		currentTime > 0 &&
+		Math.abs(currentTime - new Date(dataStore.state.Heartbeat.Utc).getTime()) < 3 * 60 * 1000
 	);
 
 	const isTrackActive = Boolean(

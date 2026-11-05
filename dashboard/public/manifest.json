@@ -5,7 +5,7 @@
 	"id": "/?source=pwa",
 	"scope": "/",
 	"display": "standalone",
-	"display_override": ["standalone", "window-controls-overlay"],
+	"display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
 	"orientation": "any",
 	"background_color": "#09090b",
 	"theme_color": "#09090b",
@@ -15,6 +15,26 @@
 	"dir": "ltr",
 	"prefer_related_applications": false,
 	"related_applications": [],
+	"scope_extensions": [
+		{
+			"origin": "https://blackboxf1.vercel.app"
+		}
+	],
+	"protocol_handlers": [
+		{
+			"protocol": "web+f1",
+			"url": "/dashboard?action=%s"
+		}
+	],
+	"share_target": {
+		"action": "/dashboard",
+		"method": "GET",
+		"params": {
+			"title": "title",
+			"text": "text",
+			"url": "url"
+		}
+	},
 	"launch_handler": {
 		"client_mode": "focus-existing"
 	},

@@ -1,20 +1,20 @@
 import type { Metadata } from "next";
 
-const title = "FocusFV | F1 Live Dashboard";
+const title = "Blackbox F1 · FocusFV";
 const description =
-	"Telemetría y tiempos en vivo de Fórmula 1 en tiempo real. Seguí las posiciones, neumáticos, brechas, vueltas, radios de equipo y más.";
+	"Centro de comando y telemetría de Fórmula 1 en tiempo real con tiempos oficiales, radio, telemetría y transmisiones.";
 
-const url = "https://Blackbox-f1.vercel.app";
+const url = "https://blackboxf1.vercel.app";
 
 export const metadata: Metadata = {
 	generator: "Next.js",
 
-	applicationName: title,
+	applicationName: "Blackbox F1",
 
 	title,
 	description,
 
-	// Usamos el favicon local de tu carpeta public
+	// Favicon local en carpeta public
 	icons: "/favicon.png",
 
 	openGraph: {
@@ -22,10 +22,10 @@ export const metadata: Metadata = {
 		description,
 		url,
 		type: "website",
-		siteName: "FocusFV F1 Dashboard",
+		siteName: "Blackbox F1 · FocusFV",
 		images: [
 			{
-				alt: "FocusFV Formula 1 Dashboard",
+				alt: "Blackbox F1 · FocusFV Formula 1 Dashboard",
 				url: `${url}/og-image.png`,
 				width: 1200,
 				height: 630,
@@ -41,8 +41,8 @@ export const metadata: Metadata = {
 		card: "summary_large_image",
 		images: [
 			{
-				url: `${url}/og-image.png`, // Usamos la misma para twitter
-				alt: "FocusFV Formula 1 Dashboard",
+				url: `${url}/og-image.png`,
+				alt: "Blackbox F1 · FocusFV Formula 1 Dashboard",
 				width: 1200,
 				height: 630,
 			},
@@ -53,15 +53,24 @@ export const metadata: Metadata = {
 
 	referrer: "strict-origin-when-cross-origin",
 
-	keywords: ["Formula 1", "f1 dashboard", "telemetria en vivo", "tiempos f1", "colapinto alpine"],
+	keywords: [
+		"Formula 1",
+		"Blackbox F1",
+		"f1 dashboard",
+		"telemetria en vivo",
+		"tiempos f1",
+		"colapinto alpine",
+		"pit wall",
+		"f1 live timing"
+	],
 
 	creator: "FocusFV",
 	publisher: "FocusFV",
-	authors: [{ name: "FocusFV", url: "https://Blackbox-f1.vercel.app" }],
+	authors: [{ name: "FocusFV", url: "https://blackboxf1.vercel.app" }],
 
 	appleWebApp: {
 		capable: true,
-		title: "FocusFV F1",
+		title: "Blackbox F1",
 		statusBarStyle: "black-translucent",
 	},
 

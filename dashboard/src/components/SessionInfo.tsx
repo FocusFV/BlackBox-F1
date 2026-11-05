@@ -45,9 +45,10 @@ export default function SessionInfo() {
 	const delay = useSettingsStore((state) => state.delay);
 
 	// Actualización fluida cada segundo para el reloj de Qualy / Prácticas
-	const [, setTick] = useState(0);
+	const [currentTime, setCurrentTime] = useState<number>(0);
 	useEffect(() => {
-		const timer = setInterval(() => setTick((t) => t + 1), 1000);
+		setCurrentTime(Date.now());
+		const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
 		return () => clearInterval(timer);
 	}, []);
 
@@ -81,7 +82,8 @@ export default function SessionInfo() {
 	const isPostSession = Boolean(
 		isSessionTerminated &&
 		sessionEndTime &&
-		Date.now() - sessionEndTime < 15 * 60 * 1000
+		currentTime > 0 &&
+		currentTime - sessionEndTime < 15 * 60 * 1000
 	);
 
 	// Detecta actividad real de telemetría en pista (tiempos de vuelta o sectores activos)
@@ -295,7 +297,7 @@ export default function SessionInfo() {
 
 		let breakRemainingMs = breakDurationMs;
 		if (breakStartMs) {
-			const elapsed = Math.max(0, Date.now() - breakStartMs);
+			const elapsed = Math.max(0, (currentTime || breakStartMs) - breakStartMs);
 			breakRemainingMs = Math.min(breakDurationMs, Math.max(0, breakDurationMs - elapsed));
 		}
 		timeRemaining = formatMsToClock(breakRemainingMs, true);
@@ -307,7 +309,7 @@ export default function SessionInfo() {
 			if (clock?.Extrapolating && clock.Utc) {
 				const clockUtcMs = parseUtcMs(clock.Utc);
 				if (clockUtcMs) {
-					ms = ms - Math.max(0, Date.now() - clockUtcMs) + (delay ? delay * 1000 : 0);
+					ms = ms - Math.max(0, (currentTime || clockUtcMs) - clockUtcMs) + (delay ? delay * 1000 : 0);
 				}
 			}
 			timeRemaining = formatMsToClock(ms, true);
@@ -329,7 +331,7 @@ export default function SessionInfo() {
 			}
 
 			if (partStartMs) {
-				const elapsed = Math.max(0, Date.now() - partStartMs);
+				const elapsed = Math.max(0, (currentTime || partStartMs) - partStartMs);
 				const remainingMs = Math.min(partDurationMs, Math.max(0, partDurationMs - elapsed + (delay ? delay * 1000 : 0)));
 				timeRemaining = formatMsToClock(remainingMs, true);
 			} else {
