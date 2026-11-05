@@ -1,10 +1,65 @@
 {
-	"name": "Blackbox F1",
-	"short_name": "Blackbox",
+	"name": "Blackbox F1 · FocusFV",
+	"short_name": "Blackbox F1",
 	"start_url": "/",
+	"id": "/",
+	"scope": "/",
 	"display": "standalone",
+	"display_override": ["standalone", "window-controls-overlay"],
+	"orientation": "any",
 	"background_color": "#09090b",
 	"theme_color": "#09090b",
-	"description": "Realtime Formula 1 Dashboard",
-	"icons": []
+	"description": "Centro de comando y telemetría de Fórmula 1 en tiempo real con tiempos oficiales, radio y streams.",
+	"categories": ["sports", "utilities", "entertainment"],
+	"lang": "es",
+	"dir": "ltr",
+	"icons": [
+		{
+			"src": "/icons/icon-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "/icons/icon-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "/icons/icon-maskable-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "maskable"
+		},
+		{
+			"src": "/icons/icon-maskable-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "maskable"
+		}
+	],
+	"shortcuts": [
+		{
+			"name": "Telemetría en Vivo",
+			"short_name": "Telemetría",
+			"description": "Ver telemetría y tiempos de pista en directo",
+			"url": "/dashboard",
+			"icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+		},
+		{
+			"name": "Transmisiones en Vivo",
+			"short_name": "Streams",
+			"description": "Ver transmisiones satelitales oficiales",
+			"url": "/streams",
+			"icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+		},
+		{
+			"name": "Campeonatos FIA",
+			"short_name": "Campeonatos",
+			"description": "Tabla de posiciones y estadísticas históricas",
+			"url": "/dashboard/standings",
+			"icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+		}
+	]
 }
