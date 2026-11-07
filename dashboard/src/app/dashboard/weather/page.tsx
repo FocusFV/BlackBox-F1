@@ -1,8 +1,21 @@
 "use client";
 
-import { WeatherMap } from "@/app/dashboard/weather/map";
+import dynamic from "next/dynamic";
 import Map from "@/components/dashboard/Map"; // Tu mapa real en vivo
 import { useDataStore } from "@/stores/useDataStore"; // Tu store oficial
+
+const WeatherMap = dynamic(
+	() => import("@/app/dashboard/weather/map").then((mod) => mod.WeatherMap),
+	{
+		ssr: false,
+		loading: () => (
+			<div className="w-full h-full flex items-center justify-center bg-black text-zinc-500 font-mono text-xs">
+				<span className="w-2 h-2 rounded-full bg-[#00A19B] animate-ping mr-2" />
+				Cargando radar satelital...
+			</div>
+		),
+	}
+);
 
 export default function WeatherPage() {
 	// 📡 ACCESO DIRECTO AL FEED OFICIAL EN VIVO

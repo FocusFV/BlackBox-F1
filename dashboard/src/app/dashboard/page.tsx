@@ -7,14 +7,22 @@ import TeamRadios from "@/components/dashboard/TeamRadios";
 import TrackViolations from "@/components/dashboard/TrackViolations";
 import Map from "@/components/dashboard/Map";
 import Footer from "@/components/Footer";
+import dynamic from "next/dynamic";
 import { ParcFerme } from "@/components/dashboard/ParcFerme";
 import { useDataStore } from "@/stores/useDataStore";
-import { YouTubeFeed } from "@/components/dashboard/YouTubeFeed";
 import { TvSyncControl } from "@/components/dashboard/TvSyncControl";
 import { RaceControlAlertBanner } from "@/components/dashboard/RaceControlAlertBanner";
 import { TeamRadioAlertPopup } from "@/components/dashboard/TeamRadioAlertPopup";
-import { HeadToHeadModal } from "@/components/dashboard/HeadToHeadModal";
 import { CircuitBackdrop } from "@/components/dashboard/CircuitBackdrop";
+
+const YouTubeFeed = dynamic(
+	() => import("@/components/dashboard/YouTubeFeed").then((mod) => mod.YouTubeFeed),
+	{ ssr: false }
+);
+const HeadToHeadModal = dynamic(
+	() => import("@/components/dashboard/HeadToHeadModal").then((mod) => mod.HeadToHeadModal),
+	{ ssr: false }
+);
 import { Swords, Radio, Flag, AlertTriangle } from "lucide-react";
 import { translateSessionName } from "@/lib/f1Translations";
 import { triggerHaptic } from "@/lib/haptics";
