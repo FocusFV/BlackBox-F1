@@ -613,7 +613,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	interlagos: {
 		key: "interlagos",
-		imageUrl: "/circuits/interlagos.webp",
+		imageUrl: "/circuits/interlagos_hd.jpg",
 		name: "Autódromo José Carlos Pace",
 		gpName: "Gran Premio de São Paulo",
 		country: "Brasil",

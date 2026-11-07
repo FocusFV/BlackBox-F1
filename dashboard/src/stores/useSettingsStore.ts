@@ -87,7 +87,7 @@ export const useSettingsStore = create<SettingsStore>()(
 				speedUnit: "metric",
 				setSpeedUnit: (speedUnit: SpeedUnit) => set({ speedUnit }),
 
-				showCornerNumbers: false,
+				showCornerNumbers: true,
 				setShowCornerNumbers: (showCornerNumbers: boolean) => set({ showCornerNumbers }),
 
 				carMetrics: false,

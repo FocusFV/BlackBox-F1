@@ -363,7 +363,25 @@ export default function Map({ filter }: { filter?: string[] }) {
 			)}
 
 			{showCornerNumbers && corners.map((corner: any) => (
-				<text key={`corner.${corner.number}`} x={corner.labelPos.x} y={corner.labelPos.y} className="fill-zinc-600 font-mono font-black select-none" fontSize={240}>{corner.number}</text>
+				<g key={`corner.${corner.number}`} className="select-none pointer-events-none">
+					<circle
+						cx={corner.labelPos.x}
+						cy={corner.labelPos.y}
+						r={200}
+						className="fill-zinc-950/90 stroke-zinc-700/80"
+						strokeWidth={25}
+					/>
+					<text
+						x={corner.labelPos.x}
+						y={corner.labelPos.y}
+						textAnchor="middle"
+						dominantBaseline="central"
+						className="fill-zinc-100 font-mono font-black"
+						fontSize={220}
+					>
+						{corner.number}
+					</text>
+				</g>
 			))}
 
 			{centerX !== null && centerY !== null && rotation !== null && drivers && timingDrivers && Object.keys(drivers).length > 0 && (
