@@ -10,6 +10,7 @@ export function TvSyncControl() {
 	const isPaused = useSettingsStore((s) => s.delayIsPaused);
 
 	const [isExpanded, setIsExpanded] = useState(false);
+	const [manualVal, setManualVal] = useState<string>("");
 
 	const adjustDelay = (delta: number) => {
 		const next = Math.max(0, delay + delta);
@@ -151,6 +152,51 @@ export function TvSyncControl() {
 								+5s
 							</button>
 						</div>
+					</div>
+
+					{/* ✍️ Entrada manual exacta en segundos */}
+					<div className="border-t border-zinc-800/80 pt-2.5 mt-2.5">
+						<div className="mb-1.5 flex items-center justify-between text-[10px] font-semibold text-zinc-400 uppercase">
+							<span>Ingreso manual:</span>
+							<span className="text-zinc-500 font-mono">Actual: +{delay}s</span>
+						</div>
+						<form
+							onSubmit={(e) => {
+								e.preventDefault();
+								const parsed = parseInt(manualVal, 10);
+								if (!isNaN(parsed) && parsed >= 0) {
+									setDelay(parsed);
+									setManualVal("");
+									setIsExpanded(false);
+								}
+							}}
+							className="flex items-center gap-1.5"
+						>
+							<div className="relative flex-1">
+								<input
+									type="text"
+									inputMode="numeric"
+									pattern="[0-9]*"
+									placeholder="Ej: 100"
+									value={manualVal}
+									onChange={(e) => {
+										const sanitized = e.target.value.replace(/[^0-9]/g, "");
+										setManualVal(sanitized);
+									}}
+									className="w-full rounded-lg border border-zinc-800 bg-zinc-900/90 pl-2.5 pr-8 py-1.5 text-xs font-mono text-white placeholder-zinc-500 focus:border-amber-500 focus:outline-none"
+								/>
+								<span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-mono text-zinc-500 pointer-events-none">
+									seg
+								</span>
+							</div>
+							<button
+								type="submit"
+								disabled={!manualVal}
+								className="rounded-lg bg-amber-500/20 border border-amber-500/50 px-3 py-1.5 text-xs font-bold text-amber-400 hover:bg-amber-500/30 transition-all disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
+							>
+								Aplicar
+							</button>
+						</form>
 					</div>
 				</div>
 			)}

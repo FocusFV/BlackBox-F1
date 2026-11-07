@@ -107,27 +107,47 @@ export default function TrackInfo() {
 		Object.values(timingData.Lines).length > 0 &&
 		Object.values(timingData.Lines).every((l: any) => l.InPit)
 	);
-	const isQualyBreak = isQualy && sessionPart < 3 && allInPit;
+
+	// Detectar Bandera Roja activa
+	const flagMessages = raceControlMessages?.filter(
+		(m) => m.Flag === "RED" || m.Flag === "GREEN" || m.Flag === "CLEAR" || m.Message?.toUpperCase().includes("RED FLAG")
+	);
+	const lastFlagMsg = flagMessages && flagMessages.length > 0 ? flagMessages[flagMessages.length - 1] : null;
+	const isRedFlag = track?.Status === "5" ||
+		Boolean(lastFlagMsg && (lastFlagMsg.Flag === "RED" || lastFlagMsg.Message?.toUpperCase().includes("RED FLAG")));
+
+	const chequeredMessages = raceControlMessages?.filter(
+		(m) => m.Flag === "CHEQUERED" || m.Message?.toUpperCase().includes("CHEQUERED")
+	);
+	const lastChequered = chequeredMessages && chequeredMessages.length > 0
+		? chequeredMessages[chequeredMessages.length - 1]
+		: null;
+	const breakStartMs = parseUtcMs(lastChequered?.Utc);
+
+	const greenMessages = raceControlMessages?.filter(
+		(m) => m.Flag === "GREEN" || m.Message?.toUpperCase().includes("GREEN LIGHT") || m.Message?.toUpperCase().includes("PIT LANE OPEN")
+	);
+	const lastGreen = greenMessages && greenMessages.length > 0 ? greenMessages[greenMessages.length - 1] : null;
+	const lastGreenMs = parseUtcMs(lastGreen?.Utc);
+
+	// Solo es pausa oficial si hubo bandera a cuadros real y no hay bandera roja
+	const breakDurationMs = (sessionPart === 1 ? 7 : 8) * 60 * 1000;
+	const elapsedSinceChequered = breakStartMs ? Math.max(0, (currentTime || breakStartMs) - breakStartMs) : 0;
+	const isChequeredActive = Boolean(
+		lastChequered &&
+		breakStartMs &&
+		(!lastGreenMs || breakStartMs >= lastGreenMs) &&
+		elapsedSinceChequered <= breakDurationMs + 60_000
+	);
+
+	const isQualyBreak = Boolean(isQualy && sessionPart < 3 && allInPit && !isRedFlag && isChequeredActive);
 	const nextPartName = sessionPart === 1 ? "Q2" : "Q3";
 
 	let formattedTime: string | undefined;
 
 	if (isQualyBreak) {
 		// ⏱️ PANTALLA OFICIAL ESTILO F1 TV DURANTE LA PAUSA ENTRE TANDAS
-		const chequeredMessages = raceControlMessages?.filter(
-			(m) => m.Flag === "CHEQUERED" || m.Message?.includes("CHEQUERED")
-		);
-		const lastChequered = chequeredMessages && chequeredMessages.length > 0
-			? chequeredMessages[chequeredMessages.length - 1]
-			: null;
-		const breakStartMs = parseUtcMs(lastChequered?.Utc);
-		const breakDurationMs = (sessionPart === 1 ? 7 : 8) * 60 * 1000;
-
-		let breakRemainingMs = breakDurationMs;
-		if (breakStartMs) {
-			const elapsed = Math.max(0, (currentTime || breakStartMs) - breakStartMs);
-			breakRemainingMs = Math.min(breakDurationMs, Math.max(0, breakDurationMs - elapsed));
-		}
+		const breakRemainingMs = Math.min(breakDurationMs, Math.max(0, breakDurationMs - elapsedSinceChequered));
 		formattedTime = formatMsToClock(breakRemainingMs, true);
 	} else if (!isRaceOrSprint && isTrackLive) {
 		// ⏱️ RELOJ EN VIVO PARA QUALY O PRÁCTICAS (SIEMPRE EN MINUTOS Y SEGUNDOS MM:SS)
@@ -135,7 +155,7 @@ export default function TrackInfo() {
 
 		if (parsedClockMs !== null) {
 			let ms = parsedClockMs;
-			if (clock?.Extrapolating && clock.Utc) {
+			if (clock?.Extrapolating && clock.Utc && !isRedFlag) {
 				const clockUtcMs = parseUtcMs(clock.Utc);
 				if (clockUtcMs) {
 					ms = ms - Math.max(0, (currentTime || clockUtcMs) - clockUtcMs) + (delay ? delay * 1000 : 0);
@@ -147,11 +167,6 @@ export default function TrackInfo() {
 				? (sessionPart === 3 ? 12 : sessionPart === 2 ? 15 : 18) * 60 * 1000
 				: 60 * 60 * 1000;
 
-			const greenMessages = raceControlMessages?.filter(
-				(m) => m.Flag === "GREEN" || m.Message?.includes("GREEN LIGHT") || m.Message?.includes("PIT LANE OPEN")
-			);
-			const lastGreen = greenMessages && greenMessages.length > 0 ? greenMessages[greenMessages.length - 1] : null;
-
 			let partStartMs: number | null = null;
 			if (lastGreen?.Utc) {
 				partStartMs = parseUtcMs(lastGreen.Utc);
@@ -161,7 +176,7 @@ export default function TrackInfo() {
 
 			if (partStartMs) {
 				const elapsed = Math.max(0, (currentTime || partStartMs) - partStartMs);
-				const remainingMs = Math.min(partDurationMs, Math.max(0, partDurationMs - elapsed + (delay ? delay * 1000 : 0)));
+				const remainingMs = Math.min(partDurationMs, Math.max(0, partDurationMs - (isRedFlag ? 0 : elapsed) + (delay ? delay * 1000 : 0)));
 				formattedTime = formatMsToClock(remainingMs, true);
 			} else {
 				formattedTime = formatMsToClock(partDurationMs, true);
@@ -169,7 +184,10 @@ export default function TrackInfo() {
 		}
 	}
 
-	const currentTrackStatus = getTrackStatusMessage(track?.Status ? parseInt(track?.Status) : undefined);
+	let currentTrackStatus = getTrackStatusMessage(track?.Status ? parseInt(track?.Status) : undefined);
+	if (isRedFlag) {
+		currentTrackStatus = getTrackStatusMessage(5);
+	}
 
 	return (
 		<div className="flex flex-row items-center gap-4 md:justify-self-end">

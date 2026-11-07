@@ -279,34 +279,55 @@ export default function SessionInfo() {
 		Object.values(timingData.Lines).length > 0 &&
 		Object.values(timingData.Lines).every((l: any) => l.InPit)
 	);
-	const isQualyBreak = isQualy && sessionPart < 3 && allInPit;
+
+	// Detectar Bandera Roja activa (Status 5 o último mensaje de bandera roja)
+	const flagMessages = raceControlMessages?.filter(
+		(m) => m.Flag === "RED" || m.Flag === "GREEN" || m.Flag === "CLEAR" || m.Message?.toUpperCase().includes("RED FLAG")
+	);
+	const lastFlagMsg = flagMessages && flagMessages.length > 0 ? flagMessages[flagMessages.length - 1] : null;
+	const isRedFlag = trackStatus === "5" ||
+		Boolean(lastFlagMsg && (lastFlagMsg.Flag === "RED" || lastFlagMsg.Message?.toUpperCase().includes("RED FLAG")));
+
+	const chequeredMessages = raceControlMessages?.filter(
+		(m) => m.Flag === "CHEQUERED" || m.Message?.toUpperCase().includes("CHEQUERED")
+	);
+	const lastChequered = chequeredMessages && chequeredMessages.length > 0
+		? chequeredMessages[chequeredMessages.length - 1]
+		: null;
+	const breakStartMs = parseUtcMs(lastChequered?.Utc);
+
+	const greenMessages = raceControlMessages?.filter(
+		(m) => m.Flag === "GREEN" || m.Message?.toUpperCase().includes("GREEN LIGHT") || m.Message?.toUpperCase().includes("PIT LANE OPEN")
+	);
+	const lastGreen = greenMessages && greenMessages.length > 0 ? greenMessages[greenMessages.length - 1] : null;
+	const lastGreenMs = parseUtcMs(lastGreen?.Utc);
+
+	// Solo es pausa oficial entre fases de Qualy si hubo bandera a cuadros real, no hay bandera roja, y la bandera a cuadros es posterior al inicio
+	const breakDurationMs = (sessionPart === 1 ? 7 : 8) * 60 * 1000;
+	const elapsedSinceChequered = breakStartMs ? Math.max(0, (currentTime || breakStartMs) - breakStartMs) : 0;
+	const isChequeredActive = Boolean(
+		lastChequered &&
+		breakStartMs &&
+		(!lastGreenMs || breakStartMs >= lastGreenMs) &&
+		elapsedSinceChequered <= breakDurationMs + 60_000
+	);
+
+	const isQualyBreak = Boolean(isQualy && sessionPart < 3 && allInPit && !isRedFlag && isChequeredActive);
 	const nextPartName = sessionPart === 1 ? "Q2" : "Q3";
 
 	let timeRemaining: string | undefined;
 
 	if (isQualyBreak) {
 		// ⏱️ CUENTA REGRESIVA OFICIAL ENTRE SESIONES DE QUALY
-		const chequeredMessages = raceControlMessages?.filter(
-			(m) => m.Flag === "CHEQUERED" || m.Message?.includes("CHEQUERED")
-		);
-		const lastChequered = chequeredMessages && chequeredMessages.length > 0
-			? chequeredMessages[chequeredMessages.length - 1]
-			: null;
-		const breakStartMs = parseUtcMs(lastChequered?.Utc);
-		const breakDurationMs = (sessionPart === 1 ? 7 : 8) * 60 * 1000;
-
-		let breakRemainingMs = breakDurationMs;
-		if (breakStartMs) {
-			const elapsed = Math.max(0, (currentTime || breakStartMs) - breakStartMs);
-			breakRemainingMs = Math.min(breakDurationMs, Math.max(0, breakDurationMs - elapsed));
-		}
+		const breakRemainingMs = Math.min(breakDurationMs, Math.max(0, breakDurationMs - elapsedSinceChequered));
 		timeRemaining = formatMsToClock(breakRemainingMs, true);
 	} else if (!isRaceOrSprint && isLive) {
 		const parsedClockMs = parseFomClockRemaining(clock?.Remaining, isRaceOrSprint);
 
 		if (parsedClockMs !== null) {
 			let ms = parsedClockMs;
-			if (clock?.Extrapolating && clock.Utc) {
+			// Bajo bandera roja el reloj oficial de F1 se detiene; no extrapolar hacia abajo
+			if (clock?.Extrapolating && clock.Utc && !isRedFlag) {
 				const clockUtcMs = parseUtcMs(clock.Utc);
 				if (clockUtcMs) {
 					ms = ms - Math.max(0, (currentTime || clockUtcMs) - clockUtcMs) + (delay ? delay * 1000 : 0);
@@ -318,11 +339,6 @@ export default function SessionInfo() {
 				? (sessionPart === 3 ? 12 : sessionPart === 2 ? 15 : 18) * 60 * 1000
 				: 60 * 60 * 1000;
 
-			const greenMessages = raceControlMessages?.filter(
-				(m) => m.Flag === "GREEN" || m.Message?.includes("GREEN LIGHT") || m.Message?.includes("PIT LANE OPEN")
-			);
-			const lastGreen = greenMessages && greenMessages.length > 0 ? greenMessages[greenMessages.length - 1] : null;
-
 			let partStartMs: number | null = null;
 			if (lastGreen?.Utc) {
 				partStartMs = parseUtcMs(lastGreen.Utc);
@@ -332,7 +348,7 @@ export default function SessionInfo() {
 
 			if (partStartMs) {
 				const elapsed = Math.max(0, (currentTime || partStartMs) - partStartMs);
-				const remainingMs = Math.min(partDurationMs, Math.max(0, partDurationMs - elapsed + (delay ? delay * 1000 : 0)));
+				const remainingMs = Math.min(partDurationMs, Math.max(0, partDurationMs - (isRedFlag ? 0 : elapsed) + (delay ? delay * 1000 : 0)));
 				timeRemaining = formatMsToClock(remainingMs, true);
 			} else {
 				timeRemaining = formatMsToClock(partDurationMs, true);
@@ -347,7 +363,11 @@ export default function SessionInfo() {
 			<div className="flex flex-col justify-center">
 				<h1 className="truncate text-xs md:text-sm leading-none font-bold text-white font-mono uppercase tracking-wide">
 					{session?.Meeting?.Name}: {translateSessionName(session?.Name)}
-					{isQualyBreak ? (
+					{isRedFlag ? (
+						<span className="text-red-500 font-black ml-1.5 animate-pulse">
+							• BANDERA ROJA
+						</span>
+					) : isQualyBreak ? (
 						<span className="text-amber-400 font-black ml-1.5 animate-pulse">
 							• PAUSA Q{sessionPart} ➔ Q{sessionPart + 1}
 						</span>

@@ -72,7 +72,15 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 	const gridDensity = useSettingsStore((state) => state.gridDensity);
 	const isCompact = gridDensity === "compact";
 
-	const favoriteDriver = useSettingsStore((state) => state.favoriteDrivers.includes(driver.RacingNumber));
+	const favoriteDriver = useSettingsStore((state) => {
+		const list = state.favoriteDrivers || [];
+		const num = String(driver?.RacingNumber ?? timingDriver?.RacingNumber ?? "").trim();
+		const tla = String(driver?.Tla ?? "").trim().toUpperCase();
+		return list.some((fav) => {
+			const f = String(fav).trim();
+			return f === num || (tla && f.toUpperCase() === tla);
+		});
+	});
 
 	const speeds = timingDriver?.Speeds as any;
 	const trapSpeed = speeds?.ST?.Value || speeds?.St?.Value || speeds?.FL?.Value || speeds?.Fl?.Value || speeds?.I2?.Value || speeds?.I1?.Value;
@@ -88,9 +96,9 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 				isCompact ? "p-1" : "p-1.5",
 				{
 					"opacity-40 grayscale": isEliminated || timingDriver.Retired || timingDriver.Stopped,
-					"bg-sky-950/40 border-sky-500/50 shadow-[0_0_12px_rgba(14,165,233,0.15)]": favoriteDriver,
-					"bg-violet-950/40 border-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.15)]": hasFastest,
-					"bg-red-950/40 border-red-500/50": isQualy && sessionPart != undefined && inDangerZone(position, sessionPart),
+					"bg-sky-950/70 border-sky-400 shadow-[0_0_20px_rgba(14,165,233,0.35)] ring-1 ring-sky-400/50": favoriteDriver,
+					"bg-violet-950/40 border-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.15)]": hasFastest && !favoriteDriver,
+					"bg-red-950/40 border-red-500/50": isQualy && sessionPart != undefined && inDangerZone(position, sessionPart) && !favoriteDriver,
 				}
 			)}
 		>
@@ -108,6 +116,7 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 					short={driver?.Tla || ""}
 					teamColor={teamColor || resolveDriverColor(driver?.Tla, driver?.TeamName, driver?.TeamColour)}
 					position={position}
+					isFavorite={favoriteDriver}
 				/>
 				<DriverDRS
 					on={carData ? hasDRS(carData[45]) : false}

@@ -170,25 +170,44 @@ export default function Map({ filter }: { filter?: string[] }) {
 		Object.values(rawTiming.Lines).every((l: any) => l.InPit)
 	);
 	const sessionPart = rawTiming?.SessionPart || 1;
-	const isQualyBreak = isQualy && sessionPart < 3 && allInPit && !isEnded;
+
+	// Detectar Bandera Roja activa
+	const flagMessages = raceControlMessages?.filter(
+		(m) => m.Flag === "RED" || m.Flag === "GREEN" || m.Flag === "CLEAR" || m.Message?.toUpperCase().includes("RED FLAG")
+	);
+	const lastFlagMsg = flagMessages && flagMessages.length > 0 ? flagMessages[flagMessages.length - 1] : null;
+	const isRedFlag = trackStatus?.Status === "5" ||
+		Boolean(lastFlagMsg && (lastFlagMsg.Flag === "RED" || lastFlagMsg.Message?.toUpperCase().includes("RED FLAG")));
+
+	const chequeredMessages = raceControlMessages?.filter(
+		(m) => m.Flag === "CHEQUERED" || m.Message?.toUpperCase().includes("CHEQUERED")
+	);
+	const lastChequered = chequeredMessages && chequeredMessages.length > 0
+		? chequeredMessages[chequeredMessages.length - 1]
+		: null;
+	const breakStartMs = parseUtcMs(lastChequered?.Utc);
+
+	const greenMessages = raceControlMessages?.filter(
+		(m) => m.Flag === "GREEN" || m.Message?.toUpperCase().includes("GREEN LIGHT") || m.Message?.toUpperCase().includes("PIT LANE OPEN")
+	);
+	const lastGreen = greenMessages && greenMessages.length > 0 ? greenMessages[greenMessages.length - 1] : null;
+	const lastGreenMs = parseUtcMs(lastGreen?.Utc);
+
+	const breakDurationMs = (sessionPart === 1 ? 7 : 8) * 60 * 1000;
+	const elapsedSinceChequered = breakStartMs ? Math.max(0, (currentTime || breakStartMs) - breakStartMs) : 0;
+	const isChequeredActive = Boolean(
+		lastChequered &&
+		breakStartMs &&
+		(!lastGreenMs || breakStartMs >= lastGreenMs) &&
+		elapsedSinceChequered <= breakDurationMs + 60_000
+	);
+
+	const isQualyBreak = Boolean(isQualy && sessionPart < 3 && allInPit && !isEnded && !isRedFlag && isChequeredActive);
 	const nextPartName = sessionPart === 1 ? "Q2" : "Q3";
 
 	let breakTimeFormatted: string | null = null;
 	if (isQualyBreak) {
-		const chequeredMessages = raceControlMessages?.filter(
-			(m) => m.Flag === "CHEQUERED" || m.Message?.includes("CHEQUERED")
-		);
-		const lastChequered = chequeredMessages && chequeredMessages.length > 0
-			? chequeredMessages[chequeredMessages.length - 1]
-			: null;
-		const breakStartMs = parseUtcMs(lastChequered?.Utc);
-		const breakDurationMs = (sessionPart === 1 ? 7 : 8) * 60 * 1000;
-
-		let breakRemainingMs = breakDurationMs;
-		if (breakStartMs) {
-			const elapsed = Math.max(0, (currentTime || breakStartMs) - breakStartMs);
-			breakRemainingMs = Math.min(breakDurationMs, Math.max(0, breakDurationMs - elapsed));
-		}
+		const breakRemainingMs = Math.min(breakDurationMs, Math.max(0, breakDurationMs - elapsedSinceChequered));
 		breakTimeFormatted = formatMsToClock(breakRemainingMs, true);
 	}
 
@@ -432,14 +451,14 @@ export default function Map({ filter }: { filter?: string[] }) {
 			</div>
 		) : allInPit && !isEnded && (
 			<div className="absolute top-4 right-4 pointer-events-none z-10 flex flex-col items-end gap-1.5 font-mono">
-				<div className="flex items-center gap-2 rounded-lg bg-zinc-950/95 border border-amber-500/40 px-3.5 py-2 shadow-2xl backdrop-blur-md">
-					<span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
-					<span className="text-xs font-black text-amber-400 uppercase tracking-wider">
-						Monoplazas en Boxes
+				<div className={clsx("flex items-center gap-2 rounded-lg px-3.5 py-2 shadow-2xl backdrop-blur-md", isRedFlag ? "bg-red-950/95 border border-red-500/60" : "bg-zinc-950/95 border border-amber-500/40")}>
+					<span className={clsx("h-2 w-2 rounded-full animate-ping", isRedFlag ? "bg-red-500" : "bg-amber-400")} />
+					<span className={clsx("text-xs font-black uppercase tracking-wider", isRedFlag ? "text-red-400" : "text-amber-400")}>
+						{isRedFlag ? "Bandera Roja - En Boxes" : "Monoplazas en Boxes"}
 					</span>
 				</div>
 				<span className="text-[10px] font-semibold text-zinc-400 bg-zinc-900/90 px-2.5 py-1 rounded-md border border-zinc-800 shadow-sm backdrop-blur-sm">
-					Sin monoplazas rodando en circuito
+					{isRedFlag ? "Sesión detenida por dirección de carrera" : "Sin monoplazas rodando en circuito"}
 				</span>
 			</div>
 		)}

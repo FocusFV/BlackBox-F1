@@ -146,6 +146,10 @@ export default function StreamsPage() {
 			{ label: "Servidor 4 (StreamTP)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRhem5mMQ==" },
 			{ label: "Servidor 5 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/Y2hhbm5lbD1kYXpuZjE=" },
 		],
+		F1TV: [
+			{ label: "Servidor 1 (F1 Oficial HD 1080p)", token: "aHR0cHM6Ly93ZWVsbHoubGl2ZS9iZXRhP3N0cmVhbT1nZWJkYWNlZmdmYWNpZWVl" },
+			{ label: "Servidor 2 (DaddyLive F1)", token: "aHR0cHM6Ly90aGVkYWRkeS5way9zdHJlYW0vc3RyZWFtLTc4Ny5waHA=" },
+		],
 		COLAPINTO: [
 			{ label: "Servidor 1 (StreamX Disney 2)", token: "aHR0cHM6Ly9zdHJlYW14OTkuY29tL2dsb2JhbDMucGhwP3N0cmVhbT1kaXNuZXky" },
 			{ label: "Servidor 2 (StreamTP Principal)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRpc25leTEz" },
@@ -486,7 +490,7 @@ export default function StreamsPage() {
 						</div>
 
 						{/* PARRILLA DE CANALES (GRID DE ACCESO DIRECTO CON DISEÑO PREMIUM) */}
-						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
+						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-6">
 							{/* CANAL FOX */}
 							<button
 								onClick={() => handleTabSelect("FOX")}
@@ -524,6 +528,19 @@ export default function StreamsPage() {
 							>
 								<img src="/dazn.png" alt="DAZN F1" className="h-10 w-auto max-w-[85%] object-contain" />
 								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">DAZN F1</span>
+							</button>
+
+							{/* CANAL F1 TV (OFICIAL 1080P) */}
+							<button
+								onClick={() => handleTabSelect("F1TV")}
+								className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 cursor-pointer ${
+									activeTab === "F1TV"
+										? "text-white border-red-500 shadow-[0_10px_25px_rgba(239,68,68,0.35)] animate-pulse"
+										: "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-red-900"
+								}`}
+							>
+								<img src="/f1tv.png" alt="F1 TV" className="h-10 w-auto max-w-[85%] object-contain" />
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">F1 TV (1080p)</span>
 							</button>
 
 							{/* ONBOARD COLAPINTO */}
