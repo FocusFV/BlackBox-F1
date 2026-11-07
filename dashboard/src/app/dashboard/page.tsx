@@ -119,13 +119,14 @@ export default function Page() {
 	const hasLiveTelemetry = hasTimingData || hasCarData || hasPositionData;
 
 	const isSessionFinished = Boolean(
-		sessionStatus === "Ends" ||
-		sessionStatus === "Finalised" ||
-		sessionStatus === "Finished" ||
-		(session as any)?.SessionStatus === "Finalised" ||
-		(session as any)?.SessionStatus === "Ends" ||
-		session?.ArchiveStatus?.Status === "Complete" ||
-		(session?.Name === "Race" && !!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps && lapCount.TotalLaps > 0)
+		(session?.ArchiveStatus?.Status === "Complete" ||
+			sessionStatus === "Ends" ||
+			sessionStatus === "Finalised" ||
+			sessionStatus === "Finished" ||
+			(session as any)?.SessionStatus === "Finalised" ||
+			(session as any)?.SessionStatus === "Ends" ||
+			(session?.Name === "Race" && !!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps && lapCount.TotalLaps > 0)) &&
+		session?.ArchiveStatus?.Status !== "Generating"
 	);
 
 	// Guardamos el timestamp de fin de sesión para mantener la vista de resultados por 15 minutos
@@ -155,11 +156,11 @@ export default function Page() {
 		currentTime - sessionEndTime < 15 * 60 * 1000
 	);
 
-	// Telemetría con heartbeat activo en los últimos 3 minutos (descarta datos viejos cacheados)
+	// Telemetría con heartbeat activo en los últimos 8 minutos (descarta datos viejos cacheados)
 	const isRecentHeartbeat = Boolean(
 		dataStore.state?.Heartbeat?.Utc &&
 		currentTime > 0 &&
-		Math.abs(currentTime - new Date(dataStore.state.Heartbeat.Utc).getTime()) < 3 * 60 * 1000
+		Math.abs(currentTime - new Date(dataStore.state.Heartbeat.Utc).getTime()) < 8 * 60 * 1000
 	);
 
 	const isTrackActive = Boolean(
@@ -169,14 +170,28 @@ export default function Page() {
 		isRecentHeartbeat
 	);
 
-	const isSessionStarted = sessionStatus === "Started" || sessionStatus === "Running";
+	const isSessionStarted =
+		sessionStatus === "Started" ||
+		sessionStatus === "Running" ||
+		sessionStatus === "Aborted" ||
+		sessionStatus === "Suspended" ||
+		(session as any)?.SessionStatus === "Started" ||
+		(dataStore.state?.SessionStatus as any)?.Started === "Started";
+
+	// 🏎️ Sesión activa transmitida por la F1 oficial (incluso con bandera roja, pausa o demora por lluvia)
+	const isF1ActiveSession = Boolean(
+		session?.Name &&
+		session.Name !== "None" &&
+		session?.ArchiveStatus?.Status !== "Complete" &&
+		(isRecentHeartbeat || hasLiveTelemetry)
+	);
 
 	// Sesión activa por calendario (ventana de ±15 minutos)
 	const isCalendarLive = scheduleStatus.isLiveWindow;
 
-	// Determinación de modo en vivo automática: Si la sesión terminó pero estamos en los 15 min de resultados, seguimos mostrando telemetría
+	// Determinación de modo en vivo automática: Si la sesión está activa por F1 oficial, por calendario o en ventana post-sesión
 	const isLiveAuto =
-		(!isSessionFinished && (isCalendarLive || (isTrackActive && isSessionStarted))) ||
+		(!isSessionFinished && (isCalendarLive || isF1ActiveSession || (isTrackActive && isSessionStarted))) ||
 		isPostSessionWindow;
 
 	// Vista activa (por defecto automático)

@@ -250,6 +250,44 @@ export default function StreamsPage() {
 	const [nextSessionName, setNextSessionName] = useState<string | null>(null);
 	const [countdownText, setCountdownText] = useState<string>("");
 
+	// 📡 Verificación directa contra el backend en tiempo real de F1 (lluvia, banderas rojas, retrasos)
+	const [isBackendSessionLive, setIsBackendSessionLive] = useState<boolean>(false);
+	const [backendSessionTitle, setBackendSessionTitle] = useState<string | null>(null);
+
+	useEffect(() => {
+		let isMounted = true;
+		const checkBackendLive = async () => {
+			try {
+				const liveUrl = process.env.NEXT_PUBLIC_LIVE_URL || "https://blackbox-f1-realtime-docker.onrender.com";
+				const res = await fetch(`${liveUrl}/api/current`, { cache: "no-store" });
+				if (!res.ok) return;
+				const data = await res.json();
+				if (!isMounted) return;
+
+				const sessionName = data?.SessionInfo?.Name;
+				const archiveStatus = data?.SessionInfo?.ArchiveStatus?.Status;
+				const hbUtc = data?.Heartbeat?.Utc;
+				const isRecent = hbUtc && Math.abs(Date.now() - new Date(hbUtc).getTime()) < 8 * 60 * 1000;
+
+				if (sessionName && sessionName !== "None" && archiveStatus !== "Complete" && isRecent) {
+					setIsBackendSessionLive(true);
+					setBackendSessionTitle(sessionName);
+				} else if (archiveStatus === "Complete") {
+					setIsBackendSessionLive(false);
+				}
+			} catch {
+				// Silenciar errores
+			}
+		};
+
+		checkBackendLive();
+		const interval = setInterval(checkBackendLive, 10000);
+		return () => {
+			isMounted = false;
+			clearInterval(interval);
+		};
+	}, []);
+
 	// 🔒 Refs para sincronización limpia y continua del temporizador de 1 segundo
 	const isLiveRef = React.useRef(isLive);
 	const bypassRef = React.useRef(bypass);
@@ -286,29 +324,31 @@ export default function StreamsPage() {
 		const updateStatus = () => {
 			const status = evaluateSessionStatus(sessions);
 			const isTelemetryActive = Boolean(
-				trackStatus &&
+				(trackStatus &&
 				parseInt(trackStatus, 10) > 0 &&
 				sessionInfo?.Name &&
-				sessionInfo?.Name !== "None"
+				sessionInfo?.Name !== "None") ||
+				isBackendSessionLive
 			);
 
-			const shouldBeLive = status.isLiveWindow || isTelemetryActive;
+			const shouldBeLive = status.isLiveWindow || isTelemetryActive || isBackendSessionLive;
 
 			if (shouldBeLive) {
+				const displayTitle = backendSessionTitle || status.activeSessionName || sessionInfo?.Name || "Sesión Oficial";
 				if (!isLiveRef.current && !bypassRef.current && !isUnlockingRef.current) {
-					// 🚀 Secuencia animada de desbloqueo al llegar a los 15 min antes
+					// 🚀 Secuencia animada de desbloqueo al llegar a los 15 min antes o por F1 en vivo
 					setIsUnlocking(true);
 					triggerHaptic("heavy");
 					setTimeout(() => {
 						setIsLive(true);
-						setActiveSessionName(translateSessionName(status.activeSessionName || "Sesión Oficial"));
+						setActiveSessionName(translateSessionName(displayTitle));
 						setCountdownText("");
 						setTimeout(() => {
 							setIsUnlocking(false);
 						}, 200);
 					}, 950);
 				} else if (isLiveRef.current) {
-					setActiveSessionName(translateSessionName(status.activeSessionName || "Sesión Oficial"));
+					setActiveSessionName(translateSessionName(displayTitle));
 					setCountdownText("");
 				}
 			} else {
@@ -330,7 +370,7 @@ export default function StreamsPage() {
 		updateStatus();
 		const interval = setInterval(updateStatus, 1000);
 		return () => clearInterval(interval);
-	}, [trackStatus, sessions, sessionInfo]);
+	}, [trackStatus, sessions, sessionInfo, isBackendSessionLive, backendSessionTitle]);
 
 	const handleLockClick = () => {
 		if (isUnlocking || isLive || bypass) return;

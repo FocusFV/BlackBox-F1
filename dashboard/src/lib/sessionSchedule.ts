@@ -64,19 +64,19 @@ export async function getUpcomingSessions(): Promise<ScheduleSession[]> {
 				const raceStart = parseDateToMs(race.date, race.time);
 				if (!raceStart) continue;
 
-				const raceEnd = raceStart + 2.5 * 3600 * 1000; // ~2h30m de carrera
+				const raceEnd = raceStart + 3.5 * 3600 * 1000; // ~3h30m de carrera (con margen de bandera roja y lluvia)
 
 				// Si el fin de semana está en curso o es el próximo
 				if (raceEnd >= now - 12 * 3600 * 1000) {
 					const sessions: ScheduleSession[] = [];
 
 					const sessionDefs = [
-						{ key: "FirstPractice", name: "Práctica 1", dur: 1 },
-						{ key: "SecondPractice", name: "Práctica 2", dur: 1 },
-						{ key: "ThirdPractice", name: "Práctica 3", dur: 1 },
-						{ key: "SprintQualifying", name: "Sprint Shootout", dur: 0.75 },
-						{ key: "Sprint", name: "Carrera Sprint", dur: 1 },
-						{ key: "Qualifying", name: "Clasificación", dur: 1 },
+						{ key: "FirstPractice", name: "Práctica 1", dur: 2 },
+						{ key: "SecondPractice", name: "Práctica 2", dur: 2 },
+						{ key: "ThirdPractice", name: "Práctica 3", dur: 2 },
+						{ key: "SprintQualifying", name: "Sprint Shootout", dur: 2 },
+						{ key: "Sprint", name: "Carrera Sprint", dur: 2 },
+						{ key: "Qualifying", name: "Clasificación", dur: 3 }, // 3 horas para tolerar banderas rojas o lluvia intensa
 					];
 
 					for (const def of sessionDefs) {
@@ -117,7 +117,7 @@ export function evaluateSessionStatus(
 	preWindowMs: number = 15 * 60 * 1000
 ): SessionStatusResult {
 	const now = Date.now();
-	const POST_WINDOW = 15 * 60 * 1000;
+	const POST_WINDOW = 45 * 60 * 1000; // 45m de margen post-sesión para celebrar y ver entrevistas
 
 	// 🟢 1. ¿Hay alguna sesión cuya ventana esté activa ahora? (desde preWindowMs antes hasta el final + 15m)
 	const active = sessions.find((s) => now >= s.start - preWindowMs && now <= s.end + POST_WINDOW);

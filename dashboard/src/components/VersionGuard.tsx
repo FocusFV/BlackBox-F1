@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { RefreshCw, Sparkles, X } from "lucide-react";
 import { triggerHaptic } from "@/lib/haptics";
 
-const CHECK_INTERVAL_MS = 30000; // Consultar cada 30 segundos
+const CHECK_INTERVAL_MS = 180000; // Consultar cada 3 minutos (ahorro del 85% de requests en Vercel)
 const COUNTDOWN_SECONDS = 60; // 60 segundos de pre-aviso
 
 export default function VersionGuard() {
@@ -19,6 +19,8 @@ export default function VersionGuard() {
 		let isMounted = true;
 
 		const checkVersion = async () => {
+			// Si la pestaña está en segundo plano o el celu bloqueado, no gastamos peticiones
+			if (typeof document !== "undefined" && document.hidden) return;
 			if (isPostponed && Date.now() < postponeUntilRef.current) return;
 
 			try {
