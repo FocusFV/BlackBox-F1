@@ -165,12 +165,14 @@ pub async fn ingest_f1(
                         if msg_type == 3 {
                             if let Some(result) = val.get("result").and_then(|r| r.as_object()) {
                                 info!("¡Recibido estado inicial completo de F1 Live Timing! ({} temas recibidos)", result.len());
+                                // 🛡️ Reseteamos con el snapshot fresco completo de FOM para eliminar pilotos de sesiones pasadas
+                                let full_initial = Value::Object(result.clone());
+                                state_service.set_state(full_initial).await.ok();
+
                                 for (topic, payload) in result {
                                     let mut state_update = serde_json::Map::new();
                                     state_update.insert(topic.clone(), payload.clone());
                                     let update_obj = Value::Object(state_update);
-
-                                    state_service.update_state(update_obj.clone()).await.ok();
                                     let _ = update_sender.send(update_obj.to_string());
                                 }
                             }
@@ -182,6 +184,11 @@ pub async fn ingest_f1(
                                 if target == "feed" {
                                     if let Some(args) = val.get("arguments").and_then(|a| a.as_array()) {
                                         if let (Some(topic), Some(payload)) = (args.get(0).and_then(|t| t.as_str()), args.get(1)) {
+                                            // 🛡️ Si es SessionInfo, verificamos si cambió la sesión para purgar pilotos viejos
+                                            if topic == "SessionInfo" {
+                                                state_service.check_and_reset_session(payload).await;
+                                            }
+
                                             let mut state_update = serde_json::Map::new();
                                             state_update.insert(topic.to_string(), payload.clone());
                                             let update_obj = Value::Object(state_update);

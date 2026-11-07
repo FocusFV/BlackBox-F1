@@ -1,8 +1,15 @@
 import { utc } from "moment";
 
-type PosObject = { Position: string };
+type PosObject = { Position?: string };
 export const sortPos = (a: PosObject, b: PosObject) => {
-	return parseInt(a.Position) - parseInt(b.Position);
+	const posA = a?.Position ? parseInt(a.Position, 10) : NaN;
+	const posB = b?.Position ? parseInt(b.Position, 10) : NaN;
+
+	if (isNaN(posA) && isNaN(posB)) return 0;
+	if (isNaN(posA)) return 1;
+	if (isNaN(posB)) return -1;
+
+	return posA - posB;
 };
 
 type PosObjectQuali = {

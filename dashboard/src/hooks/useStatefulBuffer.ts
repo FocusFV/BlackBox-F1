@@ -15,8 +15,15 @@ export const useStatefulBuffer = <T>() => {
 		if (currentRef.current) buffer.push(currentRef.current);
 	};
 
+	const reset = (val?: T) => {
+		currentRef.current = val ?? null;
+		buffer.cleanup(0);
+		if (val) buffer.push(val);
+	};
+
 	return {
 		push,
+		reset,
 		latest: buffer.latest,
 		delayed: buffer.delayed,
 		cleanup: buffer.cleanup,

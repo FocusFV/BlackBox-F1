@@ -24,13 +24,38 @@ export default function LeaderBoard() {
             <LayoutGroup key="drivers">
                 {drivers && driversTiming && driversTiming.Lines && (
                     <AnimatePresence>
-                        {Object.entries(driversTiming.Lines)
-                            .map(([key, timingDriver]: [string, any]) => ({
-                                ...timingDriver,
-                                resolvedNumber: timingDriver?.RacingNumber ?? timingDriver?.Line ?? key,
-                            }))
-                            .sort(sortPos)
-                            .map((timingDriver: any, index: number) => {
+                        {(() => {
+                            // 1. Filtrar solo pilotos que existan en la lista oficial de la sesión
+                            const validDrivers = Object.entries(driversTiming.Lines)
+                                .map(([key, timingDriver]: [string, any]) => ({
+                                    ...timingDriver,
+                                    resolvedNumber: timingDriver?.RacingNumber ?? timingDriver?.Line ?? key,
+                                }))
+                                .filter((timingDriver: any) => {
+                                    const driverInfo = drivers[timingDriver.resolvedNumber];
+                                    return Boolean(driverInfo);
+                                });
+
+                            // 2. Si hay más de 22 pilotos (por ejemplo, si coincidieron pilotos de prueba y titulares por datos heredados),
+                            // agrupamos por escudería y tomamos como máximo 2 monoplazas activos por equipo (regla FIA 2026: 11 equipos x 2 autos = 22)
+                            const teamCounts: Record<string, number> = {};
+                            const sorted = [...validDrivers].sort(sortPos);
+
+                            const prioritized = sorted.filter((d) => {
+                                const driverInfo = drivers[d.resolvedNumber];
+                                const team = driverInfo?.TeamName || driverInfo?.TeamColour || "unknown";
+                                const currentCount = teamCounts[team] || 0;
+                                if (currentCount < 2) {
+                                    teamCounts[team] = currentCount + 1;
+                                    return true;
+                                }
+                                return false;
+                            });
+
+                            // Límite reglamentario FIA: Máximo 22 monoplazas (11 escuderías en 2026)
+                            const finalGrid = (prioritized.length >= 20 ? prioritized : sorted).slice(0, 22);
+
+                            return finalGrid.map((timingDriver: any, index: number) => {
                                 const driverKey = timingDriver.resolvedNumber;
                                 return (
                                     <Driver
@@ -40,7 +65,8 @@ export default function LeaderBoard() {
                                         timingDriver={timingDriver}
                                     />
                                 );
-                            })}
+                            });
+                        })()}
                     </AnimatePresence>
                 )}
             </LayoutGroup>

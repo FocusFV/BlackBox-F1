@@ -9,6 +9,7 @@ import { inflate } from "@/lib/inflate";
 import { utcToLocalMs } from "@/lib/utcToLocalMs";
 
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useDataStore } from "@/stores/useDataStore";
 
 import { useBuffer } from "@/hooks/useBuffer";
 import { useStatefulBuffer } from "@/hooks/useStatefulBuffer";
@@ -59,6 +60,7 @@ export const useDataEngine = ({ updateState, updatePosition, updateCarData }: Pr
 	}, []);
 
 	const intervalRef = useRef<NodeJS.Timeout | null>(null);
+	const sessionKeyRef = useRef<string | number | null>(null);
 
 	const handleInitial = (payload: any) => {
 		// 🛠️ Mapeo inteligente para capturar CarData.z o CarDataZ indistintamente
@@ -106,6 +108,22 @@ export const useDataEngine = ({ updateState, updatePosition, updateCarData }: Pr
 	};
 
 	const handleUpdate = (payload: any) => {
+		// 🛡️ Detección en caliente de cambio de sesión (ej. de FP1 a FP2 o Qualy)
+		if (payload.SessionInfo) {
+			const newKey =
+				payload.SessionInfo.Key || payload.SessionInfo.Path || payload.SessionInfo.Name;
+			if (newKey && sessionKeyRef.current && newKey !== sessionKeyRef.current) {
+				console.log(
+					`[DataEngine] 🔄 Cambio de sesión detectado (${sessionKeyRef.current} -> ${newKey}). Purgando sesión anterior...`
+				);
+				sessionKeyRef.current = newKey;
+				Object.values(buffers).forEach((b) => b.reset());
+				useDataStore.getState().resetSession();
+			} else if (newKey && !sessionKeyRef.current) {
+				sessionKeyRef.current = newKey;
+			}
+		}
+
 		const carZ = payload["CarData.z"] || payload["CarDataZ"];
 		const posZ = payload["Position.z"] || payload["PositionZ"];
 		const update = { ...payload };

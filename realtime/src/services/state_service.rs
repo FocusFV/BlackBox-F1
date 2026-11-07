@@ -48,6 +48,70 @@ impl StateService {
         merge(&mut state, update);
         Ok(())
     }
+
+    /// 🧹 Purga los datos específicos de la sesión anterior (pilotos, tiempos, telemetría)
+    #[allow(dead_code)]
+    pub async fn reset_session_data(&self) {
+        let mut state = self.state.write().await;
+        if let Value::Object(map) = &mut *state {
+            tracing::info!("🧹 Reseteando datos de sesión de telemetría (TimingData, DriverList, CarData)...");
+            map.remove("TimingData");
+            map.remove("DriverList");
+            map.remove("TimingAppData");
+            map.remove("TimingStats");
+            map.remove("CarData.z");
+            map.remove("CarDataZ");
+            map.remove("Position.z");
+            map.remove("PositionZ");
+            map.remove("LapCount");
+            map.remove("RaceControlMessages");
+            map.remove("TopThree");
+            map.remove("ExtrapolatedClock");
+        }
+    }
+
+    /// 🔍 Evalúa si SessionInfo corresponde a una nueva sesión y purga el estado si cambió
+    pub async fn check_and_reset_session(&self, new_session_info: &Value) -> bool {
+        let mut state = self.state.write().await;
+        if let Value::Object(map) = &mut *state {
+            let current_key = map
+                .get("SessionInfo")
+                .and_then(|s| s.get("Key"))
+                .and_then(|k| k.as_i64());
+            let current_path = map
+                .get("SessionInfo")
+                .and_then(|s| s.get("Path"))
+                .and_then(|p| p.as_str());
+
+            let new_key = new_session_info.get("Key").and_then(|k| k.as_i64());
+            let new_path = new_session_info.get("Path").and_then(|p| p.as_str());
+
+            let changed = (new_key.is_some() && current_key.is_some() && new_key != current_key)
+                || (new_path.is_some() && current_path.is_some() && new_path != current_path);
+
+            if changed {
+                tracing::info!(
+                    old_key = ?current_key,
+                    new_key = ?new_key,
+                    "🔄 Cambio de sesión detectado en F1 Live Timing. Purgando datos viejos para evitar pilotos fantasma..."
+                );
+                map.remove("TimingData");
+                map.remove("DriverList");
+                map.remove("TimingAppData");
+                map.remove("TimingStats");
+                map.remove("CarData.z");
+                map.remove("CarDataZ");
+                map.remove("Position.z");
+                map.remove("PositionZ");
+                map.remove("LapCount");
+                map.remove("RaceControlMessages");
+                map.remove("TopThree");
+                map.remove("ExtrapolatedClock");
+                return true;
+            }
+        }
+        false
+    }
 }
 
 pub fn merge(base: &mut Value, update: Value) {
