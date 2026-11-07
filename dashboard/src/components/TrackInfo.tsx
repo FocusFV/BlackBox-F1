@@ -36,13 +36,24 @@ export default function TrackInfo() {
 
 	const isSessionStarted = sessionStatus === "Started" || sessionStatus === "Running";
 
-	const isSessionTerminated =
-		sessionStatus === "Ends" ||
-		sessionStatus === "Finalised" ||
-		sessionStatus === "Finished" ||
-		(session as any)?.SessionStatus === "Finalised" ||
-		(session as any)?.SessionStatus === "Ends" ||
-		session?.ArchiveStatus?.Status === "Complete";
+	const isQualy = session?.Name?.toLowerCase().includes("qual") || Boolean(timingData?.SessionPart);
+	const sessionPart = timingData?.SessionPart || 1;
+	const isQualyEarlyPart = Boolean(
+		isQualy &&
+		sessionPart < 3 &&
+		session?.ArchiveStatus?.Status !== "Complete"
+	);
+
+	const isSessionTerminated = Boolean(
+		!isQualyEarlyPart &&
+		((sessionStatus === "Ends" ||
+			sessionStatus === "Finalised" ||
+			(sessionStatus === "Finished" && (!isQualy || sessionPart >= 3)) ||
+			(session as any)?.SessionStatus === "Finalised" ||
+			(session as any)?.SessionStatus === "Ends" ||
+			session?.ArchiveStatus?.Status === "Complete") &&
+		session?.ArchiveStatus?.Status !== "Generating")
+	);
 
 	const isRaceOrSprint = session?.Name === "Race" || session?.Name === "Sprint";
 	const hasValidLapCount = Boolean(
@@ -78,8 +89,8 @@ export default function TrackInfo() {
 			(session && isSessionStarted))
 	);
 
-	// Si la carrera o sesión terminó, mostramos el badge oficial de finalizada
-	if (isRaceFinished || isSessionTerminated) {
+	// Si la carrera o sesión terminó de verdad (no en pausa entre tandas de Qualy)
+	if ((isRaceFinished || isSessionTerminated) && !isQualyEarlyPart) {
 		return (
 			<div className="flex flex-row items-center gap-3 md:justify-self-end font-mono">
 				{hasValidLapCount && (
@@ -100,8 +111,6 @@ export default function TrackInfo() {
 		return null;
 	}
 
-	const isQualy = session?.Name?.toLowerCase().includes("qual") || Boolean(timingData?.SessionPart);
-	const sessionPart = timingData?.SessionPart || 1;
 	const allInPit = Boolean(
 		timingData?.Lines &&
 		Object.values(timingData.Lines).length > 0 &&
@@ -158,7 +167,13 @@ export default function TrackInfo() {
 		elapsedSinceChequered <= breakDurationMs + 60_000
 	);
 
-	const isQualyBreak = Boolean(isQualy && sessionPart < 3 && allInPit && !isRedFlag && isChequeredActive);
+	const isQualyBreak = Boolean(
+		isQualy &&
+		sessionPart < 3 &&
+		!isRedFlag &&
+		session?.ArchiveStatus?.Status !== "Complete" &&
+		(isChequeredActive || sessionStatus === "Finished" || allInPit)
+	);
 	const nextPartName = sessionPart === 1 ? "Q2" : "Q3";
 
 	let formattedTime: string | undefined;

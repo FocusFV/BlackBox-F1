@@ -52,13 +52,28 @@ export default function SessionInfo() {
 		return () => clearInterval(timer);
 	}, []);
 
-	// Una sesión se considera en vivo ÚNICAMENTE si está formalmente iniciada/corriendo y no ha finalizado
-	const isSessionTerminated =
-		sessionStatus === "Ends" ||
-		sessionStatus === "Finalised" ||
-		sessionStatus === "Finished" ||
-		(session as any)?.SessionStatus === "Finalised" ||
-		(session as any)?.SessionStatus === "Ends";
+	const isRaceOrSprint = session?.Name === "Race" || session?.Name === "Sprint";
+	const isQualy = session?.Name?.toLowerCase().includes("qual") || Boolean(timingData?.SessionPart);
+	const sessionPart = timingData?.SessionPart || 1;
+
+	// En Clasificación (Qualy), 'Finished' solo significa que terminó Q1 o Q2.
+	// La sesión solo termina de verdad si es Q3 o si F1 marca ArchiveStatus como 'Complete'.
+	const isQualyEarlyPart = Boolean(
+		isQualy &&
+		sessionPart < 3 &&
+		session?.ArchiveStatus?.Status !== "Complete"
+	);
+
+	const isSessionTerminated = Boolean(
+		!isQualyEarlyPart &&
+		((sessionStatus === "Ends" ||
+			sessionStatus === "Finalised" ||
+			(sessionStatus === "Finished" && (!isQualy || sessionPart >= 3)) ||
+			(session as any)?.SessionStatus === "Finalised" ||
+			(session as any)?.SessionStatus === "Ends" ||
+			session?.ArchiveStatus?.Status === "Complete") &&
+		session?.ArchiveStatus?.Status !== "Generating")
+	);
 
 	// Detectar ventana de 15 minutos post-sesión
 	const [sessionEndTime, setSessionEndTime] = useState<number | null>(null);
@@ -223,7 +238,7 @@ export default function SessionInfo() {
 	}, [isOfflineOrFinished]);
 
 	// Render post-sesión (15 minutos tras finalizar para revisar resultados con calma)
-	if (isPostSession) {
+	if (isPostSession && !isQualyEarlyPart) {
 		return (
 			<div className="flex items-center gap-3 font-mono">
 				<Flag countryCode={session?.Meeting?.Country?.Code} />
@@ -271,9 +286,6 @@ export default function SessionInfo() {
 	}
 
 	// Render en vivo
-	const isRaceOrSprint = session?.Name === "Race" || session?.Name === "Sprint";
-	const isQualy = session?.Name?.toLowerCase().includes("qual") || Boolean(timingData?.SessionPart);
-	const sessionPart = timingData?.SessionPart || 1;
 	const allInPit = Boolean(
 		timingData?.Lines &&
 		Object.values(timingData.Lines).length > 0 &&
@@ -330,7 +342,13 @@ export default function SessionInfo() {
 		elapsedSinceChequered <= breakDurationMs + 60_000
 	);
 
-	const isQualyBreak = Boolean(isQualy && sessionPart < 3 && allInPit && !isRedFlag && isChequeredActive);
+	const isQualyBreak = Boolean(
+		isQualy &&
+		sessionPart < 3 &&
+		!isRedFlag &&
+		session?.ArchiveStatus?.Status !== "Complete" &&
+		(isChequeredActive || sessionStatus === "Finished" || allInPit)
+	);
 	const nextPartName = sessionPart === 1 ? "Q2" : "Q3";
 
 	let timeRemaining: string | undefined;
