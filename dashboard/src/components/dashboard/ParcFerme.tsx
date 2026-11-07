@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
 import Flag from "@/components/Flag";
 import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
@@ -20,6 +20,10 @@ interface DriverResult {
 	gapTime: string;
 	isDNF: boolean;
 	dnfReason?: string;
+	gridPos?: number;
+	qualyPos?: number;
+	delta?: number;
+	penaltyNote?: string | null;
 }
 
 type SessionTab = "RACE" | "QUALY" | "SPRINT" | "FP3" | "FP2" | "FP1" | "SQ";
@@ -162,6 +166,71 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 	const [raceDate, setRaceDate] = useState<string>(() => (liveSession?.StartDate ? liveSession.StartDate.split("T")[0] : ""));
 	const [loading, setLoading] = useState(true);
 	const [hasSprint, setHasSprint] = useState(false);
+	const [qualyViewMode, setQualyViewMode] = useState<"times" | "grid">("times");
+	const [startingGrid, setStartingGrid] = useState<
+		{ position: number; driver_number: string; penalty?: string | null }[] | null
+	>(null);
+	const [gridLoading, setGridLoading] = useState(false);
+
+	// 🚦 Consulta de grilla oficial de largada para clasificación
+	useEffect(() => {
+		let isMounted = true;
+		if (activeTab === "QUALY" || activeTab === "SQ") {
+			setGridLoading(true);
+			fetch("/api/starting-grid")
+				.then((r) => r.json())
+				.then((data) => {
+					if (!isMounted) return;
+					if (data?.available && Array.isArray(data?.grid)) {
+						setStartingGrid(data.grid);
+					} else {
+						setStartingGrid(null);
+					}
+				})
+				.catch((err) => {
+					console.warn("[ParcFerme] Error fetching starting grid:", err);
+				})
+				.finally(() => {
+					if (isMounted) setGridLoading(false);
+				});
+		}
+		return () => {
+			isMounted = false;
+		};
+	}, [activeTab]);
+
+	useEffect(() => {
+		setQualyViewMode("times");
+	}, [activeTab]);
+
+	// 🔄 Lista de resultados procesada según el modo seleccionado (Tiempos o Grilla de Salida)
+	const displayResults = useMemo(() => {
+		if (activeTab === "QUALY" && qualyViewMode === "grid") {
+			if (!startingGrid || startingGrid.length === 0) {
+				return [];
+			}
+			return startingGrid
+				.map((gridItem) => {
+					const match = results.find(
+						(r) => String(r.number) === String(gridItem.driver_number)
+					);
+					if (!match) return null;
+					const qualyPos = parseInt(match.pos, 10);
+					const gridPos = gridItem.position;
+					const delta = isNaN(qualyPos) ? 0 : qualyPos - gridPos;
+					return {
+						...match,
+						pos: String(gridPos),
+						gridPos,
+						qualyPos,
+						delta,
+						penaltyNote: gridItem.penalty,
+					};
+				})
+				.filter(Boolean) as DriverResult[];
+		}
+		return results;
+	}, [activeTab, qualyViewMode, startingGrid, results]);
 
 	// 🧠 Detección inteligente de GP y sesión según calendario y día de la semana
 	useEffect(() => {
@@ -674,18 +743,54 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 							})}
 						</div>
 
-						<div className="flex items-center justify-between px-1">
-							<span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
-								{activeTab === "RACE"
-									? "Clasificación Final Oficial"
-									: activeTab === "QUALY"
-									? "Tiempos Oficiales FIA"
-									: activeTab.startsWith("FP")
-									? "Mejores Vueltas en Pista"
-									: "Puntos Oficiales Sprint"}
-							</span>
+						<div className="flex flex-wrap items-center justify-between gap-2 px-1">
+							{activeTab === "QUALY" || activeTab === "SQ" ? (
+								<div className="flex items-center gap-1.5 bg-zinc-900/90 p-1 rounded-xl border border-zinc-800">
+									<button
+										type="button"
+										onClick={() => {
+											setQualyViewMode("times");
+											triggerHaptic("light");
+										}}
+										className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold transition-all duration-200 select-none cursor-pointer ${
+											qualyViewMode === "times"
+												? "bg-amber-400 text-black shadow-md font-black"
+												: "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
+										}`}
+									>
+										⏱️ Tiempos Clasificación
+									</button>
+									<button
+										type="button"
+										onClick={() => {
+											setQualyViewMode("grid");
+											triggerHaptic("light");
+										}}
+										className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold transition-all duration-200 select-none cursor-pointer flex items-center gap-1.5 ${
+											qualyViewMode === "grid"
+												? "bg-amber-400 text-black shadow-md font-black"
+												: "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
+										}`}
+									>
+										<span>🚦 Grilla de Salida</span>
+										{startingGrid && startingGrid.length > 0 && (
+											<span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+										)}
+									</button>
+								</div>
+							) : (
+								<span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
+									{activeTab === "RACE"
+										? "Clasificación Final Oficial"
+										: activeTab.startsWith("FP")
+										? "Mejores Vueltas en Pista"
+										: "Puntos Oficiales Sprint"}
+								</span>
+							)}
 							<span className="text-[10px] font-mono text-amber-400/80 font-bold uppercase tracking-wider hidden sm:inline-block">
-								Blackbox Timing Console
+								{activeTab === "QUALY" && qualyViewMode === "grid"
+									? "Parrilla Oficial de Salida FIA"
+									: "Blackbox Timing Console"}
 							</span>
 						</div>
 					</div>
@@ -695,6 +800,22 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 							<span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
 							Cargando tiempos oficiales...
 						</div>
+					) : activeTab === "QUALY" && qualyViewMode === "grid" && displayResults.length === 0 ? (
+						<div className="h-48 flex flex-col items-center justify-center gap-2 text-zinc-400 font-mono text-xs text-center p-6 bg-zinc-950/40 rounded-xl border border-zinc-900/80">
+							<span className="text-amber-400 font-bold text-xs uppercase tracking-wider">
+								🚦 Grilla de Salida en Homologación FIA
+							</span>
+							<p className="max-w-md text-zinc-400 text-[11px] leading-relaxed">
+								Los comisarios de la FIA están confirmando las penalizaciones técnicas y conformando la grilla oficial de largada para el Gran Premio. Se actualizará automáticamente en cuanto se publique el documento oficial.
+							</p>
+							<button
+								type="button"
+								onClick={() => setQualyViewMode("times")}
+								className="mt-2 text-[10px] text-amber-400 underline uppercase tracking-wider cursor-pointer hover:text-amber-300"
+							>
+								Ver tiempos de clasificación
+							</button>
+						</div>
 					) : results.length === 0 ? (
 						<div className="h-48 flex flex-col items-center justify-center gap-2 text-zinc-400 font-mono text-xs text-center p-6 bg-zinc-950/40 rounded-xl border border-zinc-900/80">
 							<span className="text-amber-400 font-bold text-xs uppercase tracking-wider">⏱️ Tiempos en Homologación FIA</span>
@@ -703,9 +824,9 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 							</p>
 						</div>
 					) : (
-						/* LISTA UNIFICADA Y COMPACTA (DE P1 A P20 SIN TARJETAS GIGANTES) */
+						/* LISTA UNIFICADA Y COMPACTA (DE P1 A P22 SIN TARJETAS GIGANTES) */
 						<div className="flex flex-col gap-1.5 max-h-[500px] overflow-y-auto pr-1 no-scrollbar">
-							{results.map((row, index) => {
+							{displayResults.map((row, index) => {
 								const driverFlag = driverNationalityMap[row.code];
 								const teamColor = driverTeamColorMap[row.code]?.bg || "#3f3f46";
 								const posNum = parseInt(row.pos, 10);
@@ -714,10 +835,10 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 								const isP2 = posNum === 2;
 								const isP3 = posNum === 3;
 
-								// Líneas de corte FIA limpias en Qualy / Shootout (22 autos en 2026: P1-P10 Q3, P11-P16 Q2, P17-P22 Q1)
+								// Líneas de corte FIA limpias en Qualy / Shootout (solo en modo tiempos)
 								const isQualyTab = activeTab === "QUALY" || activeTab === "SQ";
-								const isCutoffQ2 = isQualyTab && posNum === 11;
-								const isCutoffQ1 = isQualyTab && posNum === 17;
+								const isCutoffQ2 = qualyViewMode === "times" && isQualyTab && posNum === 11;
+								const isCutoffQ1 = qualyViewMode === "times" && isQualyTab && posNum === 17;
 
 								// Estilo sutil de podio integrado en la misma altura
 								const rowBg = isP1
@@ -803,8 +924,29 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 												</div>
 											</div>
 
-											{/* Datos derecha (Tiempos y Puntos) */}
+											{/* Datos derecha (Tiempos, Penalizaciones y Puntos) */}
 											<div className="flex items-center gap-2 shrink-0 font-mono">
+												{row.penaltyNote && (
+													<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-amber-300 shrink-0">
+														{row.penaltyNote}
+													</span>
+												)}
+												{qualyViewMode === "grid" && typeof row.delta === "number" && row.delta !== 0 && (
+													<span
+														className={`text-[10px] font-bold px-1.5 py-0.5 rounded border shrink-0 ${
+															row.delta > 0
+																? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
+																: "bg-red-500/15 border-red-500/40 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
+														}`}
+													>
+														{row.delta > 0 ? `▲ +${row.delta}` : `▼ ${row.delta}`}
+													</span>
+												)}
+												{qualyViewMode === "grid" && row.qualyPos && (
+													<span className="text-[10px] text-zinc-500 font-bold hidden sm:inline-block">
+														(Q: P{row.qualyPos})
+													</span>
+												)}
 												<p
 													className={`text-xs font-bold tracking-tight uppercase ${
 														row.isDNF
