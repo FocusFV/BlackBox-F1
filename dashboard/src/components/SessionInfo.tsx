@@ -66,13 +66,12 @@ export default function SessionInfo() {
 
 	const isSessionTerminated = Boolean(
 		!isQualyEarlyPart &&
-		((sessionStatus === "Ends" ||
+		(sessionStatus === "Ends" ||
 			sessionStatus === "Finalised" ||
 			(sessionStatus === "Finished" && (!isQualy || sessionPart >= 3)) ||
 			(session as any)?.SessionStatus === "Finalised" ||
 			(session as any)?.SessionStatus === "Ends" ||
-			session?.ArchiveStatus?.Status === "Complete") &&
-		session?.ArchiveStatus?.Status !== "Generating")
+			session?.ArchiveStatus?.Status === "Complete")
 	);
 
 	// Detectar ventana de 15 minutos post-sesión

@@ -152,14 +152,13 @@ export default function Map({ filter }: { filter?: string[] }) {
 
 	const isSessionTerminated = Boolean(
 		!isQualyEarlyPart &&
-		((sessionStatus === "Ends" ||
+		(sessionStatus === "Ends" ||
 			sessionStatus === "Finalised" ||
 			(sessionStatus === "Finished" && (!isQualy || sessionPart >= 3)) ||
 			(sessionInfo as any)?.SessionStatus === "Finalised" ||
 			(sessionInfo as any)?.SessionStatus === "Ends" ||
 			sessionInfo?.ArchiveStatus?.Status === "Complete" ||
-			(isRaceOrSprint && !!lapCount && lapCount.CurrentLap > 0 && lapCount.CurrentLap >= lapCount.TotalLaps)) &&
-		sessionInfo?.ArchiveStatus?.Status !== "Generating")
+			(isRaceOrSprint && !!lapCount && lapCount.CurrentLap > 0 && lapCount.CurrentLap >= lapCount.TotalLaps))
 	);
 
 	const hasCarsRunning = Boolean(
@@ -167,10 +166,8 @@ export default function Map({ filter }: { filter?: string[] }) {
 		Object.values(rawTiming.Lines).some((l: any) => !l.InPit && !(isQualy && l.KnockedOut) && !l.Retired && !l.Stopped)
 	);
 
-	// 🛡️ Si la pista está en verde ("1"), o hay monoplazas rodando, la sesión NUNCA está terminada.
-	// Esto previene que banderas a cuadros viejas de la Q1 o Q2 bloqueen la Q2 o Q3.
-	const isTrackActive = trackStatus?.Status === "1" || hasCarsRunning || isQualyEarlyPart;
-	const isEnded = !isTrackActive && isSessionTerminated;
+	const isTrackActive = !isSessionTerminated && (trackStatus?.Status === "1" || hasCarsRunning);
+	const isEnded = isSessionTerminated;
 
 	// Detectar si todos los monoplazas están en boxes o en pausa entre fases de Qualy
 	const allInPit = Boolean(

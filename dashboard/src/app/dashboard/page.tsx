@@ -118,15 +118,23 @@ export default function Page() {
 	);
 	const hasLiveTelemetry = hasTimingData || hasCarData || hasPositionData;
 
+	const isQualy = session?.Name?.toLowerCase().includes("qual") || Boolean(dataStore.state?.TimingData?.SessionPart);
+	const sessionPart = dataStore.state?.TimingData?.SessionPart || 1;
+	const isQualyEarlyPart = Boolean(
+		isQualy &&
+		sessionPart < 3 &&
+		session?.ArchiveStatus?.Status !== "Complete"
+	);
+
 	const isSessionFinished = Boolean(
+		!isQualyEarlyPart &&
 		(session?.ArchiveStatus?.Status === "Complete" ||
 			sessionStatus === "Ends" ||
 			sessionStatus === "Finalised" ||
-			sessionStatus === "Finished" ||
+			(sessionStatus === "Finished" && (!isQualy || sessionPart >= 3)) ||
 			(session as any)?.SessionStatus === "Finalised" ||
 			(session as any)?.SessionStatus === "Ends" ||
-			(session?.Name === "Race" && !!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps && lapCount.TotalLaps > 0)) &&
-		session?.ArchiveStatus?.Status !== "Generating"
+			(session?.Name === "Race" && !!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps && lapCount.TotalLaps > 0))
 	);
 
 	// Guardamos el timestamp de fin de sesión para mantener la vista de resultados por 15 minutos
