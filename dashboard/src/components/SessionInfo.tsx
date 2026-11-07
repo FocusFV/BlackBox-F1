@@ -297,9 +297,20 @@ export default function SessionInfo() {
 	const lastGreenMs = parseUtcMs(lastGreenMsg?.Utc);
 	const lastGreen = lastGreenMsg;
 
-	const isRedFlag = trackStatus === "5" || Boolean(
-		lastRedMs && (!lastGreenMs || lastRedMs >= lastGreenMs)
+	const hasCarsOnTrack = Boolean(
+		timingData?.Lines &&
+		Object.values(timingData.Lines).some((l: any) => !l.InPit && !l.Stopped)
 	);
+
+	const isRedFlag =
+		trackStatus === "5" ||
+		(!hasCarsOnTrack &&
+			allInPit &&
+			trackStatus !== "2" &&
+			trackStatus !== "4" &&
+			trackStatus !== "6" &&
+			trackStatus !== "7" &&
+			Boolean(lastRedMs && (!lastGreenMs || lastRedMs > lastGreenMs)));
 
 	const chequeredMessages = raceControlMessages?.filter(
 		(m) => m.Flag === "CHEQUERED" || m.Message?.toUpperCase().includes("CHEQUERED")

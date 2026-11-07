@@ -124,9 +124,20 @@ export default function TrackInfo() {
 	).slice(-1)[0];
 	const lastGreenMs = parseUtcMs(lastGreenMsg?.Utc);
 
-	const isRedFlag = track?.Status === "5" || Boolean(
-		lastRedMs && (!lastGreenMs || lastRedMs >= lastGreenMs)
+	const hasCarsOnTrack = Boolean(
+		timingData?.Lines &&
+		Object.values(timingData.Lines).some((l: any) => !l.InPit && !l.Stopped)
 	);
+
+	const isRedFlag =
+		track?.Status === "5" ||
+		(!hasCarsOnTrack &&
+			allInPit &&
+			track?.Status !== "2" &&
+			track?.Status !== "4" &&
+			track?.Status !== "6" &&
+			track?.Status !== "7" &&
+			Boolean(lastRedMs && (!lastGreenMs || lastRedMs > lastGreenMs)));
 
 	const chequeredMessages = raceControlMessages?.filter(
 		(m) => m.Flag === "CHEQUERED" || m.Message?.toUpperCase().includes("CHEQUERED")

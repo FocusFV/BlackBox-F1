@@ -187,9 +187,20 @@ export default function Map({ filter }: { filter?: string[] }) {
 	).slice(-1)[0];
 	const lastGreenMs = parseUtcMs(lastGreenMsg?.Utc);
 
-	const isRedFlag = trackStatus?.Status === "5" || Boolean(
-		lastRedMs && (!lastGreenMs || lastRedMs >= lastGreenMs)
+	const hasCarsOnTrack = Boolean(
+		rawTiming?.Lines &&
+		Object.values(rawTiming.Lines).some((l: any) => !l.InPit && !l.Stopped)
 	);
+
+	const isRedFlag =
+		trackStatus?.Status === "5" ||
+		(!hasCarsOnTrack &&
+			allInPit &&
+			trackStatus?.Status !== "2" &&
+			trackStatus?.Status !== "4" &&
+			trackStatus?.Status !== "6" &&
+			trackStatus?.Status !== "7" &&
+			Boolean(lastRedMs && (!lastGreenMs || lastRedMs > lastGreenMs)));
 
 	const chequeredMessages = raceControlMessages?.filter(
 		(m) => m.Flag === "CHEQUERED" || m.Message?.toUpperCase().includes("CHEQUERED")
