@@ -137,10 +137,11 @@ pub async fn ingest_f1(
         "invocationId": "0",
         "target": "Subscribe",
         "arguments": [[
-            "Heartbeat", "CarData.z", "Position.z", "TimingAppData",
-            "TimingData", "WeatherData", "TrackStatus", "DriverList",
-            "RaceControlMessages", "SessionInfo", "SessionData", "LapCount",
-            "TeamRadio", "TimingStats", "TopThree"
+            "Heartbeat", "CarData.z", "Position.z", "ExtrapolatedClock",
+            "TimingAppData", "TimingData", "WeatherData", "TrackStatus",
+            "SessionStatus", "DriverList", "RaceControlMessages",
+            "SessionInfo", "SessionData", "LapCount", "TeamRadio",
+            "TimingStats", "TopThree", "ChampionshipPrediction"
         ]]
     });
     let subscribe_payload = format!("{}\x1e", subscribe_msg);

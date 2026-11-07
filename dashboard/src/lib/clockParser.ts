@@ -22,14 +22,13 @@ export function parseFomClockRemaining(remainingStr?: string, isRace: boolean = 
 
 	if (parts.length === 3) {
 		const [p0, p1, p2] = parts;
-		// En F1, las tandas de Qualy (Q1: 18m, Q2: 15m, Q3: 12m) y Prácticas (60m) NUNCA duran más de 60 minutos.
-		// FOM envía el reloj en Qualy con centésimas: "MM:SS:cc" (ej: "05:29:14").
-		// Si no es carrera o si el primer número es > 3, p0 son minutos, p1 segundos y p2 centésimas.
-		if (!isRace || p0 > 3) {
-			return (p0 * 60 + p1) * 1000 + Math.round(p2 * 10);
-		} else {
-			// Formato HH:MM:SS en Carrera (ej: "01:15:30")
+		// ⏱️ Formato oficial estándar FOM: "HH:MM:SS" (ej: "00:15:37" en Q1, "00:18:00", "01:00:00" en FP1, "02:00:00" en Carrera)
+		// Si p0 <= 3, p0 son HORAS (en F1 ninguna sesión reglamentaria dura más de 3 horas), p1 son MINUTOS y p2 son SEGUNDOS.
+		// Solo si p0 > 3 (ej: "15:37:20") p0 son minutos, p1 segundos y p2 centésimas.
+		if (p0 <= 3) {
 			return (p0 * 3600 + p1 * 60 + p2) * 1000;
+		} else {
+			return (p0 * 60 + p1) * 1000 + Math.round(p2 * 10);
 		}
 	} else if (parts.length === 2) {
 		// Formato MM:SS (ej: "05:48" o "18:00")
