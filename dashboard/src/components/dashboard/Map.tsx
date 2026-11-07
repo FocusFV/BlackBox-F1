@@ -237,11 +237,11 @@ export default function Map({ filter }: { filter?: string[] }) {
 	}
 
 	const hasLivePositions = useMemo(() => {
-		if (positions && Object.values(positions).some((p) => p && typeof p.X === "number" && (p.X !== 0 || p.Y !== 0))) {
-			return true;
-		}
-		return hasCarsRunning;
-	}, [positions, hasCarsRunning]);
+		if (!positions) return false;
+		return Object.values(positions).some(
+			(p) => p && typeof p.X === "number" && (p.X !== 0 || p.Y !== 0)
+		);
+	}, [positions]);
 
 	const [[minX, minY, widthX, widthY], setBounds] = useState<(null | number)[]>([null, null, null, null]);
 	const [[centerX, centerY], setCenter] = useState<(null | number)[]>([null, null]);
@@ -394,75 +394,42 @@ export default function Map({ filter }: { filter?: string[] }) {
 							rawPos.Status !== "InPit"
 						);
 
-						let carX: number;
-						let carY: number;
-						let carAngle: number = 0;
+						if (!hasCarPos || !rawPos) {
+							// 🛑 CERO DATOS FALSOS: Si FOM no transmite coordenadas GPS satelitales en vivo en este frame,
+							// NUNCA inventamos una posición simulada ni ponemos monoplazas en lugares falsos.
+							return null;
+						}
 
-						if (hasCarPos && rawPos) {
-							// 🏎️ TELEMETRÍA OFICIAL F1: Coordenadas GPS satelitales exactas
-							const rotated = rotate(rawPos.X, rawPos.Y, rotation, centerX, centerY);
-							carX = rotated.x;
-							carY = rotated.y;
+						// 🏎️ TELEMETRÍA OFICIAL F1: Coordenadas GPS exactas en pista (60 FPS fluidos)
+						const rotated = rotate(rawPos.X, rawPos.Y, rotation, centerX, centerY);
+						const carX = rotated.x;
+						const carY = rotated.y;
+						let carAngle: number;
 
-							const prev = prevCarsRef.current[driver.RacingNumber];
-							if (prev) {
-								const dx = carX - prev.x;
-								const dy = carY - prev.y;
-								const dist = Math.hypot(dx, dy);
-								if (dist > 3) {
-									const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI);
-									carAngle = smoothAngle(prev.angle, targetAngle);
-								} else {
-									carAngle = prev.angle;
-								}
-							} else if (points && points.length > 0) {
-								const closestIdx = findMinDistance({ x: carX, y: carY }, points);
-								if (closestIdx !== -1) {
-									const nextIdx = (closestIdx + 3) % points.length;
-									carAngle = Math.atan2(
-										points[nextIdx].y - points[closestIdx].y,
-										points[nextIdx].x - points[closestIdx].x
-									) * (180 / Math.PI);
-								}
+						const prev = prevCarsRef.current[driver.RacingNumber];
+						if (prev) {
+							const dx = carX - prev.x;
+							const dy = carY - prev.y;
+							const dist = Math.hypot(dx, dy);
+							if (dist > 3) {
+								const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+								carAngle = smoothAngle(prev.angle, targetAngle);
+							} else {
+								carAngle = prev.angle;
 							}
 						} else if (points && points.length > 0) {
-							// 🏎️ UBICACIÓN EN PISTA EN TIEMPO REAL POR SECTOR Y MINISECTORES:
-							// Ubica al monoplaza sobre el asfalto según el sector oficial en el que está rodando
-							let sIdx = 0;
-							const s1 = timingDriver.Sectors?.[0];
-							const s2 = timingDriver.Sectors?.[1];
-
-							if (s1?.Value && s2?.Value) {
-								sIdx = 2; // Sector 3
-							} else if (s1?.Value) {
-								sIdx = 1; // Sector 2
+							const closestIdx = findMinDistance({ x: carX, y: carY }, points);
+							if (closestIdx !== -1) {
+								const nextIdx = (closestIdx + 3) % points.length;
+								carAngle = Math.atan2(
+									points[nextIdx].y - points[closestIdx].y,
+									points[nextIdx].x - points[closestIdx].x
+								) * (180 / Math.PI);
 							} else {
-								sIdx = 0; // Sector 1
+								carAngle = 0;
 							}
-
-							const activeSec = timingDriver.Sectors?.[sIdx];
-							const segs = activeSec?.Segments || [];
-							const completed = segs.filter((s: any) => s && s.Status > 0).length;
-							const segProg = segs.length > 0 ? completed / segs.length : 0.45;
-
-							// Posición a lo largo del circuito (0.0 a 1.0)
-							const baseProg = (sIdx + segProg) / 3;
-							// Dispersión sutil por número para que varios coches en el mismo sector no se solapen
-							const numSpread = ((parseInt(driver.RacingNumber, 10) * 19) % 35) / 1000 - 0.017;
-							const finalProg = (baseProg + numSpread + 1) % 1;
-
-							const ptIdx = Math.floor(finalProg * points.length);
-							const targetPt = points[ptIdx % points.length];
-							carX = targetPt.x;
-							carY = targetPt.y;
-
-							const nextIdx = (ptIdx + 4) % points.length;
-							carAngle = Math.atan2(
-								points[nextIdx].y - targetPt.y,
-								points[nextIdx].x - targetPt.x
-							) * (180 / Math.PI);
 						} else {
-							return null;
+							carAngle = 0;
 						}
 
 						prevCarsRef.current[driver.RacingNumber] = { x: carX, y: carY, angle: carAngle };
