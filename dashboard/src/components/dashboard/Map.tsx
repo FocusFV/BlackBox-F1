@@ -508,7 +508,8 @@ export default function Map({ filter }: { filter?: string[] }) {
 const CarObject = ({ x, y, name, colors, angle, favorite, pit, hidden }: any) => {
 	return (
 		<g 
-			className={clsx("transition-transform duration-300 ease-linear", { "opacity-40": pit }, { "opacity-0!": hidden })} 
+			className={clsx("transition-transform duration-300 ease-linear", { "opacity-40": pit }, { "!opacity-0": hidden })} 
+			transform={`translate(${x}, ${y})`}
 			style={{ transform: `translateX(${x}px) translateY(${y}px)` }}
 		>
 			{/* 🏎️ MONOPLAZA 2026 PREMIUM (Silueta con Curvas Orgánicas Redondeadas) */}

@@ -23,7 +23,14 @@ export const inflate = <T>(data: any): T => {
 			bytes[i] = binaryString.charCodeAt(i);
 		}
 
-		const inflated = pako.inflate(bytes, { to: "string" });
+		let inflated: string;
+		try {
+			// 🏎️ F1 SignalR Core transmite datos comprimidos en RAW DEFLATE (RFC 1951, sin encabezado zlib)
+			inflated = pako.inflateRaw(bytes, { to: "string" });
+		} catch {
+			// Fallback a zlib estándar (RFC 1950) por compatibilidad
+			inflated = pako.inflate(bytes, { to: "string" });
+		}
 		return JSON.parse(inflated) as T;
 	} catch (err) {
 		console.warn("Fallo al descomprimir payload con inflate, intentando parseo raw:", err);
@@ -87,7 +94,12 @@ function getWorker(): Worker | null {
 				if (success) {
 					if (bytes) {
 						try {
-							const inflated = pako.inflate(new Uint8Array(bytes), { to: "string" });
+							let inflated: string;
+							try {
+								inflated = pako.inflateRaw(new Uint8Array(bytes), { to: "string" });
+							} catch {
+								inflated = pako.inflate(new Uint8Array(bytes), { to: "string" });
+							}
 							handler.resolve(JSON.parse(inflated));
 						} catch {
 							handler.resolve(result);
