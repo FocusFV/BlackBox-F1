@@ -96,9 +96,8 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 				isCompact ? "p-1" : "p-1.5",
 				{
 					"opacity-40 grayscale": isEliminated || timingDriver.Retired || timingDriver.Stopped,
-					"bg-sky-950/70 border-sky-400 shadow-[0_0_20px_rgba(14,165,233,0.35)] ring-1 ring-sky-400/50": favoriteDriver,
-					"bg-violet-950/40 border-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.15)]": hasFastest && !favoriteDriver,
-					"bg-red-950/40 border-red-500/50": isQualy && sessionPart != undefined && inDangerZone(position, sessionPart) && !favoriteDriver,
+					"bg-violet-950/40 border-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.15)]": hasFastest,
+					"bg-red-950/40 border-red-500/50": isQualy && sessionPart != undefined && inDangerZone(position, sessionPart),
 				}
 			)}
 		>

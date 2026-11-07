@@ -376,6 +376,9 @@ export default function SessionInfo() {
 			<div className="flex flex-col justify-center">
 				<h1 className="truncate text-xs md:text-sm leading-none font-bold text-white font-mono uppercase tracking-wide">
 					{session?.Meeting?.Name}: {translateSessionName(session?.Name)}
+					{timingData?.SessionPart && session?.Name
+						? ` ${sessionPartPrefix(session.Name)}${timingData.SessionPart}`
+						: (isQualy ? ` Q${sessionPart}` : "")}
 					{isRedFlag ? (
 						<span className="text-red-500 font-black ml-1.5 animate-pulse">
 							• BANDERA ROJA
@@ -384,9 +387,7 @@ export default function SessionInfo() {
 						<span className="text-amber-400 font-black ml-1.5 animate-pulse">
 							• PAUSA Q{sessionPart} ➔ Q{sessionPart + 1}
 						</span>
-					) : (
-						timingData?.SessionPart && session?.Name ? ` ${sessionPartPrefix(session.Name)}${timingData.SessionPart}` : ""
-					)}
+					) : null}
 				</h1>
 
 				{timeRemaining !== undefined ? (

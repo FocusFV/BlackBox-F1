@@ -189,7 +189,7 @@ export const useDataEngine = ({ updateState, updatePosition, updateCarData }: Pr
 
         Object.keys(buffers).forEach((key) => {
             const buffer = buffers[key as keyof typeof buffers];
-            const delayed = buffer.delayed(delayedTimestamp) as State[keyof State];
+            const delayed = (buffer.delayed(delayedTimestamp) ?? buffer.latest()) as State[keyof State];
 
             if (delayed) newStateFrame[key] = delayed;
 

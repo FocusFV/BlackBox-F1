@@ -19,7 +19,6 @@ export default function DriverTag({ position, teamColor, short, className, isFav
 			id="walkthrough-driver-position"
 			className={clsx(
 				"flex w-fit items-center justify-between gap-1 rounded-lg px-1 py-1 font-black transition-all",
-				isFavorite && "ring-2 ring-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.6)]",
 				className
 			)}
 			style={{ backgroundColor: hexColor }}
@@ -28,7 +27,7 @@ export default function DriverTag({ position, teamColor, short, className, isFav
 
 			<div className="flex h-min w-min items-center justify-center gap-1 rounded-md bg-white px-1">
 				{isFavorite && (
-					<span className="text-amber-500 text-[11px] leading-none select-none drop-shadow-sm">⭐</span>
+					<span className="text-amber-500 text-[11px] leading-none select-none">⭐</span>
 				)}
 				<p className="font-mono font-bold" style={{ color: hexColor }}>
 					{short}
