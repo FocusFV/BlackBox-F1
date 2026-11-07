@@ -74,34 +74,27 @@ export default function SessionInfo() {
 			session?.ArchiveStatus?.Status === "Complete")
 	);
 
-	// Detectar ventana de 15 minutos post-sesión
-	const [sessionEndTime, setSessionEndTime] = useState<number | null>(null);
+	const chequeredMessages = raceControlMessages?.filter(
+		(m) => m.Flag === "CHEQUERED" || m.Message?.toUpperCase().includes("CHEQUERED")
+	);
+	const lastChequered = chequeredMessages && chequeredMessages.length > 0
+		? chequeredMessages[chequeredMessages.length - 1]
+		: null;
+	const lastChequeredMs = parseUtcMs(lastChequered?.Utc);
+	const effectiveSessionEndMs = lastChequeredMs || (session?.EndDate ? parseUtcMs(session.EndDate) : null);
 
-	useEffect(() => {
-		if (isSessionTerminated && session?.Name) {
-			const storageKey = `f1_session_end_${session?.Key || session?.Name}`;
-			const stored = typeof window !== "undefined" ? sessionStorage.getItem(storageKey) : null;
-			if (stored) {
-				setSessionEndTime(parseInt(stored, 10));
-			} else {
-				const now = Date.now();
-				if (typeof window !== "undefined") sessionStorage.setItem(storageKey, String(now));
-				setSessionEndTime(now);
-			}
-		} else if (!isSessionTerminated) {
-			setSessionEndTime(null);
-		}
-	}, [isSessionTerminated, session?.Key, session?.Name]);
-
+	// Detectar ventana de 15 minutos post-sesión tras la bandera a cuadros real
 	const isPostSession = Boolean(
 		isSessionTerminated &&
-		sessionEndTime &&
+		effectiveSessionEndMs &&
 		currentTime > 0 &&
-		currentTime - sessionEndTime < 15 * 60 * 1000
+		currentTime - effectiveSessionEndMs < 15 * 60 * 1000 &&
+		currentTime >= effectiveSessionEndMs
 	);
 
-	// Detecta actividad real de telemetría en pista (tiempos de vuelta o sectores activos)
+	// Detecta actividad real de telemetría en pista SOLO si la sesión no ha finalizado
 	const hasActiveTiming = Boolean(
+		!isSessionTerminated &&
 		timingData?.Lines &&
 		Object.values(timingData.Lines).some((line: any) =>
 			Boolean(
@@ -113,14 +106,14 @@ export default function SessionInfo() {
 	);
 
 	const isLive = Boolean(
-		hasActiveTiming ||
-		Boolean(clock?.Remaining) ||
-		(session &&
-			!isSessionTerminated &&
-			(sessionStatus === "Started" ||
-				sessionStatus === "Running" ||
-				sessionStatus === "PitsOpen" ||
-				sessionStatus === "StartedOnTime"))
+		!isSessionTerminated &&
+		(hasActiveTiming ||
+			Boolean(clock?.Remaining) ||
+			(session &&
+				(sessionStatus === "Started" ||
+					sessionStatus === "Running" ||
+					sessionStatus === "PitsOpen" ||
+					sessionStatus === "StartedOnTime")))
 	);
 
 	const isOfflineOrFinished = !isLive;
@@ -191,10 +184,12 @@ export default function SessionInfo() {
 						.filter((s): s is { name: string; dt: Date } => s.dt !== null)
 						.sort((a, b) => a.dt.getTime() - b.dt.getTime());
 
-					// Verificamos si hay alguna sesión oficial en curso (iniciada hace menos de 2 horas)
-					const ongoingSession = validSessions.find(
-						(s) => s.dt.getTime() <= now && now <= s.dt.getTime() + 2 * 3600 * 1000
-					);
+					// Verificamos si hay alguna sesión oficial en curso solo si no estamos con sesión finalizada
+					const ongoingSession = !isSessionTerminated
+						? validSessions.find(
+								(s) => s.dt.getTime() <= now && now <= s.dt.getTime() + 2 * 3600 * 1000
+						  )
+						: undefined;
 
 					if (ongoingSession) {
 						setNextSessionName(ongoingSession.name);
@@ -205,7 +200,11 @@ export default function SessionInfo() {
 							validSessions[validSessions.length - 1];
 
 						if (upcomingSession) {
-							setNextSessionName(upcomingSession.name);
+							const displaySessionName =
+								upcomingSession.name === "Gran Premio"
+									? "Gran Premio (Carrera)"
+									: upcomingSession.name;
+							setNextSessionName(displaySessionName);
 							targetDate = upcomingSession.dt;
 							setCountdown(calcCountdown(targetDate));
 						}
@@ -308,14 +307,7 @@ export default function SessionInfo() {
 	const lastGreenMs = parseUtcMs(lastGreenMsg?.Utc);
 	const lastGreen = lastGreenMsg;
 
-	const chequeredMessages = raceControlMessages?.filter(
-		(m) => m.Flag === "CHEQUERED" || m.Message?.toUpperCase().includes("CHEQUERED")
-	);
-	const lastChequered = chequeredMessages && chequeredMessages.length > 0
-		? chequeredMessages[chequeredMessages.length - 1]
-		: null;
-	const breakStartMs = parseUtcMs(lastChequered?.Utc);
-	const lastChequeredMs = breakStartMs;
+	const breakStartMs = lastChequeredMs;
 
 	const isRedFlag =
 		trackStatus === "5" ||

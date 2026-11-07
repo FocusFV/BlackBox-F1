@@ -68,7 +68,25 @@ export default function TrackInfo() {
 		(hasValidLapCount && !!lapCount && lapCount.CurrentLap >= lapCount.TotalLaps)
 	);
 
+	const chequeredMessages = raceControlMessages?.filter(
+		(m) => m.Flag === "CHEQUERED" || m.Message?.toUpperCase().includes("CHEQUERED")
+	);
+	const lastChequered = chequeredMessages && chequeredMessages.length > 0
+		? chequeredMessages[chequeredMessages.length - 1]
+		: null;
+	const lastChequeredMs = parseUtcMs(lastChequered?.Utc);
+	const effectiveSessionEndMs = lastChequeredMs || (session?.EndDate ? parseUtcMs(session.EndDate) : null);
+
+	const isPostSession = Boolean(
+		isSessionTerminated &&
+		effectiveSessionEndMs &&
+		currentTime > 0 &&
+		currentTime - effectiveSessionEndMs < 15 * 60 * 1000 &&
+		currentTime >= effectiveSessionEndMs
+	);
+
 	const hasActiveTiming = Boolean(
+		!isSessionTerminated &&
 		timingData?.Lines &&
 		Object.values(timingData.Lines).some((line: any) =>
 			Boolean(
@@ -90,16 +108,30 @@ export default function TrackInfo() {
 
 	// Si la carrera o sesión terminó de verdad (no en pausa entre tandas de Qualy)
 	if ((isRaceFinished || isSessionTerminated) && !isQualyEarlyPart) {
+		if (isPostSession) {
+			return (
+				<div className="flex flex-row items-center gap-3 md:justify-self-end font-mono">
+					{hasValidLapCount && (
+						<p className="text-2xl sm:text-3xl font-extrabold whitespace-nowrap font-mono tracking-wider text-zinc-300">
+							{lapCount?.CurrentLap} / {lapCount?.TotalLaps}
+						</p>
+					)}
+					<div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-400 text-sm font-black tracking-wider shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+						<span>🏁</span>
+						<span>FINALIZADA</span>
+					</div>
+				</div>
+			);
+		}
+
 		return (
 			<div className="flex flex-row items-center gap-3 md:justify-self-end font-mono">
-				{hasValidLapCount && (
-					<p className="text-2xl sm:text-3xl font-extrabold whitespace-nowrap font-mono tracking-wider text-zinc-300">
-						{lapCount?.CurrentLap} / {lapCount?.TotalLaps}
-					</p>
-				)}
-				<div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-400 text-sm font-black tracking-wider shadow-[0_0_15px_rgba(245,158,11,0.2)]">
-					<span>🏁</span>
-					<span>FINALIZADA</span>
+				<div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-800 text-zinc-300 text-xs font-mono font-bold tracking-wider">
+					<span className="relative flex h-2 w-2">
+						<span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 animate-ping" />
+						<span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+					</span>
+					<span>PISTA EN ESPERA</span>
 				</div>
 			</div>
 		);
@@ -133,14 +165,7 @@ export default function TrackInfo() {
 	const lastGreenMs = parseUtcMs(lastGreenMsg?.Utc);
 	const lastGreen = lastGreenMsg;
 
-	const chequeredMessages = raceControlMessages?.filter(
-		(m) => m.Flag === "CHEQUERED" || m.Message?.toUpperCase().includes("CHEQUERED")
-	);
-	const lastChequered = chequeredMessages && chequeredMessages.length > 0
-		? chequeredMessages[chequeredMessages.length - 1]
-		: null;
-	const breakStartMs = parseUtcMs(lastChequered?.Utc);
-	const lastChequeredMs = breakStartMs;
+	const breakStartMs = lastChequeredMs;
 
 	const isRedFlag =
 		track?.Status === "5" ||
