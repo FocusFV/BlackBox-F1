@@ -127,8 +127,34 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 	const initialCountry = (currentGpName ? getCountryCodeForGp(currentGpName, currentCountryName) : null) || "bra";
 	const initialGpName = currentGpName ? translateGpName(currentGpName) : "Gran Premio de São Paulo";
 
+	const getInitialTab = (): SessionTab => {
+		const sName = (liveSession?.Name || "").toLowerCase();
+		const sType = (liveSession?.Type || "").toLowerCase();
+		if (
+			sName.includes("qualifying") ||
+			sType.includes("qualifying") ||
+			sName.includes("shootout") ||
+			sType.includes("shootout")
+		) {
+			return "QUALY";
+		}
+		if (sName.includes("sprint") || sType.includes("sprint")) {
+			return "SPRINT";
+		}
+		if (sName.includes("practice 3") || sType.includes("practice 3")) return "FP3";
+		if (sName.includes("practice 2") || sType.includes("practice 2")) return "FP2";
+		if (sName.includes("practice 1") || sType.includes("practice 1")) return "FP1";
+		if (sName === "race" || sType === "race") return "RACE";
+
+		// Inferencia por día de la semana mientras hidrata el store
+		const day = new Date().getDay(); // 6 = Sábado, 0 = Domingo, 5 = Viernes
+		if (day === 6) return "QUALY";
+		if (day === 5) return "FP1";
+		return "RACE";
+	};
+
 	const [smartContext, setSmartContext] = useState<SmartGpContext | null>(null);
-	const [activeTab, setActiveTab] = useState<SessionTab>("RACE");
+	const [activeTab, setActiveTab] = useState<SessionTab>(getInitialTab);
 	const [tabManuallySelected, setTabManuallySelected] = useState(false);
 	const [results, setResults] = useState<DriverResult[]>([]);
 	const [gpName, setGpName] = useState(initialGpName);
@@ -162,8 +188,34 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 		async function fetchSessionData() {
 			setLoading(true);
 			try {
-				const sessionName = (liveSession?.Name || "").toLowerCase();
-				const sessionType = (liveSession?.Type || "").toLowerCase();
+				let currentTiming = liveTiming;
+				let currentSession = liveSession;
+				let currentStats = liveStats;
+				let currentDrivers = liveDrivers;
+				let currentLap = liveLapCount;
+
+				// 🚀 Resiliencia instantánea: Si el store aún no terminó de hidratar desde el socket, consultamos /api/current directamente
+				if (!currentTiming?.Lines || Object.keys(currentTiming.Lines).length === 0) {
+					try {
+						const liveBase = process.env.NEXT_PUBLIC_LIVE_URL || "https://blackbox-f1-realtime-docker.onrender.com";
+						const liveRes = await fetch(`${liveBase}/api/current`, { cache: "no-store" });
+						if (liveRes.ok) {
+							const liveData = await liveRes.json();
+							if (liveData?.TimingData?.Lines && Object.keys(liveData.TimingData.Lines).length > 0) {
+								currentTiming = liveData.TimingData;
+								currentSession = liveData.SessionInfo || currentSession;
+								currentStats = liveData.TimingStats || currentStats;
+								currentDrivers = liveData.DriverList || currentDrivers;
+								currentLap = liveData.LapCount || currentLap;
+							}
+						}
+					} catch (err) {
+						console.warn("[ParcFerme] Error obteniendo /api/current de respaldo:", err);
+					}
+				}
+
+				const sessionName = (currentSession?.Name || "").toLowerCase();
+				const sessionType = (currentSession?.Type || "").toLowerCase();
 				const isQualySession =
 					sessionName.includes("qualifying") ||
 					sessionType.includes("qualifying") ||
@@ -178,19 +230,22 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 					!sessionName.includes("qual");
 
 				const hasLiveLines = Boolean(
-					liveTiming?.Lines && Object.keys(liveTiming.Lines).length > 0
+					currentTiming?.Lines && Object.keys(currentTiming.Lines).length > 0
 				);
+
+				const effectiveGpName = currentSession?.Meeting?.Name || currentGpName;
+				const effectiveCountryName = currentSession?.Meeting?.Country?.Name || currentCountryName;
 
 				// 1. PRIORIDAD MÁXIMA: Telemetría oficial en vivo o de sesión recién concluida
 				if (hasLiveLines) {
 					// 1.A CLASIFICACIÓN / SHOOTOUT EN VIVO O RECIÉN FINALIZADA
 					if ((activeTab === "QUALY" || activeTab === "SQ") && isQualySession) {
-						if (currentGpName) {
-							setGpName(translateGpName(currentGpName));
-							setCountryCode(getCountryCodeForGp(currentGpName, currentCountryName) || "bra");
+						if (effectiveGpName) {
+							setGpName(translateGpName(effectiveGpName));
+							setCountryCode(getCountryCodeForGp(effectiveGpName, effectiveCountryName) || "bra");
 						}
-						if (liveSession?.StartDate) {
-							setRaceDate(liveSession.StartDate.split("T")[0]);
+						if (currentSession?.StartDate) {
+							setRaceDate(currentSession.StartDate.split("T")[0]);
 						}
 
 						const parseMs = (s?: string) => {
@@ -202,8 +257,8 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 
 						const getBestLap = (l: any): string => {
 							if (l.BestLapTime?.Value) return l.BestLapTime.Value;
-							if (liveStats?.Lines?.[l.RacingNumber]?.PersonalBestLapTime?.Value) {
-								return liveStats.Lines[l.RacingNumber].PersonalBestLapTime.Value;
+							if (currentStats?.Lines?.[l.RacingNumber]?.PersonalBestLapTime?.Value) {
+								return currentStats.Lines[l.RacingNumber].PersonalBestLapTime.Value;
 							}
 							if (Array.isArray(l.BestLapTimes)) {
 								for (let i = l.BestLapTimes.length - 1; i >= 0; i--) {
@@ -213,7 +268,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 							return "";
 						};
 
-						const lines = Object.values(liveTiming!.Lines).sort((a: any, b: any) => {
+						const lines = Object.values(currentTiming!.Lines).sort((a: any, b: any) => {
 							const posA = parseInt(a.Position, 10) || 99;
 							const posB = parseInt(b.Position, 10) || 99;
 							return posA - posB;
@@ -225,7 +280,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 
 						const liveResults: DriverResult[] = lines.map((line: any) => {
 							const posNum = parseInt(line.Position, 10) || 99;
-							const drv = liveDrivers?.[line.RacingNumber];
+							const drv = currentDrivers?.[line.RacingNumber];
 							const isDNF = Boolean(line.Retired || line.Stopped);
 							const code = drv?.Tla || line.RacingNumber;
 							const name = drv?.FullName || drv?.BroadcastName || `Piloto #${line.RacingNumber}`;
@@ -272,12 +327,12 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 						(activeTab === "RACE" && isRaceSession) ||
 						(activeTab === "SPRINT" && isSprintSession)
 					) {
-						if (currentGpName) {
-							setGpName(translateGpName(currentGpName));
-							setCountryCode(getCountryCodeForGp(currentGpName, currentCountryName) || "bra");
+						if (effectiveGpName) {
+							setGpName(translateGpName(effectiveGpName));
+							setCountryCode(getCountryCodeForGp(effectiveGpName, effectiveCountryName) || "bra");
 						}
-						if (liveSession?.StartDate) {
-							setRaceDate(liveSession.StartDate.split("T")[0]);
+						if (currentSession?.StartDate) {
+							setRaceDate(currentSession.StartDate.split("T")[0]);
 						}
 
 						const f1Points =
@@ -285,7 +340,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 								? [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
 								: [8, 7, 6, 5, 4, 3, 2, 1];
 
-						const lines = Object.values(liveTiming!.Lines).sort((a: any, b: any) => {
+						const lines = Object.values(currentTiming!.Lines).sort((a: any, b: any) => {
 							const posA = parseInt(a.Position, 10) || 99;
 							const posB = parseInt(b.Position, 10) || 99;
 							return posA - posB;
@@ -293,7 +348,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 
 						const liveResults: DriverResult[] = lines.map((line: any) => {
 							const posNum = parseInt(line.Position, 10) || 99;
-							const drv = liveDrivers?.[line.RacingNumber];
+							const drv = currentDrivers?.[line.RacingNumber];
 							const isDNF = Boolean(line.Retired || line.Stopped);
 							const code = drv?.Tla || line.RacingNumber;
 							const name = drv?.FullName || drv?.BroadcastName || `Piloto #${line.RacingNumber}`;
@@ -301,7 +356,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 
 							let gapTime = "";
 							if (posNum === 1) {
-								gapTime = `${line.NumberOfLaps || liveLapCount?.TotalLaps || 71} VUELTAS`;
+								gapTime = `${line.NumberOfLaps || currentLap?.TotalLaps || 71} VUELTAS`;
 							} else if (isDNF) {
 								gapTime = line.NumberOfLaps ? `DNF (Vta ${line.NumberOfLaps})` : "DNF · RETIRADO";
 							} else {
