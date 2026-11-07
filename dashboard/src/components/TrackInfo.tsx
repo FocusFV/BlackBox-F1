@@ -118,7 +118,7 @@ export default function TrackInfo() {
 	);
 
 	// 🔴 DETECCIÓN DE BANDERA ROJA OFICIAL:
-	// Una bandera roja solo se cancela cuando Dirección de Carrera muestra BANDERA VERDE o abre el Pit Lane.
+	// Solo es bandera roja si trackStatus es '5', o si el último mensaje de bandera es ROJA y no ha sido superado por verde o bandera a cuadros, y la pista no está en verde ("1").
 	const lastRedMsg = raceControlMessages?.filter(
 		(m) => m.Flag === "RED" || m.Message?.toUpperCase().includes("RED FLAG") || m.Message?.toUpperCase().includes("SUSPENDED")
 	).slice(-1)[0];
@@ -132,21 +132,7 @@ export default function TrackInfo() {
 			m.Message?.toUpperCase().includes("TRACK CLEAR")
 	).slice(-1)[0];
 	const lastGreenMs = parseUtcMs(lastGreenMsg?.Utc);
-
-	const hasCarsOnTrack = Boolean(
-		timingData?.Lines &&
-		Object.values(timingData.Lines).some((l: any) => !l.InPit && !l.Stopped)
-	);
-
-	const isRedFlag =
-		track?.Status === "5" ||
-		(!hasCarsOnTrack &&
-			allInPit &&
-			track?.Status !== "2" &&
-			track?.Status !== "4" &&
-			track?.Status !== "6" &&
-			track?.Status !== "7" &&
-			Boolean(lastRedMs && (!lastGreenMs || lastRedMs > lastGreenMs)));
+	const lastGreen = lastGreenMsg;
 
 	const chequeredMessages = raceControlMessages?.filter(
 		(m) => m.Flag === "CHEQUERED" || m.Message?.toUpperCase().includes("CHEQUERED")
@@ -155,7 +141,18 @@ export default function TrackInfo() {
 		? chequeredMessages[chequeredMessages.length - 1]
 		: null;
 	const breakStartMs = parseUtcMs(lastChequered?.Utc);
-	const lastGreen = lastGreenMsg;
+	const lastChequeredMs = breakStartMs;
+
+	const isRedFlag =
+		track?.Status === "5" ||
+		(lastRedMs !== null &&
+			(!lastGreenMs || lastRedMs > lastGreenMs) &&
+			(!lastChequeredMs || lastRedMs > lastChequeredMs) &&
+			track?.Status !== "1" &&
+			track?.Status !== "2" &&
+			track?.Status !== "4" &&
+			track?.Status !== "6" &&
+			track?.Status !== "7");
 
 	// Solo es pausa oficial si hubo bandera a cuadros real y no hay bandera roja
 	const breakDurationMs = (sessionPart === 1 ? 7 : 8) * 60 * 1000;
@@ -184,28 +181,29 @@ export default function TrackInfo() {
 		formattedTime = formatMsToClock(breakRemainingMs, true);
 	} else if (!isRaceOrSprint && isTrackLive) {
 		// ⏱️ RELOJ EN VIVO PARA QUALY O PRÁCTICAS (SIEMPRE EN MINUTOS Y SEGUNDOS MM:SS)
+		const partDurationMs = isQualy
+			? (sessionPart === 3 ? 12 : sessionPart === 2 ? 15 : 18) * 60 * 1000
+			: 60 * 60 * 1000;
+
 		const parsedClockMs = parseFomClockRemaining(clock?.Remaining, isRaceOrSprint);
 
-		if (parsedClockMs !== null) {
-			let ms = parsedClockMs;
-			// Bajo bandera roja o cuando FOM congela el reloj (Extrapolating: false), se clava en tiempo real
-			const isClockStopped = !clock?.Extrapolating || isRedFlag;
-			if (!isClockStopped && clock?.Utc) {
+		if (isRedFlag) {
+			// 🔴 BAJO BANDERA ROJA: El reloj oficial se detiene en el momento exacto en que Dirección de Carrera sacó la bandera roja
+			let redMsRemaining: number | null = null;
+
+			// 1. Si tenemos reloj oficial de FOM con tiempo restante válido (> 0):
+			if (parsedClockMs !== null && parsedClockMs > 0 && clock?.Utc) {
 				const clockUtcMs = parseUtcMs(clock.Utc);
-				if (clockUtcMs) {
-					ms = ms - Math.max(0, (currentTime || clockUtcMs) - clockUtcMs) + (delay ? delay * 1000 : 0);
+				if (clockUtcMs && lastRedMs && lastRedMs >= clockUtcMs) {
+					const elapsedBeforeRed = lastRedMs - clockUtcMs;
+					redMsRemaining = Math.max(0, parsedClockMs - elapsedBeforeRed);
+				} else {
+					redMsRemaining = parsedClockMs;
 				}
 			}
-			formattedTime = formatMsToClock(ms, true);
-		} else {
-			const partDurationMs = isQualy
-				? (sessionPart === 3 ? 12 : sessionPart === 2 ? 15 : 18) * 60 * 1000
-				: 60 * 60 * 1000;
 
-			// Si hay bandera roja y no tenemos reloj aún, no calcular contra reloj de pared porque daría negativo y 00:00
-			if (isRedFlag) {
-				formattedTime = formatMsToClock(partDurationMs, true);
-			} else {
+			// 2. Si no o si dio 0 (reloj congelado en 00:00 al suspender), calcular duración de la tanda menos tiempo corrido hasta la bandera roja:
+			if (redMsRemaining === null || redMsRemaining <= 0) {
 				let partStartMs: number | null = null;
 				if (lastGreen?.Utc) {
 					partStartMs = parseUtcMs(lastGreen.Utc);
@@ -213,13 +211,39 @@ export default function TrackInfo() {
 					partStartMs = parseUtcMs(session.StartDate);
 				}
 
-				if (partStartMs) {
-					const elapsed = Math.max(0, (currentTime || partStartMs) - partStartMs);
-					const remainingMs = Math.min(partDurationMs, Math.max(0, partDurationMs - elapsed + (delay ? delay * 1000 : 0)));
-					formattedTime = formatMsToClock(remainingMs, true);
+				if (partStartMs && lastRedMs && lastRedMs > partStartMs) {
+					const elapsedBeforeRed = lastRedMs - partStartMs;
+					redMsRemaining = Math.max(0, partDurationMs - elapsedBeforeRed);
 				} else {
-					formattedTime = formatMsToClock(partDurationMs, true);
+					redMsRemaining = partDurationMs;
 				}
+			}
+
+			formattedTime = formatMsToClock(redMsRemaining, true);
+		} else if (parsedClockMs !== null) {
+			let ms = parsedClockMs;
+			// Cuando FOM extrapola el reloj, restamos el tiempo transcurrido desde el último timestamp
+			if (clock?.Extrapolating && clock?.Utc) {
+				const clockUtcMs = parseUtcMs(clock.Utc);
+				if (clockUtcMs) {
+					ms = ms - Math.max(0, (currentTime || clockUtcMs) - clockUtcMs) + (delay ? delay * 1000 : 0);
+				}
+			}
+			formattedTime = formatMsToClock(ms, true);
+		} else {
+			let partStartMs: number | null = null;
+			if (lastGreen?.Utc) {
+				partStartMs = parseUtcMs(lastGreen.Utc);
+			} else if (session?.StartDate) {
+				partStartMs = parseUtcMs(session.StartDate);
+			}
+
+			if (partStartMs) {
+				const elapsed = Math.max(0, (currentTime || partStartMs) - partStartMs);
+				const remainingMs = Math.min(partDurationMs, Math.max(0, partDurationMs - elapsed + (delay ? delay * 1000 : 0)));
+				formattedTime = formatMsToClock(remainingMs, true);
+			} else {
+				formattedTime = formatMsToClock(partDurationMs, true);
 			}
 		}
 	}

@@ -180,7 +180,6 @@ export default function Map({ filter }: { filter?: string[] }) {
 	);
 
 	// 🔴 DETECCIÓN DE BANDERA ROJA OFICIAL:
-	// Una bandera roja solo se cancela cuando Dirección de Carrera muestra BANDERA VERDE o abre el Pit Lane.
 	const lastRedMsg = raceControlMessages?.filter(
 		(m) => m.Flag === "RED" || m.Message?.toUpperCase().includes("RED FLAG") || m.Message?.toUpperCase().includes("SUSPENDED")
 	).slice(-1)[0];
@@ -195,21 +194,6 @@ export default function Map({ filter }: { filter?: string[] }) {
 	).slice(-1)[0];
 	const lastGreenMs = parseUtcMs(lastGreenMsg?.Utc);
 
-	const hasCarsOnTrack = Boolean(
-		rawTiming?.Lines &&
-		Object.values(rawTiming.Lines).some((l: any) => !l.InPit && !l.Stopped)
-	);
-
-	const isRedFlag =
-		trackStatus?.Status === "5" ||
-		(!hasCarsOnTrack &&
-			allInPit &&
-			trackStatus?.Status !== "2" &&
-			trackStatus?.Status !== "4" &&
-			trackStatus?.Status !== "6" &&
-			trackStatus?.Status !== "7" &&
-			Boolean(lastRedMs && (!lastGreenMs || lastRedMs > lastGreenMs)));
-
 	const chequeredMessages = raceControlMessages?.filter(
 		(m) => m.Flag === "CHEQUERED" || m.Message?.toUpperCase().includes("CHEQUERED")
 	);
@@ -217,6 +201,18 @@ export default function Map({ filter }: { filter?: string[] }) {
 		? chequeredMessages[chequeredMessages.length - 1]
 		: null;
 	const breakStartMs = parseUtcMs(lastChequered?.Utc);
+	const lastChequeredMs = breakStartMs;
+
+	const isRedFlag =
+		trackStatus?.Status === "5" ||
+		(lastRedMs !== null &&
+			(!lastGreenMs || lastRedMs > lastGreenMs) &&
+			(!lastChequeredMs || lastRedMs > lastChequeredMs) &&
+			trackStatus?.Status !== "1" &&
+			trackStatus?.Status !== "2" &&
+			trackStatus?.Status !== "4" &&
+			trackStatus?.Status !== "6" &&
+			trackStatus?.Status !== "7");
 
 	const breakDurationMs = (sessionPart === 1 ? 7 : 8) * 60 * 1000;
 	const elapsedSinceChequered = breakStartMs ? Math.max(0, (currentTime || breakStartMs) - breakStartMs) : 0;
