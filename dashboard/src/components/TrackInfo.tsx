@@ -124,17 +124,7 @@ export default function TrackInfo() {
 			);
 		}
 
-		return (
-			<div className="flex flex-row items-center gap-3 md:justify-self-end font-mono">
-				<div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-800 text-zinc-300 text-xs font-mono font-bold tracking-wider">
-					<span className="relative flex h-2 w-2">
-						<span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 animate-ping" />
-						<span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
-					</span>
-					<span>PISTA EN ESPERA</span>
-				</div>
-			</div>
-		);
+		return null;
 	}
 
 	// Si no hay sesión activa en pista ni reloj, no mostramos datos residuales

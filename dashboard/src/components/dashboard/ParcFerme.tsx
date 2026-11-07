@@ -714,9 +714,10 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 								const isP2 = posNum === 2;
 								const isP3 = posNum === 3;
 
-								// Líneas de corte FIA limpias en Qualy (sin texto)
-								const isCutoffQ2 = activeTab === "QUALY" && posNum === 11;
-								const isCutoffQ1 = activeTab === "QUALY" && posNum === 16;
+								// Líneas de corte FIA limpias en Qualy / Shootout (22 autos en 2026: P1-P10 Q3, P11-P16 Q2, P17-P22 Q1)
+								const isQualyTab = activeTab === "QUALY" || activeTab === "SQ";
+								const isCutoffQ2 = isQualyTab && posNum === 11;
+								const isCutoffQ1 = isQualyTab && posNum === 17;
 
 								// Estilo sutil de podio integrado en la misma altura
 								const rowBg = isP1
