@@ -24,7 +24,7 @@ const driverTeamColorMap: { [key: string]: string } = {
 	HUL: "#c0c0c0", BOR: "#c0c0c0", // Audi F1
 	ALO: "#229971", STR: "#229971", // Aston Martin
 	LAW: "#6692ff", TSU: "#6692ff", LIN: "#6692ff", // Racing Bulls
-	OCO: "#b6babd", BEA: "#b6babd", MAG: "#b6babd", // Haas
+	OCO: "#b6babd", BEA: "#b6babd", CAM: "#b6babd", MAG: "#b6babd", // Haas
 };
 
 export default function TrackMap() {

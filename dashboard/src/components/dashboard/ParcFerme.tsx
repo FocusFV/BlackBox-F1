@@ -28,8 +28,8 @@ const driverNationalityMap: Record<string, string> = {
 	COL: "ar", VER: "nl", HAM: "gb", RUS: "gb", LEC: "mc", SAI: "es",
 	NOR: "gb", PIA: "au", ALB: "th", GAS: "fr", OCO: "fr", HUL: "de",
 	TSU: "jp", RIC: "au", BOT: "fi", ZHO: "cn", MAG: "dk", STR: "ca",
-	ALO: "es", PER: "mx", BEA: "gb", HAD: "fr", BOR: "br", LIN: "us",
-	LAW: "nz", ANT: "it"
+	ALO: "es", PER: "mx", BEA: "gb", HAD: "fr", BOR: "br", LIN: "gb",
+	LAW: "nz", ANT: "it", CAM: "br"
 };
 
 const driverTeamColorMap: Record<string, { bg: string; text: string }> = {
@@ -47,7 +47,8 @@ const driverTeamColorMap: Record<string, { bg: string; text: string }> = {
 	STR: { bg: "#006f62", text: "#ffffff" },
 	GAS: { bg: "#0093cc", text: "#ffffff" }, // Alpine
 	COL: { bg: "#0093cc", text: "#ffffff" }, // Alpine
-	BEA: { bg: "#e10600", text: "#ffffff" },
+	BEA: { bg: "#e10600", text: "#ffffff" }, // Haas F1 Team
+	CAM: { bg: "#e10600", text: "#ffffff" }, // Haas F1 Team
 	OCO: { bg: "#e10600", text: "#ffffff" },
 	MAG: { bg: "#373737", text: "#ffffff" },
 	LAW: { bg: "#4b77ff", text: "#ffffff" },
@@ -115,6 +116,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 
 	const liveSession = useDataStore((state) => state.state?.SessionInfo);
 	const liveTiming = useDataStore((state) => state.state?.TimingData);
+	const liveStats = useDataStore((state) => state.state?.TimingStats);
 	const liveDrivers = useDataStore((state) => state.state?.DriverList);
 	const liveLapCount = useDataStore((state) => state.state?.LapCount);
 	const liveSessionStatus = useDataStore((state) => state.state?.SessionStatus?.Status);
@@ -122,8 +124,8 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 	const roundNumber = (liveSession?.Meeting as any)?.Number || (liveSession as any)?.Number;
 	const currentGpName = liveSession?.Meeting?.Name;
 	const currentCountryName = liveSession?.Meeting?.Country?.Name;
-	const initialCountry = (currentGpName ? getCountryCodeForGp(currentGpName, currentCountryName) : null) || "mex";
-	const initialGpName = currentGpName ? translateGpName(currentGpName) : "Gran Premio";
+	const initialCountry = (currentGpName ? getCountryCodeForGp(currentGpName, currentCountryName) : null) || "bra";
+	const initialGpName = currentGpName ? translateGpName(currentGpName) : "Gran Premio de São Paulo";
 
 	const [smartContext, setSmartContext] = useState<SmartGpContext | null>(null);
 	const [activeTab, setActiveTab] = useState<SessionTab>("RACE");
@@ -160,7 +162,180 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 		async function fetchSessionData() {
 			setLoading(true);
 			try {
-				// 1. Si es práctica libre (FP1, FP2, FP3), consultamos nuestra API de OpenF1
+				const sessionName = (liveSession?.Name || "").toLowerCase();
+				const sessionType = (liveSession?.Type || "").toLowerCase();
+				const isQualySession =
+					sessionName.includes("qualifying") ||
+					sessionType.includes("qualifying") ||
+					sessionName.includes("shootout") ||
+					sessionType.includes("shootout");
+				const isRaceSession =
+					(sessionName === "race" || sessionType === "race") &&
+					!sessionName.includes("sprint");
+				const isSprintSession =
+					sessionName.includes("sprint") &&
+					!sessionName.includes("shootout") &&
+					!sessionName.includes("qual");
+
+				const hasLiveLines = Boolean(
+					liveTiming?.Lines && Object.keys(liveTiming.Lines).length > 0
+				);
+
+				// 1. PRIORIDAD MÁXIMA: Telemetría oficial en vivo o de sesión recién concluida
+				if (hasLiveLines) {
+					// 1.A CLASIFICACIÓN / SHOOTOUT EN VIVO O RECIÉN FINALIZADA
+					if ((activeTab === "QUALY" || activeTab === "SQ") && isQualySession) {
+						if (currentGpName) {
+							setGpName(translateGpName(currentGpName));
+							setCountryCode(getCountryCodeForGp(currentGpName, currentCountryName) || "bra");
+						}
+						if (liveSession?.StartDate) {
+							setRaceDate(liveSession.StartDate.split("T")[0]);
+						}
+
+						const parseMs = (s?: string) => {
+							if (!s || !s.includes(":")) return null;
+							const [m, rest] = s.split(":");
+							const [sec, ms] = rest.split(".");
+							return parseInt(m, 10) * 60000 + parseInt(sec, 10) * 1000 + parseInt(ms || "0", 10);
+						};
+
+						const getBestLap = (l: any): string => {
+							if (l.BestLapTime?.Value) return l.BestLapTime.Value;
+							if (liveStats?.Lines?.[l.RacingNumber]?.PersonalBestLapTime?.Value) {
+								return liveStats.Lines[l.RacingNumber].PersonalBestLapTime.Value;
+							}
+							if (Array.isArray(l.BestLapTimes)) {
+								for (let i = l.BestLapTimes.length - 1; i >= 0; i--) {
+									if (l.BestLapTimes[i]?.Value) return l.BestLapTimes[i].Value;
+								}
+							}
+							return "";
+						};
+
+						const lines = Object.values(liveTiming!.Lines).sort((a: any, b: any) => {
+							const posA = parseInt(a.Position, 10) || 99;
+							const posB = parseInt(b.Position, 10) || 99;
+							return posA - posB;
+						});
+
+						const p1Line = lines.find((l: any) => parseInt(l.Position, 10) === 1) || lines[0];
+						const p1Best = p1Line ? getBestLap(p1Line) : "";
+						const p1Ms = parseMs(p1Best);
+
+						const liveResults: DriverResult[] = lines.map((line: any) => {
+							const posNum = parseInt(line.Position, 10) || 99;
+							const drv = liveDrivers?.[line.RacingNumber];
+							const isDNF = Boolean(line.Retired || line.Stopped);
+							const code = drv?.Tla || line.RacingNumber;
+							const name = drv?.FullName || drv?.BroadcastName || `Piloto #${line.RacingNumber}`;
+							const team = drv?.TeamName || "Equipo";
+							const best = getBestLap(line);
+							const driverMs = parseMs(best);
+
+							let gapTime = "";
+							if (posNum === 1) {
+								gapTime = best || "POLE";
+							} else if (driverMs && p1Ms && driverMs >= p1Ms) {
+								gapTime = `+${((driverMs - p1Ms) / 1000).toFixed(3)}s`;
+							} else if (best) {
+								gapTime = best;
+							} else if (isDNF) {
+								gapTime = "DNF";
+							} else {
+								gapTime = "S/T";
+							}
+
+							return {
+								pos: String(posNum),
+								number: String(line.RacingNumber),
+								code,
+								name,
+								team,
+								constructorId: team.toLowerCase().replaceAll(" ", "-"),
+								points: "",
+								gapTime,
+								isDNF,
+								dnfReason: isDNF ? "DNF" : undefined,
+							};
+						});
+
+						if (liveResults.length > 0) {
+							setResults(liveResults);
+							setLoading(false);
+							return;
+						}
+					}
+
+					// 1.B CARRERA O SPRINT EN VIVO O RECIÉN FINALIZADA
+					if (
+						(activeTab === "RACE" && isRaceSession) ||
+						(activeTab === "SPRINT" && isSprintSession)
+					) {
+						if (currentGpName) {
+							setGpName(translateGpName(currentGpName));
+							setCountryCode(getCountryCodeForGp(currentGpName, currentCountryName) || "bra");
+						}
+						if (liveSession?.StartDate) {
+							setRaceDate(liveSession.StartDate.split("T")[0]);
+						}
+
+						const f1Points =
+							activeTab === "RACE"
+								? [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
+								: [8, 7, 6, 5, 4, 3, 2, 1];
+
+						const lines = Object.values(liveTiming!.Lines).sort((a: any, b: any) => {
+							const posA = parseInt(a.Position, 10) || 99;
+							const posB = parseInt(b.Position, 10) || 99;
+							return posA - posB;
+						});
+
+						const liveResults: DriverResult[] = lines.map((line: any) => {
+							const posNum = parseInt(line.Position, 10) || 99;
+							const drv = liveDrivers?.[line.RacingNumber];
+							const isDNF = Boolean(line.Retired || line.Stopped);
+							const code = drv?.Tla || line.RacingNumber;
+							const name = drv?.FullName || drv?.BroadcastName || `Piloto #${line.RacingNumber}`;
+							const team = drv?.TeamName || "Equipo";
+
+							let gapTime = "";
+							if (posNum === 1) {
+								gapTime = `${line.NumberOfLaps || liveLapCount?.TotalLaps || 71} VUELTAS`;
+							} else if (isDNF) {
+								gapTime = line.NumberOfLaps ? `DNF (Vta ${line.NumberOfLaps})` : "DNF · RETIRADO";
+							} else {
+								gapTime = line.GapToLeader || line.IntervalToPositionAhead?.Value || "INTERVAL";
+							}
+
+							let pointsStr = "";
+							if (posNum <= f1Points.length && !isDNF) {
+								pointsStr = `+${f1Points[posNum - 1]} PTS`;
+							}
+
+							return {
+								pos: String(posNum),
+								number: String(line.RacingNumber),
+								code,
+								name,
+								team,
+								constructorId: team.toLowerCase().replaceAll(" ", "-"),
+								points: pointsStr,
+								gapTime,
+								isDNF,
+								dnfReason: isDNF ? "DNF" : undefined,
+							};
+						});
+
+						if (liveResults.length > 0) {
+							setResults(liveResults);
+							setLoading(false);
+							return;
+						}
+					}
+				}
+
+				// 2. Si es práctica libre (FP1, FP2, FP3), consultamos nuestra API de OpenF1
 				if (activeTab === "FP1" || activeTab === "FP2" || activeTab === "FP3") {
 					const dateParam = raceDate ? `&date=${raceDate}` : (liveSession?.StartDate ? `&date=${liveSession.StartDate.split("T")[0]}` : "");
 					try {
@@ -170,7 +345,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 							if (Array.isArray(data.results) && data.results.length > 0) {
 								if (currentGpName) {
 									setGpName(translateGpName(currentGpName));
-									setCountryCode(getCountryCodeForGp(currentGpName, currentCountryName) || "mex");
+									setCountryCode(getCountryCodeForGp(currentGpName, currentCountryName) || "bra");
 								}
 								setResults(data.results);
 								setLoading(false);
@@ -186,83 +361,6 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 					return;
 				}
 
-				// 2. Para Carrera, si tenemos telemetría de la sesión que acaba de terminar en vivo
-				const isRaceSession = liveSession?.Name === "Race" || liveSession?.Type === "Race";
-				const isRaceFinished = Boolean(
-					liveSessionStatus === "Ends" ||
-					liveSessionStatus === "Finalised" ||
-					liveSessionStatus === "Finished" ||
-					(liveSession as any)?.SessionStatus === "Finalised" ||
-					(liveSession as any)?.SessionStatus === "Ends" ||
-					liveSession?.ArchiveStatus?.Status === "Complete" ||
-					(liveLapCount && liveLapCount.TotalLaps > 0 && liveLapCount.CurrentLap >= liveLapCount.TotalLaps)
-				);
-				const hasLiveRaceLines = Boolean(
-					isRaceSession &&
-					isRaceFinished &&
-					liveTiming?.Lines &&
-					Object.keys(liveTiming.Lines).length > 0
-				);
-
-				if (activeTab === "RACE" && hasLiveRaceLines) {
-					if (currentGpName) {
-						setGpName(translateGpName(currentGpName));
-						setCountryCode(getCountryCodeForGp(currentGpName, currentCountryName) || "mex");
-					}
-					if (liveSession?.StartDate) {
-						setRaceDate(liveSession.StartDate.split("T")[0]);
-					}
-
-					const f1Points = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
-					const lines = Object.values(liveTiming!.Lines).sort((a: any, b: any) => {
-						const posA = parseInt(a.Position, 10) || 99;
-						const posB = parseInt(b.Position, 10) || 99;
-						return posA - posB;
-					});
-
-					const liveResults: DriverResult[] = lines.map((line: any) => {
-						const posNum = parseInt(line.Position, 10) || 99;
-						const drv = liveDrivers?.[line.RacingNumber];
-						const isDNF = Boolean(line.Retired || line.Stopped);
-						const code = drv?.Tla || line.RacingNumber;
-						const name = drv?.FullName || drv?.BroadcastName || `Piloto #${line.RacingNumber}`;
-						const team = drv?.TeamName || "Equipo";
-
-						let gapTime = "";
-						if (posNum === 1) {
-							gapTime = `${line.NumberOfLaps || liveLapCount?.TotalLaps || 71} VUELTAS`;
-						} else if (isDNF) {
-							gapTime = line.NumberOfLaps ? `DNF (Vta ${line.NumberOfLaps})` : "DNF · RETIRADO";
-						} else {
-							gapTime = line.GapToLeader || line.IntervalToPositionAhead?.Value || "INTERVAL";
-						}
-
-						let pointsStr = "";
-						if (posNum <= 10 && !isDNF) {
-							pointsStr = `+${f1Points[posNum - 1]} PTS`;
-						}
-
-						return {
-							pos: String(posNum),
-							number: String(line.RacingNumber),
-							code,
-							name,
-							team,
-							constructorId: team.toLowerCase().replaceAll(" ", "-"),
-							points: pointsStr,
-							gapTime,
-							isDNF,
-							dnfReason: isDNF ? "DNF" : undefined,
-						};
-					});
-
-					if (liveResults.length > 0) {
-						setResults(liveResults);
-						setLoading(false);
-						return;
-					}
-				}
-
 				// 3. Consultamos Jolpica/Ergast para la ronda objetivo actual
 				let subpath = "results.json";
 				if (activeTab === "QUALY") subpath = "qualifying.json";
@@ -275,9 +373,8 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 					endpoints.push(`https://api.jolpi.ca/ergast/f1/2026/${targetRound}/${subpath}`);
 				}
 
-				// ⚠️ Solo recurrir a /current/last/ si NO estamos en un fin de semana de carrera activo
-				// (evita mostrar el Gran Premio anterior cuando el actual recién termina o se está disputando)
-				if (!smartContext?.isWeekendActive && !targetRound) {
+				// ⚠️ Solo recurrir a /current/last/ si NO estamos en un fin de semana de carrera activo y no tenemos liveSession
+				if (!smartContext?.isWeekendActive && !targetRound && !currentGpName) {
 					endpoints.push(
 						`https://api.jolpi.ca/ergast/f1/current/last/${subpath}`,
 						`https://api.jolpi.ca/ergast/f1/last/${subpath}`,
@@ -311,8 +408,10 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 
 				if (data?.MRData?.RaceTable?.Races?.length > 0) {
 					const race = data.MRData.RaceTable.Races[0];
-					setGpName(translateGpName(race.raceName));
-					setCountryCode(getCountryCodeForGp(race.raceName, race.Circuit?.Location?.country));
+					if (!currentGpName) {
+						setGpName(translateGpName(race.raceName));
+						setCountryCode(getCountryCodeForGp(race.raceName, race.Circuit?.Location?.country));
+					}
 					if (race.date) setRaceDate(race.date);
 
 					if (race.Sprint || race.SprintResults) {
@@ -372,20 +471,22 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 					return;
 				}
 
-				// 4. Si Jolpica no tiene datos aún para esta sesión, consultamos OpenF1
-				const dateParam = raceDate ? `&date=${raceDate}` : (liveSession?.StartDate ? `&date=${liveSession.StartDate.split("T")[0]}` : "");
-				try {
-					const openF1Res = await fetch(`/api/practice?session=${activeTab}${dateParam}`);
-					if (openF1Res.ok) {
-						const openF1Data = await openF1Res.json();
-						if (Array.isArray(openF1Data.results) && openF1Data.results.length > 0) {
-							setResults(openF1Data.results);
-							setLoading(false);
-							return;
+				// 4. Si Jolpica no tiene datos aún para esta sesión, consultamos OpenF1 solo si no es carrera en vivo
+				if (!currentGpName && !smartContext?.isWeekendActive) {
+					const dateParam = raceDate ? `&date=${raceDate}` : (liveSession?.StartDate ? `&date=${liveSession.StartDate.split("T")[0]}` : "");
+					try {
+						const openF1Res = await fetch(`/api/practice?session=${activeTab}${dateParam}`);
+						if (openF1Res.ok) {
+							const openF1Data = await openF1Res.json();
+							if (Array.isArray(openF1Data.results) && openF1Data.results.length > 0) {
+								setResults(openF1Data.results);
+								setLoading(false);
+								return;
+							}
 						}
+					} catch (e) {
+						console.error("Error consultando OpenF1 para sesión:", e);
 					}
-				} catch (e) {
-					console.error("Error consultando OpenF1 para sesión:", e);
 				}
 
 				// Si ninguna fuente tiene resultados aún para este GP, limpiamos lista sin tocar el nombre del GP ni la bandera
@@ -398,7 +499,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 		}
 
 		fetchSessionData();
-	}, [activeTab, raceDate, roundNumber, smartContext, liveSession, liveTiming, liveDrivers, liveLapCount, liveSessionStatus]);
+	}, [activeTab, raceDate, roundNumber, smartContext, liveSession, liveTiming, liveStats, liveDrivers, liveLapCount, liveSessionStatus]);
 
 	return (
 		<div className="flex flex-col gap-4 w-full text-white items-center">
