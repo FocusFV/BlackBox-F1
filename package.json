@@ -1,4 +1,10 @@
 {
+  "name": "blackbox-f1-root",
+  "private": true,
+  "workspaces": [
+    "dashboard"
+  ],
+  "packageManager": "npm@10.9.0",
   "dependencies": {
     "cheerio": "^1.2.0",
     "hls.js": "^1.6.16",
