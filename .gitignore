@@ -12,3 +12,5 @@ compose.env
 *.data.*
 
 .vercel
+.open-next/
+.wrangler/
