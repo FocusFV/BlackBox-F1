@@ -44,6 +44,7 @@ const securityAndRobotsHeaders = [
 const config: NextConfig = {
 	output,
 	compress,
+	turbopack: {},
 	productionBrowserSourceMaps: false,
 	env: {
 		version: pack.version,
