@@ -3,14 +3,13 @@
 	"version": "4.1.0",
 	"private": true,
 	"scripts": {
-		"build": "next build --webpack",
-		"build:worker": "npx @opennextjs/cloudflare build",
+		"build": "opennextjs-cloudflare build",
 		"dev": "next dev --webpack",
 		"lint": "eslint .",
 		"start": "next start",
 		"prettier": "prettier --write src",
-		"deploy": "npx @opennextjs/cloudflare deploy",
-		"preview": "npx @opennextjs/cloudflare preview"
+		"deploy": "opennextjs-cloudflare deploy",
+		"preview": "opennextjs-cloudflare preview"
 	},
 	"dependencies": {
 		"@headlessui/react": "2.2.10",
