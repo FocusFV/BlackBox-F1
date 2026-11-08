@@ -10,8 +10,9 @@ import { useSettingsStore } from "@/stores/useSettingsStore";
 import { isFavoriteDriver } from "@/lib/favoriteDriver";
 
 import { toTrackTime } from "@/lib/toTrackTime";
+import WavingFlag from "@/components/ui/WavingFlag";
 import {
-	prepareFiaMessageForTranslation,
+	translateFiaMessage,
 	postProcessFiaTranslation,
 } from "@/lib/raceControlTranslations";
 
@@ -31,35 +32,94 @@ export function RaceControlMessage({ msg, gmtOffset }: Props) {
 	const localTime = utc(msg.Utc).local().format("HH:mm:ss");
 	const trackTime = utc(toTrackTime(msg.Utc, gmtOffset)).format("HH:mm");
 
-	const [translatedText, setTranslatedText] = useState(msg.Message);
+	// 🏁 Traducción instantánea determinista oficial en español (sin esperar red ni sufrir CORS)
+	const initialTranslation = translateFiaMessage(msg.Message);
+	const [translatedText, setTranslatedText] = useState(initialTranslation);
 	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
-		const translateMessage = async () => {
-			if (!msg.Message) return;
-			setIsLoading(true);
-			try {
-				const preprocessed = prepareFiaMessageForTranslation(msg.Message);
-				const res = await fetch(
-					"https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=es&dt=t&q=" +
-						encodeURIComponent(preprocessed)
-				);
-				const data = await res.json();
-				
-				if (data && data[0] && data[0][0] && data[0][0][0]) {
-					const sanitized = postProcessFiaTranslation(data[0][0][0]);
-					setTranslatedText(sanitized);
-				}
-			} catch (error) {
-				console.error("Error al traducir el mensaje de Race Control:", error);
-				setTranslatedText(prepareFiaMessageForTranslation(msg.Message));
-			} finally {
-				setIsLoading(false);
-			}
-		};
+		if (!msg.Message) return;
+		const local = translateFiaMessage(msg.Message);
+		setTranslatedText(local);
 
-		translateMessage();
+		// Si quedara algún residuo en inglés, recurrimos a la API del servidor (sin problemas de CORS)
+		const hasEnglish = /\b(turn|incident|investigated|stewards|driver|limits|penalty|noted|deleted)\b/i.test(local);
+		if (hasEnglish) {
+			setIsLoading(true);
+			fetch(`/api/translate?text=${encodeURIComponent(msg.Message)}`)
+				.then((res) => res.json())
+				.then((data) => {
+					if (data?.translated) {
+						setTranslatedText(postProcessFiaTranslation(data.translated));
+					}
+				})
+				.catch((err) => {
+					console.warn("Fallo traducción de servidor:", err);
+				})
+				.finally(() => {
+					setIsLoading(false);
+				});
+		}
 	}, [msg.Message]);
+
+	const isChequered = msg.Flag === "CHEQUERED" || msg.Message?.toUpperCase().includes("CHEQUERED");
+	const isGreen = msg.Flag === "GREEN" || msg.Message?.toUpperCase().includes("GREEN LIGHT") || msg.Message?.toUpperCase().includes("GREEN FLAG");
+
+	// 🏁 BANDERA A CUADROS CON ANIMACIÓN Y DISEÑO VIP DE TRANSMISIÓN
+	if (isChequered) {
+		return (
+			<motion.li
+				layout="position"
+				animate={{ opacity: 1, scale: 1 }}
+				initial={{ opacity: 0, scale: 0.9 }}
+				className="flex items-center justify-between gap-3 rounded-xl border border-amber-500/50 bg-gradient-to-r from-amber-500/15 via-zinc-900/90 to-zinc-950 p-2.5 shadow-[0_0_20px_rgba(245,158,11,0.2)] backdrop-blur-md"
+			>
+				<div className="flex items-center gap-3">
+					<WavingFlag type="chequered" size="sm" />
+					<div>
+						<div className="flex items-center gap-1.5 text-xs font-mono font-bold leading-none text-amber-400">
+							{msg.Lap && <span>Vuelta {msg.Lap} ·</span>}
+							<time dateTime={localTime}>{localTime}</time>
+							<span className="rounded bg-amber-400/20 px-1 py-0.5 text-[9px] uppercase tracking-wider text-amber-300">
+								FINAL DE CARRERA
+							</span>
+						</div>
+						<p className="mt-1 font-mono text-sm font-black uppercase tracking-wide text-zinc-100">
+							🏁 {translatedText}
+						</p>
+					</div>
+				</div>
+			</motion.li>
+		);
+	}
+
+	// 🟢 BANDERA VERDE / LARGADA CON ANIMACIÓN ESMERALDA NEÓN
+	if (isGreen) {
+		return (
+			<motion.li
+				layout="position"
+				animate={{ opacity: 1, scale: 1 }}
+				initial={{ opacity: 0, scale: 0.9 }}
+				className="flex items-center justify-between gap-3 rounded-xl border border-emerald-500/50 bg-gradient-to-r from-emerald-500/15 via-zinc-900/90 to-zinc-950 p-2.5 shadow-[0_0_20px_rgba(16,185,129,0.2)] backdrop-blur-md"
+			>
+				<div className="flex items-center gap-3">
+					<WavingFlag type="green" size="sm" />
+					<div>
+						<div className="flex items-center gap-1.5 text-xs font-mono font-bold leading-none text-emerald-400">
+							{msg.Lap && <span>Vuelta {msg.Lap} ·</span>}
+							<time dateTime={localTime}>{localTime}</time>
+							<span className="rounded bg-emerald-400/20 px-1 py-0.5 text-[9px] uppercase tracking-wider text-emerald-300">
+								PISTA HABILITADA
+							</span>
+						</div>
+						<p className="mt-1 font-mono text-sm font-black uppercase tracking-wide text-zinc-100">
+							🟢 {translatedText}
+						</p>
+					</div>
+				</div>
+			</motion.li>
+		);
+	}
 
 	return (
 		<motion.li

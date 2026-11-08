@@ -502,6 +502,13 @@ class SimulatorService {
 					{
 						Utc: nowIso,
 						Lap: 27,
+						Message: "FIA STEWARDS: TURN 4 INCIDENT INVOLVING CARS 18 (STR) AND 27 (HUL) NOTED",
+						Category: "Incident",
+						Scope: "Track",
+					},
+					{
+						Utc: nowIso,
+						Lap: 27,
 						Message: "AUTO 43 (COL) MEJOR VUELTA PERSONAL 1:19.420 EN SECTOR 1 Y 2",
 						Category: "Sector",
 						Scope: "Driver",

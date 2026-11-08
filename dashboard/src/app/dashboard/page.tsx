@@ -14,6 +14,8 @@ import { TvSyncControl } from "@/components/dashboard/TvSyncControl";
 import { RaceControlAlertBanner } from "@/components/dashboard/RaceControlAlertBanner";
 import { TeamRadioAlertPopup } from "@/components/dashboard/TeamRadioAlertPopup";
 import { CircuitBackdrop } from "@/components/dashboard/CircuitBackdrop";
+import { LocalDevSwitch, type DevViewMode } from "@/components/dashboard/LocalDevSwitch";
+import { simulator } from "@/lib/simulatorFeed";
 
 const YouTubeFeed = dynamic(
 	() => import("@/components/dashboard/YouTubeFeed").then((mod) => mod.YouTubeFeed),
@@ -61,6 +63,47 @@ export default function Page() {
 	// 🎬 Transición cinemática de Parque Cerrado a Telemetría en Vivo
 	const [isTransitioningToLive, setIsTransitioningToLive] = useState(false);
 	const [currentTime, setCurrentTime] = useState<number>(0);
+
+	// 🔒 SWITCH EXCLUSIVO PARA DESARROLLO LOCAL (Inexistente e inaccesible en producción/Vercel)
+	const [isLocalDev, setIsLocalDev] = useState(false);
+	const [devMode, setDevMode] = useState<DevViewMode>("auto");
+
+	useEffect(() => {
+		const isLocal =
+			process.env.NODE_ENV === "development" ||
+			(typeof window !== "undefined" &&
+				(window.location.hostname === "localhost" ||
+					window.location.hostname === "127.0.0.1" ||
+					window.location.hostname.endsWith(".local")));
+		setIsLocalDev(isLocal);
+
+		if (isLocal && typeof window !== "undefined") {
+			const saved = sessionStorage.getItem("f1_dev_view_mode") as DevViewMode;
+			if (saved === "telemetry" || saved === "parc_ferme" || saved === "auto") {
+				setDevMode(saved);
+				if (saved === "telemetry" && !simulator.getActive()) {
+					simulator.start();
+				}
+			}
+		}
+	}, []);
+
+	const handleDevModeChange = (newMode: DevViewMode) => {
+		setDevMode(newMode);
+		if (typeof window !== "undefined") {
+			sessionStorage.setItem("f1_dev_view_mode", newMode);
+		}
+
+		if (newMode === "telemetry") {
+			if (!simulator.getActive()) {
+				simulator.start();
+			}
+		} else {
+			if (simulator.getActive()) {
+				simulator.stop();
+			}
+		}
+	};
 
 	useEffect(() => {
 		setCurrentTime(Date.now());
@@ -210,8 +253,10 @@ export default function Page() {
 		(!isSessionFinished && (isCalendarLive || isF1ActiveSession || (isTrackActive && isSessionStarted))) ||
 		isPostSessionWindow;
 
-	// Vista activa (por defecto automático)
-	const showTelemetry = isLiveAuto;
+	// Vista activa: en local respeta el switch exclusivo de dev, en producción es 100% automático
+	const showTelemetry = isLocalDev && devMode !== "auto"
+		? devMode === "telemetry"
+		: isLiveAuto;
 
 	// 🎬 Detectar cambio de Parque Cerrado a Telemetría en Vivo para lanzar la animación
 	useEffect(() => {
@@ -464,6 +509,9 @@ export default function Page() {
 
 			{/* ⚔️ Modal Comparador Cara a Cara */}
 			<HeadToHeadModal isOpen={isH2HOpen} onClose={() => setIsH2HOpen(false)} />
+
+			{/* 🛠️ Switch de Control exclusivo para Localhost (Nunca se renderiza en producción) */}
+			<LocalDevSwitch mode={devMode} onModeChange={handleDevModeChange} />
 
 			<Footer />
 		</div>

@@ -21,6 +21,19 @@ export default function ChequeredFlagStrip({ className = "", title = "Bandera a 
 			style={{ width: "16px", height: "28px" }}
 			title={title}
 		>
+			<style jsx>{`
+				@keyframes flagSheen {
+					0% {
+						transform: translateY(-100%);
+					}
+					50%, 100% {
+						transform: translateY(100%);
+					}
+				}
+				.flag-sheen-sweep {
+					animation: flagSheen 3s ease-in-out infinite;
+				}
+			`}</style>
 			<svg
 				viewBox="0 0 16 28"
 				fill="none"
@@ -48,13 +61,21 @@ export default function ChequeredFlagStrip({ className = "", title = "Bandera a 
 				<rect x="0" y="22.4" width="8" height="5.6" fill="#FFFFFF" />
 				<rect x="8" y="22.4" width="8" height="5.6" fill="#18181B" />
 
-				{/* Efecto Glossy Broadcast de cristal */}
+				{/* Efecto Glossy Broadcast de cristal con barrido de luz */}
 				<rect x="0" y="0" width="16" height="28" fill="url(#flag-shine)" opacity="0.35" />
+				<g className="flag-sheen-sweep">
+					<rect x="0" y="0" width="16" height="14" fill="url(#sheen-gradient)" opacity="0.4" />
+				</g>
 				<defs>
 					<linearGradient id="flag-shine" x1="0" y1="0" x2="16" y2="28" gradientUnits="userSpaceOnUse">
 						<stop stopColor="#ffffff" stopOpacity="0.4" />
 						<stop offset="0.5" stopColor="#ffffff" stopOpacity="0" />
 						<stop offset="1" stopColor="#000000" stopOpacity="0.5" />
+					</linearGradient>
+					<linearGradient id="sheen-gradient" x1="0" y1="0" x2="0" y2="1">
+						<stop offset="0%" stopColor="#ffffff" stopOpacity="0" />
+						<stop offset="50%" stopColor="#ffffff" stopOpacity="0.6" />
+						<stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
 					</linearGradient>
 				</defs>
 			</svg>

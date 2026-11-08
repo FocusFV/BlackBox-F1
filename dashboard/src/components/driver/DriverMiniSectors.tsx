@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import clsx from "clsx";
 
 import type { Sector, TimingDataDriver, TimingStatsDriver } from "@/types/state.type";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useDataStore } from "@/stores/useDataStore";
 
 type Props = {
 	sectors: TimingDataDriver["Sectors"];
@@ -11,6 +13,33 @@ type Props = {
 export default function DriverMiniSectors({ sectors = [], bestSectors }: Props) {
 	const showMiniSectors = useSettingsStore((state) => state.showMiniSectors);
 	const showBestSectors = useSettingsStore((state) => state.showBestSectors);
+	const allTimingLines = useDataStore((state) => state.state?.TimingData?.Lines);
+
+	// 🏁 CANTIDAD EXACTA DE MINI-SECTORES POR SECTOR:
+	// Detectamos el total máximo de mini-sectores de la pista (ej. 6 en S1, 8-10 en S2, 6 en S3).
+	// Si a un piloto como Norris le faltan segmentos residuales (ej. solo le llegaron 4 de los 6),
+	// se completan armoniosamente según el estado del sector para que la cuadrícula quede 100% simétrica.
+	const expectedSegmentsPerSector = useMemo(() => {
+		const counts = [6, 8, 6]; // Mínimos estándar FIA
+		if (!allTimingLines) return counts;
+
+		for (const d of Object.values(allTimingLines)) {
+			const sList = (d as any)?.Sectors;
+			if (!sList) continue;
+			for (let idx = 0; idx < 3; idx++) {
+				const rawSegs = sList[idx]?.Segments;
+				const len = Array.isArray(rawSegs)
+					? rawSegs.length
+					: rawSegs && typeof rawSegs === "object"
+					? Object.keys(rawSegs).length
+					: 0;
+				if (len > counts[idx]) {
+					counts[idx] = len;
+				}
+			}
+		}
+		return counts;
+	}, [allTimingLines]);
 
 	// 🛡️ En F1 reglamentariamente siempre hay exactamente 3 sectores por vuelta (S1, S2, S3).
 	// Garantizamos una tupla fija de 3 elementos mapeando exactamente por índice (0, 1, 2)
@@ -28,6 +57,22 @@ export default function DriverMiniSectors({ sectors = [], bestSectors }: Props) 
 				const isRecord = Boolean(sector?.OverallFastest);
 				const isPersonal = Boolean(sector?.PersonalFastest);
 
+				const rawSegments: any[] = Array.isArray(sector?.Segments)
+					? sector.Segments
+					: sector?.Segments && typeof sector.Segments === "object"
+					? Object.values(sector.Segments)
+					: [];
+
+				const expectedCount = expectedSegmentsPerSector[i] || 6;
+				const paddedSegments = [...rawSegments];
+
+				// Estado por defecto para segmentos faltantes en sectores completados
+				const defaultStatus = isRecord ? 2051 : isPersonal ? 2049 : sector?.Value ? 2048 : 0;
+
+				while (paddedSegments.length < expectedCount) {
+					paddedSegments.push({ Status: defaultStatus });
+				}
+
 				return (
 					<div
 						key={`sector.${i}`}
@@ -42,9 +87,9 @@ export default function DriverMiniSectors({ sectors = [], bestSectors }: Props) 
 					>
 						{showMiniSectors && (
 							<div className="flex flex-row gap-0.5 justify-center items-center w-full px-0.5 h-[4px]">
-								{sector?.Segments && sector.Segments.length > 0 ? (
-									sector.Segments.map((segment, j) => (
-										<MiniSector status={segment.Status} key={`sector.mini.${j}`} />
+								{paddedSegments.length > 0 ? (
+									paddedSegments.map((segment, j) => (
+										<MiniSector status={segment.Status} key={`sector.mini.${i}.${j}`} />
 									))
 								) : (
 									<div className="h-[3.5px]" />

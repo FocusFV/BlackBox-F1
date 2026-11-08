@@ -3,6 +3,7 @@ import clsx from "clsx";
 import type { TimingDataDriver } from "@/types/state.type";
 import { useDataStore } from "@/stores/useDataStore";
 import { isDriverFinished } from "@/lib/driverFinished";
+import WavingFlag from "@/components/ui/WavingFlag";
 
 type Props = {
 	timingDriver: TimingDataDriver;
@@ -88,10 +89,10 @@ export default function DriverInfo({ timingDriver, gridPos }: Props) {
 			<div className="mt-1 flex items-center justify-center">
 				{status === "META" ? (
 					<span
-						className="inline-flex items-center gap-0.5 rounded border border-zinc-700/80 bg-zinc-900 px-1 py-0.5 text-[9px] font-black text-zinc-100 shadow-xs select-none"
+						className="inline-flex items-center gap-1 rounded border border-amber-500/40 bg-zinc-900/90 px-1 py-0.5 text-[9px] font-black text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.2)] select-none"
 						title="Bandera a cuadros (Finalizado)"
 					>
-						<span className="text-[10px] leading-none">🏁</span>
+						<WavingFlag type="chequered" size="xs" />
 						<span className="leading-none">META</span>
 					</span>
 				) : (

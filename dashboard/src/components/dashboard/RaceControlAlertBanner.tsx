@@ -5,10 +5,12 @@ import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { AlertTriangle, ShieldAlert, Flag, Volume2, VolumeX, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { translateFiaMessage } from "@/lib/raceControlTranslations";
+import WavingFlag from "@/components/ui/WavingFlag";
 
 interface AlertData {
 	id: string;
-	type: "SC" | "VSC" | "RED_FLAG" | "YELLOW" | "MESSAGE";
+	type: "SC" | "VSC" | "RED_FLAG" | "YELLOW" | "MESSAGE" | "CHEQUERED" | "GREEN_FLAG";
 	title: string;
 	subtitle?: string;
 	badgeBg: string;
@@ -30,6 +32,7 @@ export function RaceControlAlertBanner() {
 
 	const lastMessageUtc = useRef<string | null>(null);
 	const audioRef = useRef<HTMLAudioElement | null>(null);
+	const prevTrackStatus = useRef<string | null>(null);
 
 	useEffect(() => {
 		if (typeof window !== "undefined") {
@@ -46,13 +49,29 @@ export function RaceControlAlertBanner() {
 		}
 	};
 
-	// 1. Monitoreo de estado de pista (SC, VSC, Red Flag, Bandera Amarilla)
+	// 1. Monitoreo de estado de pista (SC, VSC, Red Flag, Bandera Amarilla, Largada en Verde)
 	useEffect(() => {
 		if (!trackStatus) return;
 
 		let alert: AlertData | null = null;
 
 		switch (trackStatus) {
+			case "1":
+				// Si la pista pasa a verde desde SC (4), VSC (6), Red Flag (5) o inicio de carrera
+				if (prevTrackStatus.current && prevTrackStatus.current !== "1") {
+					alert = {
+						id: `track-green-${Date.now()}`,
+						type: "GREEN_FLAG",
+						title: "¡LARGARON! · BANDERA VERDE EN PISTA",
+						subtitle: "Pista habilitada · ¡Aceleran a fondo!",
+						badgeBg: "bg-emerald-400",
+						textColor: "text-emerald-200",
+						borderColor: "border-emerald-400/80 shadow-[0_0_35px_rgba(16,185,129,0.35)]",
+						pulseColor: "bg-emerald-400",
+						persistent: false,
+					};
+				}
+				break;
 			case "4":
 				alert = {
 					id: "track-sc",
@@ -119,20 +138,28 @@ export function RaceControlAlertBanner() {
 				};
 				break;
 			default:
-				// Si vuelve a verde (status "1") o neutral
 				if (activeAlert?.persistent) {
 					setActiveAlert(null);
 				}
 				break;
 		}
 
+		prevTrackStatus.current = trackStatus;
+
 		if (alert && alert.id !== dismissedId) {
 			setActiveAlert(alert);
 			playAlertSound();
+
+			if (!alert.persistent) {
+				const t = setTimeout(() => {
+					setActiveAlert((curr) => (curr?.id === alert?.id ? null : curr));
+				}, 10000);
+				return () => clearTimeout(t);
+			}
 		}
 	}, [trackStatus, dismissedId]);
 
-	// 2. Monitoreo de mensajes críticos de Dirección de Carrera
+	// 2. Monitoreo de mensajes críticos de Dirección de Carrera (Banderas, Sanciones, etc.)
 	useEffect(() => {
 		if (!messages || messages.length === 0) return;
 
@@ -146,6 +173,58 @@ export function RaceControlAlertBanner() {
 		if (!isRecent) return;
 
 		const text = (latest.Message || "").toUpperCase();
+		const flag = (latest.Flag || "").toUpperCase();
+
+		// 🏁 CELEBRACIÓN DE BANDERA A CUADROS
+		if (flag === "CHEQUERED" || text.includes("CHEQUERED")) {
+			const alertId = `rc-chequered-${latest.Utc}`;
+			const messageAlert: AlertData = {
+				id: alertId,
+				type: "CHEQUERED",
+				title: "BANDERA A CUADROS · FINAL DE CARRERA",
+				subtitle: "¡Victoria y final de carrera! Monoplazas en vuelta de honor hacia el Parque Cerrado",
+				badgeBg: "bg-amber-400 text-black",
+				textColor: "text-amber-200",
+				borderColor: "border-amber-400/80 shadow-[0_0_40px_rgba(245,158,11,0.35)]",
+				pulseColor: "bg-amber-400",
+				persistent: false,
+			};
+
+			setActiveAlert(messageAlert);
+			playAlertSound();
+
+			const timer = setTimeout(() => {
+				setActiveAlert((curr) => (curr?.id === alertId ? null : curr));
+			}, 15000);
+
+			return () => clearTimeout(timer);
+		}
+
+		// 🟢 CELEBRACIÓN DE LARGADA / BANDERA VERDE
+		if (flag === "GREEN" || text.includes("GREEN LIGHT") || text.includes("GREEN FLAG")) {
+			const alertId = `rc-green-${latest.Utc}`;
+			const messageAlert: AlertData = {
+				id: alertId,
+				type: "GREEN_FLAG",
+				title: "¡LARGARON! · BANDERA VERDE EN PISTA",
+				subtitle: translateFiaMessage(latest.Message),
+				badgeBg: "bg-emerald-400 text-black",
+				textColor: "text-emerald-200",
+				borderColor: "border-emerald-400/80 shadow-[0_0_35px_rgba(16,185,129,0.35)]",
+				pulseColor: "bg-emerald-400",
+				persistent: false,
+			};
+
+			setActiveAlert(messageAlert);
+			playAlertSound();
+
+			const timer = setTimeout(() => {
+				setActiveAlert((curr) => (curr?.id === alertId ? null : curr));
+			}, 10000);
+
+			return () => clearTimeout(timer);
+		}
+
 		const isCritical =
 			text.includes("PENALTY") ||
 			text.includes("INVESTIGATION") ||
@@ -161,10 +240,10 @@ export function RaceControlAlertBanner() {
 				id: alertId,
 				type: "MESSAGE",
 				title: "DIRECCIÓN DE CARRERA",
-				subtitle: latest.Message,
-				badgeBg: "bg-red-600",
+				subtitle: translateFiaMessage(latest.Message),
+				badgeBg: "bg-red-600 text-white",
 				textColor: "text-white",
-				borderColor: "border-red-500/60",
+				borderColor: "border-red-500/60 shadow-[0_0_25px_rgba(239,68,68,0.25)]",
 				pulseColor: "bg-red-400",
 				persistent: false,
 			};
@@ -194,11 +273,15 @@ export function RaceControlAlertBanner() {
 				<div className="flex items-center justify-between gap-3">
 					{/* Icono + Título + Subtítulo */}
 					<div className="flex items-center gap-3">
-						<div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-700/60">
+						<div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-700/60">
 							<span
 								className={`absolute inline-flex h-full w-full animate-ping rounded-lg opacity-40 ${activeAlert.pulseColor}`}
 							></span>
-							{activeAlert.type === "RED_FLAG" ? (
+							{activeAlert.type === "CHEQUERED" ? (
+								<WavingFlag type="chequered" size="sm" />
+							) : activeAlert.type === "GREEN_FLAG" ? (
+								<WavingFlag type="green" size="sm" />
+							) : activeAlert.type === "RED_FLAG" ? (
 								<Flag className="h-5 w-5 text-red-500 fill-red-500" />
 							) : activeAlert.type === "SC" || activeAlert.type === "VSC" ? (
 								<ShieldAlert className="h-5 w-5 text-amber-400" />
@@ -210,9 +293,9 @@ export function RaceControlAlertBanner() {
 						<div className="flex flex-col">
 							<div className="flex items-center gap-2">
 								<span
-									className={`rounded px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-black ${activeAlert.badgeBg}`}
+									className={`rounded px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${activeAlert.badgeBg}`}
 								>
-									{activeAlert.type}
+									{activeAlert.type === "CHEQUERED" ? "META" : activeAlert.type === "GREEN_FLAG" ? "VERDE" : activeAlert.type}
 								</span>
 								<h4 className="text-xs font-black uppercase tracking-wide text-white md:text-sm">
 									{activeAlert.title}
