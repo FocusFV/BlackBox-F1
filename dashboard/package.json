@@ -27,12 +27,13 @@
 		"react": "^19.2.5",
 		"react-dom": "^19.2.5",
 		"sharp": "0.34.5",
+		"tailwindcss": "4.2.3",
+		"@tailwindcss/postcss": "4.2.3",
 		"wrangler": "^4.158.0",
 		"zod": "3.25.76",
 		"zustand": "5.0.12"
 	},
 	"devDependencies": {
-		"@tailwindcss/postcss": "4.2.3",
 		"@types/node": "22.19.17",
 		"@types/pako": "2.0.4",
 		"@types/react": "^19.2.14",
