@@ -199,6 +199,8 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 					"border-amber-400/50 bg-amber-950/20 shadow-[0_0_14px_rgba(245,158,11,0.15)]": isFinished && position === 1,
 					"bg-violet-950/40 border-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.15)]": hasFastest && (!isFinished || position !== 1),
 					"bg-red-950/40 border-red-500/50": isQualy && sessionPart != undefined && inDangerZone(position, sessionPart),
+					"border-amber-500/70! bg-gradient-to-r! from-amber-500/15 via-zinc-950/90 to-zinc-950/40 border-l-4! border-l-amber-400! shadow-[0_0_16px_rgba(245,158,11,0.18)]": Boolean(timingDriver.InPit),
+					"border-cyan-500/60! bg-gradient-to-r! from-cyan-500/10 via-zinc-950/90 to-zinc-950/40 border-l-4! border-l-cyan-400! shadow-[0_0_14px_rgba(6,182,212,0.15)]": Boolean(timingDriver.PitOut && !timingDriver.InPit),
 				}
 			)}
 		>
@@ -236,6 +238,8 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 					hasFastest={hasFastest}
 					isLastOverallFastest={isLastOverallFastest}
 					isLastPersonalFastest={isLastPersonalFastest}
+					inPit={timingDriver.InPit}
+					pitOut={timingDriver.PitOut}
 				/>
 				<div className="flex items-center gap-2">
 					<DriverMiniSectors sectors={timingDriver.Sectors} bestSectors={timingStatsDriver?.BestSectors} />

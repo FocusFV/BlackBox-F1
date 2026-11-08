@@ -32,34 +32,13 @@ export function RaceControlMessage({ msg, gmtOffset }: Props) {
 	const localTime = utc(msg.Utc).local().format("HH:mm:ss");
 	const trackTime = utc(toTrackTime(msg.Utc, gmtOffset)).format("HH:mm");
 
-	// 🏁 Traducción instantánea determinista oficial en español (sin esperar red ni sufrir CORS)
+	// 🏁 Traducción instantánea determinista oficial en español (0 ms, 0 llamadas de red, 0 consumo de servidor)
 	const initialTranslation = translateFiaMessage(msg.Message);
 	const [translatedText, setTranslatedText] = useState(initialTranslation);
-	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
 		if (!msg.Message) return;
-		const local = translateFiaMessage(msg.Message);
-		setTranslatedText(local);
-
-		// Si quedara algún residuo en inglés, recurrimos a la API del servidor (sin problemas de CORS)
-		const hasEnglish = /\b(turn|incident|investigated|stewards|driver|limits|penalty|noted|deleted)\b/i.test(local);
-		if (hasEnglish) {
-			setIsLoading(true);
-			fetch(`/api/translate?text=${encodeURIComponent(msg.Message)}`)
-				.then((res) => res.json())
-				.then((data) => {
-					if (data?.translated) {
-						setTranslatedText(postProcessFiaTranslation(data.translated));
-					}
-				})
-				.catch((err) => {
-					console.warn("Fallo traducción de servidor:", err);
-				})
-				.finally(() => {
-					setIsLoading(false);
-				});
-		}
+		setTranslatedText(translateFiaMessage(msg.Message));
 	}, [msg.Message]);
 
 	const isChequered = msg.Flag === "CHEQUERED" || msg.Message?.toUpperCase().includes("CHEQUERED");
@@ -143,7 +122,7 @@ export function RaceControlMessage({ msg, gmtOffset }: Props) {
 					</time>
 				</div>
 
-				<p className={clsx("text-sm, transition-opacity", { "opacity-50": isLoading })}>{translatedText}</p>
+				<p className="text-sm text-zinc-100">{translatedText}</p>
 			</div>
 
 			{msg.Flag && msg.Flag !== "CLEAR" && (

@@ -135,6 +135,29 @@ export function LocalDevSwitch({ mode, onModeChange }: Props) {
 		});
 	};
 
+	// 🛠️ Alternar Auto en Boxes (Verstappen InPit / Pista) para probar visualmente
+	const triggerTogglePit = () => {
+		const currentLines = useDataStore.getState().state?.TimingData?.Lines;
+		if (!currentLines || !currentLines["1"]) return;
+
+		const isCurrentlyInPit = Boolean(currentLines["1"]?.InPit);
+		const updated: any = {
+			...currentLines,
+			"1": {
+				...currentLines["1"],
+				InPit: !isCurrentlyInPit,
+				PitOut: isCurrentlyInPit,
+			},
+		};
+
+		const existingTiming = useDataStore.getState().state?.TimingData;
+		useDataStore.getState().setState({
+			TimingData: existingTiming
+				? { ...existingTiming, Lines: updated }
+				: undefined,
+		});
+	};
+
 	// 🔄 Reiniciar Simulación Local
 	const resetSimulation = () => {
 		simulator.stop();
@@ -269,6 +292,18 @@ export function LocalDevSwitch({ mode, onModeChange }: Props) {
 									<span>Probar Lance Stroll (Sin Paseo)</span>
 								</div>
 								<span className="text-[9px] uppercase tracking-widest text-zinc-400">Comisarios</span>
+							</button>
+
+							<button
+								type="button"
+								onClick={triggerTogglePit}
+								className="flex items-center justify-between rounded-lg border border-amber-500/50 bg-amber-500/15 px-2.5 py-1.5 text-[11px] font-bold text-amber-200 hover:bg-amber-500/25 transition-all cursor-pointer"
+							>
+								<div className="flex items-center gap-2">
+									<span>🛠️</span>
+									<span>Alternar Auto en Boxes (VER)</span>
+								</div>
+								<span className="text-[9px] uppercase tracking-widest text-amber-400">Test Pit</span>
 							</button>
 						</div>
 					</div>

@@ -95,12 +95,33 @@ export default function DriverInfo({ timingDriver, gridPos }: Props) {
 						<WavingFlag type="chequered" size="xs" />
 						<span className="leading-none">META</span>
 					</span>
+				) : status === "BOX" ? (
+					<span
+						className="inline-flex items-center gap-1 rounded border border-amber-400/70 bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-black text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.25)] select-none tracking-wider"
+						title="Monoplaza detenido en boxes (Pit Lane)"
+					>
+						<span className="relative flex h-1.5 w-1.5">
+							<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-80" />
+							<span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
+						</span>
+						<span className="leading-none text-[9px]">🛠️</span>
+						<span className="leading-none">IN PIT</span>
+					</span>
+				) : status === "SALIDA" ? (
+					<span
+						className="inline-flex items-center gap-1 rounded border border-cyan-400/60 bg-cyan-500/20 px-1.5 py-0.5 text-[9px] font-black text-cyan-300 shadow-[0_0_8px_rgba(6,182,212,0.2)] select-none tracking-wider"
+						title="Saliendo de boxes a pista (Pit Exit)"
+					>
+						<span className="relative flex h-1.5 w-1.5">
+							<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-80" />
+							<span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+						</span>
+						<span className="leading-none">PIT OUT</span>
+					</span>
 				) : (
 					<p
 						className={clsx("text-[10px] font-black leading-none uppercase tracking-tight", {
-							"text-amber-400": status === "BOX",
 							"text-emerald-400": status === "PISTA",
-							"text-cyan-400": status === "SALIDA",
 							"text-red-400": status === "ELIM" || status === "ABAN" || status === "DET",
 							"text-zinc-400": status === "CORTE",
 						})}
