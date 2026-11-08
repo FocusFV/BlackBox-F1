@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import type { Message } from "@/types/state.type";
 
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { isFavoriteDriver } from "@/lib/favoriteDriver";
 
 import { toTrackTime } from "@/lib/toTrackTime";
 import {
@@ -25,7 +26,7 @@ const getDriverNumber = (msg: Message) => {
 };
 
 export function RaceControlMessage({ msg, gmtOffset }: Props) {
-	const favoriteDriver = useSettingsStore((state) => state.favoriteDrivers.includes(getDriverNumber(msg) ?? ""));
+	const favoriteDriver = useSettingsStore((state) => isFavoriteDriver(getDriverNumber(msg), state.favoriteDrivers));
 
 	const localTime = utc(msg.Utc).local().format("HH:mm:ss");
 	const trackTime = utc(toTrackTime(msg.Utc, gmtOffset)).format("HH:mm");

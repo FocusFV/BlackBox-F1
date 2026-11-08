@@ -99,7 +99,7 @@ export default function TrackMap() {
 						<ul className="space-y-1 text-[10px] text-zinc-400">
 							<li className="flex justify-between"><span className="font-bold text-zinc-500">Trazado Ideal:</span> <span className="text-emerald-500 font-black">Proyectado</span></li>
 							<li className="flex justify-between"><span className="font-bold text-zinc-500">Vértices y Curvas:</span> <span className="text-zinc-200 font-black">Modo HUD Activo</span></li>
-							<li className="flex justify-between"><span className="font-bold text-zinc-500">Boost PU 2026:</span> <span className="text-amber-500 font-black">Manual Override</span></li>
+							<li className="flex justify-between"><span className="font-bold text-zinc-500">Boost PU 2026:</span> <span className="text-amber-500 font-black">Manual Override Activo</span></li>
 						</ul>
 					</div>
 					<div className="w-full h-full flex items-center justify-center relative">

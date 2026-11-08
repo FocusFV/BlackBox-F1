@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import clsx from "clsx";
 import { motion } from "motion/react";
 
@@ -9,6 +10,9 @@ import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useDataStore } from "@/stores/useDataStore";
 import { triggerHaptic } from "@/lib/haptics";
 import { resolveDriverColor } from "@/lib/teamcolors";
+import { parseLapTimeToMs, getFastestLapInSession } from "@/lib/lapTime";
+import { isFavoriteDriver } from "@/lib/favoriteDriver";
+import { isDriverFinished } from "@/lib/driverFinished";
 
 import DriverTag from "./DriverTag";
 import DriverDRS from "./DriverDRS";
@@ -18,6 +22,7 @@ import DriverMiniSectors from "./DriverMiniSectors";
 import DriverLapTime from "./DriverLapTime";
 import DriverInfo from "./DriverInfo";
 import DriverCarMetrics from "./DriverCarMetrics";
+import ChequeredFlagStrip from "./ChequeredFlagStrip";
 
 type Props = {
 	position: number;
@@ -25,10 +30,6 @@ type Props = {
 	timingDriver: TimingDataDriver;
 	teamColor?: string; // 🌟 LE AGREGAMOS EL '?' ACÁ PARA HACERLA OPCIONAL
 };
-
-const hasDRS = (drs: number) => drs > 9;
-
-const possibleDRS = (drs: number) => drs === 8;
 
 const inDangerZone = (position: number, sessionPart: number) => {
 	switch (sessionPart) {
@@ -49,6 +50,8 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 	const timingStatsDriver = useDataStore((state) => state.state?.TimingStats?.Lines[driver.RacingNumber]);
 	const appTimingDriver = useDataStore((state) => state.state?.TimingAppData?.Lines[driver.RacingNumber]);
 	const carData = useDataStore((state) => (state?.carsData ? state.carsData[driver.RacingNumber]?.Channels : undefined));
+	const raceControlMessages = useDataStore((state) => state.state?.RaceControlMessages?.Messages);
+	const sessionStatus = useDataStore((state) => state.state?.SessionStatus?.Status);
 
 	const isRaceOrSprint = Boolean(
 		session?.Name === "Race" ||
@@ -66,25 +69,122 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 
 	const isEliminated = isQualy && Boolean(timingDriver.KnockedOut);
 
-	const hasFastest = timingStatsDriver?.PersonalBestLapTime.Position == 1;
+	// 🏁 Detección en tiempo real: ¿Ya tomó la bandera a cuadros este monoplaza individualmente?
+	const isFinished = isDriverFinished({
+		timingDriver,
+		position,
+		sessionName: session?.Name,
+		sessionType: session?.Type,
+		sessionStatus,
+		totalLaps: lapCount?.TotalLaps,
+		currentLap: lapCount?.CurrentLap,
+		raceControlMessages,
+	});
+
+	// 🟣 VUELTA RÁPIDA REAL Y VERIFICADA DE LA SESIÓN:
+	// Buscamos el mejor tiempo absoluto de la sesión en toda la grilla para evitar que deltas residuales pinten de lila a pilotos lentos
+	const allTimingLines = useDataStore((state) => state.state?.TimingData?.Lines);
+	const sessionFastestMs = useMemo(() => getFastestLapInSession(allTimingLines), [allTimingLines]);
+
+	const driverBestMs = parseLapTimeToMs(timingDriver.BestLapTime?.Value);
+	const hasFastest = Boolean(
+		driverBestMs !== null &&
+		sessionFastestMs !== null &&
+		driverBestMs <= sessionFastestMs &&
+		driverBestMs > 45000
+	);
+
+	const driverLastMs = parseLapTimeToMs(timingDriver.LastLapTime?.Value);
+
+	// La última vuelta solo es púrpura si coincide exactamente con el récord de la sesión
+	const isLastOverallFastest = Boolean(
+		driverLastMs !== null &&
+		sessionFastestMs !== null &&
+		driverLastMs <= sessionFastestMs &&
+		driverLastMs > 45000
+	);
+
+	// La última vuelta es verde (personal best) solo si coincide con su propio mejor tiempo
+	const isLastPersonalFastest = Boolean(
+		!isLastOverallFastest &&
+		driverLastMs !== null &&
+		driverBestMs !== null &&
+		driverLastMs <= driverBestMs &&
+		timingDriver.LastLapTime?.PersonalFastest
+	);
 
 	const carMetrics = useSettingsStore((state) => state.carMetrics);
 	const gridDensity = useSettingsStore((state) => state.gridDensity);
 	const isCompact = gridDensity === "compact";
 
-	const favoriteDriver = useSettingsStore((state) => {
-		const list = state.favoriteDrivers || [];
-		const num = String(driver?.RacingNumber ?? timingDriver?.RacingNumber ?? "").trim();
-		const tla = String(driver?.Tla ?? "").trim().toUpperCase();
-		return list.some((fav) => {
-			const f = String(fav).trim();
-			return f === num || (tla && f.toUpperCase() === tla);
-		});
-	});
+	const favoriteDriver = useSettingsStore((state) =>
+		isFavoriteDriver(driver ?? timingDriver, state.favoriteDrivers)
+	);
 
 	const speeds = timingDriver?.Speeds as any;
 	const trapSpeed = speeds?.ST?.Value || speeds?.St?.Value || speeds?.FL?.Value || speeds?.Fl?.Value || speeds?.I2?.Value || speeds?.I1?.Value;
 	const trapLabel = (speeds?.ST?.Value || speeds?.St?.Value) ? "ST" : ((speeds?.FL?.Value || speeds?.Fl?.Value) ? "FL" : (speeds?.I2?.Value ? "I2" : ""));
+
+	// ⚡ LÓGICA INTELIGENTE DE BOOST / DRS (Manual Override 2026 & FIA Timing)
+	const trackStatusCode = useDataStore((state) => state.state?.TrackStatus?.Status);
+	// DRS / Boost deshabilitado bajo Safety Car (4), Red Flag (5) o VSC (6, 7)
+	const isDrsDisabledByRaceControl =
+		trackStatusCode === "4" || trackStatusCode === "5" || trackStatusCode === "6" || trackStatusCode === "7";
+
+	const parseInterval = (val?: string): number | null => {
+		if (!val) return null;
+		const clean = String(val).replace("+", "").trim();
+		if (clean.includes("LAP") || clean.includes("L") || clean.includes("-")) return null;
+		const num = parseFloat(clean);
+		return isNaN(num) ? null : num;
+	};
+
+	const gapToFrontStr =
+		timingDriver.IntervalToPositionAhead?.Value ??
+		(timingDriver.Stats ? timingDriver.Stats[sessionPart ? sessionPart - 1 : 0]?.TimeDifftoPositionAhead : undefined) ??
+		timingDriver.TimeDiffToPositionAhead;
+
+	const intervalSeconds = parseInterval(gapToFrontStr);
+	// Elegible para Boost / DRS si está a 1.0s o menos del auto de adelante en carrera
+	const isEligibleByGap = position > 1 && intervalSeconds !== null && intervalSeconds > 0 && intervalSeconds <= 1.0;
+
+	// Telemetría directa ECU canal 45
+	const rawDrs = carData ? Number(carData[45]) : undefined;
+	const isTelemetryDrsOn = rawDrs !== undefined && rawDrs >= 10;
+	const isTelemetryDrsPossible = rawDrs === 8;
+
+	// Detección de aceleración a fondo en recta: acelerador > 85% y alta velocidad / marchas altas
+	const isFullThrottleStraight = Boolean(
+		carData &&
+		carData[4] >= 85 && // Acelerador > 85%
+		(carData[2] >= 250 || carData[3] >= 6) // Velocidad > 250 km/h o marcha 6, 7 u 8
+	);
+
+	let isBoostOn = false;
+	let isBoostPossible = false;
+
+	if (!isDrsDisabledByRaceControl && !timingDriver.InPit && !timingDriver.PitOut && !timingDriver.Retired && !timingDriver.Stopped) {
+		if (isTelemetryDrsOn) {
+			isBoostOn = true;
+		} else if (isRaceOrSprint) {
+			if (isEligibleByGap) {
+				if (isFullThrottleStraight) {
+					isBoostOn = true;
+				} else {
+					isBoostPossible = true;
+				}
+			} else if (isTelemetryDrsPossible) {
+				isBoostPossible = true;
+			}
+		} else if (isQualy) {
+			// En clasificación todos tienen DRS/Boost en zonas activas
+			if (isFullThrottleStraight) {
+				isBoostOn = true;
+			} else {
+				isBoostPossible = true;
+			}
+		}
+	}
 
 	return (
 		<motion.div
@@ -96,7 +196,8 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 				isCompact ? "p-1" : "p-1.5",
 				{
 					"opacity-40 grayscale": isEliminated || timingDriver.Retired || timingDriver.Stopped,
-					"bg-violet-950/40 border-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.15)]": hasFastest,
+					"border-amber-400/50 bg-amber-950/20 shadow-[0_0_14px_rgba(245,158,11,0.15)]": isFinished && position === 1,
+					"bg-violet-950/40 border-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.15)]": hasFastest && (!isFinished || position !== 1),
 					"bg-red-950/40 border-red-500/50": isQualy && sessionPart != undefined && inDangerZone(position, sessionPart),
 				}
 			)}
@@ -118,8 +219,8 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 					isFavorite={favoriteDriver}
 				/>
 				<DriverDRS
-					on={carData ? hasDRS(carData[45]) : false}
-					possible={carData ? possibleDRS(carData[45]) : false}
+					on={isBoostOn}
+					possible={isBoostPossible}
 					inPit={timingDriver.InPit}
 					pitOut={timingDriver.PitOut}
 				/>
@@ -129,8 +230,17 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 					gridPos={appTimingDriver?.GridPos ? parseInt(appTimingDriver.GridPos, 10) : undefined}
 				/>
 				<DriverGap timingDriver={timingDriver} sessionPart={sessionPart} />
-				<DriverLapTime last={timingDriver.LastLapTime} best={timingDriver.BestLapTime} hasFastest={hasFastest} />
-				<DriverMiniSectors sectors={timingDriver.Sectors} bestSectors={timingStatsDriver?.BestSectors} />
+				<DriverLapTime
+					last={timingDriver.LastLapTime}
+					best={timingDriver.BestLapTime}
+					hasFastest={hasFastest}
+					isLastOverallFastest={isLastOverallFastest}
+					isLastPersonalFastest={isLastPersonalFastest}
+				/>
+				<div className="flex items-center gap-2">
+					<DriverMiniSectors sectors={timingDriver.Sectors} bestSectors={timingStatsDriver?.BestSectors} />
+					{isFinished && <ChequeredFlagStrip />}
+				</div>
 
 				{carMetrics && (
 					carData ? (

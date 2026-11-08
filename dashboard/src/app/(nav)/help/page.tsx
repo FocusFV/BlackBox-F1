@@ -135,7 +135,7 @@ export default function HelpPage() {
 			<section className="space-y-6">
 				<div className="border-b border-zinc-800/80 pb-4">
 					<h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-						<span className="text-red-500">#</span> Estados de DRS y Boxes (PIT)
+						<span className="text-red-500">#</span> Estados de BOOST / DRS y Boxes (PIT)
 					</h2>
 					<p className="text-sm text-zinc-400 mt-1">
 						Saber al instante si un auto tiene oportunidad de sobrepaso o si perderá tiempo en boxes.
@@ -145,35 +145,35 @@ export default function HelpPage() {
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<div className="flex items-center justify-between rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
 						<div>
-							<h3 className="font-bold text-white">DRS Apagado</h3>
-							<p className="text-xs text-zinc-400">Estado por defecto cuando no hay zona habilitada o está fuera de rango.</p>
+							<h3 className="font-bold text-zinc-300">BOOST Apagado</h3>
+							<p className="text-xs text-zinc-400">Fuera de rango (&gt;1.0s) respecto al monoplaza de adelante.</p>
 						</div>
 						<div className="w-16">
 							<DriverDRS on={false} possible={false} inPit={false} pitOut={false} />
 						</div>
 					</div>
 
-					<div className="flex items-center justify-between rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
+					<div className="flex items-center justify-between rounded-xl border border-amber-500/30 bg-amber-950/20 p-4">
 						<div>
-							<h3 className="font-bold text-white">DRS Posible</h3>
-							<p className="text-xs text-zinc-400">A menos de 1s en la detección. Listo para abrir ala en zona DRS.</p>
+							<h3 className="font-bold text-amber-400">BOOST Disponible (Listo)</h3>
+							<p className="text-xs text-zinc-400">A menos de 1.0s de persecución. Modo Manual Override habilitado.</p>
 						</div>
 						<div className="w-16">
 							<DriverDRS on={false} possible={true} inPit={false} pitOut={false} />
 						</div>
 					</div>
 
-					<div className="flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-950/10 p-4">
+					<div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4">
 						<div>
-							<h3 className="font-bold text-emerald-400">DRS Activo</h3>
-							<p className="text-xs text-zinc-400">El alerón trasero está abierto entregando máxima velocidad punta.</p>
+							<h3 className="font-bold text-emerald-400">BOOST Activo (Desplegando)</h3>
+							<p className="text-xs text-zinc-400">Despliegue máximo de potencia eléctrica y alerón abierto en recta.</p>
 						</div>
 						<div className="w-16">
 							<DriverDRS on={true} possible={false} inPit={false} pitOut={false} />
 						</div>
 					</div>
 
-					<div className="flex items-center justify-between rounded-xl border border-amber-500/20 bg-amber-950/10 p-4">
+					<div className="flex items-center justify-between rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
 						<div>
 							<h3 className="font-bold text-amber-400">En PIT / Pit Out</h3>
 							<p className="text-xs text-zinc-400">El coche se desplaza por la calle de boxes realizando parada o regreso.</p>

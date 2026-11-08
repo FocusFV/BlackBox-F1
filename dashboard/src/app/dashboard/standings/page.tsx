@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { isFavoriteDriver } from "@/lib/favoriteDriver";
 import { motion, AnimatePresence } from "motion/react";
 import clsx from "clsx";
 import calendar2026 from "@/data/calendar2026.json";
@@ -770,7 +771,7 @@ export default function Standings() {
 								: (driverToTeamNameMap[driverCode] || "F1 Team");
 
 							const badgeColor = driverTeamColorMap[driverCode] || { bg: "#3f3f46", text: "#ffffff" };
-							const isFav = year === 2026 && favoriteDrivers?.includes(driverCode);
+							const isFav = year === 2026 && isFavoriteDriver(driverCode, favoriteDrivers);
 
 							const posNum = parseInt(driver.position, 10);
 							const isP1 = posNum === 1;

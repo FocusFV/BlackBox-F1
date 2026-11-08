@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { isFavoriteDriver } from "@/lib/favoriteDriver";
 import { Radio, Play, Pause, X, Volume2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import type { Driver, RadioCapture } from "@/types/state.type";
@@ -41,7 +42,7 @@ export function TeamRadioAlertPopup() {
 
 		// Si el usuario tiene pilotos favoritos, filtramos por ellos. Si no tiene ninguno seleccionado, mostramos de cualquiera.
 		const isTargetDriver =
-			favoriteDrivers.length === 0 || favoriteDrivers.includes(latest.RacingNumber);
+			favoriteDrivers.length === 0 || isFavoriteDriver(latest.RacingNumber, favoriteDrivers);
 
 		if (isTargetDriver) {
 			const driver = drivers[latest.RacingNumber];

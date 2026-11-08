@@ -13,6 +13,7 @@ import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { getTrackStatusMessage } from "@/lib/getTrackStatusMessage";
 import { parseUtcMs, parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
+import { isFavoriteDriver } from "@/lib/favoriteDriver";
 import {
 	createSectors,
 	findYellowSectors,
@@ -386,7 +387,15 @@ export default function Map({ filter }: { filter?: string[] }) {
 
 			{centerX !== null && centerY !== null && rotation !== null && drivers && timingDrivers && Object.keys(drivers).length > 0 && (
 				<>
-					{Object.values(drivers).reverse().filter((driver: any) => (filter ? filter.includes(driver.RacingNumber) : true)).map((driver: any) => {
+					{Object.values(drivers)
+						.filter((driver: any) => (filter ? filter.includes(driver.RacingNumber) : true))
+						// 🌟 Prioridad Z-Order: los pilotos favoritos se renderizan al final para que siempre queden por encima en el mapa
+						.sort((a: any, b: any) => {
+							const aFav = isFavoriteDriver(a, favoriteDrivers) ? 1 : 0;
+							const bFav = isFavoriteDriver(b, favoriteDrivers) ? 1 : 0;
+							return aFav - bFav;
+						})
+						.map((driver: any) => {
 						const timingDriver = timingDrivers?.Lines?.[driver.RacingNumber];
 						const rawPos = positions?.[driver.RacingNumber];
 						const isInPit = Boolean(timingDriver?.InPit);
@@ -446,7 +455,7 @@ export default function Map({ filter }: { filter?: string[] }) {
 						prevCarsRef.current[driver.RacingNumber] = { x: carX, y: carY, angle: carAngle };
 
 						const colorConfig = TEAM_COLORS_2026[driver.Tla] || { bg: "#ffffff", text: "#ffffff" };
-						const isFav = favoriteDrivers.includes(driver.RacingNumber);
+						const isFav = isFavoriteDriver(driver, favoriteDrivers);
 
 						return (
 							<CarObject
@@ -523,6 +532,45 @@ const CarObject = ({ x, y, name, colors, angle, favorite, pit, hidden }: any) =>
 			transform={`translate(${x}, ${y})`}
 			style={{ transform: `translateX(${x}px) translateY(${y}px)` }}
 		>
+			{/* 🌟 BALIZA RADAR VIP DE PILOTO FAVORITO */}
+			{favorite && (
+				<g className="pointer-events-none select-none">
+					{/* Onda expansiva de radar continua */}
+					<circle
+						cx="0"
+						cy="0"
+						r="340"
+						fill="none"
+						stroke="#fbbf24"
+						strokeWidth="28"
+						opacity="0.4"
+						className="animate-ping origin-center"
+					/>
+					{/* Anillo de baliza dorada exterior con trazo segmentado */}
+					<circle
+						cx="0"
+						cy="0"
+						r="360"
+						fill="rgba(245, 158, 11, 0.14)"
+						stroke="#fbbf24"
+						strokeWidth="28"
+						strokeDasharray="60 30"
+						opacity="0.9"
+					/>
+					{/* Halo interior con el color oficial de la escudería */}
+					<circle
+						cx="0"
+						cy="0"
+						r="240"
+						fill={colors.bg}
+						fillOpacity="0.22"
+						stroke={colors.bg}
+						strokeWidth="18"
+						opacity="0.9"
+					/>
+				</g>
+			)}
+
 			{/* 🏎️ MONOPLAZA 2026 PREMIUM (Silueta con Curvas Orgánicas Redondeadas) */}
 			<g transform={`rotate(${angle + 90})`} style={{ transition: "transform 0.3s linear" }}>
 				{/* Ejes de suspensión delantera y trasera estilizados */}
@@ -579,7 +627,17 @@ const CarObject = ({ x, y, name, colors, angle, favorite, pit, hidden }: any) =>
 
 			{/* 🏷️ PANEL HUD DE PILOTO COMPACTO */}
 			<g transform="translate(150, -180)">
-				<rect x="-20" y="-55" width="160" height="70" fill="#000000" rx="10" stroke={colors.bg} strokeWidth={14} opacity="0.95" />
+				<rect 
+					x="-20" 
+					y="-55" 
+					width="160" 
+					height="70" 
+					fill="#000000" 
+					rx="10" 
+					stroke={favorite ? "#fbbf24" : colors.bg} 
+					strokeWidth={favorite ? 20 : 14} 
+					opacity="0.95" 
+				/>
 				
 				<text 
 					x="60" 
@@ -596,22 +654,17 @@ const CarObject = ({ x, y, name, colors, angle, favorite, pit, hidden }: any) =>
 					{name}
 				</text>
 
-				{/* ⭐ DETALLE PREMIUM: Estrellita dorada flotante animada si es piloto favorito */}
+				{/* ⭐ DETALLE PREMIUM: Insignia de Estrella Dorada HUD visible sobre el nombre */}
 				{favorite && (
-					<g transform="translate(115, -60)" className="animate-pulse">
-						{/* Sombra negra de fondo para la estrella */}
+					<g transform="translate(60, -145)" className="animate-pulse">
+						{/* Círculo de fondo oscuro para el badge */}
+						<circle cx="0" cy="0" r="110" fill="#09090b" stroke="#f59e0b" strokeWidth="20" />
+						{/* Estrella Dorada HUD grande y nítida */}
 						<path 
-							d="M 0,-25 L 7,-7 L 25,-6 L 11,6 L 15,24 L 0,14 L -15,24 L -11,6 L -25,-6 L -7,-7 Z" 
-							fill="#000000" 
-							stroke="#000000" 
+							d="M 0,-65 L 19,-20 L 68,-15 L 30,16 L 41,65 L 0,38 L -41,65 L -30,16 L -68,-15 L -19,-20 Z" 
+							fill="#fbbf24" 
+							stroke="#d97706" 
 							strokeWidth="8"
-						/>
-						{/* Estrella Dorada HUD */}
-						<path 
-							d="M 0,-25 L 7,-7 L 25,-6 L 11,6 L 15,24 L 0,14 L -15,24 L -11,6 L -25,-6 L -7,-7 Z" 
-							fill="#ffd700" 
-							stroke="#ff9900" 
-							strokeWidth="3"
 						/>
 					</g>
 				)}

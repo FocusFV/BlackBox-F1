@@ -130,12 +130,12 @@ function MobileDynamicBar() {
 }
 
 function MobileStaticBar({ show, connected }: { show: boolean; connected: boolean }) {
-	const open = useSidebarStore((state) => state.open);
+	const toggle = useSidebarStore((state) => state.toggle);
 
 	return (
 		<div className="relative z-20 flex w-full items-center justify-between overflow-hidden border-b border-zinc-800/90 bg-zinc-950/90 backdrop-blur-md p-2 md:hidden shadow-md">
 			<div className="flex items-center gap-2">
-				<SidenavButton key="mobile" onClick={() => open()} />
+				<SidenavButton key="mobile" onClick={() => toggle()} title="Menú lateral" />
 
 				<DelayInput saveDelay={500} />
 				<DelayTimer />
@@ -150,18 +150,21 @@ function MobileStaticBar({ show, connected }: { show: boolean; connected: boolea
 
 function DesktopStaticBar({ show }: { show: boolean }) {
 	const pinned = useSidebarStore((state) => state.pinned);
-	const pin = useSidebarStore((state) => state.pin);
+	const togglePin = useSidebarStore((state) => state.togglePin);
 
 	return (
 		<div className="relative z-20 hidden w-full flex-row justify-between overflow-hidden rounded-xl border border-zinc-800/90 bg-zinc-950/85 backdrop-blur-xl p-2.5 shadow-xl md:flex">
 			<div className="flex items-center gap-2">
-				<AnimatePresence>
-					{!pinned && <SidenavButton key="desktop" className="shrink-0" onClick={() => pin()} />}
+				<SidenavButton 
+					key="desktop" 
+					className="shrink-0" 
+					onClick={() => togglePin()} 
+					title={pinned ? "Ocultar menú lateral" : "Fijar menú lateral"}
+				/>
 
-					<motion.div key="session-info" layout="position">
-						<SessionInfo />
-					</motion.div>
-				</AnimatePresence>
+				<motion.div key="session-info" layout="position">
+					<SessionInfo />
+				</motion.div>
 			</div>
 
 			<div className="flex justify-end">{show && <TrackInfo />}</div>

@@ -7,6 +7,7 @@ import { Languages, Loader2 } from "lucide-react";
 import type { Driver, RadioCapture } from "@/types/state.type";
 
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { isFavoriteDriver } from "@/lib/favoriteDriver";
 
 import { toTrackTime } from "@/lib/toTrackTime";
 
@@ -109,7 +110,7 @@ export default function RadioMessage({ driver, capture, basePath, gmtOffset }: P
 		});
 	};
 
-	const favoriteDriver = useSettingsStore((state) => state.favoriteDrivers.includes(driver.RacingNumber));
+	const favoriteDriver = useSettingsStore((state) => isFavoriteDriver(driver, state.favoriteDrivers));
 
 	const localTime = utc(capture.Utc).local().format("HH:mm:ss");
 	const trackTime = utc(toTrackTime(capture.Utc, gmtOffset)).format("HH:mm");

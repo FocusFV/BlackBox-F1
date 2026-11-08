@@ -105,9 +105,8 @@ export default function StreamsPage() {
 	const [isUnlocking, setIsUnlocking] = useState<boolean>(false);
 
 	// Controles del Sidebar Store
-	const openSidebar = useSidebarStore((state) => state.open);
 	const pinnedSidebar = useSidebarStore((state) => state.pinned);
-	const pinSidebar = useSidebarStore((state) => state.pin);
+	const toggleSidebar = useSidebarStore((state) => state.toggle);
 
 	// 🏎️ PARRILLA PROTEGIDA CON ENCRIPTACIÓN DE SERVIDORES Y DE RESPALDO
 	interface StreamSource {
@@ -402,9 +401,13 @@ export default function StreamsPage() {
 				{/* 🛑 CASO 1: MOTORES APAGADOS (CANDADO CERRADO) */}
 				{!isLive && !bypass ? (
 					<div className="pt-4 w-full mx-auto px-4 sm:px-6 h-full flex flex-col items-center justify-center relative">
-						<div className="absolute top-4 left-4">
+						<div className="absolute top-4 left-4 z-20">
 							<SidenavButton
-								onClick={() => (pinnedSidebar ? pinSidebar() : openSidebar())}
+								onClick={() => {
+									triggerHaptic("light");
+									toggleSidebar();
+								}}
+								title={pinnedSidebar ? "Ocultar menú lateral" : "Fijar menú lateral"}
 							/>
 						</div>
 
@@ -489,12 +492,16 @@ export default function StreamsPage() {
 					</div>
 				) : (
 					/* 🟢 CASO 2: TRANSMISIONES EN VIVO (CANDADO ABIERTO) */
-					<div className="pt-2 w-full mx-auto px-4 sm:px-6 max-w-7xl animate-in fade-in zoom-in-[0.98] duration-700 ease-out">
+					<div className="pt-2 w-full mx-auto px-4 sm:px-6 max-w-[1920px] animate-in fade-in zoom-in-[0.98] duration-700 ease-out">
 						{/* CABECERA HUD CON BOTÓN DE SIDEBAR */}
 						<div className="my-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-900 pb-4">
 							<div className="flex items-center gap-3">
 								<SidenavButton
-									onClick={() => (pinnedSidebar ? pinSidebar() : openSidebar())}
+									onClick={() => {
+										triggerHaptic("light");
+										toggleSidebar();
+									}}
+									title={pinnedSidebar ? "Ocultar menú lateral" : "Fijar menú lateral"}
 								/>
 								<div>
 									<div className="flex items-center gap-2.5">

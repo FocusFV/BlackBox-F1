@@ -9,12 +9,14 @@ import sidebarIcon from "public/icons/sidebar.svg";
 type Props = {
 	className?: string;
 	onClick: () => void;
+	title?: string;
 };
 
-export default function SidenavButton({ className, onClick }: Props) {
+export default function SidenavButton({ className, onClick, title }: Props) {
 	return (
 		<motion.button
 			onClick={onClick}
+			title={title}
 			animate={{ scale: 1, opacity: 1 }}
 			exit={{ scale: 0, opacity: 0 }}
 			whileTap={{ scale: 0.9 }}

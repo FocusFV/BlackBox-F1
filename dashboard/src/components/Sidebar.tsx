@@ -85,15 +85,16 @@ type Props = {
 
 export default function Sidebar({ connected }: Props) {
 	const pathname = usePathname();
-	const { opened, pinned } = useSidebarStore();
+	const opened = useSidebarStore((state) => state.opened);
+	const pinned = useSidebarStore((state) => state.pinned);
 	const close = useSidebarStore((state) => state.close);
 	const open = useSidebarStore((state) => state.open);
-
-	const pin = useSidebarStore((state) => state.pin);
-	const unpin = useSidebarStore((state) => state.unpin);
+	const togglePin = useSidebarStore((state) => state.togglePin);
+	const toggle = useSidebarStore((state) => state.toggle);
 
 	const oledMode = useSettingsStore((state) => state.oledMode);
 	const [currentTime, setCurrentTime] = useState<number>(0);
+	const [isDesktop, setIsDesktop] = useState<boolean>(true);
 
 	useEffect(() => {
 		setCurrentTime(Date.now());
@@ -168,28 +169,53 @@ export default function Sidebar({ connected }: Props) {
 			.filter((cat) => cat.items.length > 0);
 	}, [isLive]);
 
-
 	useEffect(() => {
 		const handleResize = () => {
-			if (window.innerWidth < 768) {
-				unpin();
-			}
+			setIsDesktop(window.innerWidth >= 768);
 		};
 
 		window.addEventListener("resize", handleResize);
 		handleResize();
 
 		return () => window.removeEventListener("resize", handleResize, false);
-	}, [unpin]);
+	}, []);
+
+	const isVisible = (isDesktop ? (pinned || opened) : opened);
 
 	return (
 		<div>
-			<motion.div className="hidden md:block" style={{ width: 230 }} animate={{ width: pinned ? 230 : 8 }} />
+			{/* Espaciador dinámico: colapsa a 0 cuando el sidebar está oculto en desktop */}
+			<motion.div 
+				className="hidden md:block shrink-0" 
+				style={{ width: pinned ? 230 : 0 }} 
+				animate={{ width: pinned ? 230 : 0 }} 
+				transition={{ type: "spring", bounce: 0.05, duration: 0.35 }} 
+			/>
+
+			{/* Pestaña flotante lateral cuando la barra está oculta para abrirla con clic o hover */}
+			{((isDesktop && !pinned) || (!isDesktop && !opened)) && (
+				<div
+					className="fixed left-0 top-1/2 -translate-y-1/2 z-40 flex items-center cursor-pointer group"
+					onClick={() => {
+						triggerHaptic("light");
+						toggle();
+					}}
+					onMouseEnter={() => {
+						if (isDesktop) open();
+					}}
+					title={pinned ? "Ocultar menú" : "Mostrar menú lateral"}
+				>
+					<div className="h-14 w-2.5 bg-amber-500/25 group-hover:bg-amber-400 group-hover:w-4 rounded-r-xl border-y border-r border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.35)] transition-all duration-300 flex items-center justify-center backdrop-blur-md">
+						<div className="w-0.5 h-6 bg-amber-400 rounded-full group-hover:bg-black transition-colors" />
+					</div>
+				</div>
+			)}
 
 			<AnimatePresence>
 				{opened && (
 					<motion.div
 						onTouchEnd={() => close()}
+						onClick={() => close()}
 						className="fixed top-0 right-0 bottom-0 left-0 z-30 bg-black/50 backdrop-blur-md md:hidden"
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
@@ -200,15 +226,15 @@ export default function Sidebar({ connected }: Props) {
 
 			<motion.div
 				className="no-scrollbar fixed top-0 bottom-0 left-0 z-40 flex overflow-y-auto select-none p-2 md:p-3"
-				onHoverEnd={!pinned ? () => close() : undefined}
-				onHoverStart={!pinned ? () => open() : undefined}
-				animate={{ left: pinned || opened ? 0 : -230 }}
+				onHoverEnd={isDesktop && !pinned ? () => close() : undefined}
+				onHoverStart={isDesktop && !pinned ? () => open() : undefined}
+				animate={{ left: isVisible ? 0 : -260 }}
 				transition={{ type: "spring", bounce: 0.05, duration: 0.4 }}
 			>
 				<nav
 					className={clsx(
 						"flex w-56 flex-col p-4 font-mono transition-all duration-500 rounded-2xl border",
-						!oledMode && "bg-[#0c0a05]/60 backdrop-blur-2xl border-amber-500/10 shadow-[0_20px_50px_rgba(0,0,0,0.9),_inset_0_1px_1px_rgba(255,255,255,0.03)]",
+						!oledMode && "bg-[#0c0a05]/90 backdrop-blur-2xl border-amber-500/10 shadow-[0_20px_50px_rgba(0,0,0,0.9),_inset_0_1px_1px_rgba(255,255,255,0.03)]",
 						oledMode && "bg-black border-zinc-900"
 					)}
 				>
@@ -222,14 +248,27 @@ export default function Sidebar({ connected }: Props) {
 						<div className="flex items-center gap-1.5">
 							<ConnectionStatus connected={connected} />
 							
-							{/* Botón superior limpio (ya maneja el oro desde su propio archivo) */}
+							{/* Botón superior para fijar u ocultar */}
 							<div className="flex items-center bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-500/40 rounded-lg p-0.5 transition-all duration-300">
-								<SidenavButton className="hidden md:flex" onClick={() => (pinned ? unpin() : pin())} />
-								<SidenavButton className="md:hidden" onClick={() => close()} />
+								<SidenavButton 
+									className="hidden md:flex" 
+									onClick={() => {
+										triggerHaptic("light");
+										togglePin();
+									}} 
+									title={pinned ? "Ocultar menú lateral" : "Fijar menú lateral"}
+								/>
+								<SidenavButton 
+									className="md:hidden" 
+									onClick={() => {
+										triggerHaptic("light");
+										close();
+									}} 
+									title="Cerrar menú"
+								/>
 							</div>
 						</div>
 					</div>
-
 
 					{/* Secciones de menú */}
 					<div className="flex-1 space-y-5 overflow-y-auto no-scrollbar">
@@ -246,6 +285,11 @@ export default function Sidebar({ connected }: Props) {
 											icon={item.icon} 
 											target={item.target} 
 											pathname={pathname}
+											onClickItem={() => {
+												if (!isDesktop) {
+													close();
+												}
+											}}
 										/>
 									))}
 								</div>
@@ -269,9 +313,10 @@ type ItemProps = {
 	item: MenuItem;
 	icon?: any;
 	pathname: string;
+	onClickItem?: () => void;
 };
 
-const Item = ({ target, item, icon: Icon, pathname }: ItemProps) => {
+const Item = ({ target, item, icon: Icon, pathname, onClickItem }: ItemProps) => {
 	const active = pathname === item.href;
 
 	return (
@@ -284,6 +329,7 @@ const Item = ({ target, item, icon: Icon, pathname }: ItemProps) => {
 					e.preventDefault();
 					useSupportModalStore.getState().open();
 				}
+				onClickItem?.();
 			}}
 			className="block relative group"
 		>
