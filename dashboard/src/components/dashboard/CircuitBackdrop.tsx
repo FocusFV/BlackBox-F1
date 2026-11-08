@@ -421,6 +421,20 @@ export function CircuitBackdrop({
 										<span>{circuit.gpsCoordinates}</span>
 									</span>
 
+									{circuit.raceLaps > 0 && (
+										<span className="font-mono text-[11px] font-bold text-zinc-200 flex items-center gap-1.5 bg-black/65 px-2.5 py-0.5 rounded-full border border-zinc-800/80 backdrop-blur-md">
+											<RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+											<span>Número de Vueltas: <strong className="text-amber-300">{circuit.raceLaps}</strong></span>
+										</span>
+									)}
+
+									{circuit.raceDistance && (
+										<span className="font-mono text-[11px] font-bold text-zinc-200 flex items-center gap-1.5 bg-black/65 px-2.5 py-0.5 rounded-full border border-zinc-800/80 backdrop-blur-md">
+											<Gauge className="w-3.5 h-3.5 text-emerald-400" />
+											<span>Distancia de Carrera: <strong className="text-emerald-300">{circuit.raceDistance}</strong></span>
+										</span>
+									)}
+
 									{/* Botón para alternar telemetría o ver solo la foto limpia */}
 									<button
 										type="button"
@@ -477,16 +491,11 @@ export function CircuitBackdrop({
 											<div className="flex items-center gap-1.5 text-amber-400 font-black uppercase tracking-wider">
 												<span>Sentido de Giro: {circuit.direction}</span>
 											</div>
-											<div className="flex items-center gap-2">
-												<span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
-													Planimetría 2D Oficial
+											{mapGeometry && (
+												<span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 font-mono font-bold tracking-wider">
+													{mapGeometry.corners.length} CURVAS
 												</span>
-												{mapGeometry && (
-													<span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-amber-400 font-mono font-bold">
-														{mapGeometry.corners.length} CURVAS
-													</span>
-												)}
-											</div>
+											)}
 										</div>
 
 										{/* Trazado Vectorial Animado con Curvas Oficiales Automáticas */}
@@ -806,17 +815,17 @@ export function CircuitBackdrop({
 											</span>
 										</div>
 
-										{/* 4. EXIGENCIA Y DINÁMICA */}
+										{/* 4. DISTANCIA DE CARRERA Y VUELTAS */}
 										<div className="flex flex-col justify-center gap-1 bg-zinc-900/60 p-3 sm:p-3.5 rounded-xl border border-white/10">
 											<span className="text-[10px] sm:text-xs text-zinc-300 uppercase tracking-wider flex items-center gap-1.5 font-bold">
-												<Flame className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-												Fuerza G Lateral
+												<RotateCcw className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+												Distancia de Carrera
 											</span>
-											<span className="text-sm sm:text-base md:text-lg font-black text-orange-300">
-												{circuit.maxGForce}
+											<span className="text-sm sm:text-base md:text-lg font-black text-emerald-300">
+												{circuit.raceDistance}
 											</span>
 											<span className="text-[10px] text-zinc-300 font-medium">
-												Gas a Fondo: {circuit.fullThrottle}
+												Número de Vueltas: <strong className="text-white">{circuit.raceLaps}</strong> · {circuit.maxGForce}
 											</span>
 										</div>
 									</div>
