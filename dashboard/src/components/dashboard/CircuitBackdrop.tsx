@@ -1,6 +1,9 @@
 "use client";
 
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useDataStore } from "@/stores/useDataStore";
+import { fetchMap } from "@/lib/fetchMap";
+import { rotate, rad } from "@/lib/map";
 import { getCircuitDetails, type CircuitDetails, DEFAULT_CIRCUIT } from "@/lib/circuitBackdrops";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Flag from "@/components/Flag";
@@ -24,6 +27,17 @@ interface Props {
 	circuitId?: string;
 	isCinematic?: boolean;
 	onToggleCinematic?: () => void;
+}
+
+interface MapGeometry {
+	points: { x: number; y: number }[];
+	pathD: string;
+	corners: { number: number; pos: { x: number; y: number }; labelPos: { x: number; y: number } }[];
+	minX: number;
+	minY: number;
+	widthX: number;
+	widthY: number;
+	finishLine: { x: number; y: number; startAngle: number } | null;
 }
 
 // 🔊 Sonido sutil sintetizado de telemetría HUD (cero archivos externos, Web Audio API nativo)
@@ -154,11 +168,86 @@ export function CircuitBackdrop({
 	onToggleCinematic,
 }: Props) {
 	const oledMode = useSettingsStore((state) => state.oledMode);
+	const liveCircuitKey = useDataStore(
+		(state) =>
+			state?.state?.SessionInfo?.Meeting?.Circuit?.Key ??
+			(state?.state?.SessionInfo as any)?.Circuit?.Key
+	);
 	const [circuit, setCircuit] = useState<CircuitDetails>(DEFAULT_CIRCUIT);
 	const [imageUrl, setImageUrl] = useState<string>("/circuits/default.webp");
 	const [loaded, setLoaded] = useState(true);
 	const [showHud, setShowHud] = useState(true);
 	const [isMounted, setIsMounted] = useState(false);
+	const [mapGeometry, setMapGeometry] = useState<MapGeometry | null>(null);
+
+	// 🗺️ Cargar geometría oficial FIA / MultiViewer con todas las curvas numeradas automáticamente
+	useEffect(() => {
+		let active = true;
+		const targetKey = circuit.circuitKey ?? liveCircuitKey ?? 14;
+
+		(async () => {
+			try {
+				const mapJson = await fetchMap(targetKey);
+				if (!mapJson || !active || !mapJson.x?.length) return;
+
+				const cX = (Math.max(...mapJson.x) - Math.min(...mapJson.x)) / 2;
+				const cY = (Math.max(...mapJson.y) - Math.min(...mapJson.y)) / 2;
+				const fixedRotation = mapJson.rotation + 90;
+
+				const rotatedPoints = mapJson.x.map((x, i) => rotate(x, mapJson.y[i], fixedRotation, cX, cY));
+				const pointsX = rotatedPoints.map((p) => p.x);
+				const pointsY = rotatedPoints.map((p) => p.y);
+
+				const cornerPositions = (mapJson.corners || []).map((corner) => ({
+					number: corner.number,
+					pos: rotate(corner.trackPosition.x, corner.trackPosition.y, fixedRotation, cX, cY),
+					labelPos: rotate(
+						corner.trackPosition.x + 850 * Math.cos(rad(corner.angle)),
+						corner.trackPosition.y + 850 * Math.sin(rad(corner.angle)),
+						fixedRotation,
+						cX,
+						cY
+					),
+				}));
+
+				const allX = [...pointsX, ...cornerPositions.map((c) => c.labelPos.x)];
+				const allY = [...pointsY, ...cornerPositions.map((c) => c.labelPos.y)];
+				const minX = Math.min(...allX) - 1000;
+				const minY = Math.min(...allY) - 1000;
+				const widthX = Math.max(...allX) - minX + 1000;
+				const widthY = Math.max(...allY) - minY + 1000;
+
+				const rotatedFinishLine = rotate(mapJson.x[0], mapJson.y[0], fixedRotation, cX, cY);
+				const startAngle =
+					Math.atan2(
+						(rotatedPoints[3]?.y ?? 0) - (rotatedPoints[0]?.y ?? 0),
+						(rotatedPoints[3]?.x ?? 1) - (rotatedPoints[0]?.x ?? 0)
+					) *
+					(180 / Math.PI);
+
+				const pathD = `M${rotatedPoints[0].x.toFixed(1)},${rotatedPoints[0].y.toFixed(1)} ${rotatedPoints
+					.map((p) => `L${p.x.toFixed(1)},${p.y.toFixed(1)}`)
+					.join(" ")} Z`;
+
+				setMapGeometry({
+					points: rotatedPoints,
+					pathD,
+					corners: cornerPositions,
+					minX,
+					minY,
+					widthX,
+					widthY,
+					finishLine: { x: rotatedFinishLine.x, y: rotatedFinishLine.y, startAngle },
+				});
+			} catch (err) {
+				console.error("Error al cargar planimetría oficial de curvas:", err);
+			}
+		})();
+
+		return () => {
+			active = false;
+		};
+	}, [circuit.circuitKey, liveCircuitKey]);
 
 	useEffect(() => {
 		setIsMounted(true);
@@ -388,134 +477,264 @@ export function CircuitBackdrop({
 											<div className="flex items-center gap-1.5 text-amber-400 font-black uppercase tracking-wider">
 												<span>Sentido de Giro: {circuit.direction}</span>
 											</div>
-											<span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
-												Planimetría 2D Oficial
-											</span>
+											<div className="flex items-center gap-2">
+												<span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+													Planimetría 2D Oficial
+												</span>
+												{mapGeometry && (
+													<span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-amber-400 font-mono font-bold">
+														{mapGeometry.corners.length} CURVAS
+													</span>
+												)}
+											</div>
 										</div>
 
-										{/* Trazado Vectorial Animado */}
-										<svg
-											viewBox="0 0 400 300"
-											className="w-full h-52 sm:h-72 drop-shadow-[0_0_24px_rgba(245,158,11,0.35)]"
-										>
-											<defs>
-												<filter id="track-neon-glow" x="-20%" y="-20%" width="140%" height="140%">
-													<feGaussianBlur stdDeviation="4" result="blur" />
-													<feMerge>
-														<feMergeNode in="blur" />
-														<feMergeNode in="SourceGraphic" />
-													</feMerge>
-												</filter>
-											</defs>
+										{/* Trazado Vectorial Animado con Curvas Oficiales Automáticas */}
+										{mapGeometry ? (
+											<svg
+												viewBox={`${mapGeometry.minX} ${mapGeometry.minY} ${mapGeometry.widthX} ${mapGeometry.widthY}`}
+												className="w-full h-56 sm:h-72 drop-shadow-[0_0_24px_rgba(245,158,11,0.35)]"
+											>
+												<defs>
+													<filter id="circuit-neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+														<feGaussianBlur stdDeviation="70" result="blur" />
+														<feMerge>
+															<feMergeNode in="blur" />
+															<feMergeNode in="SourceGraphic" />
+														</feMerge>
+													</filter>
+													<pattern id="cb-checkered" width="160" height="160" patternUnits="userSpaceOnUse">
+														<rect width="80" height="80" fill="#000000" />
+														<rect x="80" width="80" height="80" fill="#ffffff" />
+														<rect y="80" width="80" height="80" fill="#ffffff" />
+														<rect x="80" y="80" width="80" height="80" fill="#000000" />
+													</pattern>
+												</defs>
 
-											{/* Base asfáltica */}
-											<path
-												d={circuit.svgPath}
-												fill="none"
-												stroke="#09090b"
-												strokeWidth="15"
-												strokeLinecap="round"
-												strokeLinejoin="round"
-											/>
-											<path
-												d={circuit.svgPath}
-												fill="none"
-												stroke="#27272a"
-												strokeWidth="8"
-												strokeLinecap="round"
-												strokeLinejoin="round"
-											/>
+												{/* Base asfáltica exterior */}
+												<path
+													d={mapGeometry.pathD}
+													fill="none"
+													stroke="#09090b"
+													strokeWidth={380}
+													strokeLinecap="round"
+													strokeLinejoin="round"
+												/>
+												{/* Pista asfalto */}
+												<path
+													d={mapGeometry.pathD}
+													fill="none"
+													stroke="#27272a"
+													strokeWidth={220}
+													strokeLinecap="round"
+													strokeLinejoin="round"
+												/>
 
-											{/* Trazado neón animado */}
-											<motion.path
-												d={circuit.svgPath}
-												fill="none"
-												stroke="#f59e0b"
-												strokeWidth="4"
-												strokeLinecap="round"
-												strokeLinejoin="round"
-												filter="url(#track-neon-glow)"
-												initial={{ pathLength: 0 }}
-												animate={{ pathLength: 1 }}
-												transition={{ duration: 1.4, ease: "easeInOut" }}
-											/>
+												{/* Trazado neón animado oficial */}
+												<motion.path
+													d={mapGeometry.pathD}
+													fill="none"
+													stroke="#f59e0b"
+													strokeWidth={130}
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													filter="url(#circuit-neon-glow)"
+													initial={{ pathLength: 0 }}
+													animate={{ pathLength: 1 }}
+													transition={{ duration: 1.4, ease: "easeInOut" }}
+												/>
 
-											{/* 🏁 LÍNEA DE META Y FLECHA BLANCA */}
-											{finishLine && (
-												<g>
-													<line
-														x1={finishLine.x1}
-														y1={finishLine.y1}
-														x2={finishLine.x2}
-														y2={finishLine.y2}
-														stroke="#ffffff"
-														strokeWidth="5"
-														strokeLinecap="butt"
-													/>
-													<line
-														x1={finishLine.x1}
-														y1={finishLine.y1}
-														x2={finishLine.x2}
-														y2={finishLine.y2}
-														stroke="#000000"
-														strokeWidth="4"
-														strokeDasharray="2.5 2.5"
-														strokeLinecap="butt"
-													/>
-
-													<circle
-														cx={finishLine.x0}
-														cy={finishLine.y0}
-														r="3.5"
-														fill="#ef4444"
-														stroke="#ffffff"
-														strokeWidth="1.2"
-													/>
-
-													{/* ➔ Flecha de sentido en BLANCO BRILLANTE */}
-													<g
-														transform={`translate(${finishLine.arrowX}, ${finishLine.arrowY}) rotate(${finishLine.arrowAngleDeg})`}
-													>
-														<polygon
-															points="-7,-6 9,0 -7,6 -4,0"
-															fill="#ffffff"
-															stroke="#000000"
-															strokeWidth="1.2"
-														/>
-													</g>
-
-													{/* Badge 🏁 META */}
-													<g
-														transform={`translate(${finishLine.x0 + (finishLine.x0 > 200 ? -48 : 12)}, ${
-															finishLine.y0 + (finishLine.y0 > 150 ? -16 : 14)
-														})`}
-													>
+												{/* 🏁 LÍNEA DE META Y BADGE */}
+												{mapGeometry.finishLine && (
+													<g>
 														<rect
-															x="0"
-															y="0"
-															width="44"
-															height="16"
-															rx="3"
-															fill="#000000"
+															x={mapGeometry.finishLine.x - 240}
+															y={mapGeometry.finishLine.y - 60}
+															width={480}
+															height={120}
+															fill="url(#cb-checkered)"
+															stroke="#ffffff"
+															strokeWidth={35}
+															transform={`rotate(${mapGeometry.finishLine.startAngle + 90}, ${mapGeometry.finishLine.x}, ${mapGeometry.finishLine.y})`}
+														/>
+														<g transform={`translate(${mapGeometry.finishLine.x + 80}, ${mapGeometry.finishLine.y - 140})`}>
+															<rect
+																x="0"
+																y="0"
+																width="640"
+																height="250"
+																rx="50"
+																fill="#000000"
+																stroke="#f59e0b"
+																strokeWidth="24"
+																opacity="0.95"
+															/>
+															<text
+																x="320"
+																y="160"
+																textAnchor="middle"
+																fontSize="140"
+																fontWeight="900"
+																fill="#ffffff"
+																fontFamily="monospace"
+															>
+																🏁 META
+															</text>
+														</g>
+													</g>
+												)}
+
+												{/* 🔢 BADGES DE TODAS LAS CURVAS OFICIALES (1, 2, ..., N) */}
+												{mapGeometry.corners.map((c) => (
+													<g key={`cb-corner-${c.number}`} className="select-none pointer-events-none">
+														<circle
+															cx={c.labelPos.x}
+															cy={c.labelPos.y}
+															r={250}
+															fill="#09090b"
 															stroke="#f59e0b"
-															strokeWidth="1"
-															opacity="0.9"
+															strokeWidth={38}
+															opacity={0.96}
 														/>
 														<text
-															x="22"
-															y="11.5"
+															x={c.labelPos.x}
+															y={c.labelPos.y}
 															textAnchor="middle"
-															fontSize="9"
-															fontWeight="bold"
+															dominantBaseline="central"
 															fill="#ffffff"
+															fontSize={250}
+															fontWeight="950"
 															fontFamily="monospace"
 														>
-															🏁 META
+															{c.number}
 														</text>
 													</g>
-												</g>
-											)}
-										</svg>
+												))}
+											</svg>
+										) : (
+											<svg
+												viewBox="0 0 400 300"
+												className="w-full h-52 sm:h-72 drop-shadow-[0_0_24px_rgba(245,158,11,0.35)]"
+											>
+												<defs>
+													<filter id="track-neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+														<feGaussianBlur stdDeviation="4" result="blur" />
+														<feMerge>
+															<feMergeNode in="blur" />
+															<feMergeNode in="SourceGraphic" />
+														</feMerge>
+													</filter>
+												</defs>
+
+												{/* Base asfáltica */}
+												<path
+													d={circuit.svgPath}
+													fill="none"
+													stroke="#09090b"
+													strokeWidth="15"
+													strokeLinecap="round"
+													strokeLinejoin="round"
+												/>
+												<path
+													d={circuit.svgPath}
+													fill="none"
+													stroke="#27272a"
+													strokeWidth="8"
+													strokeLinecap="round"
+													strokeLinejoin="round"
+												/>
+
+												{/* Trazado neón animado */}
+												<motion.path
+													d={circuit.svgPath}
+													fill="none"
+													stroke="#f59e0b"
+													strokeWidth="4"
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													filter="url(#track-neon-glow)"
+													initial={{ pathLength: 0 }}
+													animate={{ pathLength: 1 }}
+													transition={{ duration: 1.4, ease: "easeInOut" }}
+												/>
+
+												{/* 🏁 LÍNEA DE META Y FLECHA BLANCA */}
+												{finishLine && (
+													<g>
+														<line
+															x1={finishLine.x1}
+															y1={finishLine.y1}
+															x2={finishLine.x2}
+															y2={finishLine.y2}
+															stroke="#ffffff"
+															strokeWidth="5"
+															strokeLinecap="butt"
+														/>
+														<line
+															x1={finishLine.x1}
+															y1={finishLine.y1}
+															x2={finishLine.x2}
+															y2={finishLine.y2}
+															stroke="#000000"
+															strokeWidth="4"
+															strokeDasharray="2.5 2.5"
+															strokeLinecap="butt"
+														/>
+
+														<circle
+															cx={finishLine.x0}
+															cy={finishLine.y0}
+															r="3.5"
+															fill="#ef4444"
+															stroke="#ffffff"
+															strokeWidth="1.2"
+														/>
+
+														{/* ➔ Flecha de sentido en BLANCO BRILLANTE */}
+														<g
+															transform={`translate(${finishLine.arrowX}, ${finishLine.arrowY}) rotate(${finishLine.arrowAngleDeg})`}
+														>
+															<polygon
+																points="-7,-6 9,0 -7,6 -4,0"
+																fill="#ffffff"
+																stroke="#000000"
+																strokeWidth="1.2"
+															/>
+														</g>
+
+														{/* Badge 🏁 META */}
+														<g
+															transform={`translate(${finishLine.x0 + (finishLine.x0 > 200 ? -48 : 12)}, ${
+																finishLine.y0 + (finishLine.y0 > 150 ? -16 : 14)
+															})`}
+														>
+															<rect
+																x="0"
+																y="0"
+																width="44"
+																height="16"
+																rx="3"
+																fill="#000000"
+																stroke="#f59e0b"
+																strokeWidth="1"
+																opacity="0.9"
+															/>
+															<text
+																x="22"
+																y="11.5"
+																textAnchor="middle"
+																fontSize="9"
+																fontWeight="bold"
+																fill="#ffffff"
+																fontFamily="monospace"
+															>
+																🏁 META
+															</text>
+														</g>
+													</g>
+												)}
+											</svg>
+										)}
 									</motion.div>
 								)}
 							</AnimatePresence>

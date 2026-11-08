@@ -2,6 +2,7 @@
 
 export interface CircuitDetails {
 	key: string;
+	circuitKey?: number;
 	imageUrl: string;
 	name: string;
 	gpName: string;
@@ -33,6 +34,7 @@ export interface CircuitDetails {
 export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	bahrain: {
 		key: "bahrain",
+		circuitKey: 63,
 		imageUrl: "/circuits/bahrain.webp",
 		name: "Bahrain International Circuit",
 		gpName: "Gran Premio de Baréin",
@@ -62,6 +64,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	jeddah: {
 		key: "jeddah",
+		circuitKey: 149,
 		imageUrl: "/circuits/jeddah.webp",
 		name: "Jeddah Corniche Circuit",
 		gpName: "Gran Premio de Arabia Saudita",
@@ -91,6 +94,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	melbourne: {
 		key: "melbourne",
+		circuitKey: 10,
 		imageUrl: "/circuits/melbourne.webp",
 		name: "Albert Park Circuit",
 		gpName: "Gran Premio de Australia",
@@ -120,6 +124,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	suzuka: {
 		key: "suzuka",
+		circuitKey: 46,
 		imageUrl: "/circuits/suzuka.webp",
 		name: "Suzuka International Racing Course",
 		gpName: "Gran Premio de Japón",
@@ -149,6 +154,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	shanghai: {
 		key: "shanghai",
+		circuitKey: 49,
 		imageUrl: "/circuits/shanghai.webp",
 		name: "Shanghai International Circuit",
 		gpName: "Gran Premio de China",
@@ -178,6 +184,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	miami: {
 		key: "miami",
+		circuitKey: 151,
 		imageUrl: "/circuits/miami.webp",
 		name: "Miami International Autodrome",
 		gpName: "Gran Premio de Miami",
@@ -207,6 +214,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	imola: {
 		key: "imola",
+		circuitKey: 6,
 		imageUrl: "/circuits/imola.webp",
 		name: "Autodromo Enzo e Dino Ferrari",
 		gpName: "Gran Premio de la Emilia-Romaña",
@@ -236,6 +244,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	monaco: {
 		key: "monaco",
+		circuitKey: 22,
 		imageUrl: "/circuits/monaco.webp",
 		name: "Circuit de Monaco",
 		gpName: "Gran Premio de Mónaco",
@@ -265,6 +274,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	montreal: {
 		key: "montreal",
+		circuitKey: 23,
 		imageUrl: "/circuits/montreal.webp",
 		name: "Circuit Gilles Villeneuve",
 		gpName: "Gran Premio de Canadá",
@@ -294,6 +304,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	barcelona: {
 		key: "barcelona",
+		circuitKey: 15,
 		imageUrl: "/circuits/barcelona.webp",
 		name: "Circuit de Barcelona-Catalunya",
 		gpName: "Gran Premio de España",
@@ -323,6 +334,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	spielberg: {
 		key: "spielberg",
+		circuitKey: 19,
 		imageUrl: "/circuits/spielberg.webp",
 		name: "Red Bull Ring",
 		gpName: "Gran Premio de Austria",
@@ -352,6 +364,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	silverstone: {
 		key: "silverstone",
+		circuitKey: 2,
 		imageUrl: "/circuits/silverstone.webp",
 		name: "Silverstone Circuit",
 		gpName: "Gran Premio de Gran Bretaña",
@@ -381,6 +394,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	hungaroring: {
 		key: "hungaroring",
+		circuitKey: 4,
 		imageUrl: "/circuits/hungaroring.webp",
 		name: "Hungaroring",
 		gpName: "Gran Premio de Hungría",
@@ -410,6 +424,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	spa: {
 		key: "spa",
+		circuitKey: 7,
 		imageUrl: "/circuits/spa.webp",
 		name: "Circuit de Spa-Francorchamps",
 		gpName: "Gran Premio de Bélgica",
@@ -439,6 +454,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	zandvoort: {
 		key: "zandvoort",
+		circuitKey: 55,
 		imageUrl: "/circuits/zandvoort.webp",
 		name: "Circuit Zandvoort",
 		gpName: "Gran Premio de los Países Bajos",
@@ -468,6 +484,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	monza: {
 		key: "monza",
+		circuitKey: 39,
 		imageUrl: "/circuits/monza.webp",
 		name: "Autodromo Nazionale Monza",
 		gpName: "Gran Premio de Italia",
@@ -497,6 +514,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	baku: {
 		key: "baku",
+		circuitKey: 144,
 		imageUrl: "/circuits/baku.webp",
 		name: "Baku City Circuit",
 		gpName: "Gran Premio de Azerbaiyán",
@@ -526,6 +544,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	singapore: {
 		key: "singapore",
+		circuitKey: 61,
 		imageUrl: "/circuits/singapore.webp",
 		name: "Marina Bay Street Circuit",
 		gpName: "Gran Premio de Singapur",
@@ -555,6 +574,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	americas: {
 		key: "americas",
+		circuitKey: 9,
 		imageUrl: "/circuits/americas.webp",
 		name: "Circuit of The Americas",
 		gpName: "Gran Premio de los Estados Unidos",
@@ -584,6 +604,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	mexico: {
 		key: "mexico",
+		circuitKey: 65,
 		imageUrl: "/circuits/mexico.webp",
 		name: "Autódromo Hermanos Rodríguez",
 		gpName: "Gran Premio de la Ciudad de México",
@@ -613,6 +634,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	interlagos: {
 		key: "interlagos",
+		circuitKey: 14,
 		imageUrl: "/circuits/interlagos_hd.jpg",
 		name: "Autódromo José Carlos Pace",
 		gpName: "Gran Premio de São Paulo",
@@ -642,6 +664,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	vegas: {
 		key: "vegas",
+		circuitKey: 152,
 		imageUrl: "/circuits/vegas.webp",
 		name: "Las Vegas Strip Circuit",
 		gpName: "Gran Premio de Las Vegas",
@@ -671,6 +694,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	qatar: {
 		key: "qatar",
+		circuitKey: 150,
 		imageUrl: "/circuits/qatar.webp",
 		name: "Lusail International Circuit",
 		gpName: "Gran Premio de Qatar",
@@ -700,6 +724,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 	},
 	abudhabi: {
 		key: "abudhabi",
+		circuitKey: 70,
 		imageUrl: "/circuits/abudhabi.webp",
 		name: "Yas Marina Circuit",
 		gpName: "Gran Premio de Abu Dabi",
