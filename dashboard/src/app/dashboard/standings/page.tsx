@@ -523,14 +523,11 @@ const TeamLogo = ({ teamName, className = "w-5 h-5" }: { teamName: string; class
 	}
 	fallbacks.push("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='8' fill='%233f3f46'/></svg>");
 
-	// Solo invertimos logos oscuros/negros monócromos. ¡McLaren NO se invierte para preservar el naranja papaya #ff8000!
-	const isDarkLogo = cleanName.includes("audi") || cleanName.includes("cadillac");
-
 	return (
 		<img
 			src={fallbacks[fallbackIndex]}
 			alt={teamName}
-			className={`${className} object-contain transition-all shrink-0 ${isDarkLogo ? "invert brightness-200 contrast-200" : ""}`}
+			className={`${className} object-contain transition-all shrink-0`}
 			onError={() => {
 				if (fallbackIndex < fallbacks.length - 1) setFallbackIndex(fallbackIndex + 1);
 			}}
@@ -662,6 +659,12 @@ export default function Standings() {
 		let isMounted = true;
 		async function fetchConstructorResults() {
 			setLoadingConstructorModal(true);
+			// Para 2026, usamos la tabla oficial fidedigna con sprints y 20 carreras completas
+			if (year === 2026) {
+				setConstructorSeasonResults([]);
+				setLoadingConstructorModal(false);
+				return;
+			}
 			try {
 				const cId = selectedConstructor.constructorId || selectedConstructor.Constructor?.constructorId;
 				if (cId) {
@@ -697,7 +700,7 @@ export default function Standings() {
 		if (year === 2026 && (!constructorSeasonResults || constructorSeasonResults.length === 0)) {
 			if (cName.includes("mercedes")) {
 				return [
-					{ name: "A. Antonelli", fullName: "Andrea Kimi Antonelli", code: "ANT", driverId: "antonelli", points: 390, wins: 8, podiums: 12, races: 20 },
+					{ name: "A. Antonelli", fullName: "Andrea Kimi Antonelli", code: "ANT", driverId: "antonelli", points: 390, wins: 9, podiums: 17, races: 20 },
 					{ name: "G. Russell", fullName: "George Russell", code: "RUS", driverId: "russell", points: 262, wins: 3, podiums: 8, races: 20 },
 				];
 			}
@@ -716,7 +719,7 @@ export default function Standings() {
 			}
 			if (cName.includes("mclaren")) {
 				return [
-					{ name: "L. Norris", fullName: "Lando Norris", code: "NOR", driverId: "norris", points: 246, wins: 2, podiums: 10, races: 20 },
+					{ name: "L. Norris", fullName: "Lando Norris", code: "NOR", driverId: "norris", points: 246, wins: 3, podiums: 10, races: 20 },
 					{ name: "O. Piastri", fullName: "Oscar Piastri", code: "PIA", driverId: "piastri", points: 152, wins: 1, podiums: 5, races: 20 },
 				];
 			}
@@ -899,8 +902,16 @@ export default function Standings() {
 		} else {
 			document.body.style.overflow = "";
 		}
+		const handleEscape = (e: KeyboardEvent) => {
+			if (e.key === "Escape") {
+				setSelectedDriver(null);
+				setSelectedConstructor(null);
+			}
+		};
+		window.addEventListener("keydown", handleEscape);
 		return () => {
 			document.body.style.overflow = "";
+			window.removeEventListener("keydown", handleEscape);
 		};
 	}, [selectedDriver, selectedConstructor]);
 

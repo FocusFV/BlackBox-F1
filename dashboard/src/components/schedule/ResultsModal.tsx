@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import { X, Trophy, Flag, Timer } from "lucide-react";
 import clsx from "clsx";
@@ -53,13 +54,11 @@ const TeamLogo = ({ teamName }: { teamName: string }) => {
 		"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='8' fill='%233f3f46'/></svg>"
 	];
 
-	const isDarkLogo = cleanName.includes("audi") || cleanName.includes("cadillac");
-
 	return (
 		<img
 			src={fallbacks[fallbackIndex]}
 			alt={teamName}
-			className={`w-5 h-5 object-contain shrink-0 ${isDarkLogo ? "invert brightness-200 contrast-200" : ""}`}
+			className="w-5 h-5 object-contain shrink-0"
 			onError={() => setFallbackIndex((prev) => Math.min(prev + 1, fallbacks.length - 1))}
 		/>
 	);
@@ -239,19 +238,37 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 		};
 	}, [meetingKey, roundNumber]);
 
-	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4 font-mono select-none">
+	// Cierre accesible con tecla Escape
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "Escape") {
+				onClose();
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [onClose]);
+
+	const modalContent = (
+		<div 
+			className="fixed inset-0 z-50 flex items-center justify-center p-4 font-mono select-none"
+			onClick={(e) => e.stopPropagation()}
+		>
 			<motion.div
-				onClick={onClose}
+				onClick={(e) => {
+					e.stopPropagation();
+					onClose();
+				}}
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				exit={{ opacity: 0 }}
-				className="absolute inset-0 bg-black/85 backdrop-blur-md"
+				className="absolute inset-0 bg-black/85 backdrop-blur-md cursor-pointer"
 			/>
 			<motion.div
 				initial={{ scale: 0.95, opacity: 0, y: 15 }}
 				animate={{ scale: 1, opacity: 1, y: 0 }}
 				exit={{ scale: 0.95, opacity: 0, y: 15 }}
+				onClick={(e) => e.stopPropagation()}
 				className="bg-zinc-950 border border-zinc-800 w-full max-w-lg rounded-2xl p-5 shadow-2xl relative z-10 text-zinc-300"
 			>
 				{/* CABECERA */}
@@ -266,8 +283,12 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 						</h2>
 					</div>
 					<button
-						onClick={onClose}
-						className="p-1.5 text-zinc-500 hover:text-white rounded-lg hover:bg-zinc-900 transition-colors"
+						type="button"
+						onClick={(e) => {
+							e.stopPropagation();
+							onClose();
+						}}
+						className="p-1.5 text-zinc-500 hover:text-white rounded-lg hover:bg-zinc-900 transition-colors cursor-pointer"
 					>
 						<X className="w-5 h-5" />
 					</button>
@@ -394,4 +415,7 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 			</motion.div>
 		</div>
 	);
+
+	if (typeof document === "undefined") return null;
+	return createPortal(modalContent, document.body);
 }

@@ -102,13 +102,11 @@ const TeamLogo: React.FC<{ teamName: string }> = ({ teamName }) => {
 		"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='8' fill='%233f3f46'/></svg>"
 	);
 
-	const isDarkLogo = cleanName.includes("audi") || cleanName.includes("cadillac");
-
 	return (
 		<img
 			src={fallbacks[fallbackIndex]}
 			alt={teamName}
-			className={`w-5 h-5 object-contain shrink-0 ${isDarkLogo ? "invert brightness-200 contrast-200" : ""}`}
+			className="w-5 h-5 object-contain shrink-0"
 			onError={() => {
 				if (fallbackIndex < fallbacks.length - 1) setFallbackIndex(fallbackIndex + 1);
 			}}
@@ -730,9 +728,13 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					}
 				}
 
-				// Si ninguna fuente tiene resultados nuevos, pero ya teníamos datos en caché para esta sesión, mantenerlos
+				// Si ninguna fuente externa tiene resultados nuevos, verificar fallback oficial de 2026
 				if (sessionResultsCache.current[activeTab] && sessionResultsCache.current[activeTab].length > 0) {
 					setResults(sessionResultsCache.current[activeTab]);
+				} else if ((brazilFallbackData as any)[activeTab] && Array.isArray((brazilFallbackData as any)[activeTab])) {
+					const fbData = (brazilFallbackData as any)[activeTab];
+					sessionResultsCache.current[activeTab] = fbData;
+					setResults(fbData);
 				} else {
 					setResults([]);
 				}
