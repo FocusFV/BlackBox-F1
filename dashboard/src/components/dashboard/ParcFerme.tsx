@@ -182,14 +182,17 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 				.then((r) => r.json())
 				.then((data) => {
 					if (!isMounted) return;
-					if (data?.available && Array.isArray(data?.grid)) {
+					if (data?.available && Array.isArray(data?.grid) && data.grid.length > 0) {
 						setStartingGrid(data.grid);
+						setQualyViewMode("grid");
 					} else {
 						setStartingGrid(null);
+						setQualyViewMode("times");
 					}
 				})
 				.catch((err) => {
 					console.warn("[ParcFerme] Error fetching starting grid:", err);
+					if (isMounted) setStartingGrid(null);
 				})
 				.finally(() => {
 					if (isMounted) setGridLoading(false);
@@ -198,10 +201,6 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 		return () => {
 			isMounted = false;
 		};
-	}, [activeTab]);
-
-	useEffect(() => {
-		setQualyViewMode("times");
 	}, [activeTab]);
 
 	// 🔄 Lista de resultados procesada según el modo seleccionado (Tiempos o Grilla de Salida)
@@ -553,7 +552,39 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 						isTimeBased = true;
 					}
 
+					// Si todos los tiempos de clasificación en Jolpica vienen vacíos, consultar las mejores vueltas oficiales en OpenF1
+					const allTimesEmpty = isTimeBased && listSource.length > 0 && listSource.every((r: any) => !r.Q3 && !r.Q2 && !r.Q1);
+					const openF1BestTimes: Record<string, number> = {};
+
+					if (allTimesEmpty) {
+						try {
+							const openF1SessionRes = await fetch("https://api.openf1.org/v1/sessions?meeting_key=latest&session_type=Qualifying");
+							if (openF1SessionRes.ok) {
+								const sessions = await openF1SessionRes.json();
+								const qSession = Array.isArray(sessions) && sessions.length > 0 ? sessions[sessions.length - 1] : null;
+								if (qSession?.session_key) {
+									const lapsRes = await fetch(`https://api.openf1.org/v1/laps?session_key=${qSession.session_key}`);
+									if (lapsRes.ok) {
+										const lapsData = await lapsRes.json();
+										if (Array.isArray(lapsData)) {
+											for (const lap of lapsData) {
+												if (!lap.lap_duration || lap.lap_duration < 60 || lap.lap_duration > 120) continue;
+												const drvNum = String(lap.driver_number);
+												if (!openF1BestTimes[drvNum] || lap.lap_duration < openF1BestTimes[drvNum]) {
+													openF1BestTimes[drvNum] = lap.lap_duration;
+												}
+											}
+										}
+									}
+								}
+							}
+						} catch (openF1Err) {
+							console.warn("[ParcFerme] Error fetching OpenF1 qualy laps:", openF1Err);
+						}
+					}
+
 					const fetchedResults: DriverResult[] = listSource.map((r: any) => {
+						const drvNum = String(r.number || r.Driver?.permanentNumber || "0");
 						const statusStr = (r.status || "").toLowerCase();
 						const isFinished =
 							statusStr.includes("finished") ||
@@ -568,7 +599,16 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 						let pointsStr = "";
 
 						if (isTimeBased) {
-							gapTime = r.Q3 || r.Q2 || r.Q1 || "S/T";
+							if (r.Q3 || r.Q2 || r.Q1) {
+								gapTime = r.Q3 || r.Q2 || r.Q1;
+							} else if (openF1BestTimes[drvNum]) {
+								const bestSec = openF1BestTimes[drvNum];
+								const mins = Math.floor(bestSec / 60);
+								const remSecs = (bestSec % 60).toFixed(3);
+								gapTime = `${mins}:${remSecs.padStart(6, "0")}`;
+							} else {
+								gapTime = "S/T";
+							}
 						} else if (isDNF) {
 							gapTime = `DNF · ${r.status?.toUpperCase() || "OUT"}`;
 						} else {
@@ -579,7 +619,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 
 						return {
 							pos: String(r.position),
-							number: String(r.number || r.Driver?.permanentNumber || "0"),
+							number: drvNum,
 							code: r.Driver?.code || r.Driver?.familyName?.substring(0, 3).toUpperCase() || "DRV",
 							name: `${r.Driver?.givenName || ""} ${r.Driver?.familyName || ""}`.trim(),
 							team: r.Constructor?.name || "Equipo",
