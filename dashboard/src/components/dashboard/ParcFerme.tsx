@@ -2,7 +2,6 @@
 import { useHeadToHeadStore } from "@/stores/useHeadToHeadStore";
 import { useDriverModalStore } from "@/stores/useDriverModalStore";
 import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
-import calendar2026 from "@/data/calendar2026.json";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "motion/react";
@@ -131,19 +130,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 	const liveLapCount = useDataStore((state) => state.state?.LapCount);
 	const liveSessionStatus = useDataStore((state) => state.state?.SessionStatus?.Status);
 
-	const [selectedRound, setSelectedRound] = useState<number | null>(() => {
-		if (typeof window !== "undefined") {
-			const saved = sessionStorage.getItem("bb_parc_ferme_round");
-			if (saved) {
-				const n = parseInt(saved, 10);
-				if (!isNaN(n)) return n;
-			}
-		}
-		return null;
-	});
-
 	const roundNumber = (liveSession?.Meeting as any)?.Number || (liveSession as any)?.Number;
-	const effectiveRound = selectedRound ?? (roundNumber || 20);
 	const currentGpName = liveSession?.Meeting?.Name;
 	const currentCountryName = liveSession?.Meeting?.Country?.Name;
 	const initialCountry = (currentGpName ? getCountryCodeForGp(currentGpName, currentCountryName) : null) || "bra";
@@ -182,6 +169,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 	};
 
 	const [smartContext, setSmartContext] = useState<SmartGpContext | null>(null);
+	const effectiveRound = smartContext?.round || roundNumber || 20;
 	const [activeTab, setActiveTab] = useState<SessionTab>(getInitialTab);
 	const [tabManuallySelected, setTabManuallySelected] = useState<boolean>(() => {
 		if (typeof window !== "undefined") {
@@ -207,54 +195,45 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 	const [loading, setLoading] = useState(true);
 	const [hasSprint, setHasSprint] = useState(false);
 
-	// 🏎️ Sincronización al cambiar manualmente de Ronda / Gran Premio
-	useEffect(() => {
-		if (selectedRound !== null) {
-			const calRound = (calendar2026 as any[]).find((c) => parseInt(c.round, 10) === selectedRound);
-			if (calRound) {
-				setGpName(translateGpName(calRound.raceName));
-				setCountryCode(getCountryCodeForGp(calRound.raceName, calRound.Circuit?.Location?.country));
-				setRaceDate(calRound.date);
-				const isSprintRound = Boolean(calRound.Sprint || calRound.SprintQualifying);
-				setHasSprint(isSprintRound);
-			}
-		}
-	}, [selectedRound]);
-
-	// 🏎️ Pestañas inteligentes según formato de fin de semana (Sprint vs Normal)
+	// 🏎️ Pestañas inteligentes según formato de fin de semana y sesiones ya disputadas
 	const sessionTabs = useMemo(() => {
-		if (hasSprint) {
-			return [
-				{ id: "FP1" as SessionTab, label: "FP1", sub: "Libres 1" },
-				{ id: "SQ" as SessionTab, label: "SQ", sub: "Clasif. Sprint" },
-				{ id: "SPRINT" as SessionTab, label: "SPRINT", sub: "Sprint" },
-				{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasificación" },
-				{ id: "RACE" as SessionTab, label: "CARRERA", sub: "Gran Premio" },
-			];
-		}
-		return [
-			{ id: "FP1" as SessionTab, label: "FP1", sub: "Libres 1" },
-			{ id: "FP2" as SessionTab, label: "FP2", sub: "Libres 2" },
-			{ id: "FP3" as SessionTab, label: "FP3", sub: "Libres 3" },
-			{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasificación" },
-			{ id: "RACE" as SessionTab, label: "CARRERA", sub: "Gran Premio" },
-		];
-	}, [hasSprint]);
+		const baseTabs = hasSprint
+			? [
+					{ id: "FP1" as SessionTab, label: "FP1", sub: "Libres 1" },
+					{ id: "SQ" as SessionTab, label: "SQ", sub: "Clasif. Sprint" },
+					{ id: "SPRINT" as SessionTab, label: "SPRINT", sub: "Sprint" },
+					{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasificación" },
+					{ id: "RACE" as SessionTab, label: "CARRERA", sub: "Gran Premio" },
+			  ]
+			: [
+					{ id: "FP1" as SessionTab, label: "FP1", sub: "Libres 1" },
+					{ id: "FP2" as SessionTab, label: "FP2", sub: "Libres 2" },
+					{ id: "FP3" as SessionTab, label: "FP3", sub: "Libres 3" },
+					{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasificación" },
+					{ id: "RACE" as SessionTab, label: "CARRERA", sub: "Gran Premio" },
+			  ];
 
-	// 🎯 Sincronización inteligente de pestaña activa si no corresponde al formato del GP
+		// 🔒 Si estamos en fin de semana en curso, solo se muestran las sesiones que ya se han disputado
+		if (smartContext?.isWeekendActive && smartContext.availableTabs && smartContext.availableTabs.length > 0) {
+			return baseTabs.filter((tab) => smartContext.availableTabs.includes(tab.id));
+		}
+		// Si el Gran Premio ya concluyó (OFF_WEEK), todas sus sesiones están disponibles
+		return baseTabs;
+	}, [hasSprint, smartContext]);
+
+	// 🎯 Sincronización inteligente de pestaña activa si no corresponde a las sesiones disponibles
 	useEffect(() => {
-		if (!hasSprint && (activeTab === "SPRINT" || activeTab === "SQ")) {
-			setActiveTab("RACE");
+		const validTabIds = sessionTabs.map((t) => t.id);
+		if (!validTabIds.includes(activeTab)) {
+			const fallback = smartContext?.defaultTab && validTabIds.includes(smartContext.defaultTab)
+				? smartContext.defaultTab
+				: validTabIds[validTabIds.length - 1] || "RACE";
+			setActiveTab(fallback);
 			if (typeof window !== "undefined") {
-				sessionStorage.setItem("bb_parc_ferme_tab", "RACE");
-			}
-		} else if (hasSprint && (activeTab === "FP2" || activeTab === "FP3")) {
-			setActiveTab("RACE");
-			if (typeof window !== "undefined") {
-				sessionStorage.setItem("bb_parc_ferme_tab", "RACE");
+				sessionStorage.setItem("bb_parc_ferme_tab", fallback);
 			}
 		}
-	}, [hasSprint, activeTab]);
+	}, [sessionTabs, activeTab, smartContext?.defaultTab]);
 
 	useEffect(() => {
 		if (gpName && onGpLoaded) {
@@ -864,7 +843,9 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 						<div className="flex items-center gap-2">
 							<span className="text-[11px] uppercase font-mono font-bold tracking-wider text-amber-400">
 								{smartContext?.isWeekendActive
-									? smartContext.stage === "FRIDAY"
+									? smartContext.stage === "PRE_WEEKEND"
+										? "Próxima Ronda · Pista en Espera"
+										: smartContext.stage === "FRIDAY"
 										? "Fin de Semana en Vivo · Libres"
 										: smartContext.stage === "SATURDAY"
 										? "Fin de Semana en Vivo · Clasificación"
@@ -881,31 +862,6 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 							<h2 className="text-sm md:text-base font-black tracking-wide text-zinc-100 font-sans group-hover:text-amber-100 transition-colors">
 								{gpName}
 							</h2>
-							<select
-								value={effectiveRound}
-								onClick={(e) => e.stopPropagation()}
-								onChange={(e) => {
-									e.stopPropagation();
-									const rnd = parseInt(e.target.value, 10);
-									setSelectedRound(rnd);
-									if (typeof window !== "undefined") {
-										sessionStorage.setItem("bb_parc_ferme_round", String(rnd));
-									}
-									setTabManuallySelected(false);
-									setActiveTab("RACE");
-								}}
-								className="bg-zinc-900/90 text-amber-400 font-mono text-[11px] font-bold px-2 py-0.5 rounded-lg border border-zinc-800 hover:border-amber-500/60 focus:outline-none focus:border-amber-400 cursor-pointer shadow-sm transition-colors"
-								title="Seleccionar ronda / Gran Premio de la temporada 2026"
-							>
-								{(calendar2026 as any[]).map((r) => {
-									const isSp = Boolean(r.Sprint || r.SprintQualifying);
-									return (
-										<option key={r.round} value={r.round} className="bg-zinc-950 text-white font-mono">
-											R{r.round} · {translateGpName(r.raceName)}{isSp ? " ⚡ SPRINT" : ""}
-										</option>
-									);
-								})}
-							</select>
 						</div>
 					</div>
 				</div>
@@ -917,7 +873,11 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					</span>
 					<div className="text-left font-mono">
 						<p className="text-[11px] font-bold text-zinc-200 uppercase tracking-tight leading-none">
-							{smartContext?.isWeekendActive ? "Pista en Espera" : "Pista en Pausa"}
+							{smartContext?.isWeekendActive
+								? smartContext.stage === "PRE_WEEKEND"
+									? "Pista en Espera"
+									: "Sesión en Curso"
+								: "Pista en Pausa"}
 						</p>
 						<p className="text-[10px] text-zinc-400 font-medium tracking-normal leading-tight mt-0.5">
 							Resultados Oficiales FIA

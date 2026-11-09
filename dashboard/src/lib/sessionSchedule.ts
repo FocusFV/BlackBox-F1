@@ -178,12 +178,26 @@ export interface SmartGpContext {
 	raceName: string;         // Nombre del GP (ej: "Mexico City Grand Prix")
 	country: string;          // País (ej: "Mexico")
 	countryCode: string;      // Código para bandera (ej: "mex")
-	stage: "FRIDAY" | "SATURDAY" | "SUNDAY" | "POST_RACE" | "OFF_WEEK";
+	stage: "PRE_WEEKEND" | "FRIDAY" | "SATURDAY" | "SUNDAY" | "POST_RACE" | "OFF_WEEK";
 	defaultTab: "FP1" | "FP2" | "FP3" | "QUALY" | "SPRINT" | "SQ" | "RACE";
 	availableTabs: ("FP1" | "FP2" | "FP3" | "QUALY" | "SPRINT" | "SQ" | "RACE")[];
 	hasSprint: boolean;
 	raceDate: string;         // YYYY-MM-DD
 	firstPracticeDate: string;// YYYY-MM-DD
+}
+
+function getWednesdayNightPriorMs(fp1DateStr: string, fp1TimeStr?: string): number {
+	const fp1Ms = parseDateToMs(fp1DateStr, fp1TimeStr) || new Date(`${fp1DateStr}T12:00:00Z`).getTime();
+	const d = new Date(fp1Ms);
+	const day = d.getUTCDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+	const daysBack = day >= 3 ? day - 3 : day + 4;
+	const wedMs = fp1Ms - daysBack * 86400000;
+	const wedDate = new Date(wedMs);
+	const y = wedDate.getUTCFullYear();
+	const m = String(wedDate.getUTCMonth() + 1).padStart(2, "0");
+	const dt = String(wedDate.getUTCDate()).padStart(2, "0");
+	// Miércoles 20:00 UTC (noche en Europa / tarde en América)
+	return new Date(`${y}-${m}-${dt}T20:00:00Z`).getTime();
 }
 
 export async function getSmartGpContext(): Promise<SmartGpContext> {
@@ -197,11 +211,12 @@ export async function getSmartGpContext(): Promise<SmartGpContext> {
 			const races: any[] = data?.MRData?.RaceTable?.Races || [];
 			const now = Date.now();
 
-			// 1. Buscamos si estamos dentro de un fin de semana de GP (viernes 00:00 UTC hasta fin de domingo / lunes mediodía UTC)
+			// 1. Buscamos si estamos dentro de un fin de semana de GP (desde el miércoles noche previo hasta fin de domingo / lunes mediodía)
 			for (const race of races) {
 				const fp1Date = race.FirstPractice?.date || race.date;
-				// Viernes a las 00:00 UTC (para cubrir todas las zonas horarias)
-				const weekendStart = new Date(`${fp1Date}T00:00:00Z`).getTime();
+				const fp1Start = parseDateToMs(race.FirstPractice?.date, race.FirstPractice?.time) || new Date(`${fp1Date}T12:00:00Z`).getTime();
+				// 🌙 El fin de semana inteligente se activa desde el miércoles en la noche previo
+				const weekendStart = getWednesdayNightPriorMs(fp1Date, race.FirstPractice?.time);
 				const raceStart = parseDateToMs(race.date, race.time || "14:00:00Z");
 				// Domingo post-carrera (~14h tras inicio de carrera o lunes mediodía UTC)
 				const weekendEnd = (raceStart || new Date(`${race.date}T23:59:59Z`).getTime()) + 14 * 3600 * 1000;
@@ -223,7 +238,6 @@ export async function getSmartGpContext(): Promise<SmartGpContext> {
 					);
 
 					// ⏱️ Calculamos las fechas/horas exactas de cada sesión en ms
-					const fp1Start = parseDateToMs(race.FirstPractice?.date, race.FirstPractice?.time) || new Date(`${fp1Date}T12:00:00Z`).getTime();
 					const fp2Start = parseDateToMs(race.SecondPractice?.date, race.SecondPractice?.time) || fp1Start + 4 * 3600 * 1000;
 					const fp3Start = parseDateToMs(race.ThirdPractice?.date, race.ThirdPractice?.time) || fp2Start + 20 * 3600 * 1000;
 					const sqStart = parseDateToMs(race.SprintQualifying?.date, race.SprintQualifying?.time) ||
@@ -248,13 +262,15 @@ export async function getSmartGpContext(): Promise<SmartGpContext> {
 					if (now >= qualyStart + 55 * 60 * 1000) availableTabs.push("QUALY");
 					if (now >= raceStartMs + 90 * 60 * 1000) availableTabs.push("RACE");
 
-					// Si recién arranca el fin de semana y todavía no concluyó FP1, mostramos únicamente FP1
+					// Si recién arranca el fin de semana (miércoles previo / jueves) y todavía no concluyó FP1, mostramos únicamente FP1
 					if (availableTabs.length === 0) {
 						availableTabs.push("FP1");
 					}
 
-					let stage: "FRIDAY" | "SATURDAY" | "SUNDAY" | "POST_RACE" = "SUNDAY";
-					if (now < satStart) {
+					let stage: "PRE_WEEKEND" | "FRIDAY" | "SATURDAY" | "SUNDAY" | "POST_RACE" = "SUNDAY";
+					if (now < fp1Start) {
+						stage = "PRE_WEEKEND";
+					} else if (now < satStart) {
 						stage = "FRIDAY";
 					} else if (now < sunStart) {
 						stage = "SATURDAY";
