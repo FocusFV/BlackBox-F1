@@ -194,6 +194,41 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 	const [loading, setLoading] = useState(true);
 	const [hasSprint, setHasSprint] = useState(false);
 
+	// 🏎️ Pestañas inteligentes según formato de fin de semana (Sprint vs Normal)
+	const sessionTabs = useMemo(() => {
+		if (hasSprint) {
+			return [
+				{ id: "FP1" as SessionTab, label: "FP1", sub: "Libres 1" },
+				{ id: "SQ" as SessionTab, label: "SQ", sub: "Clasif. Sprint" },
+				{ id: "SPRINT" as SessionTab, label: "SPRINT", sub: "Sprint" },
+				{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasificación" },
+				{ id: "RACE" as SessionTab, label: "CARRERA", sub: "Gran Premio" },
+			];
+		}
+		return [
+			{ id: "FP1" as SessionTab, label: "FP1", sub: "Libres 1" },
+			{ id: "FP2" as SessionTab, label: "FP2", sub: "Libres 2" },
+			{ id: "FP3" as SessionTab, label: "FP3", sub: "Libres 3" },
+			{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasificación" },
+			{ id: "RACE" as SessionTab, label: "CARRERA", sub: "Gran Premio" },
+		];
+	}, [hasSprint]);
+
+	// 🎯 Sincronización inteligente de pestaña activa si no corresponde al formato del GP
+	useEffect(() => {
+		if (!hasSprint && (activeTab === "SPRINT" || activeTab === "SQ")) {
+			setActiveTab("RACE");
+			if (typeof window !== "undefined") {
+				sessionStorage.setItem("bb_parc_ferme_tab", "RACE");
+			}
+		} else if (hasSprint && (activeTab === "FP2" || activeTab === "FP3")) {
+			setActiveTab("RACE");
+			if (typeof window !== "undefined") {
+				sessionStorage.setItem("bb_parc_ferme_tab", "RACE");
+			}
+		}
+	}, [hasSprint, activeTab]);
+
 	useEffect(() => {
 		if (gpName && onGpLoaded) {
 			onGpLoaded(gpName, countryCode);
@@ -601,9 +636,12 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					}
 					if (race.date) setRaceDate(race.date);
 
-					if (race.Sprint || race.SprintResults) {
-						setHasSprint(true);
-					}
+					const isSprintWeekend = Boolean(
+						race.Sprint ||
+						race.SprintQualifying ||
+						(Array.isArray(race.SprintResults) && race.SprintResults.length > 0)
+					);
+					setHasSprint(isSprintWeekend);
 
 					let listSource: any[] = [];
 					let isTimeBased = false;
@@ -827,14 +865,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					{/* SELECTOR PANORÁMICO DE SESIONES ESTILO PIT-WALL (UNIFICADO EN ORO LÍQUIDO) */}
 					<div className="flex flex-col gap-2.5 mb-5 border-b border-zinc-900/80 pb-4">
 						<div className="w-full bg-zinc-950/80 p-1.5 rounded-2xl border border-zinc-800/80 shadow-[0_8px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl flex flex-nowrap overflow-x-auto no-scrollbar gap-1.5 select-none relative max-w-full">
-							{[
-								{ id: "FP1" as SessionTab, label: "FP1", sub: "Libres 1" },
-								{ id: "FP2" as SessionTab, label: "FP2", sub: "Libres 2" },
-								{ id: "FP3" as SessionTab, label: "FP3", sub: "Libres 3" },
-								{ id: "SPRINT" as SessionTab, label: "SPRINT", sub: "Carrera Sprint" },
-								{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasificación" },
-								{ id: "RACE" as SessionTab, label: "CARRERA", sub: "Gran Premio" },
-							].map((tab) => {
+							{sessionTabs.map((tab) => {
 								const isActive = activeTab === tab.id;
 								return (
 									<button

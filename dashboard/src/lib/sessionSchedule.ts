@@ -1,4 +1,5 @@
 import { translateSessionName, getCountryCodeForGp } from "./f1Translations";
+import calendar2026 from "@/data/calendar2026.json";
 
 export interface ScheduleSession {
 	name: string;
@@ -211,7 +212,15 @@ export async function getSmartGpContext(): Promise<SmartGpContext> {
 					const satStart = new Date(`${satDate}T00:00:00Z`).getTime();
 					const sunStart = new Date(`${race.date}T00:00:00Z`).getTime();
 
-					const hasSprint = Boolean(race.Sprint || race.SprintQualifying || race.SprintShootout);
+					const calMatch = (calendar2026 as any[]).find((c: any) => String(c.round) === String(race.round));
+					const hasSprint = Boolean(
+						race.Sprint ||
+						race.SprintQualifying ||
+						race.SprintShootout ||
+						(Array.isArray(race.SprintResults) && race.SprintResults.length > 0) ||
+						calMatch?.Sprint ||
+						calMatch?.SprintQualifying
+					);
 
 					// ⏱️ Calculamos las fechas/horas exactas de cada sesión en ms
 					const fp1Start = parseDateToMs(race.FirstPractice?.date, race.FirstPractice?.time) || new Date(`${fp1Date}T12:00:00Z`).getTime();
@@ -284,15 +293,17 @@ export async function getSmartGpContext(): Promise<SmartGpContext> {
 			}
 
 			if (lastCompleted) {
-				const isSprint = Boolean(lastCompleted.Sprint || lastCompleted.SprintQualifying);
-				const allTabs: ("FP1" | "FP2" | "FP3" | "QUALY" | "SPRINT" | "SQ" | "RACE")[] = [
-					"FP1",
-					"FP2",
-					"FP3",
-					"SPRINT",
-					"QUALY",
-					"RACE",
-				];
+				const calMatch = (calendar2026 as any[]).find((c: any) => String(c.round) === String(lastCompleted.round));
+				const isSprint = Boolean(
+					lastCompleted.Sprint ||
+					lastCompleted.SprintQualifying ||
+					(Array.isArray(lastCompleted.SprintResults) && lastCompleted.SprintResults.length > 0) ||
+					calMatch?.Sprint ||
+					calMatch?.SprintQualifying
+				);
+				const allTabs: ("FP1" | "FP2" | "FP3" | "QUALY" | "SPRINT" | "SQ" | "RACE")[] = isSprint
+					? ["FP1", "SQ", "SPRINT", "QUALY", "RACE"]
+					: ["FP1", "FP2", "FP3", "QUALY", "RACE"];
 
 				return {
 					isWeekendActive: false,
