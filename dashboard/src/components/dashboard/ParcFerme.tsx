@@ -33,7 +33,7 @@ const driverNationalityMap: Record<string, string> = {
 	NOR: "gb", PIA: "au", ALB: "th", GAS: "fr", OCO: "fr", HUL: "de",
 	TSU: "jp", RIC: "au", BOT: "fi", ZHO: "cn", MAG: "dk", STR: "ca",
 	ALO: "es", PER: "mx", BEA: "gb", HAD: "fr", BOR: "br", LIN: "gb",
-	LAW: "nz", ANT: "it", CAM: "br"
+	LAW: "nz", ANT: "it", CAM: "br", HIR: "jp"
 };
 
 const driverTeamColorMap: Record<string, { bg: string; text: string }> = {
@@ -53,6 +53,7 @@ const driverTeamColorMap: Record<string, { bg: string; text: string }> = {
 	COL: { bg: "#0093cc", text: "#ffffff" }, // Alpine
 	BEA: { bg: "#e10600", text: "#ffffff" }, // Haas F1 Team
 	CAM: { bg: "#e10600", text: "#ffffff" }, // Haas F1 Team
+	HIR: { bg: "#e10600", text: "#ffffff" }, // Haas F1 Team
 	OCO: { bg: "#e10600", text: "#ffffff" },
 	MAG: { bg: "#373737", text: "#ffffff" },
 	LAW: { bg: "#4b77ff", text: "#ffffff" },

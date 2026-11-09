@@ -307,9 +307,9 @@ function getTeamTheme(nameOrId?: string): TeamTheme {
 const nationalityToCountryCode: { [key: string]: string } = {
 	argentinian: "ar", argentine: "ar",
 	british: "gb", dutch: "nl", monegasque: "mc", spanish: "es",
-	australian: "au", thai: "th", french: "fr", german: "de", japanese: "jp",
+	australian: "au", thai: "th", french: "fr", german: "de", japanese: "jp", japan: "jp",
 	finnish: "fi", chinese: "cn", danish: "dk", canadian: "ca", mexican: "mx",
-	brazilian: "br", american: "us", italian: "it", austrian: "at", 
+	brazilian: "br", brazil: "br", american: "us", italian: "it", austrian: "at", 
 	belgian: "be", swiss: "ch", swedish: "se", russian: "ru", polish: "pl", 
 	indian: "in", indonesian: "id", venezuelan: "ve", colombian: "co",
 	newzealander: "nz", malaysian: "my", czech: "cz", southafrican: "za",
@@ -323,7 +323,7 @@ const driverToTeamNameMap: { [key: string]: string } = {
 	RUS: "Mercedes", ANT: "Mercedes",
 	ALO: "Aston Martin", STR: "Aston Martin",
 	GAS: "Alpine", COL: "Alpine", 
-	MAG: "Haas", OCO: "Haas", BEA: "Haas",
+	MAG: "Haas", OCO: "Haas", BEA: "Haas", CAM: "Haas F1 Team", HIR: "Haas F1 Team",
 	LAW: "Racing Bulls", TSU: "Racing Bulls", LIN: "Racing Bulls",
 	ALB: "Williams", SAI: "Williams",
 	BOT: "Cadillac F1 Team", PER: "Cadillac F1 Team",
@@ -342,7 +342,8 @@ const driverTeamColorMap: { [key: string]: { bg: string; text: string } } = {
 	MAG: { bg: "#373737", text: "#ffffff" }, LAW: { bg: "#4b77ff", text: "#ffffff" },
 	TSU: { bg: "#4b77ff", text: "#ffffff" }, ALB: { bg: "#005aff", text: "#ffffff" },
 	SAI: { bg: "#005aff", text: "#ffffff" }, BOT: { bg: "#27272a", text: "#ffffff" },
-	HUL: { bg: "#1f1f1f", text: "#ffffff" }, BOR: { bg: "#1f1f1f", text: "#ffffff" }, CAM: { bg: "#e10600", text: "#ffffff" },
+	HUL: { bg: "#1f1f1f", text: "#ffffff" }, BOR: { bg: "#1f1f1f", text: "#ffffff" },
+	CAM: { bg: "#e10600", text: "#ffffff" }, HIR: { bg: "#e10600", text: "#ffffff" },
 };
 
 const constructorColorMap: { [key: string]: string } = {
@@ -376,9 +377,11 @@ const DEFAULT_2026_DRIVERS = [
 	{ position: "18", points: "7", Driver: { driverId: "sainz", code: "SAI", givenName: "Carlos", familyName: "Sainz", nationality: "Spanish" }, Constructors: [{ name: "Williams" }] },
 	{ position: "19", points: "5", Driver: { driverId: "albon", code: "ALB", givenName: "Alexander", familyName: "Albon", nationality: "Thai" }, Constructors: [{ name: "Williams" }] },
 	{ position: "20", points: "1", Driver: { driverId: "tsunoda", code: "TSU", givenName: "Yuki", familyName: "Tsunoda", nationality: "Japanese" }, Constructors: [{ name: "RB F1 Team" }] },
-	{ position: "21", points: "0", Driver: { driverId: "stroll", code: "STR", givenName: "Lance", familyName: "Stroll", nationality: "Canadian" }, Constructors: [{ name: "Aston Martin" }] },
-	{ position: "22", points: "0", Driver: { driverId: "bottas", code: "BOT", givenName: "Valtteri", familyName: "Bottas", nationality: "Finnish" }, Constructors: [{ name: "Cadillac F1 Team" }] },
-	{ position: "23", points: "0", Driver: { driverId: "perez", code: "PER", givenName: "Sergio", familyName: "Pérez", nationality: "Mexican" }, Constructors: [{ name: "Cadillac F1 Team" }] },
+	{ position: "21", points: "1", Driver: { driverId: "ryo_hirakawa", code: "HIR", givenName: "Ryo", familyName: "Hirakawa", nationality: "Japanese" }, Constructors: [{ name: "Haas F1 Team" }] },
+	{ position: "22", points: "0", Driver: { driverId: "stroll", code: "STR", givenName: "Lance", familyName: "Stroll", nationality: "Canadian" }, Constructors: [{ name: "Aston Martin" }] },
+	{ position: "23", points: "0", Driver: { driverId: "bottas", code: "BOT", givenName: "Valtteri", familyName: "Bottas", nationality: "Finnish" }, Constructors: [{ name: "Cadillac F1 Team" }] },
+	{ position: "24", points: "0", Driver: { driverId: "perez", code: "PER", givenName: "Sergio", familyName: "Pérez", nationality: "Mexican" }, Constructors: [{ name: "Cadillac F1 Team" }] },
+	{ position: "25", points: "0", Driver: { driverId: "rafael_camara", code: "CAM", givenName: "Rafael", familyName: "Camara", nationality: "Brazilian" }, Constructors: [{ name: "Haas F1 Team" }] },
 ];
 
 // 🛠️ Escuderías oficiales reales de la temporada 2026
@@ -425,6 +428,8 @@ function getDriverAvatarUrl(driverCode?: string, driverId?: string, familyName?:
 	if (code === "BOT" || id.includes("bottas")) return "/drivers/grid/bottas.jpg";
 	if (code === "PER" || id.includes("perez") || id.includes("pérez")) return "/drivers/grid/perez.jpg";
 	if (code === "LIN" || id.includes("lindblad")) return "/drivers/grid/lindblad.jpg";
+	if (code === "CAM" || id.includes("camara") || id.includes("câmara")) return "/drivers/grid/camara.jpg";
+	if (code === "HIR" || id.includes("hirakawa")) return "/drivers/grid/hirakawa.jpg";
 
 	// Pilotos de récords históricos
 	if (id.includes("schumacher")) return "/drivers/records/schumacher.jpg";
@@ -764,7 +769,14 @@ export default function Standings() {
 							const driverId = driver.Driver?.driverId || driver.driverId || driverCode.toLowerCase();
 							
 							const driverNationality = (driver.Driver?.nationality || driver.nationality || "").toLowerCase().replace(/\s+/g, "");
-							const countryCode = nationalityToCountryCode[driverNationality];
+							let countryCode = nationalityToCountryCode[driverNationality];
+							if (!countryCode) {
+								if (driverCode === "CAM" || driverId.includes("camara") || (driver.Driver?.familyName || "").toLowerCase().includes("camara")) {
+									countryCode = "br";
+								} else if (driverCode === "HIR" || driverId.includes("hirakawa") || (driver.Driver?.familyName || "").toLowerCase().includes("hirakawa")) {
+									countryCode = "jp";
+								}
+							}
 
 							const historicTeamName = driver.Constructors && driver.Constructors[0]
 								? driver.Constructors[0].name
@@ -1011,7 +1023,7 @@ export default function Standings() {
 								</button>
 
 								{/* Cabecera del Piloto con mono oficial y colores de su escudería */}
-								<div className="flex items-center gap-4 pb-4 border-b border-zinc-800/80">
+								<div className="flex items-center gap-4 pb-4 border-b border-zinc-800/80 pr-12 sm:pr-14">
 									{(() => {
 										const avatarUrl = getDriverAvatarUrl(
 											selectedDriver.driverCode,
@@ -1242,7 +1254,7 @@ export default function Standings() {
 								</button>
 
 								{/* Cabecera de la Escudería con identidad cromática oficial */}
-								<div className="flex items-center gap-4 pb-4 border-b border-zinc-800/80">
+								<div className="flex items-center gap-4 pb-4 border-b border-zinc-800/80 pr-12 sm:pr-14">
 									<div
 										className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-zinc-900 border p-2.5 flex items-center justify-center shrink-0 shadow-lg"
 										style={{ borderColor: cTheme.borderSubtle }}
