@@ -16,16 +16,16 @@ const client = z.object({
 });
 
 const processEnv = {
-	NODE_ENV: process.env.NODE_ENV,
+	NODE_ENV: process.env.NODE_ENV || "production",
 
-	API_URL: process.env.API_URL,
+	API_URL: process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || "https://blackbox-f1.onrender.com",
 
 	TRACKING_ID: process.env.TRACKING_ID,
 	TRACKING_URL: process.env.TRACKING_URL,
 
 	DISABLE_IFRAME: process.env.DISABLE_IFRAME,
 
-	NEXT_PUBLIC_LIVE_URL: process.env.NEXT_PUBLIC_LIVE_URL,
+	NEXT_PUBLIC_LIVE_URL: process.env.NEXT_PUBLIC_LIVE_URL || "https://blackbox-f1-realtime-docker.onrender.com",
 };
 
 // Don't touch the part below
