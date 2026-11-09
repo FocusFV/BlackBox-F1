@@ -299,7 +299,7 @@ export default function Sidebar({ connected }: Props) {
 
 					{/* Pie */}
 					<div className="border-t border-zinc-800/80 pt-3 mt-4 flex items-center justify-between text-[10px] font-bold tracking-widest text-zinc-400 font-mono uppercase">
-						<span>v4.0.3</span>
+						<span>v4.1.0</span>
 						<span className="text-zinc-400">FocusFV</span>
 					</div>
 				</nav>

@@ -33,6 +33,7 @@ const countryCodeMap: Record<string, string> = {
 	Hungary: "hun", Italy: "ita", Japan: "jpn", "Saudi Arabia": "ksa",
 	Mexico: "mex", Monaco: "mon", Netherlands: "ned", Portugal: "por",
 	Qatar: "qat", Singapore: "sgp", "United Arab Emirates": "uae", "United States": "usa",
+	UAE: "uae", "Emiratos Árabes Unidos": "uae", "Emiratos Árabes": "uae",
 };
 
 const countryTranslation: Record<string, string> = {
@@ -42,7 +43,7 @@ const countryTranslation: Record<string, string> = {
 	Germany: "Alemania", Hungary: "Hungría", Italy: "Italia", Japan: "Japón",
 	"Saudi Arabia": "Arabia Saudita", Mexico: "México", Monaco: "Mónaco", Netherlands: "Países Bajos",
 	Portugal: "Portugal", Qatar: "Catar", Singapore: "Singapur", "United Arab Emirates": "Emiratos Árabes Unidos",
-	"United States": "Estados Unidos",
+	"United States": "Estados Unidos", UAE: "Emiratos Árabes Unidos", "Emiratos Árabes": "Emiratos Árabes Unidos",
 };
 
 const dayTranslation: Record<string, string> = {
@@ -315,7 +316,9 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 				{modalOpen && (
 					<ResultsModal
 						meetingKey={round.meetingKey}
+						roundNumber={round.meetingKey}
 						raceName={round.name}
+						countryName={translatedCountry}
 						onClose={() => setModalOpen(false)}
 					/>
 				)}

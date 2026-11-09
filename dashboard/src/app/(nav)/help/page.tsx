@@ -27,7 +27,7 @@ export default function HelpPage() {
 						<span className="size-2 rounded-full bg-red-500 animate-pulse" /> Guía Oficial de Telemetría
 					</div>
 					<h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl bg-gradient-to-r from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent">
-						Centro de Ayuda Blackboxf1
+						Centro de Ayuda Blackbox F1
 					</h1>
 					<p className="max-w-2xl text-zinc-400 text-base leading-relaxed">
 						Dominá la interfaz de telemetría en tiempo real. Conocé la codificación de colores, indicadores de estado de los monoplazas y cómo sincronizar los datos en vivo con tu transmisión.
@@ -173,13 +173,15 @@ export default function HelpPage() {
 						</div>
 					</div>
 
-					<div className="flex items-center justify-between rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
+					<div className="flex items-center justify-between rounded-xl border border-blue-500/30 bg-blue-950/20 p-4">
 						<div>
-							<h3 className="font-bold text-amber-400">En PIT / Pit Out</h3>
-							<p className="text-xs text-zinc-400">El coche se desplaza por la calle de boxes realizando parada o regreso.</p>
+							<h3 className="font-bold text-blue-400">En PIT / Pit Out</h3>
+							<p className="text-xs text-zinc-400">El monoplaza se desplaza por la calle de boxes realizando parada o salida a pista.</p>
 						</div>
-						<div className="w-16">
-							<DriverDRS on={false} possible={false} inPit={true} pitOut={false} />
+						<div className="w-16 flex justify-end">
+							<span className="inline-flex h-7 px-3 items-center justify-center rounded-md border border-blue-500/60 bg-blue-950/60 font-mono text-xs font-black text-blue-300 shadow-[0_0_12px_rgba(59,130,246,0.35)] select-none">
+								PIT
+							</span>
 						</div>
 					</div>
 				</div>
@@ -232,7 +234,7 @@ export default function HelpPage() {
 					</div>
 					<div className="flex flex-col items-center justify-center p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center gap-2">
 						<Image src={wetTireIcon} alt="lluvia" className="size-10" />
-						<span className="text-xs font-bold text-blue-400">Extrema Lluvia</span>
+						<span className="text-xs font-bold text-blue-400">Lluvia Extrema (Wet)</span>
 					</div>
 					<div className="flex flex-col items-center justify-center p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center gap-2">
 						<Image src={unknownTireIcon} alt="desconocido" className="size-10 opacity-60" />
@@ -254,7 +256,7 @@ export default function HelpPage() {
 
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 					<div className="flex flex-col items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 text-center">
-						<div className="w-16">
+						<div className="w-24 flex justify-center">
 							<DriverPedals className="bg-red-500" value={1} maxValue={3} />
 						</div>
 						<div>
@@ -264,7 +266,7 @@ export default function HelpPage() {
 					</div>
 
 					<div className="flex flex-col items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 text-center">
-						<div className="w-16">
+						<div className="w-24 flex justify-center">
 							<DriverPedals className="bg-emerald-500" value={3} maxValue={4} />
 						</div>
 						<div>
@@ -274,7 +276,7 @@ export default function HelpPage() {
 					</div>
 
 					<div className="flex flex-col items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 text-center">
-						<div className="w-16">
+						<div className="w-24 flex justify-center">
 							<DriverPedals className="bg-blue-500" value={2} maxValue={3} />
 						</div>
 						<div>
@@ -344,7 +346,7 @@ export default function HelpPage() {
 
 				<div className="rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900/60 to-black p-6 space-y-4">
 					<p className="text-sm text-zinc-300 leading-relaxed">
-						Dado que la API directo de boxes se actualiza milisegundos antes que la transmisión de TV, podés configurar un retraso (delay) en segundos. Así la app pausará la llegada de datos y la reproducirá a la par de tus imágenes sin spoliarte los sobrepasos.
+						Dado que la API directa de boxes se actualiza milisegundos antes que la transmisión de TV, podés configurar un retraso (delay) en segundos. Así la plataforma pausará la llegada de datos y la reproducirá a la par de tus imágenes sin spoilearte los sobrepasos.
 					</p>
 
 					<div className="rounded-xl border border-zinc-800 bg-zinc-950/80 p-4 space-y-2">

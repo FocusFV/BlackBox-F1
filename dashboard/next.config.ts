@@ -63,6 +63,13 @@ const config: NextConfig = {
 		],
 	},
 	headers: async () => securityAndRobotsHeaders,
+	redirects: async () => [
+		{
+			source: "/panel",
+			destination: "/dashboard",
+			permanent: true,
+		},
+	],
 
 	webpack: (config, { dev }) => {
 		if (dev) {

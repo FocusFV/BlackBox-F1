@@ -6,6 +6,7 @@ import { isFavoriteDriver } from "@/lib/favoriteDriver";
 import { motion, AnimatePresence } from "motion/react";
 import clsx from "clsx";
 import calendar2026 from "@/data/calendar2026.json";
+import { translateGpName } from "@/lib/f1Translations";
 import {
 	Trophy,
 	Wrench,
@@ -1169,7 +1170,7 @@ export default function Standings() {
 																R{race.round}
 															</span>
 															<p className="font-bold truncate text-white uppercase">
-																{race.raceName}
+																{translateGpName(race.raceName)}
 															</p>
 															<span className="text-[10px] text-zinc-400 truncate hidden sm:inline">
 																({race.Circuit?.circuitName || ""})
@@ -1229,7 +1230,7 @@ export default function Standings() {
 																		R{ur.round}
 																	</span>
 																	<p className="font-semibold truncate text-zinc-400 uppercase">
-																		{ur.raceName}
+																		{translateGpName(ur.raceName)}
 																	</p>
 																</div>
 																<span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-zinc-800/80 text-amber-400/90 border border-zinc-700/60 shrink-0">

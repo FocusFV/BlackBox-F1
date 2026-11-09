@@ -39,7 +39,7 @@ export default function Footer() {
 					{/* VERSIÓN DEL SOFTWARE Y CONTADOR DISCRETO DE ESPECTADORES */}
 					<div className="flex flex-wrap items-center justify-center gap-2.5 mt-1.5">
 						<div className="text-xs text-zinc-500 font-mono bg-zinc-900/30 px-2.5 py-0.5 rounded-full border border-zinc-900/60">
-							v4.0.7
+							v4.1.0
 						</div>
 						<span className="text-zinc-700 select-none">•</span>
 						<VisitorCounter />

@@ -14,7 +14,8 @@ const countryNameMap: Record<string, string> = {
 	"Monaco": "Monaco", "Spain": "Spain", "Austria": "Austria", "Great Britain": "Great Britain",
 	"Hungary": "Hungary", "Belgium": "Belgium", "Netherlands": "Netherlands", "Italy": "Italy",
 	"Azerbaijan": "Azerbaijan", "Singapore": "Singapore", "Mexico": "Mexico", "Brazil": "Brazil",
-	"Qatar": "Qatar", "Abu Dhabi": "United Arab Emirates"
+	"Qatar": "Qatar", "Abu Dhabi": "United Arab Emirates", "UAE": "United Arab Emirates",
+	"United Arab Emirates": "United Arab Emirates"
 };
 
 function adaptJolpicaRaces(races: any[]): RoundType[] {
