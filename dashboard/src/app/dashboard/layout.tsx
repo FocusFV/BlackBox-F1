@@ -113,8 +113,7 @@ export default function DashboardLayout({ children }: Props) {
 				</div>
 			</motion.div>
 
-			{/* 🚀 MODAL DE APOYO CADA 30 MINUTOS */}
-			<SupportModal />
+			{/* Contenedor principal */}
 		</div>
 	);
 }

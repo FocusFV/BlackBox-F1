@@ -5,36 +5,56 @@ export const revalidate = 1800; // Cache de 30 minutos
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
 	const sessionName = searchParams.get("session") || "FP1"; // "FP1" | "FP2" | "FP3" | "QUALY" | "RACE" | "SPRINT" | "SQ"
+	const meetingKey = searchParams.get("meeting_key") || "latest";
 	const raceDate = searchParams.get("date") || new Date().toISOString().split("T")[0];
 
 	try {
-		// 1. Mapear identificador de sesión a nombres de OpenF1
-		const targetDate = new Date(raceDate);
-		const minDate = new Date(targetDate.getTime() - 4 * 86400000).toISOString().split("T")[0];
-		const maxDate = new Date(targetDate.getTime() + 2 * 86400000).toISOString().split("T")[0];
-
-		const sessionsRes = await fetch(
-			`https://api.openf1.org/v1/sessions?date_start>=${minDate}&date_start<=${maxDate}`,
-			{ next: { revalidate: 1800 } }
-		);
-
-		if (!sessionsRes.ok) {
-			return NextResponse.json({ error: "Error consultando OpenF1" }, { status: 502 });
+		// 1. Obtener sesiones de OpenF1 para el fin de semana objetivo
+		let sessionsData: any[] = [];
+		try {
+			const sessionsRes = await fetch(
+				`https://api.openf1.org/v1/sessions?meeting_key=${meetingKey}`,
+				{ next: { revalidate: 1800 } }
+			);
+			if (sessionsRes.ok) {
+				sessionsData = await sessionsRes.json();
+			}
+		} catch (e) {
+			console.warn("[API Practice] Error con meeting_key:", e);
 		}
 
-		const sessionsData: any[] = await sessionsRes.json();
-		const matchingSession = sessionsData.find((s: any) => {
-			const sName = (s.session_name || "").toLowerCase();
-			const sType = (s.session_type || "").toLowerCase();
-			if (sessionName === "FP1") return sName === "practice 1";
-			if (sessionName === "FP2") return sName === "practice 2";
-			if (sessionName === "FP3") return sName === "practice 3";
-			if (sessionName === "QUALY") return sName === "qualifying" || sType === "qualifying";
-			if (sessionName === "SQ") return sName.includes("shootout") || sName.includes("sprint qual") || sType.includes("qualifying");
-			if (sessionName === "SPRINT") return sName === "sprint" || sType === "sprint";
-			if (sessionName === "RACE") return sName === "race" || sType === "race";
-			return false;
-		});
+		// Fallback por rango de fechas si meeting_key no arrojó resultados
+		if (!Array.isArray(sessionsData) || sessionsData.length === 0) {
+			try {
+				const targetDate = new Date(raceDate);
+				const minDate = new Date(targetDate.getTime() - 7 * 86400000).toISOString().split("T")[0];
+				const maxDate = new Date(targetDate.getTime() + 4 * 86400000).toISOString().split("T")[0];
+				const dateRes = await fetch(
+					`https://api.openf1.org/v1/sessions?date_start>=${minDate}&date_start<=${maxDate}`,
+					{ next: { revalidate: 1800 } }
+				);
+				if (dateRes.ok) {
+					sessionsData = await dateRes.json();
+				}
+			} catch (e) {
+				console.warn("[API Practice] Error con date range:", e);
+			}
+		}
+
+		const matchingSession = Array.isArray(sessionsData)
+			? sessionsData.find((s: any) => {
+					const sName = (s.session_name || "").toLowerCase();
+					const sType = (s.session_type || "").toLowerCase();
+					if (sessionName === "FP1") return sName.includes("practice 1") || sName.includes("fp1");
+					if (sessionName === "FP2") return sName.includes("practice 2") || sName.includes("fp2");
+					if (sessionName === "FP3") return sName.includes("practice 3") || sName.includes("fp3");
+					if (sessionName === "QUALY") return sName === "qualifying" || sType === "qualifying";
+					if (sessionName === "SQ") return sName.includes("shootout") || sName.includes("sprint qual") || sType.includes("qualifying");
+					if (sessionName === "SPRINT") return sName === "sprint" || sType === "sprint";
+					if (sessionName === "RACE") return sName === "race" || sType === "race";
+					return false;
+			  })
+			: null;
 
 		if (!matchingSession) {
 			return NextResponse.json({ error: `Sesión ${sessionName} no encontrada` }, { status: 404 });
@@ -127,7 +147,7 @@ export async function GET(request: Request) {
 
 		const bestLaps: Record<string, number> = {};
 		for (const l of laps) {
-			if (l.lap_duration && (!bestLaps[l.driver_number] || l.lap_duration < bestLaps[l.driver_number])) {
+			if (l.lap_duration && l.lap_duration > 55 && l.lap_duration < 240 && (!bestLaps[l.driver_number] || l.lap_duration < bestLaps[l.driver_number])) {
 				bestLaps[l.driver_number] = l.lap_duration;
 			}
 		}

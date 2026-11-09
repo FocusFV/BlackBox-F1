@@ -720,8 +720,6 @@ export default function StreamsPage() {
 					</div>
 				)}
 			</div>
-
-			<SupportModal />
 		</div>
 	);
 }

@@ -59,6 +59,7 @@ export default function Page() {
 
 	// 🛰️ Modo Cinemático de Circuito Aéreo (pantalla completa sin resultados)
 	const [isCinematicTrackMode, setIsCinematicTrackMode] = useState(false);
+	const [activeCircuit, setActiveCircuit] = useState<{ gpName?: string; country?: string } | null>(null);
 
 	// 🎬 Transición cinemática de Parque Cerrado a Telemetría en Vivo
 	const [isTransitioningToLive, setIsTransitioningToLive] = useState(false);
@@ -381,8 +382,8 @@ export default function Page() {
 				>
 					{/* 🏎️ Fondo inteligente del circuito aéreo y Easter Egg de telemetría */}
 					<CircuitBackdrop
-						gpName={session?.Meeting?.Name || scheduleStatus.nextSessionName || session?.Name}
-						country={session?.Meeting?.Country?.Name}
+						gpName={session?.Meeting?.Name || activeCircuit?.gpName || scheduleStatus.nextSessionName || session?.Name}
+						country={session?.Meeting?.Country?.Name || activeCircuit?.country}
 						isCinematic={isCinematicTrackMode}
 						onToggleCinematic={() => setIsCinematicTrackMode((prev) => !prev)}
 					/>
@@ -397,7 +398,13 @@ export default function Page() {
 					>
 						{/* Historial y resultados del último GP (con laterales táctiles restringidos solo a esta altura) */}
 						<div className="relative w-full">
-							<ParcFerme onOpenCircuit={() => setIsCinematicTrackMode(true)} />
+							<ParcFerme
+								onGpLoaded={(gp, country) => setActiveCircuit({ gpName: gp, country })}
+								onOpenCircuit={(gp, country) => {
+									if (gp) setActiveCircuit({ gpName: gp, country });
+									setIsCinematicTrackMode(true);
+								}}
+							/>
 
 							{/* 🏎️ Franjas laterales táctiles que terminan exactamente donde termina Parque Cerrado (no tocan YouTube) */}
 							{!isCinematicTrackMode && (

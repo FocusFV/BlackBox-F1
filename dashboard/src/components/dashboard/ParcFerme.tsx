@@ -112,10 +112,11 @@ const TeamLogo: React.FC<{ teamName: string }> = ({ teamName }) => {
 };
 
 interface ParcFermeProps {
-	onOpenCircuit?: () => void;
+	onOpenCircuit?: (gpName?: string, countryCode?: string) => void;
+	onGpLoaded?: (gpName: string, countryCode: string) => void;
 }
 
-export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
+export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded }) => {
 	const gridDensity = useSettingsStore((state) => state.gridDensity);
 	const isCompact = gridDensity === "compact";
 
@@ -167,6 +168,12 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 	const [raceDate, setRaceDate] = useState<string>(() => (liveSession?.StartDate ? liveSession.StartDate.split("T")[0] : ""));
 	const [loading, setLoading] = useState(true);
 	const [hasSprint, setHasSprint] = useState(false);
+
+	useEffect(() => {
+		if (gpName && onGpLoaded) {
+			onGpLoaded(gpName, countryCode);
+		}
+	}, [gpName, countryCode, onGpLoaded]);
 	const [qualyViewMode, setQualyViewMode] = useState<"times" | "grid">("times");
 	const [startingGrid, setStartingGrid] = useState<
 		{ position: number; driver_number: string; penalty?: string | null }[] | null
@@ -670,7 +677,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit }) => {
 		<div className="flex flex-col gap-4 w-full text-white items-center">
 			{/* 🏁 CABECERA UNIFICADA PANORÁMICA (TÁCTIL PARA ACTIVAR MODO CIRCUITO EN MÓVIL Y DESKTOP) */}
 			<div
-				onClick={onOpenCircuit}
+				onClick={() => onOpenCircuit ? onOpenCircuit(gpName, countryCode) : undefined}
 				className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-2xl bg-zinc-950/75 border border-zinc-800/80 shadow-[0_4px_25px_rgba(0,0,0,0.5)] backdrop-blur-xl lg:w-8/12 w-full cursor-pointer hover:border-amber-500/50 hover:bg-zinc-900/80 transition-all group"
 				title="Toca para ver el circuito completo en alta resolución"
 			>

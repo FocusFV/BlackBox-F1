@@ -694,8 +694,31 @@ export default function Standings() {
 			});
 		});
 
-		return Object.values(driversMap).sort((a, b) => b.points - a.points);
-	}, [constructorSeasonResults]);
+		// 🎯 Sincronización oficial: cotejar con la tabla de posiciones oficial de pilotos (driverStandings)
+		// para asegurar que los puntos del desglose coincidan exactamente con la suma de la escudería
+		return Object.values(driversMap)
+			.map((d) => {
+				const standingMatch = (extDrivers || []).find((sd: any) => {
+					const sId = sd.Driver?.driverId || sd.driverId || "";
+					const sCode = sd.Driver?.code || sd.code || "";
+					const sFamily = (sd.Driver?.familyName || sd.familyName || "").toLowerCase();
+					return (
+						(d.driverId && sId && d.driverId === sId) ||
+						(d.code && sCode && d.code === sCode) ||
+						(sFamily && d.name.toLowerCase().includes(sFamily))
+					);
+				});
+
+				if (standingMatch && standingMatch.points !== undefined) {
+					const officialPoints = parseFloat(standingMatch.points);
+					if (!isNaN(officialPoints) && officialPoints > 0) {
+						return { ...d, points: officialPoints };
+					}
+				}
+				return d;
+			})
+			.sort((a, b) => b.points - a.points);
+	}, [constructorSeasonResults, extDrivers]);
 
 	// Carreras restantes aún no disputadas de la temporada 2026
 	const upcoming2026Races = useMemo(() => {

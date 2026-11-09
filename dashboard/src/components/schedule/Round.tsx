@@ -163,7 +163,8 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 				{!isRoundOver ? (
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
 						{groupSessionByDay(round.sessions).map((day, i) => {
-							const dayNameEnglish = utc(day.date).format("dddd").toLowerCase();
+							const localMoment = mounted ? utc(day.date).local() : utc(day.date);
+							const dayNameEnglish = localMoment.format("dddd").toLowerCase();
 							const isFridayOrThursday = dayNameEnglish === "friday" || dayNameEnglish === "thursday";
 
 							return (
@@ -177,7 +178,7 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 											{mounted ? (dayTranslation[dayNameEnglish] || dayNameEnglish) : "..."}
 										</span>
 										<span className="text-[11px] font-mono font-bold text-amber-400/90 tracking-wide bg-zinc-900/90 px-2 py-0.5 rounded-md border border-zinc-800">
-											{mounted ? utc(day.date).local().format("DD · MMM") : "-- · ---"}
+											{mounted ? localMoment.format("DD · MMM") : "-- · ---"}
 										</span>
 									</div>
 

@@ -9,6 +9,7 @@ import { env } from "@/env";
 import EnvScript from "@/env-script";
 import OledModeProvider from "@/components/OledModeProvider";
 import Navbar from "@/components/Navbar";
+import SupportModal from "@/components/SupportModal";
 import VersionGuard from "@/components/VersionGuard";
 import { PwaRegister } from "@/components/PwaRegister";
 
@@ -48,6 +49,9 @@ export default function RootLayout({ children }: Props) {
 
 					{/* 🚀 MONITOR DE ACTUALIZACIONES EN VIVO */}
 					<VersionGuard />
+
+					{/* ☕ MODAL DE DONACIÓN / APOYO GLOBAL */}
+					<SupportModal />
 				</OledModeProvider>
 
 				<Analytics />
