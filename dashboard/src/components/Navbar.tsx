@@ -116,12 +116,11 @@ export default function Navbar() {
 					{/* Botón Café (Más grande, sin fondo gris) */}
 					<Link
 						className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-transparent border border-transparent text-xs font-bold uppercase tracking-widest text-zinc-400 transition-all duration-300 hover:text-amber-400 hover:border-amber-500/20 hover:bg-amber-500/[0.02] active:scale-95 group"
-						href="#support"
+						href="https://buymeacoffee.com/focusfv"
 						onClick={(e) => {
 							e.preventDefault();
 							useSupportModalStore.getState().open();
 						}}
-						target="_blank"
 					>
 						<Image src={coffeeIcon} alt="Café" width={20} height={20} className="opacity-70 brightness-0 invert transition-all group-hover:opacity-100 group-hover:text-amber-400 group-hover:scale-105 duration-200" />
 						<span>Doname un café</span>
@@ -169,7 +168,7 @@ export default function Navbar() {
 					))}
 					<div className="h-[1px] bg-zinc-900 my-2" />
 					<div className="flex justify-between items-center gap-4">
-						<Link className="flex flex-1 items-center justify-center gap-2 px-4 py-2 rounded-xl bg-transparent border border-zinc-800 text-xs text-zinc-400 cursor-pointer" href="#support" onClick={(e) => { e.preventDefault(); setIsOpen(false); useSupportModalStore.getState().open(); }}>
+						<Link className="flex flex-1 items-center justify-center gap-2 px-4 py-2 rounded-xl bg-transparent border border-zinc-800 text-xs text-zinc-400 cursor-pointer" href="https://buymeacoffee.com/focusfv" onClick={(e) => { e.preventDefault(); setIsOpen(false); useSupportModalStore.getState().open(); }}>
 							<Image src={coffeeIcon} alt="Café" width={18} height={18} className="brightness-0 invert opacity-60" />
 							<span>Café</span>
 						</Link>

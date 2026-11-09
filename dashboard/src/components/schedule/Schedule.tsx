@@ -67,10 +67,15 @@ function adaptJolpicaRaces(races: any[]): RoundType[] {
 		const countryRaw = race.Circuit?.Location?.country || "F1";
 		const countryNormalized = countryNameMap[countryRaw] || countryRaw;
 
+		const isMalaysia = String(race.round) === "16" || race.Circuit?.circuitId === "sepang" || (race.raceName || "").toLowerCase().includes("malaysia");
+		const cleanName = isMalaysia ? "Malaysian Grand Prix" : race.raceName;
+		const cleanCountry = isMalaysia ? "Malaysia" : countryNormalized;
+
 		return {
-			name: race.raceName,
-			countryName: countryNormalized,
+			name: cleanName,
+			countryName: cleanCountry,
 			countryKey: null,
+			roundNumber: parseInt(race.round, 10) || 1,
 			meetingKey: parseInt(race.round, 10) || 1,
 			start: firstStart,
 			end: endMoment.toISOString(),
@@ -130,6 +135,7 @@ export const getSchedule = async (): Promise<RoundType[]> => {
 								name: meeting.official_name || meeting.meeting_name,
 								countryName: countryNameMap[meeting.country_name] || meeting.country_name,
 								countryKey: null,
+								roundNumber: meeting.meeting_number ? parseInt(meeting.meeting_number, 10) : (meetings.indexOf(meeting) + 1),
 								meetingKey: meeting.meeting_key,
 								start: meeting.date_start,
 								end: endMoment.toISOString(),
@@ -177,8 +183,8 @@ export default async function Schedule() {
 		return utc(round.end) > utc();
 	}) || schedule[schedule.length - 1];
 
-	// Excluimos el GP destacado de la grilla de abajo
-	const cleanSchedule = schedule.filter((round) => round.name !== next?.name);
+	// Mostramos todas las rondas oficiales del campeonato (23 rondas completas)
+	const cleanSchedule = schedule;
 
 	return (
 		<div className="space-y-6 mb-20">

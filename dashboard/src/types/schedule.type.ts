@@ -2,6 +2,7 @@ export type Round = {
     name: string;
     countryName: string;
     countryKey: null;
+    roundNumber?: number;
     meetingKey: number; // 🔑 Clave esencial para OpenF1
     start: string;
     end: string;

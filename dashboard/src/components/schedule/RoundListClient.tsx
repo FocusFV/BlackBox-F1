@@ -17,6 +17,14 @@ type Props = {
 export default function RoundListClient({ schedule, nextName }: Props) {
 	const [filtro, setFiltro] = useState<"proximas" | "completadas">("proximas");
 
+	
+	const completedCount = schedule.filter((round) => {
+		const raceSession = round.sessions?.find((s) => s.kind.toLowerCase() === "race");
+		const endTime = raceSession ? utc(raceSession.end) : utc(round.end).endOf("day");
+		return round.over || endTime.isBefore(utc());
+	}).length;
+	const pendingCount = schedule.length - completedCount;
+
 	const rondasFiltradas = schedule.filter((round) => {
 		const nameClean = round.name ? round.name.toLowerCase() : "";
 		if (nameClean.includes("testing") || nameClean.includes("pre-season")) {

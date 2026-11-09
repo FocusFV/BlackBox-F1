@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDataStore } from "@/stores/useDataStore";
 import { X, Swords, Gauge, Flag, Timer, Zap } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -37,6 +37,12 @@ export function HeadToHeadModal({
 
 	const [driver1Num, setDriver1Num] = useState<string>(defaultD1);
 	const [driver2Num, setDriver2Num] = useState<string>(defaultD2);
+	// Sincronizar pilotos seleccionados desde evento externo
+	useEffect(() => {
+		if (initialDriver1) setDriver1Num(initialDriver1);
+		if (initialDriver2) setDriver2Num(initialDriver2);
+	}, [initialDriver1, initialDriver2]);
+
 
 	if (!isOpen) return null;
 

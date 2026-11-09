@@ -316,7 +316,7 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 				{modalOpen && (
 					<ResultsModal
 						meetingKey={round.meetingKey}
-						roundNumber={round.meetingKey}
+						roundNumber={round.roundNumber || (round.meetingKey > 100 ? ((round.name || "").toLowerCase().includes("brazil") || (round.name || "").toLowerCase().includes("paulo") ? 20 : undefined) : round.meetingKey)}
 						raceName={round.name}
 						countryName={translatedCountry}
 						onClose={() => setModalOpen(false)}

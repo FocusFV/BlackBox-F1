@@ -1,4 +1,5 @@
 "use client";
+import { useHeadToHeadStore } from "@/stores/useHeadToHeadStore";
 
 import { useEffect, useState, useRef } from "react";
 import LeaderBoard from "@/components/dashboard/LeaderBoard";
@@ -55,7 +56,11 @@ export default function Page() {
 	const [countdownText, setCountdownText] = useState<string>("");
 
 	// ⚔️ Modal Cara a Cara
-	const [isH2HOpen, setIsH2HOpen] = useState(false);
+	const isH2HOpen = useHeadToHeadStore((state) => state.isOpen);
+	const openH2H = useHeadToHeadStore((state) => state.open);
+	const h2hDriver1 = useHeadToHeadStore((state) => state.first);
+	const h2hDriver2 = useHeadToHeadStore((state) => state.second);
+	const closeH2H = useHeadToHeadStore((state) => state.close);
 
 	// 🛰️ Modo Cinemático de Circuito Aéreo (pantalla completa sin resultados)
 	const [isCinematicTrackMode, setIsCinematicTrackMode] = useState(false);
@@ -324,7 +329,7 @@ export default function Page() {
 							<div className="flex flex-wrap items-center gap-2">
 								<button
 									type="button"
-									onClick={() => setIsH2HOpen(true)}
+									onClick={() => openH2H()}
 									className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/90 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 hover:border-red-500/50 hover:bg-zinc-800 hover:text-white transition-all cursor-pointer"
 									title="Abrir comparador Cara a Cara entre dos pilotos"
 								>
@@ -349,7 +354,7 @@ export default function Page() {
 							<div className="flex flex-wrap items-center gap-2">
 								<button
 									type="button"
-									onClick={() => setIsH2HOpen(true)}
+									onClick={() => openH2H()}
 									className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/90 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 hover:border-red-500/50 hover:bg-zinc-800 hover:text-white transition-all cursor-pointer"
 									title="Abrir comparador Cara a Cara entre dos pilotos"
 								>
@@ -515,7 +520,7 @@ export default function Page() {
 			)}
 
 			{/* ⚔️ Modal Comparador Cara a Cara */}
-			<HeadToHeadModal isOpen={isH2HOpen} onClose={() => setIsH2HOpen(false)} />
+			<HeadToHeadModal isOpen={isH2HOpen} onClose={closeH2H} initialDriver1={h2hDriver1 || undefined} initialDriver2={h2hDriver2 || undefined} />
 
 			{/* 🛠️ Switch de Control exclusivo para Localhost (Nunca se renderiza en producción) */}
 			<LocalDevSwitch mode={devMode} onModeChange={handleDevModeChange} />

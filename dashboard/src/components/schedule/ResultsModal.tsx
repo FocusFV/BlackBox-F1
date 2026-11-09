@@ -71,7 +71,10 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 
 		async function fetchRaceData() {
 			setLoading(true);
-			const targetRound = roundNumber || meetingKey;
+			const isBrazil = (raceName || "").toLowerCase().includes("brazil") || (raceName || "").toLowerCase().includes("brasil") || (raceName || "").toLowerCase().includes("paulo");
+			const targetRound = (roundNumber && roundNumber <= 30) 
+				? roundNumber 
+				: (meetingKey && meetingKey <= 30 ? meetingKey : (isBrazil ? 20 : null));
 
 			// 1. Intentamos consultar Ergast/Jolpica para la ronda oficial
 			if (targetRound) {
@@ -166,7 +169,16 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 							}
 						});
 
-						const sorted = Object.values(latestPositions)
+						// Deduplicar estrictamente por posición y número de piloto para evitar posiciones clonadas
+						const uniqueByPos: Record<number, any> = {};
+						Object.values(latestPositions).forEach((p: any) => {
+							const pos = parseInt(p.position, 10);
+							if (pos >= 1 && pos <= 22 && !uniqueByPos[pos]) {
+								uniqueByPos[pos] = p;
+							}
+						});
+
+						const sorted = Object.values(uniqueByPos)
 							.map((p: any) => {
 								const d = driversMap[p.driver_number];
 								const code = d?.name_acronym || "";

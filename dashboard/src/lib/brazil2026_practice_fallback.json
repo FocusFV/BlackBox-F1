@@ -963,5 +963,249 @@
       "points": "",
       "isDNF": false
     }
+  ],
+  "RACE": [
+    {
+      "pos": "1",
+      "number": "1",
+      "code": "NOR",
+      "name": "Lando NORRIS",
+      "team": "McLaren",
+      "constructorId": "mclaren",
+      "gapTime": "1:35:23.504",
+      "points": "+25 PTS",
+      "isDNF": false
+    },
+    {
+      "pos": "2",
+      "number": "3",
+      "code": "VER",
+      "name": "Max VERSTAPPEN",
+      "team": "Red Bull Racing",
+      "constructorId": "red-bull-racing",
+      "gapTime": "+14.602s",
+      "points": "+18 PTS",
+      "isDNF": false
+    },
+    {
+      "pos": "3",
+      "number": "6",
+      "code": "HAD",
+      "name": "Isack HADJAR",
+      "team": "Red Bull Racing",
+      "constructorId": "red-bull-racing",
+      "gapTime": "+24.485s",
+      "points": "+15 PTS",
+      "isDNF": false
+    },
+    {
+      "pos": "4",
+      "number": "63",
+      "code": "RUS",
+      "name": "George RUSSELL",
+      "team": "Mercedes",
+      "constructorId": "mercedes",
+      "gapTime": "+33.991s",
+      "points": "+12 PTS",
+      "isDNF": false
+    },
+    {
+      "pos": "5",
+      "number": "12",
+      "code": "ANT",
+      "name": "Kimi ANTONELLI",
+      "team": "Mercedes",
+      "constructorId": "mercedes",
+      "gapTime": "+41.017s",
+      "points": "+10 PTS",
+      "isDNF": false
+    },
+    {
+      "pos": "6",
+      "number": "81",
+      "code": "PIA",
+      "name": "Oscar PIASTRI",
+      "team": "McLaren",
+      "constructorId": "mclaren",
+      "gapTime": "+56.475s",
+      "points": "+8 PTS",
+      "isDNF": false
+    },
+    {
+      "pos": "7",
+      "number": "30",
+      "code": "LAW",
+      "name": "Liam LAWSON",
+      "team": "Racing Bulls",
+      "constructorId": "racing-bulls",
+      "gapTime": "+1:15.402",
+      "points": "+6 PTS",
+      "isDNF": false
+    },
+    {
+      "pos": "8",
+      "number": "16",
+      "code": "LEC",
+      "name": "Charles LECLERC",
+      "team": "Ferrari",
+      "constructorId": "ferrari",
+      "gapTime": "+1:18.586",
+      "points": "+4 PTS",
+      "isDNF": false
+    },
+    {
+      "pos": "9",
+      "number": "44",
+      "code": "HAM",
+      "name": "Lewis HAMILTON",
+      "team": "Ferrari",
+      "constructorId": "ferrari",
+      "gapTime": "+1:24.427",
+      "points": "+2 PTS",
+      "isDNF": false
+    },
+    {
+      "pos": "10",
+      "number": "27",
+      "code": "HUL",
+      "name": "Nico HULKENBERG",
+      "team": "Audi",
+      "constructorId": "audi",
+      "gapTime": "+1:27.105",
+      "points": "+1 PTS",
+      "isDNF": false
+    },
+    {
+      "pos": "11",
+      "number": "41",
+      "code": "LIN",
+      "name": "Arvid LINDBLAD",
+      "team": "Racing Bulls",
+      "constructorId": "racing-bulls",
+      "gapTime": "+1:29.130",
+      "points": "",
+      "isDNF": false
+    },
+    {
+      "pos": "12",
+      "number": "14",
+      "code": "ALO",
+      "name": "Fernando ALONSO",
+      "team": "Aston Martin",
+      "constructorId": "aston-martin",
+      "gapTime": "+1:36.856",
+      "points": "",
+      "isDNF": false
+    },
+    {
+      "pos": "13",
+      "number": "43",
+      "code": "COL",
+      "name": "Franco COLAPINTO",
+      "team": "Alpine",
+      "constructorId": "alpine",
+      "gapTime": "+1 VUELTA",
+      "points": "",
+      "isDNF": false
+    },
+    {
+      "pos": "14",
+      "number": "10",
+      "code": "GAS",
+      "name": "Pierre GASLY",
+      "team": "Alpine",
+      "constructorId": "alpine",
+      "gapTime": "+1 VUELTA",
+      "points": "",
+      "isDNF": false
+    },
+    {
+      "pos": "15",
+      "number": "23",
+      "code": "ALB",
+      "name": "Alexander ALBON",
+      "team": "Williams",
+      "constructorId": "williams",
+      "gapTime": "+1 VUELTA",
+      "points": "",
+      "isDNF": false
+    },
+    {
+      "pos": "16",
+      "number": "5",
+      "code": "BOR",
+      "name": "Gabriel BORTOLETO",
+      "team": "Audi",
+      "constructorId": "audi",
+      "gapTime": "+1 VUELTA",
+      "points": "",
+      "isDNF": false
+    },
+    {
+      "pos": "17",
+      "number": "87",
+      "code": "BEA",
+      "name": "Oliver BEARMAN",
+      "team": "Haas F1 Team",
+      "constructorId": "haas-f1-team",
+      "gapTime": "+1 VUELTA",
+      "points": "",
+      "isDNF": false
+    },
+    {
+      "pos": "18",
+      "number": "11",
+      "code": "PER",
+      "name": "Sergio PEREZ",
+      "team": "Cadillac",
+      "constructorId": "cadillac",
+      "gapTime": "+2 VUELTAS",
+      "points": "",
+      "isDNF": false
+    },
+    {
+      "pos": "19",
+      "number": "55",
+      "code": "SAI",
+      "name": "Carlos SAINZ",
+      "team": "Williams",
+      "constructorId": "williams",
+      "gapTime": "+2 VUELTAS",
+      "points": "",
+      "isDNF": false
+    },
+    {
+      "pos": "20",
+      "number": "51",
+      "code": "CAM",
+      "name": "Rafael CAMARA",
+      "team": "Haas F1 Team",
+      "constructorId": "haas-f1-team",
+      "gapTime": "+2 VUELTAS",
+      "points": "",
+      "isDNF": false
+    },
+    {
+      "pos": "21",
+      "number": "18",
+      "code": "STR",
+      "name": "Lance STROLL",
+      "team": "Aston Martin",
+      "constructorId": "aston-martin",
+      "gapTime": "DNF",
+      "points": "",
+      "isDNF": true
+    },
+    {
+      "pos": "22",
+      "number": "77",
+      "code": "BOT",
+      "name": "Valtteri BOTTAS",
+      "team": "Cadillac",
+      "constructorId": "cadillac",
+      "gapTime": "DNS",
+      "points": "",
+      "isDNF": true
+    }
   ]
 }

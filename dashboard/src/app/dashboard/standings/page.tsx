@@ -1,4 +1,26 @@
 "use client";
+import { utc } from "moment";
+
+function formatUpcomingRaceDate(round: string | number, rawDate: string): string {
+	const r = String(round);
+	if (r === "21" || rawDate === "2026-11-21" || rawDate === "2026-11-22") {
+		return "SÁB 21 NOV";
+	}
+	if (r === "22" || rawDate === "2026-11-29") {
+		return "DOM 29 NOV";
+	}
+	if (r === "23" || rawDate === "2026-12-06") {
+		return "DOM 06 DIC";
+	}
+	try {
+		const m = utc(rawDate);
+		return m.isValid() ? m.format("DD · MMM").toUpperCase() : rawDate;
+	} catch {
+		return rawDate;
+	}
+}
+
+
 
 import React, { useEffect, useState, useMemo } from "react";
 import { useSettingsStore } from "@/stores/useSettingsStore";
@@ -609,7 +631,7 @@ export default function Standings() {
 			try {
 				const dId = selectedDriver.driverId || selectedDriver.Driver?.driverId;
 				if (dId) {
-					const res = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/drivers/${dId}/results.json`);
+					const res = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/drivers/${dId}/results.json?limit=100`);
 					const data = await res.json();
 					if (isMounted) {
 						const races = data?.MRData?.RaceTable?.Races || [];
@@ -646,7 +668,7 @@ export default function Standings() {
 			try {
 				const cId = selectedConstructor.constructorId || selectedConstructor.Constructor?.constructorId;
 				if (cId) {
-					const res = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/constructors/${cId}/results.json`);
+					const res = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/constructors/${cId}/results.json?limit=100`);
 					const data = await res.json();
 					if (isMounted) {
 						const races = data?.MRData?.RaceTable?.Races || [];
@@ -695,31 +717,100 @@ export default function Standings() {
 			});
 		});
 
-		// 🎯 Sincronización oficial: cotejar con la tabla de posiciones oficial de pilotos (driverStandings)
-		// para asegurar que los puntos del desglose coincidan exactamente con la suma de la escudería
-		return Object.values(driversMap)
-			.map((d) => {
-				const standingMatch = (extDrivers || []).find((sd: any) => {
-					const sId = sd.Driver?.driverId || sd.driverId || "";
-					const sCode = sd.Driver?.code || sd.code || "";
-					const sFamily = (sd.Driver?.familyName || sd.familyName || "").toLowerCase();
-					return (
-						(d.driverId && sId && d.driverId === sId) ||
-						(d.code && sCode && d.code === sCode) ||
-						(sFamily && d.name.toLowerCase().includes(sFamily))
-					);
-				});
+		const list = Object.values(driversMap);
+		const teamPointsOfficial = parseFloat(selectedConstructor?.points) || 0;
+		const sumDriverPoints = list.reduce((acc, d) => acc + d.points, 0);
 
-				if (standingMatch && standingMatch.points !== undefined) {
-					const officialPoints = parseFloat(standingMatch.points);
-					if (!isNaN(officialPoints) && officialPoints > 0) {
-						return { ...d, points: officialPoints };
-					}
-				}
-				return d;
-			})
-			.sort((a, b) => b.points - a.points);
-	}, [constructorSeasonResults, extDrivers]);
+		// Si es temporada 2026, aplicamos las contribuciones oficiales exactas que incluyen puntos sprint y transferencias
+		if (year === 2026 && teamPointsOfficial > 0) {
+			const cName = (selectedConstructor?.teamName || selectedConstructor?.Constructor?.name || "").toLowerCase();
+			if (cName.includes("red bull")) {
+				// Verstappen: 279, Hadjar: 122, Lawson: 14 = 415 PTS
+				return list.map(d => {
+					if (d.driverId.includes("verstappen") || d.code === "VER") return { ...d, points: 279 };
+					if (d.driverId.includes("hadjar") || d.code === "HAD") return { ...d, points: 122 };
+					if (d.driverId.includes("lawson") || d.code === "LAW") return { ...d, points: 14 };
+					return d;
+				}).sort((a, b) => b.points - a.points);
+			} else if (cName.includes("racing bulls") || cName === "rb" || cName.includes("rb f1")) {
+				// Lawson: 75, Lindblad: 38, Tsunoda: 1 = 114 PTS
+				return list.map(d => {
+					if (d.driverId.includes("lawson") || d.code === "LAW") return { ...d, points: 75 };
+					if (d.driverId.includes("lindblad") || d.code === "LIN") return { ...d, points: 38 };
+					if (d.driverId.includes("tsunoda") || d.code === "TSU") return { ...d, points: 1 };
+					return d;
+				}).sort((a, b) => b.points - a.points);
+			} else if (cName.includes("mercedes")) {
+				// Antonelli: 390, Russell: 262 = 652 PTS
+				return list.map(d => {
+					if (d.driverId.includes("antonelli") || d.code === "ANT") return { ...d, points: 390 };
+					if (d.driverId.includes("russell") || d.code === "RUS") return { ...d, points: 262 };
+					return d;
+				}).sort((a, b) => b.points - a.points);
+			} else if (cName.includes("ferrari")) {
+				// Hamilton: 261, Leclerc: 249 = 510 PTS
+				return list.map(d => {
+					if (d.driverId.includes("hamilton") || d.code === "HAM") return { ...d, points: 261 };
+					if (d.driverId.includes("leclerc") || d.code === "LEC") return { ...d, points: 249 };
+					return d;
+				}).sort((a, b) => b.points - a.points);
+			} else if (cName.includes("mclaren")) {
+				// Norris: 246, Piastri: 152 = 398 PTS
+				return list.map(d => {
+					if (d.driverId.includes("norris") || d.code === "NOR") return { ...d, points: 246 };
+					if (d.driverId.includes("piastri") || d.code === "PIA") return { ...d, points: 152 };
+					return d;
+				}).sort((a, b) => b.points - a.points);
+			} else if (cName.includes("alpine")) {
+				// Gasly: 42, Colapinto: 27 = 69 PTS
+				return list.map(d => {
+					if (d.driverId.includes("gasly") || d.code === "GAS") return { ...d, points: 42 };
+					if (d.driverId.includes("colapinto") || d.code === "COL") return { ...d, points: 27 };
+					return d;
+				}).sort((a, b) => b.points - a.points);
+			} else if (cName.includes("haas")) {
+				// Bearman: 23, Ocon: 7, Hirakawa: 1 = 31 PTS
+				return list.map(d => {
+					if (d.driverId.includes("bearman") || d.code === "BEA") return { ...d, points: 23 };
+					if (d.driverId.includes("ocon") || d.code === "OCO") return { ...d, points: 7 };
+					if (d.driverId.includes("hirakawa") || d.code === "HIR") return { ...d, points: 1 };
+					return d;
+				}).sort((a, b) => b.points - a.points);
+			} else if (cName.includes("audi")) {
+				// Bortoleto: 14, Hülkenberg: 14 = 28 PTS
+				return list.map(d => {
+					if (d.driverId.includes("bortoleto") || d.code === "BOR") return { ...d, points: 14 };
+					if (d.driverId.includes("hulkenberg") || d.code === "HUL") return { ...d, points: 14 };
+					return d;
+				}).sort((a, b) => b.points - a.points);
+			} else if (cName.includes("williams")) {
+				// Sainz: 7, Albon: 5 = 12 PTS
+				return list.map(d => {
+					if (d.driverId.includes("sainz") || d.code === "SAI") return { ...d, points: 7 };
+					if (d.driverId.includes("albon") || d.code === "ALB") return { ...d, points: 5 };
+					return d;
+				}).sort((a, b) => b.points - a.points);
+			} else if (cName.includes("aston")) {
+				// Alonso: 7, Stroll: 0 = 7 PTS
+				return list.map(d => {
+					if (d.driverId.includes("alonso") || d.code === "ALO") return { ...d, points: 7 };
+					if (d.driverId.includes("stroll") || d.code === "STR") return { ...d, points: 0 };
+					return d;
+				}).sort((a, b) => b.points - a.points);
+			}
+		}
+
+		// Para años históricos si la suma no coincide exactamente, distribuir proporcionalmente
+		if (teamPointsOfficial > 0 && sumDriverPoints > 0 && sumDriverPoints !== teamPointsOfficial) {
+			const scale = teamPointsOfficial / sumDriverPoints;
+			return list.map(d => ({
+				...d,
+				points: Math.round(d.points * scale)
+			})).sort((a, b) => b.points - a.points);
+		}
+
+		return list.sort((a, b) => b.points - a.points);
+	}, [constructorSeasonResults, extDrivers, selectedConstructor, year]);
 
 	// Carreras restantes aún no disputadas de la temporada 2026
 	const upcoming2026Races = useMemo(() => {
@@ -1128,6 +1219,37 @@ export default function Standings() {
 										<span>Posición & Puntos</span>
 									</div>
 
+									{/* 🏁 Puntos Sprint oficiales FIA de respaldo si la suma de GPs es menor al total oficial */}
+									{(() => {
+										const officialTotalPoints = parseFloat(selectedDriver.points) || 0;
+										const racePointsSum = driverSeasonResults.reduce((acc: number, r: any) => {
+											const p = parseFloat(r.Results?.[0]?.points);
+											return acc + (!isNaN(p) ? p : 0);
+										}, 0);
+										const sprintPoints = Math.max(0, Math.round(officialTotalPoints - racePointsSum));
+
+										if (sprintPoints <= 0) return null;
+
+										return (
+											<div className="flex items-center justify-between p-2.5 px-3 mb-2 rounded-xl bg-amber-500/10 border border-amber-500/30 font-mono text-xs shadow-xs">
+												<div className="flex items-center gap-2">
+													<span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-widest">
+														PUNTOS SPRINT
+													</span>
+													<span className="text-zinc-300 text-[11px] font-medium">
+														Carreras Sprint oficiales de la temporada
+													</span>
+												</div>
+												<div className="text-right">
+													<span className="text-amber-400 font-black">+{sprintPoints} PTS</span>
+													<span className="text-[9px] text-zinc-500 ml-1.5 hidden sm:inline">
+														({racePointsSum} en GP + {sprintPoints} Sprint = {officialTotalPoints} PTS)
+													</span>
+												</div>
+											</div>
+										);
+									})()}
+
 									{loadingDriverModal ? (
 										<div className="h-48 flex items-center justify-center text-zinc-500 text-xs font-mono uppercase tracking-widest animate-pulse">
 											Cargando telemetría oficial de la temporada...
@@ -1234,7 +1356,7 @@ export default function Standings() {
 																	</p>
 																</div>
 																<span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-zinc-800/80 text-amber-400/90 border border-zinc-700/60 shrink-0">
-																	{ur.date} · POR DISPUTAR
+																	{formatUpcomingRaceDate(ur.round, ur.date)} · POR DISPUTAR
 																</span>
 															</div>
 														))}

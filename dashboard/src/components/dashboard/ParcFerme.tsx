@@ -1,4 +1,5 @@
 "use client";
+import { useHeadToHeadStore } from "@/stores/useHeadToHeadStore";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "motion/react";
@@ -278,6 +279,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 	useEffect(() => {
 		async function fetchSessionData() {
 			const isPractice = activeTab === "FP1" || activeTab === "FP2" || activeTab === "FP3";
+			const dateParam = raceDate ? `&date=${raceDate}` : (liveSession?.StartDate ? `&date=${liveSession.StartDate.split("T")[0]}` : "");
 
 			// 🛡️ Si ya tenemos resultados para esta sesión en memoria, mostrarlos al instante (0ms) sin parpadeo
 			if (sessionResultsCache.current[activeTab] && sessionResultsCache.current[activeTab].length > 0) {
@@ -496,7 +498,6 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 
 				// 2. Si es práctica libre (FP1, FP2, FP3), consultamos nuestra API de OpenF1
 				if (activeTab === "FP1" || activeTab === "FP2" || activeTab === "FP3") {
-					const dateParam = raceDate ? `&date=${raceDate}` : (liveSession?.StartDate ? `&date=${liveSession.StartDate.split("T")[0]}` : "");
 					try {
 						const res = await fetch(`/api/practice?session=${activeTab}${dateParam}`);
 						if (res.ok) {
@@ -594,11 +595,25 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 						isTimeBased = true;
 					}
 
-					// Si todos los tiempos de clasificación en Jolpica vienen vacíos, consultar las mejores vueltas oficiales en OpenF1
+					// Si todos los tiempos de clasificación en Jolpica vienen vacíos, usar fallback oficial de clasificación
 					const allTimesEmpty = isTimeBased && listSource.length > 0 && listSource.every((r: any) => !r.Q3 && !r.Q2 && !r.Q1);
 					const openF1BestTimes: Record<string, number> = {};
 
 					if (allTimesEmpty) {
+						try {
+							const qualyFbRes = await fetch(`/api/practice?session=QUALY${dateParam}`).catch(() => null);
+							if (qualyFbRes && qualyFbRes.ok) {
+								const qData = await qualyFbRes.json();
+								if (Array.isArray(qData?.results) && qData.results.length > 0) {
+									sessionResultsCache.current[activeTab] = qData.results;
+									setResults(qData.results);
+									setLoading(false);
+									return;
+								}
+							}
+						} catch (e) {
+							console.warn("[ParcFerme] Error fallback QUALY:", e);
+						}
 						try {
 							const openF1SessionRes = await fetch("https://api.openf1.org/v1/sessions?meeting_key=latest&session_type=Qualifying");
 							if (openF1SessionRes.ok) {
@@ -972,7 +987,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 											animate={{ opacity: 1, x: 0 }}
 											whileHover={{ x: 3 }}
 											transition={{ delay: index * 0.015 }}
-											onClick={() => triggerHaptic("light")}
+											onClick={() => { triggerHaptic("medium"); useHeadToHeadStore.getState().open(row.number); }}
 											className={`group/row relative flex items-center justify-between p-2.5 rounded-xl border transition-all duration-200 ${
 												isCompact ? "h-10 py-1.5" : "h-12"
 											} overflow-hidden ${rowBg} hover:border-zinc-700/80 cursor-pointer`}
