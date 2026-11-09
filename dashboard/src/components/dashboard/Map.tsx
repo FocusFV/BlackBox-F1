@@ -77,16 +77,16 @@ function smoothAngle(prevAngle: number, newAngle: number): number {
 	return prevAngle + diff;
 }
 
-export default function Map({ filter }: { filter?: string[] }) {
+export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: string[]; circuitKey?: number }) {
 	const showCornerNumbers = useSettingsStore((state) => state.showCornerNumbers);
 	const favoriteDrivers = useSettingsStore((state) => state.favoriteDrivers);
 
 	// 🛡️ Compatible con TypeScript estricto y seguro ante objetos incompletos
-	const circuitKey = useDataStore((state) => 
+	const storeCircuitKey = useDataStore((state) => 
 		state?.state?.SessionInfo?.Meeting?.Circuit?.Key ?? 
-		(state?.state?.SessionInfo as any)?.Circuit?.Key ?? 
-		2
+		(state?.state?.SessionInfo as any)?.Circuit?.Key
 	);
+	const circuitKey = propCircuitKey ?? storeCircuitKey ?? 152;
 
 	const rawDrivers = useDataStore((state) => state?.state?.DriverList);
 	const rawTiming = useDataStore((state) => state?.state?.TimingData);

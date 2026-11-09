@@ -115,7 +115,7 @@ export default function HelpPage() {
 
 					<div className="rounded-xl border border-zinc-700/50 bg-zinc-900/30 p-5 opacity-70 backdrop-blur-sm">
 						<div className="inline-block rounded-md border border-zinc-600 bg-zinc-800/50 px-3 py-1 font-semibold text-zinc-300 text-xs mb-3">
-							Out / DNF
+							Retirado / DNF
 						</div>
 						<h3 className="font-bold text-white text-base">Transparente</h3>
 						<p className="mt-1 text-xs text-zinc-400">El auto sufrió una avería, chocó o quedó eliminado de la tanda.</p>

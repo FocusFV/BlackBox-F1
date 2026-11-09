@@ -109,14 +109,35 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 									const sLower = (item.status || "").toLowerCase();
 									const itemLaps = parseInt(item.laps, 10) || 0;
 									const lapsDiff = leaderLaps > itemLaps ? leaderLaps - itemLaps : 0;
-									const isLapped = sLower.includes("lap") || sLower.includes("vta") || lapsDiff > 0;
-									const isFinished = sLower === "finished" || sLower.startsWith("+") || isLapped;
+
+									// Detección estricta de abandono / DNF según FIA (menos del 90% de vueltas o avería/accidente)
+									const isRetirement =
+										sLower.includes("ret") ||
+										sLower.includes("accident") ||
+										sLower.includes("collision") ||
+										sLower.includes("crash") ||
+										sLower.includes("engine") ||
+										sLower.includes("gearbox") ||
+										sLower.includes("brakes") ||
+										sLower.includes("suspension") ||
+										sLower.includes("hydraulics") ||
+										sLower.includes("electrical") ||
+										sLower.includes("puncture") ||
+										sLower.includes("withdrew") ||
+										sLower.includes("disqualified") ||
+										sLower.includes("did not") ||
+										sLower === "dnf" ||
+										(leaderLaps > 0 && itemLaps < Math.floor(leaderLaps * 0.9));
+
+									const isStatusFinished = sLower === "finished" || sLower.startsWith("+");
+									const isLapped = !isRetirement && (sLower.includes("lap") || sLower.includes("vta") || (isStatusFinished && lapsDiff > 0));
+									const isDNF = isRetirement;
 
 									let gapTime = "";
 									if (item.position === "1") {
 										gapTime = item.Time?.time || "GANADOR";
-									} else if (!isFinished) {
-										gapTime = translateStatus(item.status) || "RETIRADO";
+									} else if (isDNF) {
+										gapTime = `DNF · ${translateStatus(item.status) || "RETIRADO"}`;
 									} else if (isLapped) {
 										gapTime = lapsDiff <= 1 ? "+1 VUELTA" : `+${lapsDiff} VUELTAS`;
 									} else {
@@ -134,7 +155,7 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 										points: item.points ? `+${item.points} PTS` : "",
 										isFastestLap: item.FastestLap?.rank === "1",
 										fastestLapTime: item.FastestLap?.Time?.time,
-										isDNF: !isFinished,
+										isDNF,
 									};
 								});
 
@@ -424,7 +445,7 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 														: "text-zinc-300"
 												)}
 											>
-												{translateStatus(row.gapTime)}
+												{row.gapTime}
 											</span>
 											{row.points && (
 												<span className="text-[10px] font-bold text-amber-400">

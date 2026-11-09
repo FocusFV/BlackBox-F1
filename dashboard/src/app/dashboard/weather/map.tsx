@@ -14,65 +14,122 @@ export function WeatherMap() {
 	const [loading, setLoading] = useState<boolean>(true);
 
 	useEffect(() => {
+		let isMounted = true;
+
 		(async () => {
-			if (!mapContainerRef.current || !meeting) return;
+			if (!mapContainerRef.current) return;
 
-			const [coordsC, coordsA] = await Promise.all([
-				fetchCoords(`${meeting.Country.Name}, ${meeting.Location} circuit`),
-				fetchCoords(`${meeting.Country.Name}, ${meeting.Location} autodrome`),
-			]);
+			// Coordenadas oficiales: Circuito de Las Vegas Strip (36.1147, -115.173)
+			let coords: { lat: number; lon: number } = { lat: 36.1147, lon: -115.173 };
 
-			const coords = coordsC || coordsA;
+			if (meeting?.Location && meeting?.Country?.Name) {
+				try {
+					const [coordsC, coordsA] = await Promise.all([
+						fetchCoords(`${meeting.Country.Name}, ${meeting.Location} circuit`),
+						fetchCoords(`${meeting.Country.Name}, ${meeting.Location} autodrome`),
+					]);
+					const found = coordsC || coordsA;
+					if (found) coords = found;
+				} catch (e) {
+					console.warn("[WeatherMap] Error geocodificando circuito:", e);
+				}
+			}
+
+			// Consultar último frame del radar Doppler de RainViewer
+			let radarTileUrl = "";
+			try {
+				const rvRes = await fetch("https://api.rainviewer.com/public/weather-maps.json");
+				if (rvRes.ok) {
+					const rvData = await rvRes.json();
+					const past = rvData?.radar?.past;
+					if (Array.isArray(past) && past.length > 0) {
+						const latest = past[past.length - 1];
+						radarTileUrl = `${rvData.host}${latest.path}/256/{z}/{x}/{y}/2/1_1.png`;
+					}
+				}
+			} catch (e) {
+				console.warn("[WeatherMap] RainViewer radar no disponible:", e);
+			}
+
+			if (!isMounted || !mapContainerRef.current) return;
+
+			const sources: any = {
+				"esri-satellite": {
+					type: "raster",
+					tiles: [
+						"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+					],
+					tileSize: 256,
+					attribution: "Esri",
+				},
+			};
+
+			const layers: any[] = [
+				{
+					id: "satellite-layer",
+					type: "raster",
+					source: "esri-satellite",
+					minzoom: 0,
+					maxzoom: 20,
+				},
+			];
+
+			if (radarTileUrl) {
+				sources["rainviewer-radar"] = {
+					type: "raster",
+					tiles: [radarTileUrl],
+					tileSize: 256,
+				};
+				layers.push({
+					id: "radar-layer",
+					type: "raster",
+					source: "rainviewer-radar",
+					minzoom: 0,
+					maxzoom: 20,
+					paint: {
+						"raster-opacity": 0.85,
+					},
+				});
+			}
 
 			const libMap = new maplibregl.Map({
 				container: mapContainerRef.current,
 				style: {
 					version: 8,
-					sources: {
-						"esri-satellite": {
-							type: "raster",
-							tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
-							tileSize: 256,
-							attribution: "Esri"
-						}
-					},
-					layers: [
-						{
-							id: "satellite-layer",
-							type: "raster",
-							source: "esri-satellite",
-							minzoom: 0,
-							maxzoom: 20
-						}
-					]
+					sources,
+					layers,
 				},
-				center: coords ? [coords.lon, coords.lat] : undefined,
-				zoom: 14.2, // Vista perfecta de pájaro
-				pitch: 0,   // 2D Plano para mapeo de precisión de lluvia
-				interactive: true
+				center: [coords.lon, coords.lat],
+				zoom: 13.6,
+				pitch: 0,
+				interactive: true,
 			});
 
 			libMap.on("load", () => {
-				setLoading(false);
+				if (isMounted) setLoading(false);
 			});
 
 			mapRef.current = libMap;
 		})();
 
 		return () => {
+			isMounted = false;
 			if (mapRef.current) mapRef.current.remove();
 		};
 	}, [meeting]);
 
 	return (
 		<div className="relative w-full h-full bg-black overflow-hidden">
-			<div 
-				ref={mapContainerRef} 
-				className="absolute inset-0 w-full h-full" 
-				style={{ filter: "hue-rotate(130deg) saturate(2.2) brightness(0.35) contrast(1.2)" }}
+			<div
+				ref={mapContainerRef}
+				className="absolute inset-0 w-full h-full"
 			/>
-			<div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,161,155,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,161,155,0.02)_1px,transparent_1px)] bg-[size:2rem_2rem] pointer-events-none" />
-			{loading && <div className="h-full w-full animate-pulse bg-zinc-950" />}
+			<div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,161,155,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,161,155,0.04)_1px,transparent_1px)] bg-[size:2rem_2rem] pointer-events-none" />
+			{loading && (
+				<div className="absolute inset-0 flex items-center justify-center bg-black/80 z-20 font-mono text-xs text-[#00A19B] animate-pulse">
+					🛰️ Conectando radar satelital...
+				</div>
+			)}
 		</div>
 	);
 }

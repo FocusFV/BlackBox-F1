@@ -14,7 +14,7 @@ export default function Note({ children, className }: Props) {
 		<div className={clsx("flex flex-col gap-1 border-l-4 border-blue-500 py-2 pl-4", className)}>
 			<div className="flex items-center gap-1">
 				<Image src={infoIcon} className="size-5" alt={"info icon"} />
-				<p className="text-blue-500">Note</p>
+				<p className="text-blue-500 font-bold uppercase tracking-wider text-xs">Nota</p>
 			</div>
 			<p>{children}</p>
 		</div>

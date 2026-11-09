@@ -8,10 +8,10 @@ export const fetchMap = async (circuitKey: number): Promise<Map | null> => {
 			next: { revalidate: 60 * 60 * 2 },
 		});
 
-		// 🛡️ FALLBACK: Si el circuitKey de prueba no existe (404), busca un mapa por defecto (Key 7 / Silverstone)
+		// 🛡️ FALLBACK: Si el circuitKey de prueba no existe (404), busca Las Vegas Strip (Key 152 / 17 curvas)
 		if (!mapRequest.ok) {
-			console.warn(`CircuitKey ${circuitKey} no encontrado. Reintentando con circuito fallback (7)...`);
-			mapRequest = await fetch(`https://api.multiviewer.app/api/v1/circuits/7/${year}`, {
+			console.warn(`CircuitKey ${circuitKey} no encontrado. Reintentando con circuito fallback (152 / Las Vegas)...`);
+			mapRequest = await fetch(`https://api.multiviewer.app/api/v1/circuits/152/2024`, {
 				next: { revalidate: 60 * 60 * 2 },
 			});
 		}

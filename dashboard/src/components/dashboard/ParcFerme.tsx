@@ -2,6 +2,7 @@
 import { useHeadToHeadStore } from "@/stores/useHeadToHeadStore";
 import { useDriverModalStore } from "@/stores/useDriverModalStore";
 import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
+import calendar2026 from "@/data/calendar2026.json";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "motion/react";
@@ -130,7 +131,19 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 	const liveLapCount = useDataStore((state) => state.state?.LapCount);
 	const liveSessionStatus = useDataStore((state) => state.state?.SessionStatus?.Status);
 
+	const [selectedRound, setSelectedRound] = useState<number | null>(() => {
+		if (typeof window !== "undefined") {
+			const saved = sessionStorage.getItem("bb_parc_ferme_round");
+			if (saved) {
+				const n = parseInt(saved, 10);
+				if (!isNaN(n)) return n;
+			}
+		}
+		return null;
+	});
+
 	const roundNumber = (liveSession?.Meeting as any)?.Number || (liveSession as any)?.Number;
+	const effectiveRound = selectedRound ?? (roundNumber || 20);
 	const currentGpName = liveSession?.Meeting?.Name;
 	const currentCountryName = liveSession?.Meeting?.Country?.Name;
 	const initialCountry = (currentGpName ? getCountryCodeForGp(currentGpName, currentCountryName) : null) || "bra";
@@ -193,6 +206,20 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 	const [raceDate, setRaceDate] = useState<string>(() => (liveSession?.StartDate ? liveSession.StartDate.split("T")[0] : ""));
 	const [loading, setLoading] = useState(true);
 	const [hasSprint, setHasSprint] = useState(false);
+
+	// 🏎️ Sincronización al cambiar manualmente de Ronda / Gran Premio
+	useEffect(() => {
+		if (selectedRound !== null) {
+			const calRound = (calendar2026 as any[]).find((c) => parseInt(c.round, 10) === selectedRound);
+			if (calRound) {
+				setGpName(translateGpName(calRound.raceName));
+				setCountryCode(getCountryCodeForGp(calRound.raceName, calRound.Circuit?.Location?.country));
+				setRaceDate(calRound.date);
+				const isSprintRound = Boolean(calRound.Sprint || calRound.SprintQualifying);
+				setHasSprint(isSprintRound);
+			}
+		}
+	}, [selectedRound]);
 
 	// 🏎️ Pestañas inteligentes según formato de fin de semana (Sprint vs Normal)
 	const sessionTabs = useMemo(() => {
@@ -588,7 +615,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 				if (activeTab === "QUALY") subpath = "qualifying.json";
 				else if (activeTab === "SPRINT" || activeTab === "SQ") subpath = "sprint.json";
 
-				const targetRound = roundNumber || smartContext?.round;
+				const targetRound = effectiveRound;
 				const endpoints: string[] = [];
 				if (targetRound) {
 					endpoints.push(`https://api.jolpi.ca/ergast/f1/current/${targetRound}/${subpath}`);
@@ -710,14 +737,28 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 						const leaderLaps = parseInt(listSource[0]?.laps, 10) || 0;
 						const itemLaps = parseInt(r.laps, 10) || 0;
 						const lapsDiff = leaderLaps > itemLaps ? leaderLaps - itemLaps : 0;
-						const isLapped = statusStr.includes("lap") || statusStr.includes("vta") || lapsDiff > 0;
-						const isFinished =
-							statusStr.includes("finished") ||
-							statusStr.includes("+") ||
-							isLapped ||
-							isTimeBased;
 
-						const isDNF = !isFinished;
+						const isRetirement =
+							statusStr.includes("ret") ||
+							statusStr.includes("accident") ||
+							statusStr.includes("collision") ||
+							statusStr.includes("crash") ||
+							statusStr.includes("engine") ||
+							statusStr.includes("gearbox") ||
+							statusStr.includes("brakes") ||
+							statusStr.includes("suspension") ||
+							statusStr.includes("hydraulics") ||
+							statusStr.includes("electrical") ||
+							statusStr.includes("puncture") ||
+							statusStr.includes("withdrew") ||
+							statusStr.includes("disqualified") ||
+							statusStr.includes("did not") ||
+							statusStr === "dnf" ||
+							(leaderLaps > 0 && itemLaps < Math.floor(leaderLaps * 0.9));
+
+						const isStatusFinished = statusStr.includes("finished") || statusStr.startsWith("+");
+						const isLapped = !isRetirement && !isTimeBased && (statusStr.includes("lap") || statusStr.includes("vta") || (isStatusFinished && lapsDiff > 0));
+						const isDNF = !isTimeBased && isRetirement;
 
 						let gapTime = "";
 						let pointsStr = "";
@@ -806,7 +847,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 		}
 
 		fetchSessionData();
-	}, [activeTab, raceDate, roundNumber, smartContext, liveSession, liveTiming, liveStats, liveDrivers, liveLapCount, liveSessionStatus]);
+	}, [activeTab, raceDate, effectiveRound, smartContext, liveSession, liveTiming, liveStats, liveDrivers, liveLapCount, liveSessionStatus]);
 
 	return (
 		<div className="flex flex-col gap-4 w-full text-white items-center">
@@ -837,9 +878,36 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 								Ver Circuito 🏁
 							</span>
 						</div>
-						<h2 className="text-sm md:text-base font-black tracking-wide text-zinc-100 font-sans group-hover:text-amber-100 transition-colors">
-							{gpName}
-						</h2>
+						<div className="flex items-center gap-2.5 flex-wrap mt-0.5">
+							<h2 className="text-sm md:text-base font-black tracking-wide text-zinc-100 font-sans group-hover:text-amber-100 transition-colors">
+								{gpName}
+							</h2>
+							<select
+								value={effectiveRound}
+								onClick={(e) => e.stopPropagation()}
+								onChange={(e) => {
+									e.stopPropagation();
+									const rnd = parseInt(e.target.value, 10);
+									setSelectedRound(rnd);
+									if (typeof window !== "undefined") {
+										sessionStorage.setItem("bb_parc_ferme_round", String(rnd));
+									}
+									setTabManuallySelected(false);
+									setActiveTab("RACE");
+								}}
+								className="bg-zinc-900/90 text-amber-400 font-mono text-[11px] font-bold px-2 py-0.5 rounded-lg border border-zinc-800 hover:border-amber-500/60 focus:outline-none focus:border-amber-400 cursor-pointer shadow-sm transition-colors"
+								title="Seleccionar ronda / Gran Premio de la temporada 2026"
+							>
+								{(calendar2026 as any[]).map((r) => {
+									const isSp = Boolean(r.Sprint || r.SprintQualifying);
+									return (
+										<option key={r.round} value={r.round} className="bg-zinc-950 text-white font-mono">
+											R{r.round} · {translateGpName(r.raceName)}{isSp ? " ⚡ SPRINT" : ""}
+										</option>
+									);
+								})}
+							</select>
+						</div>
 					</div>
 				</div>
 
