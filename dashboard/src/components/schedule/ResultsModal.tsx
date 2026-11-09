@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { X, Trophy, Flag, Timer } from "lucide-react";
 import clsx from "clsx";
+import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
 
 type Props = {
 	meetingKey?: number;
@@ -52,11 +53,13 @@ const TeamLogo = ({ teamName }: { teamName: string }) => {
 		"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='8' fill='%233f3f46'/></svg>"
 	];
 
+	const isDarkLogo = cleanName.includes("audi") || cleanName.includes("cadillac");
+
 	return (
 		<img
 			src={fallbacks[fallbackIndex]}
 			alt={teamName}
-			className="w-5 h-5 object-contain"
+			className={`w-5 h-5 object-contain shrink-0 ${isDarkLogo ? "invert brightness-200 contrast-200" : ""}`}
 			onError={() => setFallbackIndex((prev) => Math.min(prev + 1, fallbacks.length - 1))}
 		/>
 	);
@@ -208,7 +211,23 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 			}
 
 			if (isMounted) {
-				setResults([]);
+				const fb = (brazilFallbackData as any).RACE;
+				if (Array.isArray(fb) && fb.length > 0) {
+					const parsed = fb.map((r: any) => ({
+						position: parseInt(r.pos, 10) || 99,
+						driver_number: r.number,
+						driverName: r.name,
+						code: r.code,
+						flag: driverNationalityMap[r.code] || "fia",
+						teamName: r.team,
+						gapTime: r.gapTime,
+						points: r.points,
+						isDNF: r.isDNF,
+					}));
+					setResults(parsed);
+				} else {
+					setResults([]);
+				}
 				setLoading(false);
 			}
 		}

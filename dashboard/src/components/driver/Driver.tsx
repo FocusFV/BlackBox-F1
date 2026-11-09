@@ -1,5 +1,6 @@
 "use client";
 import { useHeadToHeadStore } from "@/stores/useHeadToHeadStore";
+import { useDriverModalStore } from "@/stores/useDriverModalStore";
 
 import { useMemo } from "react";
 import clsx from "clsx";
@@ -191,7 +192,16 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 		<motion.div
 			layout="position"
 			whileHover={{ x: 3 }}
-			onClick={() => { triggerHaptic("medium"); useHeadToHeadStore.getState().open(driver?.RacingNumber); }}
+			onClick={() => {
+				triggerHaptic("medium");
+				useDriverModalStore.getState().open({
+					driverCode: driver?.Tla,
+					code: driver?.Tla,
+					name: driver?.FullName || driver?.BroadcastName,
+					teamName: driver?.TeamName,
+					driverId: driver?.Tla?.toLowerCase(),
+				});
+			}}
 			className={clsx(
 				"group/driver flex flex-col gap-1 rounded-lg select-none transition-all duration-200 cursor-pointer border bg-zinc-950/40 border-zinc-900/60 hover:border-zinc-700/70 hover:bg-zinc-900/50",
 				isCompact ? "p-1" : "p-1.5",

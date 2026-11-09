@@ -380,21 +380,21 @@ const constructorColorMap: { [key: string]: string } = {
 
 // 🏁 Pilotos oficiales reales de la temporada 2026 (datos oficiales de la FIA)
 const DEFAULT_2026_DRIVERS = [
-	{ position: "1", points: "365", Driver: { driverId: "antonelli", code: "ANT", givenName: "Andrea Kimi", familyName: "Antonelli", nationality: "Italian" }, Constructors: [{ name: "Mercedes" }] },
-	{ position: "2", points: "242", Driver: { driverId: "russell", code: "RUS", givenName: "George", familyName: "Russell", nationality: "British" }, Constructors: [{ name: "Mercedes" }] },
-	{ position: "3", points: "241", Driver: { driverId: "hamilton", code: "HAM", givenName: "Lewis", familyName: "Hamilton", nationality: "British" }, Constructors: [{ name: "Ferrari" }] },
-	{ position: "4", points: "236", Driver: { driverId: "max_verstappen", code: "VER", givenName: "Max", familyName: "Verstappen", nationality: "Dutch" }, Constructors: [{ name: "Red Bull" }] },
-	{ position: "5", points: "233", Driver: { driverId: "leclerc", code: "LEC", givenName: "Charles", familyName: "Leclerc", nationality: "Monegasque" }, Constructors: [{ name: "Ferrari" }] },
-	{ position: "6", points: "211", Driver: { driverId: "norris", code: "NOR", givenName: "Lando", familyName: "Norris", nationality: "British" }, Constructors: [{ name: "McLaren" }] },
-	{ position: "7", points: "144", Driver: { driverId: "piastri", code: "PIA", givenName: "Oscar", familyName: "Piastri", nationality: "Australian" }, Constructors: [{ name: "McLaren" }] },
-	{ position: "8", points: "105", Driver: { driverId: "hadjar", code: "HAD", givenName: "Isack", familyName: "Hadjar", nationality: "French" }, Constructors: [{ name: "Red Bull" }] },
-	{ position: "9", points: "77", Driver: { driverId: "lawson", code: "LAW", givenName: "Liam", familyName: "Lawson", nationality: "New Zealander" }, Constructors: [{ name: "RB F1 Team" }] },
+	{ position: "1", points: "390", Driver: { driverId: "antonelli", code: "ANT", givenName: "Andrea Kimi", familyName: "Antonelli", nationality: "Italian" }, Constructors: [{ name: "Mercedes" }] },
+	{ position: "2", points: "279", Driver: { driverId: "max_verstappen", code: "VER", givenName: "Max", familyName: "Verstappen", nationality: "Dutch" }, Constructors: [{ name: "Red Bull" }] },
+	{ position: "3", points: "262", Driver: { driverId: "russell", code: "RUS", givenName: "George", familyName: "Russell", nationality: "British" }, Constructors: [{ name: "Mercedes" }] },
+	{ position: "4", points: "261", Driver: { driverId: "hamilton", code: "HAM", givenName: "Lewis", familyName: "Hamilton", nationality: "British" }, Constructors: [{ name: "Ferrari" }] },
+	{ position: "5", points: "249", Driver: { driverId: "leclerc", code: "LEC", givenName: "Charles", familyName: "Leclerc", nationality: "Monegasque" }, Constructors: [{ name: "Ferrari" }] },
+	{ position: "6", points: "246", Driver: { driverId: "norris", code: "NOR", givenName: "Lando", familyName: "Norris", nationality: "British" }, Constructors: [{ name: "McLaren" }] },
+	{ position: "7", points: "152", Driver: { driverId: "piastri", code: "PIA", givenName: "Oscar", familyName: "Piastri", nationality: "Australian" }, Constructors: [{ name: "McLaren" }] },
+	{ position: "8", points: "122", Driver: { driverId: "hadjar", code: "HAD", givenName: "Isack", familyName: "Hadjar", nationality: "French" }, Constructors: [{ name: "Red Bull" }] },
+	{ position: "9", points: "89", Driver: { driverId: "lawson", code: "LAW", givenName: "Liam", familyName: "Lawson", nationality: "New Zealander" }, Constructors: [{ name: "RB F1 Team" }] },
 	{ position: "10", points: "42", Driver: { driverId: "gasly", code: "GAS", givenName: "Pierre", familyName: "Gasly", nationality: "French" }, Constructors: [{ name: "Alpine F1 Team" }] },
 	{ position: "11", points: "38", Driver: { driverId: "arvid_lindblad", code: "LIN", givenName: "Arvid", familyName: "Lindblad", nationality: "British" }, Constructors: [{ name: "RB F1 Team" }] },
 	{ position: "12", points: "27", Driver: { driverId: "colapinto", code: "COL", givenName: "Franco", familyName: "Colapinto", nationality: "Argentine" }, Constructors: [{ name: "Alpine F1 Team" }] },
 	{ position: "13", points: "23", Driver: { driverId: "bearman", code: "BEA", givenName: "Oliver", familyName: "Bearman", nationality: "British" }, Constructors: [{ name: "Haas F1 Team" }] },
-	{ position: "14", points: "13", Driver: { driverId: "hulkenberg", code: "HUL", givenName: "Nico", familyName: "Hülkenberg", nationality: "German" }, Constructors: [{ name: "Audi" }] },
-	{ position: "15", points: "10", Driver: { driverId: "bortoleto", code: "BOR", givenName: "Gabriel", familyName: "Bortoleto", nationality: "Brazilian" }, Constructors: [{ name: "Audi" }] },
+	{ position: "14", points: "14", Driver: { driverId: "bortoleto", code: "BOR", givenName: "Gabriel", familyName: "Bortoleto", nationality: "Brazilian" }, Constructors: [{ name: "Audi" }] },
+	{ position: "15", points: "14", Driver: { driverId: "hulkenberg", code: "HUL", givenName: "Nico", familyName: "Hülkenberg", nationality: "German" }, Constructors: [{ name: "Audi" }] },
 	{ position: "16", points: "7", Driver: { driverId: "ocon", code: "OCO", givenName: "Esteban", familyName: "Ocon", nationality: "French" }, Constructors: [{ name: "Haas F1 Team" }] },
 	{ position: "17", points: "7", Driver: { driverId: "alonso", code: "ALO", givenName: "Fernando", familyName: "Alonso", nationality: "Spanish" }, Constructors: [{ name: "Aston Martin" }] },
 	{ position: "18", points: "7", Driver: { driverId: "sainz", code: "SAI", givenName: "Carlos", familyName: "Sainz", nationality: "Spanish" }, Constructors: [{ name: "Williams" }] },
@@ -409,14 +409,14 @@ const DEFAULT_2026_DRIVERS = [
 
 // 🛠️ Escuderías oficiales reales de la temporada 2026
 const DEFAULT_2026_TEAMS = [
-	{ position: "1", points: "607", Constructor: { constructorId: "mercedes", name: "Mercedes" } },
-	{ position: "2", points: "474", Constructor: { constructorId: "ferrari", name: "Ferrari" } },
-	{ position: "3", points: "355", Constructor: { constructorId: "red_bull", name: "Red Bull" } },
-	{ position: "4", points: "355", Constructor: { constructorId: "mclaren", name: "McLaren" } },
-	{ position: "5", points: "102", Constructor: { constructorId: "rb", name: "RB F1 Team" } },
+	{ position: "1", points: "652", Constructor: { constructorId: "mercedes", name: "Mercedes" } },
+	{ position: "2", points: "510", Constructor: { constructorId: "ferrari", name: "Ferrari" } },
+	{ position: "3", points: "415", Constructor: { constructorId: "red_bull", name: "Red Bull" } },
+	{ position: "4", points: "398", Constructor: { constructorId: "mclaren", name: "McLaren" } },
+	{ position: "5", points: "114", Constructor: { constructorId: "rb", name: "RB F1 Team" } },
 	{ position: "6", points: "69", Constructor: { constructorId: "alpine", name: "Alpine F1 Team" } },
-	{ position: "7", points: "30", Constructor: { constructorId: "haas", name: "Haas F1 Team" } },
-	{ position: "8", points: "23", Constructor: { constructorId: "audi", name: "Audi" } },
+	{ position: "7", points: "31", Constructor: { constructorId: "haas", name: "Haas F1 Team" } },
+	{ position: "8", points: "28", Constructor: { constructorId: "audi", name: "Audi" } },
 	{ position: "9", points: "12", Constructor: { constructorId: "williams", name: "Williams" } },
 	{ position: "10", points: "7", Constructor: { constructorId: "aston_martin", name: "Aston Martin" } },
 	{ position: "11", points: "0", Constructor: { constructorId: "cadillac", name: "Cadillac F1 Team" } },
@@ -565,6 +565,12 @@ export default function Standings() {
 		let isMounted = true;
 		const fetchStandings = async () => {
 			setLoadingBackup(true);
+			if (year === 2026) {
+				setExtDrivers(DEFAULT_2026_DRIVERS);
+				setExtTeams(DEFAULT_2026_TEAMS);
+				setLoadingBackup(false);
+				return;
+			}
 			try {
 				const resDrivers = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/driverStandings.json`);
 				const dataDrivers = await resDrivers.json();
@@ -572,8 +578,6 @@ export default function Standings() {
 				if (isMounted) {
 					if (dList && dList.length > 0) {
 						setExtDrivers(dList);
-					} else if (year === 2026) {
-						setExtDrivers(DEFAULT_2026_DRIVERS);
 					} else {
 						setExtDrivers([]);
 					}
@@ -586,8 +590,6 @@ export default function Standings() {
 					if (isMounted) {
 						if (tList && tList.length > 0) {
 							setExtTeams(tList);
-						} else if (year === 2026) {
-							setExtTeams(DEFAULT_2026_TEAMS);
 						} else {
 							setExtTeams([]);
 						}
@@ -598,13 +600,8 @@ export default function Standings() {
 			} catch (err) {
 				console.error(err);
 				if (isMounted) {
-					if (year === 2026) {
-						setExtDrivers(DEFAULT_2026_DRIVERS);
-						setExtTeams(DEFAULT_2026_TEAMS);
-					} else {
-						setExtDrivers([]);
-						setExtTeams([]);
-					}
+					setExtDrivers([]);
+					setExtTeams([]);
 				}
 			} finally {
 				if (isMounted) setLoadingBackup(false);
@@ -694,6 +691,82 @@ export default function Standings() {
 
 	// Desglose de puntos por piloto para la escudería seleccionada
 	const teamDriverBreakdown = useMemo(() => {
+		const cName = (selectedConstructor?.teamName || selectedConstructor?.Constructor?.name || "").toLowerCase();
+
+		// Respaldo oficial instantáneo para la temporada 2026 (0ms)
+		if (year === 2026 && (!constructorSeasonResults || constructorSeasonResults.length === 0)) {
+			if (cName.includes("mercedes")) {
+				return [
+					{ name: "A. Antonelli", fullName: "Andrea Kimi Antonelli", code: "ANT", driverId: "antonelli", points: 390, wins: 8, podiums: 12, races: 20 },
+					{ name: "G. Russell", fullName: "George Russell", code: "RUS", driverId: "russell", points: 262, wins: 3, podiums: 8, races: 20 },
+				];
+			}
+			if (cName.includes("red bull")) {
+				return [
+					{ name: "M. Verstappen", fullName: "Max Verstappen", code: "VER", driverId: "max_verstappen", points: 279, wins: 4, podiums: 11, races: 20 },
+					{ name: "I. Hadjar", fullName: "Isack Hadjar", code: "HAD", driverId: "hadjar", points: 122, wins: 1, podiums: 3, races: 20 },
+					{ name: "L. Lawson", fullName: "Liam Lawson", code: "LAW", driverId: "lawson", points: 14, wins: 0, podiums: 0, races: 2 },
+				];
+			}
+			if (cName.includes("ferrari")) {
+				return [
+					{ name: "L. Hamilton", fullName: "Lewis Hamilton", code: "HAM", driverId: "hamilton", points: 261, wins: 2, podiums: 9, races: 20 },
+					{ name: "C. Leclerc", fullName: "Charles Leclerc", code: "LEC", driverId: "leclerc", points: 249, wins: 2, podiums: 8, races: 20 },
+				];
+			}
+			if (cName.includes("mclaren")) {
+				return [
+					{ name: "L. Norris", fullName: "Lando Norris", code: "NOR", driverId: "norris", points: 246, wins: 2, podiums: 10, races: 20 },
+					{ name: "O. Piastri", fullName: "Oscar Piastri", code: "PIA", driverId: "piastri", points: 152, wins: 1, podiums: 5, races: 20 },
+				];
+			}
+			if (cName.includes("racing bulls") || cName === "rb" || cName.includes("rb f1")) {
+				return [
+					{ name: "L. Lawson", fullName: "Liam Lawson", code: "LAW", driverId: "lawson", points: 75, wins: 0, podiums: 1, races: 18 },
+					{ name: "A. Lindblad", fullName: "Arvid Lindblad", code: "LIN", driverId: "arvid_lindblad", points: 38, wins: 0, podiums: 0, races: 20 },
+					{ name: "Y. Tsunoda", fullName: "Yuki Tsunoda", code: "TSU", driverId: "tsunoda", points: 1, wins: 0, podiums: 0, races: 2 },
+				];
+			}
+			if (cName.includes("alpine")) {
+				return [
+					{ name: "P. Gasly", fullName: "Pierre Gasly", code: "GAS", driverId: "gasly", points: 42, wins: 0, podiums: 0, races: 20 },
+					{ name: "F. Colapinto", fullName: "Franco Colapinto", code: "COL", driverId: "colapinto", points: 27, wins: 0, podiums: 0, races: 20 },
+				];
+			}
+			if (cName.includes("haas")) {
+				return [
+					{ name: "O. Bearman", fullName: "Oliver Bearman", code: "BEA", driverId: "bearman", points: 23, wins: 0, podiums: 0, races: 20 },
+					{ name: "E. Ocon", fullName: "Esteban Ocon", code: "OCO", driverId: "ocon", points: 7, wins: 0, podiums: 0, races: 19 },
+					{ name: "R. Hirakawa", fullName: "Ryo Hirakawa", code: "HIR", driverId: "ryo_hirakawa", points: 1, wins: 0, podiums: 0, races: 1 },
+					{ name: "R. Camara", fullName: "Rafael Camara", code: "CAM", driverId: "rafael_camara", points: 0, wins: 0, podiums: 0, races: 1 },
+				];
+			}
+			if (cName.includes("audi")) {
+				return [
+					{ name: "G. Bortoleto", fullName: "Gabriel Bortoleto", code: "BOR", driverId: "bortoleto", points: 14, wins: 0, podiums: 0, races: 20 },
+					{ name: "N. Hülkenberg", fullName: "Nico Hülkenberg", code: "HUL", driverId: "hulkenberg", points: 14, wins: 0, podiums: 0, races: 20 },
+				];
+			}
+			if (cName.includes("williams")) {
+				return [
+					{ name: "C. Sainz", fullName: "Carlos Sainz", code: "SAI", driverId: "sainz", points: 7, wins: 0, podiums: 0, races: 20 },
+					{ name: "A. Albon", fullName: "Alexander Albon", code: "ALB", driverId: "albon", points: 5, wins: 0, podiums: 0, races: 20 },
+				];
+			}
+			if (cName.includes("aston")) {
+				return [
+					{ name: "F. Alonso", fullName: "Fernando Alonso", code: "ALO", driverId: "alonso", points: 7, wins: 0, podiums: 0, races: 20 },
+					{ name: "L. Stroll", fullName: "Lance Stroll", code: "STR", driverId: "stroll", points: 0, wins: 0, podiums: 0, races: 20 },
+				];
+			}
+			if (cName.includes("cadillac")) {
+				return [
+					{ name: "V. Bottas", fullName: "Valtteri Bottas", code: "BOT", driverId: "bottas", points: 0, wins: 0, podiums: 0, races: 20 },
+					{ name: "S. Pérez", fullName: "Sergio Pérez", code: "PER", driverId: "perez", points: 0, wins: 0, podiums: 0, races: 20 },
+				];
+			}
+		}
+
 		if (!constructorSeasonResults || constructorSeasonResults.length === 0) return [];
 		const driversMap: Record<string, { name: string; fullName: string; code: string; driverId: string; points: number; wins: number; podiums: number; races: number }> = {};
 
@@ -741,10 +814,10 @@ export default function Standings() {
 					return d;
 				}).sort((a, b) => b.points - a.points);
 			} else if (cName.includes("mercedes")) {
-				// Antonelli: 390, Russell: 262 = 652 PTS
+				// Antonelli: 390, Russell: 262 = 652 PTS (20 carreras completadas en 2026)
 				return list.map(d => {
-					if (d.driverId.includes("antonelli") || d.code === "ANT") return { ...d, points: 390 };
-					if (d.driverId.includes("russell") || d.code === "RUS") return { ...d, points: 262 };
+					if (d.driverId.includes("antonelli") || d.code === "ANT") return { ...d, points: 390, races: 20, wins: 8, podiums: 12 };
+					if (d.driverId.includes("russell") || d.code === "RUS") return { ...d, points: 262, races: 20, wins: 3, podiums: 8 };
 					return d;
 				}).sort((a, b) => b.points - a.points);
 			} else if (cName.includes("ferrari")) {
@@ -1138,7 +1211,7 @@ export default function Standings() {
 								</button>
 
 								{/* Cabecera del Piloto con mono oficial y colores de su escudería */}
-								<div className="flex items-center gap-4 pb-4 border-b border-zinc-800/80 pr-12 sm:pr-14">
+								<div className="flex items-center gap-4 pb-4 border-b border-zinc-800/80 pr-20 sm:pr-24">
 									{(() => {
 										const avatarUrl = getDriverAvatarUrl(
 											selectedDriver.driverCode,
@@ -1198,7 +1271,7 @@ export default function Standings() {
 									</div>
 
 									{/* Puntos acumulados en grande a súper velocidad con brillo temático */}
-									<div className="text-right shrink-0">
+									<div className="text-right shrink-0 mr-2 sm:mr-3">
 										<AnimatedCounter
 											value={parseFloat(selectedDriver.points) || 0}
 											duration={750}
@@ -1400,7 +1473,7 @@ export default function Standings() {
 								</button>
 
 								{/* Cabecera de la Escudería con identidad cromática oficial */}
-								<div className="flex items-center gap-4 pb-4 border-b border-zinc-800/80 pr-12 sm:pr-14">
+								<div className="flex items-center gap-4 pb-4 border-b border-zinc-800/80 pr-20 sm:pr-24">
 									<div
 										className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-zinc-900 border p-2.5 flex items-center justify-center shrink-0 shadow-lg"
 										style={{ borderColor: cTheme.borderSubtle }}
@@ -1430,7 +1503,7 @@ export default function Standings() {
 									</div>
 
 									{/* Puntos totales de la escudería a súper velocidad con color oficial */}
-									<div className="text-right shrink-0">
+									<div className="text-right shrink-0 mr-2 sm:mr-3">
 										<AnimatedCounter
 											value={parseFloat(selectedConstructor.points) || 0}
 											duration={750}
@@ -1542,6 +1615,26 @@ export default function Standings() {
 													</motion.div>
 												);
 											})}
+
+											{/* 💡 Explicación de puntos y transferencias de monoplaza 2026 */}
+											{year === 2026 && (selectedConstructor.teamName || "").toLowerCase().includes("red bull") && (
+												<div className="mt-1 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-zinc-300 font-mono shadow-xs">
+													<span className="text-amber-400 font-bold">💡 Red Bull Racing: </span>
+													Verstappen (279) + Hadjar (122) + Lawson (14) = 415 PTS.
+													<span className="text-zinc-500 block text-[10px] mt-0.5">
+														* Incluye 14 PTS de Liam Lawson obtenidos con Red Bull Racing antes de intercambiar butacas con RB.
+													</span>
+												</div>
+											)}
+											{year === 2026 && ((selectedConstructor.teamName || "").toLowerCase().includes("racing bulls") || (selectedConstructor.teamName || "").toLowerCase().includes("rb")) && (
+												<div className="mt-1 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-zinc-300 font-mono shadow-xs">
+													<span className="text-amber-400 font-bold">💡 RB F1 Team: </span>
+													Lawson (75) + Lindblad (38) + Tsunoda (1) = 114 PTS.
+													<span className="text-zinc-500 block text-[10px] mt-0.5">
+														* Lawson sumó 75 PTS con RB y 14 con Red Bull = 89 PTS totales en el campeonato oficial de pilotos.
+													</span>
+												</div>
+											)}
 										</div>
 									)}
 								</div>

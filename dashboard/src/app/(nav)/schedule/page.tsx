@@ -8,8 +8,12 @@ import { useDataStore } from "@/stores/useDataStore";
 
 export default async function SchedulePage() {
 	// 🏎️ LEEMOS EL ESTADO EN VIVO DE LA PISTA CORREGIDO:
-	const trackStatus = useDataStore.getState().state?.TrackStatus?.Status;
-	const isLive = trackStatus && parseInt(trackStatus) > 0;
+	const stateAny = useDataStore.getState().state as any;
+	const archiveStatus = stateAny?.ArchiveStatus?.Status || stateAny?.SessionInfo?.ArchiveStatus?.Status;
+	const isArchived = archiveStatus === "Complete";
+	const trackStatus = stateAny?.TrackStatus?.Status;
+	// Solo consideramos sesión en marcha si no está archivada y hay actividad en pista
+	const isLive = !isArchived && trackStatus && parseInt(trackStatus) > 0;
 	
 	// 🌟 CAMBIO ACÁ: Usamos SessionInfo para traer el nombre oficial del Meeting
 	const activeRace = useDataStore.getState().state?.SessionInfo?.Meeting?.Name || "Gran Premio";

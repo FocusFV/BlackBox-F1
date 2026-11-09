@@ -26,6 +26,10 @@ const HeadToHeadModal = dynamic(
 	() => import("@/components/dashboard/HeadToHeadModal").then((mod) => mod.HeadToHeadModal),
 	{ ssr: false }
 );
+const DriverProfileModal = dynamic(
+	() => import("@/components/driver/DriverProfileModal"),
+	{ ssr: false }
+);
 import { Swords, Radio, Flag, AlertTriangle } from "lucide-react";
 import { translateSessionName } from "@/lib/f1Translations";
 import { triggerHaptic } from "@/lib/haptics";
@@ -196,9 +200,10 @@ export default function Page() {
 
 	// Guardamos el timestamp de fin de sesión para mantener la vista de resultados por 15 minutos
 	const [sessionEndTime, setSessionEndTime] = useState<number | null>(null);
+	const isArchived = session?.ArchiveStatus?.Status === "Complete";
 
 	useEffect(() => {
-		if (isSessionFinished && session?.Name) {
+		if (isSessionFinished && !isArchived && session?.Name) {
 			const storageKey = `f1_session_end_${session?.Key || session?.Name}`;
 			const stored = typeof window !== "undefined" ? sessionStorage.getItem(storageKey) : null;
 			if (stored) {
@@ -208,13 +213,14 @@ export default function Page() {
 				if (typeof window !== "undefined") sessionStorage.setItem(storageKey, String(now));
 				setSessionEndTime(now);
 			}
-		} else if (!isSessionFinished) {
+		} else {
 			setSessionEndTime(null);
 		}
-	}, [isSessionFinished, session?.Key, session?.Name]);
+	}, [isSessionFinished, isArchived, session?.Key, session?.Name]);
 
 	// ¿Estamos en los 15 minutos posteriores al fin de la sesión? (15 min = 900,000 ms)
 	const isPostSessionWindow = Boolean(
+		!isArchived &&
 		isSessionFinished &&
 		sessionEndTime &&
 		currentTime > 0 &&
@@ -521,6 +527,9 @@ export default function Page() {
 
 			{/* ⚔️ Modal Comparador Cara a Cara */}
 			<HeadToHeadModal isOpen={isH2HOpen} onClose={closeH2H} initialDriver1={h2hDriver1 || undefined} initialDriver2={h2hDriver2 || undefined} />
+
+			{/* 🏎️ Ficha Oficial del Piloto */}
+			<DriverProfileModal />
 
 			{/* 🛠️ Switch de Control exclusivo para Localhost (Nunca se renderiza en producción) */}
 			<LocalDevSwitch mode={devMode} onModeChange={handleDevModeChange} />

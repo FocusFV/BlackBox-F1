@@ -13,6 +13,50 @@ interface Props {
 	initialDriver2?: string;
 }
 
+const DRIVER_CODE_TO_NUM: Record<string, string> = {
+	NOR: "1", VER: "3", BOR: "5", HAD: "6", GAS: "10",
+	PER: "11", ANT: "12", ALO: "14", LEC: "16", STR: "18",
+	TSU: "22", ALB: "23", HUL: "27", HIR: "29", LAW: "30",
+	OCO: "31", LIN: "41", COL: "43", HAM: "44", CAM: "51",
+	SAI: "55", RUS: "63", BOT: "77", PIA: "81", BEA: "87",
+};
+
+const DEFAULT_2026_GRID: Record<string, any> = {
+	"1": { RacingNumber: "1", Tla: "NOR", FullName: "Lando Norris", BroadcastName: "L. NORRIS", TeamName: "McLaren", TeamColour: "ff8700" },
+	"3": { RacingNumber: "3", Tla: "VER", FullName: "Max Verstappen", BroadcastName: "M. VERSTAPPEN", TeamName: "Red Bull Racing", TeamColour: "3671c6" },
+	"5": { RacingNumber: "5", Tla: "BOR", FullName: "Gabriel Bortoleto", BroadcastName: "G. BORTOLETO", TeamName: "Audi", TeamColour: "c0c0c0" },
+	"6": { RacingNumber: "6", Tla: "HAD", FullName: "Isack Hadjar", BroadcastName: "I. HADJAR", TeamName: "Red Bull Racing", TeamColour: "3671c6" },
+	"10": { RacingNumber: "10", Tla: "GAS", FullName: "Pierre Gasly", BroadcastName: "P. GASLY", TeamName: "Alpine", TeamColour: "0093cc" },
+	"11": { RacingNumber: "11", Tla: "PER", FullName: "Sergio Pérez", BroadcastName: "S. PÉREZ", TeamName: "Cadillac F1 Team", TeamColour: "d1a153" },
+	"12": { RacingNumber: "12", Tla: "ANT", FullName: "Andrea Kimi Antonelli", BroadcastName: "K. ANTONELLI", TeamName: "Mercedes", TeamColour: "27f4d2" },
+	"14": { RacingNumber: "14", Tla: "ALO", FullName: "Fernando Alonso", BroadcastName: "F. ALONSO", TeamName: "Aston Martin", TeamColour: "006f62" },
+	"16": { RacingNumber: "16", Tla: "LEC", FullName: "Charles Leclerc", BroadcastName: "C. LECLERC", TeamName: "Ferrari", TeamColour: "e80020" },
+	"18": { RacingNumber: "18", Tla: "STR", FullName: "Lance Stroll", BroadcastName: "L. STROLL", TeamName: "Aston Martin", TeamColour: "006f62" },
+	"22": { RacingNumber: "22", Tla: "TSU", FullName: "Yuki Tsunoda", BroadcastName: "Y. TSUNODA", TeamName: "RB F1 Team", TeamColour: "4b77ff" },
+	"23": { RacingNumber: "23", Tla: "ALB", FullName: "Alexander Albon", BroadcastName: "A. ALBON", TeamName: "Williams", TeamColour: "005aff" },
+	"27": { RacingNumber: "27", Tla: "HUL", FullName: "Nico Hülkenberg", BroadcastName: "N. HÜLKENBERG", TeamName: "Audi", TeamColour: "c0c0c0" },
+	"29": { RacingNumber: "29", Tla: "HIR", FullName: "Ryo Hirakawa", BroadcastName: "R. HIRAKAWA", TeamName: "Haas F1 Team", TeamColour: "e10600" },
+	"30": { RacingNumber: "30", Tla: "LAW", FullName: "Liam Lawson", BroadcastName: "L. LAWSON", TeamName: "RB F1 Team", TeamColour: "4b77ff" },
+	"31": { RacingNumber: "31", Tla: "OCO", FullName: "Esteban Ocon", BroadcastName: "E. OCON", TeamName: "Haas F1 Team", TeamColour: "e10600" },
+	"41": { RacingNumber: "41", Tla: "LIN", FullName: "Arvid Lindblad", BroadcastName: "A. LINDBLAD", TeamName: "RB F1 Team", TeamColour: "4b77ff" },
+	"43": { RacingNumber: "43", Tla: "COL", FullName: "Franco Colapinto", BroadcastName: "F. COLAPINTO", TeamName: "Alpine", TeamColour: "0093cc" },
+	"44": { RacingNumber: "44", Tla: "HAM", FullName: "Lewis Hamilton", BroadcastName: "L. HAMILTON", TeamName: "Ferrari", TeamColour: "e80020" },
+	"51": { RacingNumber: "51", Tla: "CAM", FullName: "Rafael Camara", BroadcastName: "R. CAMARA", TeamName: "Haas F1 Team", TeamColour: "e10600" },
+	"55": { RacingNumber: "55", Tla: "SAI", FullName: "Carlos Sainz", BroadcastName: "C. SAINZ", TeamName: "Williams", TeamColour: "005aff" },
+	"63": { RacingNumber: "63", Tla: "RUS", FullName: "George Russell", BroadcastName: "G. RUSSELL", TeamName: "Mercedes", TeamColour: "27f4d2" },
+	"77": { RacingNumber: "77", Tla: "BOT", FullName: "Valtteri Bottas", BroadcastName: "V. BOTTAS", TeamName: "Cadillac F1 Team", TeamColour: "d1a153" },
+	"81": { RacingNumber: "81", Tla: "PIA", FullName: "Oscar Piastri", BroadcastName: "O. PIASTRI", TeamName: "McLaren", TeamColour: "ff8700" },
+	"87": { RacingNumber: "87", Tla: "BEA", FullName: "Oliver Bearman", BroadcastName: "O. BEARMAN", TeamName: "Haas F1 Team", TeamColour: "e10600" },
+};
+
+function resolveDriverNumber(val?: string): string {
+	if (!val) return "43";
+	const clean = val.trim().toUpperCase();
+	if (DRIVER_CODE_TO_NUM[clean]) return DRIVER_CODE_TO_NUM[clean];
+	if (DEFAULT_2026_GRID[clean]) return clean;
+	return clean;
+}
+
 export function HeadToHeadModal({
 	isOpen,
 	onClose,
@@ -24,30 +68,34 @@ export function HeadToHeadModal({
 	const appTiming = useDataStore((state) => state.state?.TimingAppData?.Lines);
 	const carsData = useDataStore((state) => state.carsData);
 
+	// Usar la grilla 2026 oficial como respaldo completo si el socket aún no hidrató
+	const effectiveDrivers = (drivers && Object.keys(drivers).length >= 2) ? drivers : DEFAULT_2026_GRID;
+
 	// Lista de pilotos disponibles ordenada por número o posición
-	const driverEntries = Object.entries(drivers || {}).sort((a, b) => {
-		const posA = timingData?.[a[0]]?.Position ? parseInt(timingData[a[0]].Position) : 99;
-		const posB = timingData?.[b[0]]?.Position ? parseInt(timingData[b[0]].Position) : 99;
+	const driverEntries = Object.entries(effectiveDrivers).sort((a, b) => {
+		const posA = timingData?.[a[0]]?.Position ? parseInt(timingData[a[0]].Position) : (parseInt(a[0], 10) || 99);
+		const posB = timingData?.[b[0]]?.Position ? parseInt(timingData[b[0]].Position) : (parseInt(b[0], 10) || 99);
 		return posA - posB;
 	});
 
-	// Si el número inicial no existe en la grilla actual, usar el primero disponible
-	const defaultD1 = drivers?.[initialDriver1] ? initialDriver1 : driverEntries[0]?.[0] || "43";
-	const defaultD2 = drivers?.[initialDriver2] ? initialDriver2 : driverEntries[1]?.[0] || "1";
+	const resolvedD1 = resolveDriverNumber(initialDriver1);
+	const resolvedD2 = resolveDriverNumber(initialDriver2);
+
+	const defaultD1 = effectiveDrivers[resolvedD1] ? resolvedD1 : driverEntries[0]?.[0] || "43";
+	const defaultD2 = effectiveDrivers[resolvedD2] ? resolvedD2 : driverEntries[1]?.[0] || "1";
 
 	const [driver1Num, setDriver1Num] = useState<string>(defaultD1);
 	const [driver2Num, setDriver2Num] = useState<string>(defaultD2);
-	// Sincronizar pilotos seleccionados desde evento externo
-	useEffect(() => {
-		if (initialDriver1) setDriver1Num(initialDriver1);
-		if (initialDriver2) setDriver2Num(initialDriver2);
-	}, [initialDriver1, initialDriver2]);
 
+	useEffect(() => {
+		if (initialDriver1) setDriver1Num(resolveDriverNumber(initialDriver1));
+		if (initialDriver2) setDriver2Num(resolveDriverNumber(initialDriver2));
+	}, [initialDriver1, initialDriver2]);
 
 	if (!isOpen) return null;
 
-	const d1 = drivers?.[driver1Num];
-	const d2 = drivers?.[driver2Num];
+	const d1 = effectiveDrivers[driver1Num] || DEFAULT_2026_GRID[driver1Num];
+	const d2 = effectiveDrivers[driver2Num] || DEFAULT_2026_GRID[driver2Num];
 
 	const t1: TimingDataDriver | undefined = timingData?.[driver1Num];
 	const t2: TimingDataDriver | undefined = timingData?.[driver2Num];

@@ -19,6 +19,7 @@ import { groupSessionByDay } from "@/lib/groupSessionByDay";
 import { formatDayRange, formatMonth } from "@/lib/dateFormatter";
 import Flag from "@/components/Flag";
 import ResultsModal from "@/components/schedule/ResultsModal";
+import { translateGpName } from "@/lib/f1Translations";
 
 type Props = {
 	round: RoundType;
@@ -81,8 +82,12 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 
 	return (
 		<div
+			onClick={() => {
+				if (isRoundOver) setModalOpen(true);
+			}}
 			className={clsx(
 				"group/card relative overflow-hidden rounded-3xl border font-mono select-none flex flex-col justify-between p-5 sm:p-6 transition-all duration-500",
+				isRoundOver && "cursor-pointer",
 				isTargetRound
 					? isLiveNow
 						? "border-emerald-500/50 bg-zinc-950/95 shadow-[0_0_35px_rgba(16,185,129,0.1)] ring-1 ring-emerald-500/30"
@@ -120,10 +125,10 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 						className="h-6 w-9 rounded object-cover shadow-2xl ring-1 ring-zinc-700/80"
 					/>
 
-					<div className="flex flex-col">
+					<div className="flex flex-col min-w-0">
 						<div className="flex items-center gap-2">
-							<h3 className="text-base font-black tracking-tight text-white uppercase font-sans">
-								{translatedCountry}
+							<h3 className="text-base font-black tracking-tight text-white uppercase font-sans truncate">
+								{translateGpName(round.name)}
 							</h3>
 
 							{round.name === nextName && !hideBadge && (
@@ -146,6 +151,10 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 								</span>
 							)}
 						</div>
+
+						<span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider truncate">
+							{translatedCountry} · {round.roundNumber ? `Ronda ${round.roundNumber}` : ""}
+						</span>
 					</div>
 				</div>
 

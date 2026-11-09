@@ -1,5 +1,7 @@
 "use client";
 import { useHeadToHeadStore } from "@/stores/useHeadToHeadStore";
+import { useDriverModalStore } from "@/stores/useDriverModalStore";
+import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "motion/react";
@@ -100,11 +102,13 @@ const TeamLogo: React.FC<{ teamName: string }> = ({ teamName }) => {
 		"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='8' fill='%233f3f46'/></svg>"
 	);
 
+	const isDarkLogo = cleanName.includes("audi") || cleanName.includes("cadillac");
+
 	return (
 		<img
 			src={fallbacks[fallbackIndex]}
 			alt={teamName}
-			className="w-5 h-5 object-contain"
+			className={`w-5 h-5 object-contain shrink-0 ${isDarkLogo ? "invert brightness-200 contrast-200" : ""}`}
 			onError={() => {
 				if (fallbackIndex < fallbacks.length - 1) setFallbackIndex(fallbackIndex + 1);
 			}}
@@ -285,8 +289,8 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 			if (sessionResultsCache.current[activeTab] && sessionResultsCache.current[activeTab].length > 0) {
 				setResults(sessionResultsCache.current[activeTab]);
 				setLoading(false);
-				// Para sesiones de práctica ya concluidas, evitar saturar la API en cada paquete del websocket
-				if (isPractice) return;
+				// Para sesiones ya concluidas, evitar saturar la API en cada paquete del websocket y evitar parpadeo de brechas
+				return;
 			} else {
 				setLoading(true);
 			}
@@ -516,7 +520,14 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					} catch (e) {
 						console.error("Error obteniendo prácticas libres:", e);
 					}
-					// 🛡️ Si la consulta falló pero ya teníamos resultados en caché, NO borrarlos
+					// 🛡️ Si la consulta falló, recurrir a los datos oficiales de respaldo de Brasil 2026
+					const fbPractice = (brazilFallbackData as any)[activeTab];
+					if (Array.isArray(fbPractice) && fbPractice.length > 0) {
+						sessionResultsCache.current[activeTab] = fbPractice;
+						setResults(fbPractice);
+						setLoading(false);
+						return;
+					}
 					if (sessionResultsCache.current[activeTab] && sessionResultsCache.current[activeTab].length > 0) {
 						setResults(sessionResultsCache.current[activeTab]);
 						setLoading(false);
@@ -597,6 +608,12 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 
 					// Si todos los tiempos de clasificación en Jolpica vienen vacíos, usar fallback oficial de clasificación
 					const allTimesEmpty = isTimeBased && listSource.length > 0 && listSource.every((r: any) => !r.Q3 && !r.Q2 && !r.Q1);
+					if (allTimesEmpty && (brazilFallbackData as any).QUALY) {
+						sessionResultsCache.current[activeTab] = (brazilFallbackData as any).QUALY;
+						setResults((brazilFallbackData as any).QUALY);
+						setLoading(false);
+						return;
+					}
 					const openF1BestTimes: Record<string, number> = {};
 
 					if (allTimesEmpty) {
@@ -987,7 +1004,16 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 											animate={{ opacity: 1, x: 0 }}
 											whileHover={{ x: 3 }}
 											transition={{ delay: index * 0.015 }}
-											onClick={() => { triggerHaptic("medium"); useHeadToHeadStore.getState().open(row.number); }}
+											onClick={() => {
+												triggerHaptic("medium");
+												useDriverModalStore.getState().open({
+													driverCode: row.code,
+													code: row.code,
+													name: row.name,
+													teamName: row.team,
+													driverId: row.code?.toLowerCase(),
+												});
+											}}
 											className={`group/row relative flex items-center justify-between p-2.5 rounded-xl border transition-all duration-200 ${
 												isCompact ? "h-10 py-1.5" : "h-12"
 											} overflow-hidden ${rowBg} hover:border-zinc-700/80 cursor-pointer`}

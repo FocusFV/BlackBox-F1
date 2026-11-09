@@ -17,7 +17,6 @@ type Props = {
 export default function RoundListClient({ schedule, nextName }: Props) {
 	const [filtro, setFiltro] = useState<"proximas" | "completadas">("proximas");
 
-	
 	const completedCount = schedule.filter((round) => {
 		const raceSession = round.sessions?.find((s) => s.kind.toLowerCase() === "race");
 		const endTime = raceSession ? utc(raceSession.end) : utc(round.end).endOf("day");
@@ -40,43 +39,49 @@ export default function RoundListClient({ schedule, nextName }: Props) {
 
 	return (
 		<div className="space-y-6">
-			{/* CONTROLES DESLIZANTES EN ORO PURO */}
-			<div className="flex bg-black/40 border border-zinc-900/80 p-1 rounded-xl max-w-xs font-mono shadow-inner">
-				<button
-					onClick={() => setFiltro("proximas")}
-					className={clsx(
-						"flex-1 relative py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-colors duration-300 z-10 flex items-center justify-center gap-1.5 cursor-pointer",
-						filtro === "proximas" ? "text-amber-100" : "text-zinc-500 hover:text-zinc-300"
-					)}
-				>
-					<Timer className="w-3.5 h-3.5" />
-					Próximas
-					{filtro === "proximas" && (
-						<motion.div 
-							layoutId="activeScheduleTab"
-							className="absolute inset-0 bg-gradient-to-r from-amber-500/15 to-transparent border border-amber-500/30 rounded-lg -z-10"
-							transition={{ type: "spring", stiffness: 380, damping: 30 }}
-						/>
-					)}
-				</button>
+			{/* CONTROLES DESLIZANTES EN ORO PURO Y RESUMEN OFICIAL */}
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono">
+				<div className="flex bg-black/40 border border-zinc-900/80 p-1 rounded-xl max-w-xs shadow-inner">
+					<button
+						onClick={() => setFiltro("proximas")}
+						className={clsx(
+							"flex-1 relative py-2 px-3 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-colors duration-300 z-10 flex items-center justify-center gap-1.5 cursor-pointer",
+							filtro === "proximas" ? "text-amber-100" : "text-zinc-500 hover:text-zinc-300"
+						)}
+					>
+						<Timer className="w-3.5 h-3.5" />
+						Próximas ({pendingCount})
+						{filtro === "proximas" && (
+							<motion.div 
+								layoutId="activeScheduleTab"
+								className="absolute inset-0 bg-gradient-to-r from-amber-500/15 to-transparent border border-amber-500/30 rounded-lg -z-10"
+								transition={{ type: "spring", stiffness: 380, damping: 30 }}
+							/>
+						)}
+					</button>
 
-				<button
-					onClick={() => setFiltro("completadas")}
-					className={clsx(
-						"flex-1 relative py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-colors duration-300 z-10 flex items-center justify-center gap-1.5 cursor-pointer",
-						filtro === "completadas" ? "text-amber-100" : "text-zinc-500 hover:text-zinc-300"
-					)}
-				>
-					<CheckCircle2 className="w-3.5 h-3.5" />
-					Completadas
-					{filtro === "completadas" && (
-						<motion.div 
-							layoutId="activeScheduleTab"
-							className="absolute inset-0 bg-gradient-to-r from-amber-500/15 to-transparent border border-amber-500/30 rounded-lg -z-10"
-							transition={{ type: "spring", stiffness: 380, damping: 30 }}
-						/>
-					)}
-				</button>
+					<button
+						onClick={() => setFiltro("completadas")}
+						className={clsx(
+							"flex-1 relative py-2 px-3 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-colors duration-300 z-10 flex items-center justify-center gap-1.5 cursor-pointer",
+							filtro === "completadas" ? "text-amber-100" : "text-zinc-500 hover:text-zinc-300"
+						)}
+					>
+						<CheckCircle2 className="w-3.5 h-3.5" />
+						Completadas ({completedCount})
+						{filtro === "completadas" && (
+							<motion.div 
+								layoutId="activeScheduleTab"
+								className="absolute inset-0 bg-gradient-to-r from-amber-500/15 to-transparent border border-amber-500/30 rounded-lg -z-10"
+								transition={{ type: "spring", stiffness: 380, damping: 30 }}
+							/>
+						)}
+					</button>
+				</div>
+
+				<div className="text-xs text-zinc-400 font-bold uppercase tracking-wider">
+					Temporada 2026 · <span className="text-amber-400">{schedule.length} Grandes Premios</span> ({completedCount} completados · {pendingCount} por disputar)
+				</div>
 			</div>
 
 			{/* CONTENEDOR DE TARJETAS ANIMADAS */}
