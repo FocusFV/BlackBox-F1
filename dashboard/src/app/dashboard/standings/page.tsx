@@ -575,13 +575,13 @@ export default function Standings() {
 	useEffect(() => {
 		let isMounted = true;
 		const fetchStandings = async () => {
-			setLoadingBackup(true);
 			if (year === 2026) {
 				setExtDrivers(DEFAULT_2026_DRIVERS);
 				setExtTeams(DEFAULT_2026_TEAMS);
 				setLoadingBackup(false);
 				return;
 			}
+			setLoadingBackup(true);
 			if (year === 2025) {
 				setExtTeams(DEFAULT_2025_TEAMS);
 			} else {
@@ -935,8 +935,17 @@ export default function Standings() {
 		};
 	}, [selectedDriver, selectedConstructor]);
 
-	const driversListSource: any[] = extDrivers;
-	const teamsListSource: any[] = extTeams;
+	// Sincronización oficial garantizada: en 2026 se utilizan siempre los datos oficiales 2026 de forma inmutable
+	const driversListSource: any[] = useMemo(() => {
+		if (year === 2026) return DEFAULT_2026_DRIVERS;
+		return extDrivers && extDrivers.length > 0 ? extDrivers : DEFAULT_2026_DRIVERS;
+	}, [year, extDrivers]);
+
+	const teamsListSource: any[] = useMemo(() => {
+		if (year === 2026) return DEFAULT_2026_TEAMS;
+		if (year === 2025 && (!extTeams || extTeams.length === 0)) return DEFAULT_2025_TEAMS;
+		return extTeams && extTeams.length > 0 ? extTeams : (year === 2025 ? DEFAULT_2025_TEAMS : []);
+	}, [year, extTeams]);
 
 	const showDriversSkeleton = loadingBackup && (!driversListSource || driversListSource.length === 0);
 	const showTeamsSkeleton = loadingBackup && (!teamsListSource || teamsListSource.length === 0);

@@ -264,7 +264,7 @@ export default function DriverProfileModal() {
 
 	const modalContent = (
 		<div
-			className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md select-none font-mono"
+			className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md select-none font-mono"
 			onClick={close}
 		>
 			<motion.div

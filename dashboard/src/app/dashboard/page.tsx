@@ -410,8 +410,8 @@ export default function Page() {
 								: "opacity-100 scale-100"
 						}`}
 					>
-						{/* Historial y resultados del último GP (con laterales táctiles restringidos solo a esta altura) */}
-						<div className="relative w-full">
+						{/* Historial y resultados oficiales (100% interactivo y reactivo sin bloqueos) */}
+						<div className="relative w-full z-20 pointer-events-auto">
 							<ParcFerme
 								onGpLoaded={(gp, country) => setActiveCircuit({ gpName: gp, country })}
 								onOpenCircuit={(gp, country) => {
@@ -419,22 +419,6 @@ export default function Page() {
 									setIsCinematicTrackMode(true);
 								}}
 							/>
-
-							{/* 🏎️ Franjas laterales táctiles que terminan exactamente donde termina Parque Cerrado (no tocan YouTube) */}
-							{!isCinematicTrackMode && (
-								<>
-									<div
-										onClick={() => setIsCinematicTrackMode(true)}
-										className="hidden lg:block absolute left-0 top-0 bottom-0 w-[18%] z-20 cursor-pointer"
-										title="Toca el margen para ver el circuito completo"
-									/>
-									<div
-										onClick={() => setIsCinematicTrackMode(true)}
-										className="hidden lg:block absolute right-0 top-0 bottom-0 w-[18%] z-20 cursor-pointer"
-										title="Toca el margen para ver el circuito completo"
-									/>
-								</>
-							)}
 						</div>
 
 						{/* Feed oficial de YouTube (100% libre para interactuar, scrollear y ver videos) */}

@@ -105,7 +105,17 @@ export function WeatherMap() {
 				interactive: true,
 			});
 
+			const safetyTimer = setTimeout(() => {
+				if (isMounted) setLoading(false);
+			}, 2500);
+
 			libMap.on("load", () => {
+				clearTimeout(safetyTimer);
+				if (isMounted) setLoading(false);
+			});
+
+			libMap.on("error", () => {
+				clearTimeout(safetyTimer);
 				if (isMounted) setLoading(false);
 			});
 

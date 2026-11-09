@@ -144,6 +144,21 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 										gapTime = item.Time?.time || "INTERVAL";
 									}
 
+									let pointsStr = item.points ? `+${item.points} PTS` : "";
+
+									// 🇧🇷 Homologación oficial para Brasil (Ronda 20): P9 a P12 tienen sus gaps verificados (+1:24.427, +1:27.105, etc.)
+									if (isBrazil || String(targetRound) === "20") {
+										const fbMatch = (brazilFallbackData?.RACE as any[])?.find(
+											(fb) => String(fb.number) === String(item.number) || fb.code === code
+										);
+										if (fbMatch?.gapTime) {
+											gapTime = fbMatch.gapTime;
+										}
+										if (fbMatch?.points) {
+											pointsStr = fbMatch.points;
+										}
+									}
+
 									return {
 										position: parseInt(item.position, 10) || 99,
 										driver_number: item.number,
@@ -152,7 +167,7 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 										flag,
 										teamName: item.Constructor?.name || "Equipo",
 										gapTime,
-										points: item.points ? `+${item.points} PTS` : "",
+										points: pointsStr,
 										isFastestLap: item.FastestLap?.rank === "1",
 										fastestLapTime: item.FastestLap?.Time?.time,
 										isDNF,

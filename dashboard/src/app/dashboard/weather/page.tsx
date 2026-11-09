@@ -134,9 +134,9 @@ export default function WeatherPage() {
 	};
 
 	const vientoCardinal = obtenerPuntoCardinal(dirVientoGrados);
-	const estadoPistaMensaje = trackStatus?.Message
-		? trackStatus.Message.toUpperCase()
-		: "MONITOREO AMBIENTAL: PISTA HABILITADA";
+	const estadoPistaMensaje = isLiveSessionRunning
+		? (trackStatus?.Message ? trackStatus.Message.toUpperCase() : "PISTA HABILITADA")
+		: "ENTRE SESIONES · PISTA EN PAUSA";
 
 	const ultimosMensajes = [...mensajesControl].reverse().slice(0, 5);
 
@@ -170,7 +170,7 @@ export default function WeatherPage() {
 					<div className="border-b border-zinc-900 pb-2 flex justify-between items-center">
 						<span className="text-[#00A19B] font-bold tracking-wider text-xs">// CONTROL_METEOROLOGICO</span>
 						<span className="text-[11px] text-zinc-400 font-bold">
-							{isLiveSessionRunning ? "● EN VIVO" : "● OFICIAL FIA"}
+							{isLiveSessionRunning ? "● EN VIVO" : "● OFICIAL FIA · PISTA EN PAUSA"}
 						</span>
 					</div>
 

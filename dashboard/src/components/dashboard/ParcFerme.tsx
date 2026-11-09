@@ -828,7 +828,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 	}, [activeTab, raceDate, effectiveRound, smartContext, liveSession, liveTiming, liveStats, liveDrivers, liveLapCount, liveSessionStatus]);
 
 	return (
-		<div className="flex flex-col gap-4 w-full text-white items-center">
+		<div className="flex flex-col gap-4 w-full text-white items-center relative z-20 pointer-events-auto">
 			{/* 🏁 CABECERA UNIFICADA PANORÁMICA (TÁCTIL PARA ACTIVAR MODO CIRCUITO EN MÓVIL Y DESKTOP) */}
 			<div
 				onClick={() => onOpenCircuit ? onOpenCircuit(gpName, countryCode) : undefined}
@@ -897,9 +897,15 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 								return (
 									<button
 										key={tab.id}
+										type="button"
 										onClick={() => {
 											setTabManuallySelected(true);
 											setActiveTab(tab.id);
+											const cached = sessionResultsCache.current[tab.id] || (brazilFallbackData as any)[tab.id];
+											if (Array.isArray(cached) && cached.length > 0) {
+												setResults(cached);
+												setLoading(false);
+											}
 											if (typeof window !== "undefined") {
 												sessionStorage.setItem("bb_parc_ferme_tab", tab.id);
 												sessionStorage.setItem("bb_parc_ferme_manual", "true");
