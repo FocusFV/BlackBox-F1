@@ -285,9 +285,14 @@ export async function getSmartGpContext(): Promise<SmartGpContext> {
 
 			if (lastCompleted) {
 				const isSprint = Boolean(lastCompleted.Sprint || lastCompleted.SprintQualifying);
-				const allTabs: ("FP1" | "FP2" | "FP3" | "QUALY" | "SPRINT" | "SQ" | "RACE")[] = isSprint
-					? ["FP1", "SQ", "SPRINT", "QUALY", "RACE"]
-					: ["FP1", "FP2", "FP3", "QUALY", "RACE"];
+				const allTabs: ("FP1" | "FP2" | "FP3" | "QUALY" | "SPRINT" | "SQ" | "RACE")[] = [
+					"FP1",
+					"FP2",
+					"FP3",
+					"SPRINT",
+					"QUALY",
+					"RACE",
+				];
 
 				return {
 					isWeekendActive: false,

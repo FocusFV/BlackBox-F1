@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import { X, Trophy, Flag, Timer } from "lucide-react";
 import clsx from "clsx";
 import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
-import { translateGpName } from "@/lib/f1Translations";
+import { translateGpName, translateStatus } from "@/lib/f1Translations";
 
 type Props = {
 	meetingKey?: number;
@@ -53,33 +53,6 @@ const countryTranslation: Record<string, string> = {
 	"Saudi Arabia": "Arabia Saudita", Mexico: "México", Monaco: "Mónaco", Netherlands: "Países Bajos",
 	Portugal: "Portugal", Qatar: "Catar", Singapore: "Singapur", "United Arab Emirates": "Emiratos Árabes Unidos",
 	"United States": "Estados Unidos", USA: "Estados Unidos", UK: "Reino Unido", Malaysia: "Malasia",
-};
-
-const translateStatus = (status: string): string => {
-	if (!status) return "";
-	const s = status.toLowerCase().trim();
-	if (s === "finished") return "FINALIZADO";
-	if (s === "lapped" || s === "+1 lap" || s === "+1 vta") return "+1 VUELTA";
-	const lapsMatch = s.match(/^\+(\d+)\s+laps?/i);
-	if (lapsMatch) return `+${lapsMatch[1]} VUELTAS`;
-	const plainLaps = s.match(/^(\d+)\s+laps?/i);
-	if (plainLaps) return `+${plainLaps[1]} VUELTAS`;
-	if (s.includes("did not start") || s === "dns") return "NO LARGÓ";
-	if (s.includes("did not qualify") || s === "dnq") return "NO CLASIFICÓ";
-	if (s.includes("disqualified") || s.includes("dsq")) return "DESCALIFICADO";
-	if (s.includes("retired") || s.includes("withdrew") || s === "ret") return "RETIRADO";
-	if (s.includes("accident") || s.includes("collision") || s.includes("crash")) return "COLISIÓN";
-	if (s.includes("engine") || s.includes("power unit")) return "MOTOR";
-	if (s.includes("gearbox")) return "CAJA DE CAMBIOS";
-	if (s.includes("transmission")) return "TRANSMISIÓN";
-	if (s.includes("brakes")) return "FRENOS";
-	if (s.includes("suspension")) return "SUSPENSIÓN";
-	if (s.includes("hydraulics")) return "HIDRÁULICA";
-	if (s.includes("electrical")) return "ELÉCTRICO";
-	if (s.includes("puncture") || s.includes("tyre") || s.includes("tire")) return "PINCHAZO";
-	if (s.includes("spun") || s.includes("spin")) return "TROMPO";
-	if (s === "dnf") return "RETIRADO";
-	return status.toUpperCase();
 };
 
 // 🏎️ Componente Logo integrado
@@ -129,10 +102,27 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 							const data = await res.json();
 							const r = data?.MRData?.RaceTable?.Races?.[0];
 							if (r?.Results && Array.isArray(r.Results) && r.Results.length > 0) {
+								const leaderLaps = parseInt(r.Results[0]?.laps, 10) || 0;
 								const parsed = r.Results.map((item: any) => {
 									const code = item.Driver?.code || item.Driver?.familyName?.substring(0, 3).toUpperCase() || "";
 									const flag = driverNationalityMap[code] || item.Driver?.nationality?.substring(0, 2).toLowerCase() || "";
-									const isFinished = item.status === "Finished" || item.status?.startsWith("+");
+									const sLower = (item.status || "").toLowerCase();
+									const itemLaps = parseInt(item.laps, 10) || 0;
+									const lapsDiff = leaderLaps > itemLaps ? leaderLaps - itemLaps : 0;
+									const isLapped = sLower.includes("lap") || sLower.includes("vta") || lapsDiff > 0;
+									const isFinished = sLower === "finished" || sLower.startsWith("+") || isLapped;
+
+									let gapTime = "";
+									if (item.position === "1") {
+										gapTime = item.Time?.time || "GANADOR";
+									} else if (!isFinished) {
+										gapTime = translateStatus(item.status) || "RETIRADO";
+									} else if (isLapped) {
+										gapTime = lapsDiff <= 1 ? "+1 VUELTA" : `+${lapsDiff} VUELTAS`;
+									} else {
+										gapTime = item.Time?.time || "INTERVAL";
+									}
+
 									return {
 										position: parseInt(item.position, 10) || 99,
 										driver_number: item.number,
@@ -140,7 +130,7 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 										code,
 										flag,
 										teamName: item.Constructor?.name || "Equipo",
-										gapTime: item.position === "1" ? (item.Time?.time || "GANADOR") : (item.Time?.time || translateStatus(item.status) || "INTERVAL"),
+										gapTime,
 										points: item.points ? `+${item.points} PTS` : "",
 										isFastestLap: item.FastestLap?.rank === "1",
 										fastestLapTime: item.FastestLap?.Time?.time,

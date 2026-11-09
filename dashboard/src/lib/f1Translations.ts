@@ -139,3 +139,31 @@ export function translateSessionName(session?: string): string {
 	if (lower.includes("race") || lower.includes("carrera")) return "Gran Premio";
 	return session;
 }
+
+export function translateStatus(status?: string): string {
+	if (!status) return "";
+	const s = status.toLowerCase().trim();
+	if (s === "finished") return "FINALIZADO";
+	if (s === "lapped" || s === "+1 lap" || s === "+1 vta") return "+1 VUELTA";
+	const lapsMatch = s.match(/^\+(\d+)\s+laps?/i);
+	if (lapsMatch) return `+${lapsMatch[1]} VUELTAS`;
+	const plainLaps = s.match(/^(\d+)\s+laps?/i);
+	if (plainLaps) return `+${plainLaps[1]} VUELTAS`;
+	if (s.includes("did not start") || s === "dns") return "NO LARGÓ";
+	if (s.includes("did not qualify") || s === "dnq") return "NO CLASIFICÓ";
+	if (s.includes("disqualified") || s.includes("dsq")) return "DESCALIFICADO";
+	if (s.includes("retired") || s.includes("withdrew") || s === "ret") return "RETIRADO";
+	if (s.includes("accident") || s.includes("collision") || s.includes("crash")) return "COLISIÓN";
+	if (s.includes("engine") || s.includes("power unit")) return "MOTOR";
+	if (s.includes("gearbox")) return "CAJA DE CAMBIOS";
+	if (s.includes("transmission")) return "TRANSMISIÓN";
+	if (s.includes("brakes")) return "FRENOS";
+	if (s.includes("suspension")) return "SUSPENSIÓN";
+	if (s.includes("hydraulics")) return "HIDRÁULICA";
+	if (s.includes("electrical")) return "ELÉCTRICO";
+	if (s.includes("puncture") || s.includes("tyre") || s.includes("tire")) return "PINCHAZO";
+	if (s.includes("spun") || s.includes("spin")) return "TROMPO";
+	if (s === "dnf" || s === "out") return "RETIRADO";
+	return status.toUpperCase();
+}
+

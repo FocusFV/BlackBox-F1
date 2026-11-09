@@ -6,7 +6,7 @@ import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "motion/react";
 import Flag from "@/components/Flag";
-import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
+import { translateGpName, getCountryCodeForGp, translateStatus } from "@/lib/f1Translations";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useDataStore } from "@/stores/useDataStore";
 import { triggerHaptic } from "@/lib/haptics";
@@ -176,8 +176,18 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 		}
 		return false;
 	});
-	const [results, setResults] = useState<DriverResult[]>([]);
-	const sessionResultsCache = useRef<Record<string, DriverResult[]>>({});
+	const [results, setResults] = useState<DriverResult[]>(() => {
+		const initTab = getInitialTab();
+		return (brazilFallbackData as any)[initTab] || [];
+	});
+	const sessionResultsCache = useRef<Record<string, DriverResult[]>>({
+		FP1: (brazilFallbackData as any).FP1 || [],
+		FP2: (brazilFallbackData as any).FP2 || [],
+		FP3: (brazilFallbackData as any).FP3 || [],
+		QUALY: (brazilFallbackData as any).QUALY || [],
+		SPRINT: (brazilFallbackData as any).SPRINT || [],
+		RACE: (brazilFallbackData as any).RACE || [],
+	});
 	const [gpName, setGpName] = useState(initialGpName);
 	const [countryCode, setCountryCode] = useState<string>(initialCountry);
 	const [raceDate, setRaceDate] = useState<string>(() => (liveSession?.StartDate ? liveSession.StartDate.split("T")[0] : ""));
@@ -268,16 +278,17 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 			setRaceDate(liveSession?.StartDate ? liveSession.StartDate.split("T")[0] : ctx.raceDate);
 			setHasSprint(ctx.hasSprint);
 			const storedTab = typeof window !== "undefined" ? (sessionStorage.getItem("bb_parc_ferme_tab") as SessionTab) : null;
-			if (storedTab && ctx.availableTabs.includes(storedTab)) {
+			const isManual = typeof window !== "undefined" ? sessionStorage.getItem("bb_parc_ferme_manual") === "true" : false;
+			if (storedTab && (isManual || ctx.availableTabs.includes(storedTab))) {
 				setActiveTab(storedTab);
-			} else if (!tabManuallySelected || !ctx.availableTabs.includes(activeTab)) {
+			} else if (!tabManuallySelected) {
 				setActiveTab(ctx.defaultTab);
 			}
 		});
 		return () => {
 			isMounted = false;
 		};
-	}, [liveSession?.Meeting?.Name, liveSession?.StartDate, tabManuallySelected, activeTab]);
+	}, [liveSession?.Meeting?.Name, liveSession?.StartDate]);
 
 	useEffect(() => {
 		async function fetchSessionData() {
@@ -532,8 +543,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 						setLoading(false);
 						return;
 					}
-					// 🚫 NUNCA consultar Jolpica para prácticas libres (evita cargar carreras anteriores)
-					setResults([]);
+					// 🚫 Si no hay datos nuevos, mantener los existentes en vez de vaciar
 					setLoading(false);
 					return;
 				}
@@ -659,11 +669,14 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					const fetchedResults: DriverResult[] = listSource.map((r: any) => {
 						const drvNum = String(r.number || r.Driver?.permanentNumber || "0");
 						const statusStr = (r.status || "").toLowerCase();
+						const leaderLaps = parseInt(listSource[0]?.laps, 10) || 0;
+						const itemLaps = parseInt(r.laps, 10) || 0;
+						const lapsDiff = leaderLaps > itemLaps ? leaderLaps - itemLaps : 0;
+						const isLapped = statusStr.includes("lap") || statusStr.includes("vta") || lapsDiff > 0;
 						const isFinished =
 							statusStr.includes("finished") ||
 							statusStr.includes("+") ||
-							statusStr.includes("lap") ||
-							statusStr.includes("laps") ||
+							isLapped ||
 							isTimeBased;
 
 						const isDNF = !isFinished;
@@ -683,7 +696,15 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 								gapTime = "S/T";
 							}
 						} else if (isDNF) {
-							gapTime = `DNF · ${r.status?.toUpperCase() || "OUT"}`;
+							gapTime = `DNF · ${translateStatus(r.status) || "RETIRADO"}`;
+						} else if (r.position === "1" || String(r.position) === "1") {
+							gapTime = r.Time?.time || `${leaderLaps || 71} VUELTAS`;
+							const ptsNum = Number(r.points || 0);
+							pointsStr = ptsNum > 0 ? `+${ptsNum} PTS` : "";
+						} else if (isLapped) {
+							gapTime = lapsDiff <= 1 ? "+1 VUELTA" : `+${lapsDiff} VUELTAS`;
+							const ptsNum = Number(r.points || 0);
+							pointsStr = ptsNum > 0 ? `+${ptsNum} PTS` : "";
 						} else {
 							gapTime = r.Time?.time || (statusStr.includes("+") ? r.status : "INTERVAL");
 							const ptsNum = Number(r.points || 0);

@@ -1372,7 +1372,9 @@ export default function Standings() {
 												const pos = res ? res.position : "-";
 												const pts = res ? parseFloat(res.points) : 0;
 												const status = res?.status || "Finalizado";
-												const isDNF = status !== "Finished" && !status.startsWith("+");
+												const sLower = status.toLowerCase();
+												const isFinished = sLower === "finished" || sLower === "finalizado" || sLower.startsWith("+") || sLower.includes("lap") || sLower.includes("vta");
+												const isDNF = !isFinished;
 												const isWin = pos === "1";
 												const isPodium = pos === "2" || pos === "3";
 

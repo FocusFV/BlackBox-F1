@@ -73,7 +73,7 @@ export default function Home() {
 	// Timer de cuenta regresiva en vivo
 	useEffect(() => {
 		setMounted(true);
-		const targetTime = new Date(`${nextRace.date}T${nextRace.time || "06:00:00Z"}`).getTime();
+		const targetTime = new Date(`${nextRace.date}T${nextRace.time || "04:00:00Z"}`).getTime();
 
 		const updateTime = () => {
 			const diff = Math.max(0, targetTime - Date.now());

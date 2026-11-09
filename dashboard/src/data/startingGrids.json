@@ -3,15 +3,15 @@
     "gp": "São Paulo Grand Prix",
     "notes": "Grilla oficial definitiva emitida por Formula 1 / FIA",
     "grid": [
-      { "position": 1, "driver_number": "1", "penalty": null },
-      { "position": 2, "driver_number": "12", "penalty": null },
-      { "position": 3, "driver_number": "30", "penalty": null },
-      { "position": 4, "driver_number": "27", "penalty": null },
-      { "position": 5, "driver_number": "6", "penalty": null },
-      { "position": 6, "driver_number": "87", "penalty": null },
-      { "position": 7, "driver_number": "63", "penalty": "PEN +5p (ICE)" },
+      { "position": 1, "driver_number": "30", "penalty": null },
+      { "position": 2, "driver_number": "6", "penalty": null },
+      { "position": 3, "driver_number": "1", "penalty": null },
+      { "position": 4, "driver_number": "12", "penalty": null },
+      { "position": 5, "driver_number": "27", "penalty": null },
+      { "position": 6, "driver_number": "63", "penalty": "PEN +5p (ICE)" },
+      { "position": 7, "driver_number": "23", "penalty": null },
       { "position": 8, "driver_number": "14", "penalty": null },
-      { "position": 9, "driver_number": "23", "penalty": null },
+      { "position": 9, "driver_number": "87", "penalty": null },
       { "position": 10, "driver_number": "81", "penalty": null },
       { "position": 11, "driver_number": "51", "penalty": null },
       { "position": 12, "driver_number": "41", "penalty": null },
@@ -24,22 +24,22 @@
       { "position": 19, "driver_number": "5", "penalty": null },
       { "position": 20, "driver_number": "44", "penalty": "PEN Fondo (PU)" },
       { "position": 21, "driver_number": "3", "penalty": "PEN Fondo (PU)" },
-      { "position": 22, "driver_number": "11", "penalty": "PEN +5p (PU)" }
+      { "position": 22, "driver_number": "11", "penalty": "PEN Fondo (PU)" }
     ]
   },
   "latest": {
     "gp": "São Paulo Grand Prix",
     "notes": "Grilla oficial definitiva emitida por Formula 1 / FIA",
     "grid": [
-      { "position": 1, "driver_number": "1", "penalty": null },
-      { "position": 2, "driver_number": "12", "penalty": null },
-      { "position": 3, "driver_number": "30", "penalty": null },
-      { "position": 4, "driver_number": "27", "penalty": null },
-      { "position": 5, "driver_number": "6", "penalty": null },
-      { "position": 6, "driver_number": "87", "penalty": null },
-      { "position": 7, "driver_number": "63", "penalty": "PEN +5p (ICE)" },
+      { "position": 1, "driver_number": "30", "penalty": null },
+      { "position": 2, "driver_number": "6", "penalty": null },
+      { "position": 3, "driver_number": "1", "penalty": null },
+      { "position": 4, "driver_number": "12", "penalty": null },
+      { "position": 5, "driver_number": "27", "penalty": null },
+      { "position": 6, "driver_number": "63", "penalty": "PEN +5p (ICE)" },
+      { "position": 7, "driver_number": "23", "penalty": null },
       { "position": 8, "driver_number": "14", "penalty": null },
-      { "position": 9, "driver_number": "23", "penalty": null },
+      { "position": 9, "driver_number": "87", "penalty": null },
       { "position": 10, "driver_number": "81", "penalty": null },
       { "position": 11, "driver_number": "51", "penalty": null },
       { "position": 12, "driver_number": "41", "penalty": null },
@@ -52,7 +52,7 @@
       { "position": 19, "driver_number": "5", "penalty": null },
       { "position": 20, "driver_number": "44", "penalty": "PEN Fondo (PU)" },
       { "position": 21, "driver_number": "3", "penalty": "PEN Fondo (PU)" },
-      { "position": 22, "driver_number": "11", "penalty": "PEN +5p (PU)" }
+      { "position": 22, "driver_number": "11", "penalty": "PEN Fondo (PU)" }
     ]
   }
 }

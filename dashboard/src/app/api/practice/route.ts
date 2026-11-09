@@ -281,11 +281,16 @@ export async function GET(request: Request) {
 			};
 		});
 
+		const finalResults =
+			results.length > 0
+				? results
+				: brazilFallback[sessionName] || [];
+
 		const payload = {
 			session: sessionName,
-			circuit: matchingSession.circuit_short_name,
-			total: results.length,
-			results,
+			circuit: matchingSession.circuit_short_name || "Interlagos",
+			total: finalResults.length,
+			results: finalResults,
 		};
 
 		sessionResultsCache[cacheKey] = { timestamp: Date.now(), data: payload };

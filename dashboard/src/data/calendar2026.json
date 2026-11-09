@@ -716,22 +716,22 @@
       }
     },
     "date": "2026-11-22",
-    "time": "06:00:00Z",
+    "time": "04:00:00Z",
     "FirstPractice": {
       "date": "2026-11-20",
-      "time": "02:30:00Z"
+      "time": "00:30:00Z"
     },
     "SecondPractice": {
       "date": "2026-11-20",
-      "time": "06:00:00Z"
+      "time": "04:00:00Z"
     },
     "ThirdPractice": {
       "date": "2026-11-21",
-      "time": "02:30:00Z"
+      "time": "00:30:00Z"
     },
     "Qualifying": {
       "date": "2026-11-21",
-      "time": "06:00:00Z"
+      "time": "04:00:00Z"
     }
   },
   {
