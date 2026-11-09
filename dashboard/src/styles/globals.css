@@ -26,6 +26,12 @@
 	--color-vsc-bg: #713f12;
 }
 
+html,
+body {
+	max-width: 100vw;
+	overflow-x: hidden;
+}
+
 /* 🏆 SISTEMA DE TEMAS DE ORO BLACKBOX */
 :root, .theme-classic {
 	--color-amber-50: #fffbeb;

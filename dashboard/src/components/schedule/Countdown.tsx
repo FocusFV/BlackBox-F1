@@ -6,11 +6,13 @@ import { duration, utc } from "moment";
 import clsx from "clsx";
 
 import type { Session } from "@/types/schedule.type";
+import { translateGpName } from "@/lib/f1Translations";
 
 type Props = {
 	next: Session;
 	type: "race" | "other";
 	countryName?: string;
+	eventName?: string;
 };
 
 const countryTranslation: Record<string, string> = {
@@ -23,7 +25,7 @@ const countryTranslation: Record<string, string> = {
 	"United States": "Estados Unidos",
 };
 
-export default function Countdown({ next, type, countryName }: Props) {
+export default function Countdown({ next, type, countryName, eventName }: Props) {
 	const [[days, hours, minutes, seconds], setDuration] = useState<
 		[number | null, number | null, number | null, number | null]
 	>([null, null, null, null]);
@@ -81,8 +83,18 @@ export default function Countdown({ next, type, countryName }: Props) {
 		let title = "";
 		let isPlural = false;
 		if (raw === "race") {
-			const translatedCountry = countryName ? (countryTranslation[countryName] || countryName) : "";
-			title = translatedCountry ? `LA CARRERA DE ${translatedCountry.toUpperCase()}` : "LA CARRERA";
+			if (eventName && eventName.toLowerCase().includes("vegas")) {
+				title = "EL GRAN PREMIO DE LAS VEGAS";
+			} else if (eventName) {
+				title = `EL ${translateGpName(eventName).toUpperCase()}`;
+			} else {
+				const translatedCountry = countryName ? (countryTranslation[countryName] || countryName) : "";
+				if (translatedCountry.toLowerCase().includes("estados unidos")) {
+					title = "EL GRAN PREMIO DE LAS VEGAS";
+				} else {
+					title = translatedCountry ? `LA CARRERA DE ${translatedCountry.toUpperCase()}` : "LA CARRERA";
+				}
+			}
 		} else if (raw === "qualifying" || raw === "qualy") {
 			title = "LA CLASIFICACIÓN";
 		} else if (raw === "sprint" || raw === "sprintrace") {

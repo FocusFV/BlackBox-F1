@@ -161,7 +161,7 @@ export default function Home() {
 						<div>
 							<div className="flex items-center gap-2">
 								<span className="text-[10px] uppercase font-mono font-black tracking-widest text-amber-400">
-									Ronda {nextRace.round} · Oficial FIA
+									Ronda {nextRace.round} · Las Vegas, Estados Unidos
 								</span>
 								<span className="inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono font-bold">
 									<span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
@@ -172,7 +172,7 @@ export default function Home() {
 								{translatedGp}
 							</h3>
 							<p className="text-[11px] text-zinc-400 font-mono">
-								{nextRace.Circuit?.circuitName || "Circuito Urbano de Las Vegas"} · Sábado 21 Nov
+								Las Vegas Strip Circuit · Sábado 21 Nov
 							</p>
 						</div>
 					</div>

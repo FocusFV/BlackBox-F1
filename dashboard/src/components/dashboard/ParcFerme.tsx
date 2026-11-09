@@ -246,6 +246,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 						gridPos,
 						qualyPos,
 						delta,
+						gapTime: gridPos === 1 ? "POLE POSITION" : `FILA ${Math.ceil(gridPos / 2)}`,
 						penaltyNote: gridItem.penalty,
 					};
 				})
@@ -804,31 +805,15 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 				<div className="lg:col-start-3 lg:col-span-8 flex flex-col bg-zinc-950/50 border border-zinc-800/80 rounded-2xl p-4 md:p-5 backdrop-blur-xl max-w-full shadow-2xl">
 					{/* SELECTOR PANORÁMICO DE SESIONES ESTILO PIT-WALL (UNIFICADO EN ORO LÍQUIDO) */}
 					<div className="flex flex-col gap-2.5 mb-5 border-b border-zinc-900/80 pb-4">
-						<div className="w-full bg-zinc-950/80 p-1.5 rounded-2xl border border-zinc-800/80 shadow-[0_8px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl flex flex-wrap sm:flex-nowrap gap-1.5 select-none relative">
-							{(hasSprint
-								? [
-										{ id: "FP1" as SessionTab, label: "FP1", sub: "Libres 1" },
-										{ id: "SQ" as SessionTab, label: "SQ", sub: "Shootout" },
-										{ id: "SPRINT" as SessionTab, label: "SPRINT", sub: "Carrera" },
-										{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasificación" },
-										{ id: "RACE" as SessionTab, label: "CARRERA", sub: "Gran Premio" },
-								  ]
-								: [
-										{ id: "FP1" as SessionTab, label: "FP1", sub: "Libres 1" },
-										{ id: "FP2" as SessionTab, label: "FP2", sub: "Libres 2" },
-										{ id: "FP3" as SessionTab, label: "FP3", sub: "Libres 3" },
-										{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasificación" },
-										{ id: "RACE" as SessionTab, label: "CARRERA", sub: "Gran Premio" },
-								  ]
-							)
-								.filter((tab) => {
-									// 🔒 Filtrado progresivo e inteligente: Solo se muestran las sesiones que YA fueron disputadas
-									if (smartContext?.availableTabs && smartContext.availableTabs.length > 0) {
-										return smartContext.availableTabs.includes(tab.id);
-									}
-									return true;
-								})
-								.map((tab) => {
+						<div className="w-full bg-zinc-950/80 p-1.5 rounded-2xl border border-zinc-800/80 shadow-[0_8px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl flex flex-nowrap overflow-x-auto no-scrollbar gap-1.5 select-none relative max-w-full">
+							{[
+								{ id: "FP1" as SessionTab, label: "FP1", sub: "Libres 1" },
+								{ id: "FP2" as SessionTab, label: "FP2", sub: "Libres 2" },
+								{ id: "FP3" as SessionTab, label: "FP3", sub: "Libres 3" },
+								{ id: "SPRINT" as SessionTab, label: "SPRINT", sub: "Carrera Sprint" },
+								{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasificación" },
+								{ id: "RACE" as SessionTab, label: "CARRERA", sub: "Gran Premio" },
+							].map((tab) => {
 								const isActive = activeTab === tab.id;
 								return (
 									<button

@@ -643,7 +643,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 		designer: "Luiz Romero Sanson",
 		length: "4.309 km",
 		raceLaps: 71,
-		raceDistance: "305.879 km",
+		raceDistance: "305.939 km",
 		turns: "15 (5 Der · 10 Izq · 'S' de Senna)",
 		drsZones: 2,
 		longestStraight: "1.200 m (Reta Oposta)",

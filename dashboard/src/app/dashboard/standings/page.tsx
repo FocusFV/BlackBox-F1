@@ -1213,86 +1213,89 @@ export default function Standings() {
 								className="relative w-full max-w-2xl bg-zinc-950 border rounded-3xl p-5 sm:p-6 shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
 								style={{ borderColor: pTheme.borderSubtle }}
 							>
-								{/* Botón de cierre */}
-								<button
-									onClick={() => setSelectedDriver(null)}
-									className="absolute top-4 right-4 p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all cursor-pointer z-10"
-								>
-									<X className="w-4 h-4" />
-								</button>
-
 								{/* Cabecera del Piloto con mono oficial y colores de su escudería */}
-								<div className="flex items-center gap-4 pb-4 border-b border-zinc-800/80 pr-20 sm:pr-24">
-									{(() => {
-										const avatarUrl = getDriverAvatarUrl(
-											selectedDriver.driverCode,
-											selectedDriver.driverId,
-											selectedDriver.familyName
-										);
-										return avatarUrl ? (
-											<img
-												src={avatarUrl}
-												alt={selectedDriver.familyName}
-												className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover object-top border-2 shadow-lg bg-zinc-900 shrink-0"
-												style={{ borderColor: pTheme.primary }}
-											/>
-										) : (
-											<div
-												className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border flex items-center justify-center text-xl font-black shrink-0"
-												style={{
-													backgroundColor: pTheme.bgSubtle,
-													borderColor: pTheme.borderSubtle,
-													color: pTheme.primary,
-												}}
-											>
-												{selectedDriver.driverCode || "F1"}
-											</div>
-										);
-									})()}
-
-									<div className="flex flex-col min-w-0 flex-1">
-										<div className="flex items-center gap-2">
-											<span
-												className="text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase border shadow-xs"
-												style={{
-													backgroundColor: pTheme.bgSubtle,
-													borderColor: pTheme.borderSubtle,
-													color: pTheme.primary,
-												}}
-											>
-												{year} · Posición #{selectedDriver.position}
-											</span>
-											{selectedDriver.countryCode && (
+								<div className="flex items-center justify-between gap-3 sm:gap-4 pb-4 border-b border-zinc-800/80">
+									<div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+										{(() => {
+											const avatarUrl = getDriverAvatarUrl(
+												selectedDriver.driverCode,
+												selectedDriver.driverId,
+												selectedDriver.familyName
+											);
+											return avatarUrl ? (
 												<img
-													src={`https://flagcdn.com/w20/${selectedDriver.countryCode}.png`}
-													alt=""
-													className="w-4 h-auto rounded-xs shadow-xs"
+													src={avatarUrl}
+													alt={selectedDriver.familyName}
+													className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover object-top border-2 shadow-lg bg-zinc-900 shrink-0"
+													style={{ borderColor: pTheme.primary }}
 												/>
-											)}
-										</div>
+											) : (
+												<div
+													className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border flex items-center justify-center text-xl font-black shrink-0"
+													style={{
+														backgroundColor: pTheme.bgSubtle,
+														borderColor: pTheme.borderSubtle,
+														color: pTheme.primary,
+													}}
+												>
+													{selectedDriver.driverCode || "F1"}
+												</div>
+											);
+										})()}
 
-										<h3 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight truncate mt-1">
-											{selectedDriver.givenName} {selectedDriver.familyName}
-										</h3>
+										<div className="flex flex-col min-w-0 flex-1">
+											<div className="flex items-center gap-2">
+												<span
+													className="text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase border shadow-xs"
+													style={{
+														backgroundColor: pTheme.bgSubtle,
+														borderColor: pTheme.borderSubtle,
+														color: pTheme.primary,
+													}}
+												>
+													{year} · Posición #{selectedDriver.position}
+												</span>
+												{selectedDriver.countryCode && (
+													<img
+														src={`https://flagcdn.com/w20/${selectedDriver.countryCode}.png`}
+														alt=""
+														className="w-4 h-auto rounded-xs shadow-xs"
+													/>
+												)}
+											</div>
 
-										<div className="flex items-center gap-2 mt-0.5 text-xs text-zinc-300 font-bold uppercase truncate">
-											<TeamLogo teamName={selectedDriver.historicTeamName} className="w-4 h-4" />
-											<span style={{ color: pTheme.primary }}>{selectedDriver.historicTeamName}</span>
+											<h3 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight truncate mt-1">
+												{selectedDriver.givenName} {selectedDriver.familyName}
+											</h3>
+
+											<div className="flex items-center gap-2 mt-0.5 text-xs text-zinc-300 font-bold uppercase truncate">
+												<TeamLogo teamName={selectedDriver.historicTeamName} className="w-4 h-4" />
+												<span style={{ color: pTheme.primary }}>{selectedDriver.historicTeamName}</span>
+											</div>
 										</div>
 									</div>
 
-									{/* Puntos acumulados en grande a súper velocidad con brillo temático */}
-									<div className="text-right shrink-0 mr-2 sm:mr-3">
-										<AnimatedCounter
-											value={parseFloat(selectedDriver.points) || 0}
-											duration={750}
-											className="text-2xl sm:text-4xl font-black tracking-tight"
-											style={{
-												color: pTheme.primary,
-												textShadow: `0 0 25px ${pTheme.glowShadow}`,
-											}}
-										/>
-										<span className="text-[10px] text-zinc-400 block font-bold uppercase">Puntos Totales</span>
+									{/* Puntos acumulados y Botón de cierre en línea (sin superposición) */}
+									<div className="flex items-center gap-3 sm:gap-4 shrink-0">
+										<div className="text-right">
+											<AnimatedCounter
+												value={parseFloat(selectedDriver.points) || 0}
+												duration={750}
+												className="text-2xl sm:text-4xl font-black tracking-tight"
+												style={{
+													color: pTheme.primary,
+													textShadow: `0 0 25px ${pTheme.glowShadow}`,
+												}}
+											/>
+											<span className="text-[10px] text-zinc-400 block font-bold uppercase">Puntos Totales</span>
+										</div>
+
+										<button
+											onClick={() => setSelectedDriver(null)}
+											className="p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all cursor-pointer shadow-md"
+										>
+											<X className="w-4 h-4" />
+										</button>
 									</div>
 								</div>
 
@@ -1475,56 +1478,59 @@ export default function Standings() {
 								className="relative w-full max-w-2xl bg-zinc-950 border rounded-3xl p-5 sm:p-6 shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
 								style={{ borderColor: cTheme.borderSubtle }}
 							>
-								{/* Botón de cierre */}
-								<button
-									onClick={() => setSelectedConstructor(null)}
-									className="absolute top-4 right-4 p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all cursor-pointer z-10"
-								>
-									<X className="w-4 h-4" />
-								</button>
-
 								{/* Cabecera de la Escudería con identidad cromática oficial */}
-								<div className="flex items-center gap-4 pb-4 border-b border-zinc-800/80 pr-20 sm:pr-24">
-									<div
-										className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-zinc-900 border p-2.5 flex items-center justify-center shrink-0 shadow-lg"
-										style={{ borderColor: cTheme.borderSubtle }}
-									>
-										<TeamLogo teamName={selectedConstructor.teamName} className="w-12 h-12" />
-									</div>
-
-									<div className="flex flex-col min-w-0 flex-1">
-										<span
-											className="text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase w-fit border shadow-xs"
-											style={{
-												backgroundColor: cTheme.bgSubtle,
-												borderColor: cTheme.borderSubtle,
-												color: cTheme.primary,
-											}}
+								<div className="flex items-center justify-between gap-3 sm:gap-4 pb-4 border-b border-zinc-800/80">
+									<div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+										<div
+											className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-zinc-900 border p-2.5 flex items-center justify-center shrink-0 shadow-lg"
+											style={{ borderColor: cTheme.borderSubtle }}
 										>
-											{year} · Posición #{selectedConstructor.position}
-										</span>
+											<TeamLogo teamName={selectedConstructor.teamName} className="w-12 h-12" />
+										</div>
 
-										<h3 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight truncate mt-1">
-											{selectedConstructor.teamName}
-										</h3>
+										<div className="flex flex-col min-w-0 flex-1">
+											<span
+												className="text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase w-fit border shadow-xs"
+												style={{
+													backgroundColor: cTheme.bgSubtle,
+													borderColor: cTheme.borderSubtle,
+													color: cTheme.primary,
+												}}
+											>
+												{year} · Posición #{selectedConstructor.position}
+											</span>
 
-										<p className="text-xs text-zinc-400 font-medium">
-											Aporte oficial de los pilotos a la escudería
-										</p>
+											<h3 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight truncate mt-1">
+												{selectedConstructor.teamName}
+											</h3>
+
+											<p className="text-xs text-zinc-400 font-medium">
+												Aporte oficial de los pilotos a la escudería
+											</p>
+										</div>
 									</div>
 
-									{/* Puntos totales de la escudería a súper velocidad con color oficial */}
-									<div className="text-right shrink-0 mr-2 sm:mr-3">
-										<AnimatedCounter
-											value={parseFloat(selectedConstructor.points) || 0}
-											duration={750}
-											className="text-2xl sm:text-4xl font-black tracking-tight"
-											style={{
-												color: cTheme.primary,
-												textShadow: `0 0 25px ${cTheme.glowShadow}`,
-											}}
-										/>
-										<span className="text-[10px] text-zinc-400 block font-bold uppercase">Puntos del Equipo</span>
+									{/* Puntos totales de la escudería y Botón de cierre en línea (sin superposición) */}
+									<div className="flex items-center gap-3 sm:gap-4 shrink-0">
+										<div className="text-right">
+											<AnimatedCounter
+												value={parseFloat(selectedConstructor.points) || 0}
+												duration={750}
+												className="text-2xl sm:text-4xl font-black tracking-tight"
+												style={{
+													color: cTheme.primary,
+													textShadow: `0 0 25px ${cTheme.glowShadow}`,
+												}}
+											/>
+											<span className="text-[10px] text-zinc-400 block font-bold uppercase">Puntos del Equipo</span>
+										</div>
+
+										<button
+											onClick={() => setSelectedConstructor(null)}
+											className="p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all cursor-pointer shadow-md"
+										>
+											<X className="w-4 h-4" />
+										</button>
 									</div>
 								</div>
 

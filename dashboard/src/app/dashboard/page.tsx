@@ -284,7 +284,7 @@ export default function Page() {
 	}, [showTelemetry]);
 
 	return (
-		<div className="flex w-full flex-col gap-4 px-4 py-4 text-zinc-100 relative">
+		<div className="flex w-full max-w-full overflow-x-hidden flex-col gap-4 px-4 py-4 text-zinc-100 relative">
 			{/* 🎬 OVERLAY DE TRANSICIÓN CINEMÁTICA A TELEMETRÍA EN VIVO */}
 			{isTransitioningToLive && (
 				<div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-xl animate-fade-in font-mono select-none px-4">

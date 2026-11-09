@@ -44,6 +44,26 @@ const driverNationalityMap: Record<string, string> = {
 	LAW: "nz", ANT: "it", CAM: "br", HIR: "jp"
 };
 
+const translateStatus = (status: string): string => {
+	if (!status) return "";
+	const s = status.toLowerCase();
+	if (s === "finished") return "FINALIZADO";
+	if (s.includes("accident") || s.includes("collision") || s.includes("crash")) return "COLISIÓN";
+	if (s.includes("engine") || s.includes("power unit")) return "MOTOR";
+	if (s.includes("gearbox")) return "CAJA DE CAMBIOS";
+	if (s.includes("transmission")) return "TRANSMISIÓN";
+	if (s.includes("brakes")) return "FRENOS";
+	if (s.includes("suspension")) return "SUSPENSIÓN";
+	if (s.includes("hydraulics")) return "HIDRÁULICA";
+	if (s.includes("electrical")) return "ELÉCTRICO";
+	if (s.includes("retired") || s.includes("withdrew")) return "RETIRADO";
+	if (s.includes("puncture") || s.includes("tyre") || s.includes("tire")) return "PINCHAZO";
+	if (s.includes("disqualified") || s.includes("dsq")) return "DESCALIFICADO";
+	if (s.includes("spun") || s.includes("spin")) return "TROMPO";
+	if (s.includes("lap") || s.includes("laps")) return status.toUpperCase().replace("LAPS", "VUELTAS").replace("LAP", "VUELTA");
+	return status.toUpperCase();
+};
+
 // 🏎️ Componente Logo integrado
 const TeamLogo = ({ teamName }: { teamName: string }) => {
 	const cleanName = (teamName || "").toLowerCase().replaceAll(" ", "-");
@@ -102,7 +122,7 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 										code,
 										flag,
 										teamName: item.Constructor?.name || "Equipo",
-										gapTime: item.position === "1" ? (item.Time?.time || "GANADOR") : (item.Time?.time || item.status || "INTERVAL"),
+										gapTime: item.position === "1" ? (item.Time?.time || "GANADOR") : (item.Time?.time || translateStatus(item.status) || "INTERVAL"),
 										points: item.points ? `+${item.points} PTS` : "",
 										isFastestLap: item.FastestLap?.rank === "1",
 										fastestLapTime: item.FastestLap?.Time?.time,
@@ -381,7 +401,7 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 									<div className="flex items-center gap-2 shrink-0 font-mono text-right">
 										{row.isFastestLap && (
 											<span className="text-purple-400 text-[9px] font-black px-1.5 py-0.5 rounded bg-purple-500/10 border border-purple-500/30">
-												🟣 FL
+												🟣 VR
 											</span>
 										)}
 

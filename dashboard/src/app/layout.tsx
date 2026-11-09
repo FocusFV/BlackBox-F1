@@ -37,13 +37,13 @@ export default function RootLayout({ children }: Props) {
 			</head>
 
 			{/* El body queda sobrio y limpio, ya que la Navbar se encarga de su propia estética */}
-			<body className="bg-zinc-950 antialiased min-h-screen relative">
+			<body className="bg-zinc-950 antialiased min-h-screen relative max-w-full overflow-x-hidden">
 				<OledModeProvider>
 					{/* La Navbar ahora tiene el patrón encapsulado adentro */}
 					<Navbar />
 					
 					{/* El contenido de todas las pantallas fluye libre abajo de la barra */}
-					<main className="w-full">
+					<main className="w-full max-w-full overflow-x-hidden">
 						{children}
 					</main>
 
