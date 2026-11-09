@@ -141,10 +141,10 @@ export default function WeatherPage() {
 	const ultimosMensajes = [...mensajesControl].reverse().slice(0, 5);
 
 	return (
-		<div className="relative h-[calc(100%-142px)] w-full md:h-full bg-[#030305] text-zinc-200 font-mono text-sm overflow-hidden p-3 flex flex-col md:grid md:grid-cols-12 md:grid-rows-6 gap-4">
+		<div className="relative h-full w-full bg-[#030305] text-zinc-200 font-mono text-sm overflow-y-auto md:overflow-hidden p-3 flex flex-col md:grid md:grid-cols-12 md:grid-rows-6 gap-3.5 sm:gap-4">
 			
 			{/* 🛰️ MONITOR ALFA: RADAR SATELITAL DE PRECIPITACIÓN */}
-			<div className="md:col-span-5 md:row-span-4 relative border border-zinc-900 rounded-xl overflow-hidden bg-black shadow-2xl">
+			<div className="md:col-span-5 md:row-span-4 relative border border-zinc-900 rounded-xl overflow-hidden bg-black shadow-2xl min-h-[300px] md:min-h-0">
 				<WeatherMap />
 				<div className="absolute top-3 left-3 z-10 bg-black/90 border border-[#00A19B]/30 px-3 py-1.5 rounded text-xs text-[#00A19B] tracking-widest font-bold">
 					🛰️ RADAR_SATELITAL_DOPPLER // CAPA_NUBOSA
@@ -152,7 +152,7 @@ export default function WeatherPage() {
 			</div>
 
 			{/* 🏎️ MONITOR BRAVO: MAPA DE TELEMETRÍA Y TRAZADA EXACTA EN VIVO */}
-			<div className="md:col-span-4 md:row-span-4 relative border border-[#00A19B]/30 rounded-xl overflow-hidden bg-[#050608] flex items-center justify-center p-6 shadow-2xl">
+			<div className="md:col-span-3 md:row-span-4 relative border border-[#00A19B]/30 rounded-xl overflow-hidden bg-[#050608] flex items-center justify-center p-4 sm:p-6 shadow-2xl min-h-[260px] md:min-h-0">
 				<div className="absolute inset-0 bg-[linear-gradient(to_right,#0c0e12_1px,transparent_1px),linear-gradient(to_bottom,#0c0e12_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] opacity-60" />
 				
 				<div className="w-full h-full relative z-10 flex items-center justify-center filter drop-shadow-[0_0_15px_rgba(0,161,155,0.25)]">
@@ -165,53 +165,61 @@ export default function WeatherPage() {
 			</div>
 
 			{/* 🌡️ MONITOR CHARLIE: PANEL DE ESTADO ATMOSFÉRICO DE BOXES */}
-			<div className="md:col-span-3 md:row-span-4 bg-[#07080a] border border-zinc-900 rounded-xl p-4 flex flex-col justify-between shadow-2xl">
-				<div className="space-y-4">
-					<div className="border-b border-zinc-900 pb-2 flex justify-between items-center">
-						<span className="text-[#00A19B] font-bold tracking-wider text-xs">// CONTROL_METEOROLOGICO</span>
-						<span className="text-[11px] text-zinc-400 font-bold">
-							{isLiveSessionRunning ? "● EN VIVO" : "● OFICIAL FIA · PISTA EN PAUSA"}
+			<div className="md:col-span-4 md:row-span-4 bg-[#07080a] border border-zinc-900 rounded-xl p-3.5 sm:p-4 flex flex-col justify-between shadow-2xl overflow-y-auto no-scrollbar">
+				<div className="space-y-3 sm:space-y-4">
+					<div className="border-b border-zinc-900 pb-2.5 flex flex-wrap items-center justify-between gap-2">
+						<span className="text-[#00A19B] font-bold tracking-wider text-xs shrink-0">// CONTROL_METEOROLOGICO</span>
+						<span className="text-[10px] sm:text-[11px] text-zinc-400 font-bold px-2 py-0.5 rounded bg-zinc-900/90 border border-zinc-800 shrink-0">
+							{isLiveSessionRunning ? "● EN VIVO" : "● PISTA EN PAUSA"}
 						</span>
 					</div>
 
 					{/* Bloque de Ubicación y Evento Real */}
-					<div className="bg-black/60 border border-zinc-900 p-3 rounded-lg border-l-4 border-l-[#00A19B] space-y-1">
-						<p className="text-[11px] text-zinc-500 tracking-wider uppercase font-bold">EVENTO OFICIAL FIA</p>
-						<p className="text-sm font-bold text-zinc-100 truncate">{gpNombre}</p>
-						<div className="flex justify-between text-[11px] text-zinc-400 pt-1 font-sans font-semibold">
-							<span>{circuitoNombre} ({paisGP})</span>
-							<span className="text-[#00A19B] font-mono">{sesionNombre}</span>
+					<div className="bg-black/60 border border-zinc-900 p-3 rounded-lg border-l-4 border-l-[#00A19B] flex flex-col gap-1.5">
+						<div className="flex items-center justify-between gap-2">
+							<p className="text-[10px] text-zinc-500 tracking-wider uppercase font-bold">EVENTO OFICIAL FIA</p>
+							<span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#00A19B]/10 text-[#00A19B] border border-[#00A19B]/20 shrink-0">
+								{sesionNombre}
+							</span>
+						</div>
+						<h3 className="text-xs sm:text-sm font-bold text-zinc-100 leading-snug break-words">
+							{gpNombre}
+						</h3>
+						<div className="text-[11px] text-zinc-400 font-sans font-medium flex items-center gap-1.5 pt-0.5">
+							<span className="text-zinc-300 font-semibold">{circuitoNombre}</span>
+							<span className="text-zinc-600">·</span>
+							<span className="text-zinc-400">{paisGP}</span>
 						</div>
 					</div>
 					
 					{/* Matriz Completa de Variables */}
-					<div className="space-y-2.5">
+					<div className="space-y-2 sm:space-y-2.5">
 						<div className="grid grid-cols-2 gap-2">
-							<div className="bg-black/40 border border-zinc-900 p-2.5 rounded-lg">
+							<div className="bg-black/40 border border-zinc-900 p-2 sm:p-2.5 rounded-lg">
 								<p className="text-[11px] text-zinc-500 uppercase tracking-wider font-bold">Temp. Aire</p>
-								<p className="text-2xl font-bold text-zinc-100 font-mono mt-0.5">{tempAire}<span className="text-xs text-zinc-500">°C</span></p>
+								<p className="text-xl sm:text-2xl font-bold text-zinc-100 font-mono mt-0.5">{tempAire}<span className="text-xs text-zinc-500">°C</span></p>
 							</div>
-							<div className="bg-black/40 border border-zinc-900 p-2.5 rounded-lg border-b-2 border-b-amber-500">
+							<div className="bg-black/40 border border-zinc-900 p-2 sm:p-2.5 rounded-lg border-b-2 border-b-amber-500">
 								<p className="text-[11px] text-zinc-500 uppercase tracking-wider font-bold">Temp. Pista</p>
-								<p className="text-2xl font-bold text-amber-400 font-mono mt-0.5">{tempPista}<span className="text-xs text-amber-500/60">°C</span></p>
+								<p className="text-xl sm:text-2xl font-bold text-amber-400 font-mono mt-0.5">{tempPista}<span className="text-xs text-amber-500/60">°C</span></p>
 							</div>
 						</div>
 
 						<div className="grid grid-cols-2 gap-2">
-							<div className="bg-black/40 border border-zinc-900 p-2.5 rounded-lg">
+							<div className="bg-black/40 border border-zinc-900 p-2 sm:p-2.5 rounded-lg">
 								<p className="text-[11px] text-zinc-500 uppercase tracking-wider font-bold">Humedad</p>
-								<p className="text-xl font-bold text-zinc-200 mt-0.5">{humedad}<span className="text-xs text-zinc-400">%</span></p>
+								<p className="text-lg sm:text-xl font-bold text-zinc-200 mt-0.5">{humedad}<span className="text-xs text-zinc-400">%</span></p>
 							</div>
-							<div className="bg-black/40 border border-zinc-900 p-2.5 rounded-lg">
+							<div className="bg-black/40 border border-zinc-900 p-2 sm:p-2.5 rounded-lg">
 								<p className="text-[11px] text-zinc-500 uppercase tracking-wider font-bold">Presión Atm.</p>
-								<p className="text-xl font-bold text-zinc-200 mt-0.5">{presion}<span className="text-[10px] text-zinc-500"> hPa</span></p>
+								<p className="text-lg sm:text-xl font-bold text-zinc-200 mt-0.5">{presion}<span className="text-[10px] text-zinc-500"> hPa</span></p>
 							</div>
 						</div>
 
-						<div className="bg-black/40 border border-zinc-900 p-3 rounded-lg flex items-center justify-between">
+						<div className="bg-black/40 border border-zinc-900 p-2.5 sm:p-3 rounded-lg flex items-center justify-between">
 							<div>
 								<p className="text-[11px] text-zinc-500 uppercase tracking-wider font-bold">Vel. Viento</p>
-								<p className="text-2xl font-bold text-zinc-100 mt-0.5">{velViento}<span className="text-xs text-zinc-500"> km/h</span></p>
+								<p className="text-xl sm:text-2xl font-bold text-zinc-100 mt-0.5">{velViento}<span className="text-xs text-zinc-500"> km/h</span></p>
 							</div>
 							<div className="text-right">
 								<p className="text-[10px] text-zinc-600 uppercase tracking-wider font-bold">Dirección</p>
@@ -221,13 +229,13 @@ export default function WeatherPage() {
 						</div>
 
 						{/* Estado de Precipitación */}
-						<div className={`p-2.5 rounded-lg border text-center font-bold text-xs ${tieneLluvia ? "bg-blue-950/40 border-blue-800 text-blue-400 animate-pulse" : "bg-black/40 border-zinc-900 text-zinc-400"}`}>
+						<div className={`p-2 sm:p-2.5 rounded-lg border text-center font-bold text-xs ${tieneLluvia ? "bg-blue-950/40 border-blue-800 text-blue-400 animate-pulse" : "bg-black/40 border-zinc-900 text-zinc-400"}`}>
 							{tieneLluvia ? "⚠️ ADVERTENCIA: DETECCIÓN DE AGUA ACTIVA" : "✓ MONITOREO AMBIENTAL: PISTA SECA"}
 						</div>
 					</div>
 				</div>
 
-				<div className="text-[11px] font-bold tracking-widest text-emerald-400 border border-zinc-900 py-2.5 rounded-lg bg-black/40 shadow-inner text-center mt-3 truncate px-1">
+				<div className="text-[10px] sm:text-[11px] font-bold tracking-wider text-emerald-400 border border-zinc-900 py-2 sm:py-2.5 rounded-lg bg-black/40 shadow-inner text-center mt-3 px-2 break-words">
 					● {estadoPistaMensaje}
 				</div>
 			</div>

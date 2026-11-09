@@ -61,6 +61,7 @@ export function WeatherMap() {
 					],
 					tileSize: 256,
 					attribution: "Esri",
+					maxzoom: 18,
 				},
 			};
 
@@ -79,6 +80,8 @@ export function WeatherMap() {
 					type: "raster",
 					tiles: [radarTileUrl],
 					tileSize: 256,
+					minzoom: 0,
+					maxzoom: 7,
 				};
 				layers.push({
 					id: "radar-layer",
@@ -100,10 +103,14 @@ export function WeatherMap() {
 					layers,
 				},
 				center: [coords.lon, coords.lat],
-				zoom: 13.6,
+				zoom: 12.5,
+				minZoom: 2,
+				maxZoom: 16.5,
 				pitch: 0,
 				interactive: true,
 			});
+
+			libMap.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 
 			const safetyTimer = setTimeout(() => {
 				if (isMounted) setLoading(false);
