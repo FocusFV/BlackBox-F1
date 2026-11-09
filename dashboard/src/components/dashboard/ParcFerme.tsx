@@ -278,7 +278,6 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					if (!isMounted) return;
 					if (data?.available && Array.isArray(data?.grid) && data.grid.length > 0) {
 						setStartingGrid(data.grid);
-						setQualyViewMode("grid");
 					} else {
 						setStartingGrid(null);
 						setQualyViewMode("times");
