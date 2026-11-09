@@ -68,7 +68,10 @@ export default function Page() {
 
 	// 🛰️ Modo Cinemático de Circuito Aéreo (pantalla completa sin resultados)
 	const [isCinematicTrackMode, setIsCinematicTrackMode] = useState(false);
-	const [activeCircuit, setActiveCircuit] = useState<{ gpName?: string; country?: string } | null>(null);
+	const [activeCircuit, setActiveCircuit] = useState<{ gpName?: string; country?: string }>({
+		gpName: "Gran Premio de São Paulo",
+		country: "bra",
+	});
 
 	// 🎬 Transición cinemática de Parque Cerrado a Telemetría en Vivo
 	const [isTransitioningToLive, setIsTransitioningToLive] = useState(false);
@@ -393,8 +396,8 @@ export default function Page() {
 				>
 					{/* 🏎️ Fondo inteligente del circuito aéreo y Easter Egg de telemetría */}
 					<CircuitBackdrop
-						gpName={session?.Meeting?.Name || activeCircuit?.gpName || scheduleStatus.nextSessionName || session?.Name}
-						country={session?.Meeting?.Country?.Name || activeCircuit?.country}
+						gpName={activeCircuit?.gpName || session?.Meeting?.Name || "Gran Premio de São Paulo"}
+						country={activeCircuit?.country || session?.Meeting?.Country?.Name || "bra"}
 						isCinematic={isCinematicTrackMode}
 						onToggleCinematic={() => setIsCinematicTrackMode((prev) => !prev)}
 					/>

@@ -10,12 +10,12 @@ export const dynamic = "force-dynamic";
 // Mapeo auxiliar para normalizar los nombres de los países a tu formato
 const countryNameMap: Record<string, string> = {
 	"Bahrain": "Bahrain", "Saudi Arabia": "Saudi Arabia", "Australia": "Australia",
-	"Japan": "Japan", "China": "China", "United States": "United States",
-	"Monaco": "Monaco", "Spain": "Spain", "Austria": "Austria", "Great Britain": "Great Britain",
+	"Japan": "Japan", "China": "China", "United States": "United States", "USA": "United States",
+	"Monaco": "Monaco", "Spain": "Spain", "Austria": "Austria", "Great Britain": "Great Britain", "UK": "Great Britain",
 	"Hungary": "Hungary", "Belgium": "Belgium", "Netherlands": "Netherlands", "Italy": "Italy",
 	"Azerbaijan": "Azerbaijan", "Singapore": "Singapore", "Mexico": "Mexico", "Brazil": "Brazil",
 	"Qatar": "Qatar", "Abu Dhabi": "United Arab Emirates", "UAE": "United Arab Emirates",
-	"United Arab Emirates": "United Arab Emirates"
+	"United Arab Emirates": "United Arab Emirates", "Malaysia": "Malaysia"
 };
 
 function adaptJolpicaRaces(races: any[]): RoundType[] {

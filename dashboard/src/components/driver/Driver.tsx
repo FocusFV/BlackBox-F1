@@ -31,6 +31,8 @@ type Props = {
 	driver: Driver;
 	timingDriver: TimingDataDriver;
 	teamColor?: string; // 🌟 LE AGREGAMOS EL '?' ACÁ PARA HACERLA OPCIONAL
+	cumulativeGap?: string;
+	intervalGap?: string;
 };
 
 const inDangerZone = (position: number, sessionPart: number) => {
@@ -45,7 +47,7 @@ const inDangerZone = (position: number, sessionPart: number) => {
 	}
 };
 
-export default function Driver({ driver, timingDriver, position, teamColor }: Props) {
+export default function Driver({ driver, timingDriver, position, teamColor, cumulativeGap, intervalGap }: Props) {
 	const session = useDataStore((state) => state.state?.SessionInfo);
 	const lapCount = useDataStore((state) => state.state?.LapCount);
 	const sessionPart = useDataStore((state) => state.state?.TimingData?.SessionPart);
@@ -242,7 +244,13 @@ export default function Driver({ driver, timingDriver, position, teamColor }: Pr
 					timingDriver={timingDriver}
 					gridPos={appTimingDriver?.GridPos ? parseInt(appTimingDriver.GridPos, 10) : undefined}
 				/>
-				<DriverGap timingDriver={timingDriver} sessionPart={sessionPart} />
+				<DriverGap
+					timingDriver={timingDriver}
+					sessionPart={sessionPart}
+					cumulativeGap={cumulativeGap}
+					intervalGap={intervalGap}
+					position={position}
+				/>
 				<DriverLapTime
 					last={timingDriver.LastLapTime}
 					best={timingDriver.BestLapTime}

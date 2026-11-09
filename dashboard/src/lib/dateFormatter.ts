@@ -52,5 +52,14 @@ export const formatMonth = (start: string, end: string): string => {
 };
 
 export const formatDayRange = (start: string, end: string): string => {
-	return `${utc(start).local().format("D")}-${utc(end).local().format("D")}`;
+	const startM = utc(start).local();
+	const endM = utc(end).local();
+	if (startM.month() !== endM.month()) {
+		const startShort = startM.format("MMM").toLowerCase();
+		const endShort = endM.format("MMM").toLowerCase();
+		const startTr = (monthsTranslation[startShort] || startM.format("MMM")).toUpperCase();
+		const endTr = (monthsTranslation[endShort] || endM.format("MMM")).toUpperCase();
+		return `${startM.format("D")} ${startTr} - ${endM.format("D")} ${endTr}`;
+	}
+	return `${startM.format("D")}-${endM.format("D")}`;
 };

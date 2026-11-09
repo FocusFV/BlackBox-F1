@@ -19,7 +19,7 @@ import { groupSessionByDay } from "@/lib/groupSessionByDay";
 import { formatDayRange, formatMonth } from "@/lib/dateFormatter";
 import Flag from "@/components/Flag";
 import ResultsModal from "@/components/schedule/ResultsModal";
-import { translateGpName } from "@/lib/f1Translations";
+import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
 
 type Props = {
 	round: RoundType;
@@ -30,21 +30,24 @@ type Props = {
 const countryCodeMap: Record<string, string> = {
 	Australia: "aus", Austria: "aut", Azerbaijan: "aze", Bahrain: "brn",
 	Belgium: "bel", Brazil: "bra", Canada: "can", China: "chn", Spain: "esp",
-	France: "fra", "Great Britain": "gbr", "United Kingdom": "gbr", Germany: "ger",
+	France: "fra", "Great Britain": "gbr", "United Kingdom": "gbr", UK: "gbr", Germany: "ger",
 	Hungary: "hun", Italy: "ita", Japan: "jpn", "Saudi Arabia": "ksa",
 	Mexico: "mex", Monaco: "mon", Netherlands: "ned", Portugal: "por",
 	Qatar: "qat", Singapore: "sgp", "United Arab Emirates": "uae", "United States": "usa",
+	USA: "usa", "Las Vegas": "usa", Miami: "usa", Austin: "usa",
 	UAE: "uae", "Emiratos Árabes Unidos": "uae", "Emiratos Árabes": "uae",
+	Malaysia: "mys", Malasia: "mys", Sepang: "mys"
 };
 
 const countryTranslation: Record<string, string> = {
 	Australia: "Australia", Austria: "Austria", Azerbaijan: "Azerbaiyán", Bahrain: "Bahréin",
 	Belgium: "Bélgica", Brazil: "Brasil", Canada: "Canadá", China: "China", Spain: "España",
-	France: "Francia", "Great Britain": "Gran Bretaña", "United Kingdom": "Reino Unido",
+	France: "Francia", "Great Britain": "Gran Bretaña", "United Kingdom": "Reino Unido", UK: "Reino Unido",
 	Germany: "Alemania", Hungary: "Hungría", Italy: "Italia", Japan: "Japón",
 	"Saudi Arabia": "Arabia Saudita", Mexico: "México", Monaco: "Mónaco", Netherlands: "Países Bajos",
 	Portugal: "Portugal", Qatar: "Catar", Singapore: "Singapur", "United Arab Emirates": "Emiratos Árabes Unidos",
-	"United States": "Estados Unidos", UAE: "Emiratos Árabes Unidos", "Emiratos Árabes": "Emiratos Árabes Unidos",
+	"United States": "Estados Unidos", USA: "Estados Unidos", UAE: "Emiratos Árabes Unidos", "Emiratos Árabes": "Emiratos Árabes Unidos",
+	Malaysia: "Malasia", Malasia: "Malasia", Sepang: "Malasia",
 };
 
 const dayTranslation: Record<string, string> = {
@@ -52,12 +55,23 @@ const dayTranslation: Record<string, string> = {
 	friday: "VIERNES", saturday: "SÁBADO", sunday: "DOMINGO",
 };
 
+const SPANISH_MONTH_SHORT: Record<number, string> = {
+	0: "ENE", 1: "FEB", 2: "MAR", 3: "ABR", 4: "MAY", 5: "JUN",
+	6: "JUL", 7: "AGO", 8: "SEP", 9: "OCT", 10: "NOV", 11: "DIC"
+};
+
+function formatDayMonthSpanish(m: any): string {
+	const day = m.format("DD");
+	const month = SPANISH_MONTH_SHORT[m.month()] || m.format("MMM").toUpperCase();
+	return `${day} · ${month}`;
+}
+
 export default function Round({ round, nextName, hideBadge = false }: Props) {
 	const [mounted, setMounted] = useState(false);
 	const [modalOpen, setModalOpen] = useState(false);
 	const patternId = useId();
 
-	const countryCode = countryCodeMap[round.countryName];
+	const countryCode = countryCodeMap[round.countryName] || getCountryCodeForGp(round.name, round.countryName) || "usa";
 	const translatedCountry = countryTranslation[round.countryName] || round.countryName;
 
 	useEffect(() => {
@@ -188,7 +202,7 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 											{mounted ? (dayTranslation[dayNameEnglish] || dayNameEnglish) : "..."}
 										</span>
 										<span className="text-[11px] font-mono font-bold text-amber-400/90 tracking-wide bg-zinc-900/90 px-2 py-0.5 rounded-md border border-zinc-800">
-											{mounted ? localMoment.format("DD · MMM") : "-- · ---"}
+											{mounted ? formatDayMonthSpanish(localMoment) : "-- · ---"}
 										</span>
 									</div>
 

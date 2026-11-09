@@ -55,14 +55,70 @@ export default function LeaderBoard() {
                             // Límite reglamentario FIA: Máximo 22 monoplazas (11 escuderías en 2026)
                             const finalGrid = (prioritized.length >= 20 ? prioritized : sorted).slice(0, 22);
 
+                            let lastValidGapSec = 0;
+                            let lastLapsDown = 0;
+
                             return finalGrid.map((timingDriver: any, index: number) => {
                                 const driverKey = timingDriver.resolvedNumber;
+                                const pos = index + 1;
+                                const isDNF = Boolean(timingDriver.Retired || timingDriver.Stopped);
+
+                                let cumulativeGap = "";
+                                const rawGtl = (timingDriver.GapToLeader || "").trim();
+                                const rawInterval = (timingDriver.IntervalToPositionAhead?.Value || "").trim();
+                                const intervalGap = rawInterval && !rawInterval.includes("L") ? (rawInterval.startsWith("+") ? rawInterval : `+${rawInterval}`) : rawInterval;
+
+                                if (isDNF) {
+                                    cumulativeGap = "RET";
+                                } else if (pos === 1) {
+                                    cumulativeGap = "LÍDER";
+                                } else {
+                                    const lapMatch = rawGtl.match(/^(\d+)\s*L/i) || rawGtl.match(/^\+(\d+)\s*L/i);
+                                    if (lapMatch) {
+                                        const laps = parseInt(lapMatch[1], 10);
+                                        lastLapsDown = Math.max(lastLapsDown, laps);
+                                        cumulativeGap = laps === 1 ? "+1 VTA" : `+${laps} VTAS`;
+                                    } else if (rawGtl.includes(":")) {
+                                        cumulativeGap = rawGtl.startsWith("+") ? rawGtl : `+${rawGtl}`;
+                                    } else if (rawGtl) {
+                                        const numSec = parseFloat(rawGtl.replace("+", ""));
+                                        if (!isNaN(numSec) && numSec > 0) {
+                                            if (numSec >= lastValidGapSec && lastLapsDown === 0) {
+                                                lastValidGapSec = numSec;
+                                                cumulativeGap = `+${numSec.toFixed(3)}`;
+                                            } else if (lastLapsDown > 0) {
+                                                cumulativeGap = lastLapsDown === 1 ? "+1 VTA" : `+${lastLapsDown} VTAS`;
+                                            } else {
+                                                const intrNum = parseFloat(rawInterval.replace("+", ""));
+                                                lastValidGapSec += (!isNaN(intrNum) && intrNum > 0 ? intrNum : 0.8);
+                                                cumulativeGap = `+${lastValidGapSec.toFixed(3)}`;
+                                            }
+                                        } else {
+                                            cumulativeGap = rawGtl;
+                                        }
+                                    } else {
+                                        if (lastLapsDown > 0) {
+                                            cumulativeGap = lastLapsDown === 1 ? "+1 VTA" : `+${lastLapsDown} VTAS`;
+                                        } else {
+                                            const intrNum = parseFloat(rawInterval.replace("+", ""));
+                                            if (!isNaN(intrNum) && intrNum > 0) {
+                                                lastValidGapSec += intrNum;
+                                                cumulativeGap = `+${lastValidGapSec.toFixed(3)}`;
+                                            } else {
+                                                cumulativeGap = lastValidGapSec > 0 ? `+${lastValidGapSec.toFixed(3)}` : `+${(pos * 1.5).toFixed(3)}`;
+                                            }
+                                        }
+                                    }
+                                }
+
                                 return (
                                     <Driver
                                         key={`leaderBoard.driver.${driverKey || index}`}
-                                        position={index + 1}
+                                        position={pos}
                                         driver={drivers[driverKey]}
                                         timingDriver={timingDriver}
+                                        cumulativeGap={cumulativeGap}
+                                        intervalGap={intervalGap}
                                     />
                                 );
                             });

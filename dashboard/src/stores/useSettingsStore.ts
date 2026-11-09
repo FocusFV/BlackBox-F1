@@ -81,7 +81,7 @@ export const useSettingsStore = create<SettingsStore>()(
 				gridDensity: "comfort",
 				setGridDensity: (gridDensity: "compact" | "comfort") => set({ gridDensity }),
 
-				timeFormat: "interval",
+				timeFormat: "leader",
 				setTimeFormat: (timeFormat: "interval" | "leader") => set({ timeFormat }),
 
 				speedUnit: "metric",

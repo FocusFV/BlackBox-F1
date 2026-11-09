@@ -6,39 +6,57 @@ import type { TimingDataDriver } from "@/types/state.type";
 type Props = {
 	timingDriver: TimingDataDriver;
 	sessionPart: number | undefined;
+	cumulativeGap?: string;
+	intervalGap?: string;
+	position?: number;
 };
 
 // 🛡️ Almacén global en memoria que persiste brechas entre re-montajes y micro-paquetes
 const globalGapCache = new Map<string, { primary: string; secondary: string }>();
 
-// 🏁 Respaldos estables para pilotos de la grilla 2026 ante oscilaciones de red o SSE parcial
-const FALLBACK_GAPS: Record<string, { primary: string; secondary: string }> = {
-	"11": { primary: "+15.060", secondary: "+0.740" }, // Checo Pérez (P9)
-	"18": { primary: "+34.200", secondary: "+2.360" }, // Lance Stroll (P18)
-};
-
-export default function DriverGap({ timingDriver, sessionPart }: Props) {
+export default function DriverGap({ timingDriver, sessionPart, cumulativeGap, intervalGap, position }: Props) {
 	const timeFormat = useSettingsStore((state) => state.timeFormat);
 	const driverKey = String(timingDriver?.RacingNumber ?? timingDriver?.Line ?? "");
 	const lastPrimaryRef = useRef<string>(globalGapCache.get(driverKey)?.primary || "");
 	const lastSecondaryRef = useRef<string>(globalGapCache.get(driverKey)?.secondary || "");
 
-	const gapToLeader =
+	const rawGtl =
 		timingDriver.GapToLeader ??
 		(timingDriver.Stats ? timingDriver.Stats[sessionPart ? sessionPart - 1 : 0]?.TimeDiffToFastest : undefined) ??
 		timingDriver.TimeDiffToFastest ??
 		"";
 
-	const gapToFront =
+	const rawInterval =
 		timingDriver.IntervalToPositionAhead?.Value ??
 		(timingDriver.Stats ? timingDriver.Stats[sessionPart ? sessionPart - 1 : 0]?.TimeDifftoPositionAhead : undefined) ??
 		timingDriver.TimeDiffToPositionAhead ??
 		"";
 
+	const isP1 = position === 1 || timingDriver.Position === "1" || timingDriver.Line === 1;
+
+	// 🏁 Formatear brecha acumulada con el líder (estrictamente monótona y creciente)
+	const formatLeaderGap = (gap: string): string => {
+		if (isP1) return "LÍDER";
+		if (!gap) return "";
+		const lapMatch = gap.match(/^(\d+)\s*L/i) || gap.match(/^\+(\d+)\s*L/i);
+		if (lapMatch) {
+			const laps = parseInt(lapMatch[1], 10);
+			return laps === 1 ? "+1 VTA" : `+${laps} VTAS`;
+		}
+		if (gap.includes(":") || gap.startsWith("+")) return gap;
+		const num = parseFloat(gap);
+		if (!isNaN(num)) return `+${num.toFixed(3)}`;
+		return gap;
+	};
+
+	const gapToLeader = formatLeaderGap(cumulativeGap || rawGtl);
+	const gapToFront = intervalGap || (rawInterval ? (rawInterval.startsWith("+") ? rawInterval : `+${rawInterval}`) : "");
+
 	const catching = timingDriver.IntervalToPositionAhead?.Catching;
 
-	const newPrimary = timeFormat === "leader" ? (gapToLeader || gapToFront) : (gapToFront || gapToLeader);
-	const newSecondary = timeFormat === "leader" ? gapToFront : gapToLeader;
+	// Un solo criterio en BlackBox: la brecha principal siempre es la acumulada con el líder
+	const newPrimary = gapToLeader || (isP1 ? "LÍDER" : gapToFront);
+	const newSecondary = isP1 ? "" : gapToFront;
 
 	if (newPrimary && newPrimary !== "--.---") {
 		lastPrimaryRef.current = newPrimary;
@@ -61,20 +79,17 @@ export default function DriverGap({ timingDriver, sessionPart }: Props) {
 	}
 
 	const cached = driverKey ? globalGapCache.get(driverKey) : undefined;
-	const fallback = driverKey ? FALLBACK_GAPS[driverKey] : undefined;
 
 	const displayPrimary =
 		newPrimary ||
 		lastPrimaryRef.current ||
 		cached?.primary ||
-		fallback?.primary ||
 		"";
 
 	const displaySecondary =
 		newSecondary ||
 		lastSecondaryRef.current ||
 		cached?.secondary ||
-		fallback?.secondary ||
 		"";
 
 	return (

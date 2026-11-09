@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { X, Trophy, Flag, Timer } from "lucide-react";
 import clsx from "clsx";
 import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
+import { translateGpName } from "@/lib/f1Translations";
 
 type Props = {
 	meetingKey?: number;
@@ -44,10 +45,29 @@ const driverNationalityMap: Record<string, string> = {
 	LAW: "nz", ANT: "it", CAM: "br", HIR: "jp"
 };
 
+const countryTranslation: Record<string, string> = {
+	Australia: "Australia", Austria: "Austria", Azerbaijan: "Azerbaiyán", Bahrain: "Bahréin",
+	Belgium: "Bélgica", Brazil: "Brasil", Canada: "Canadá", China: "China", Spain: "España",
+	France: "Francia", "Great Britain": "Gran Bretaña", "United Kingdom": "Reino Unido",
+	Germany: "Alemania", Hungary: "Hungría", Italy: "Italia", Japan: "Japón",
+	"Saudi Arabia": "Arabia Saudita", Mexico: "México", Monaco: "Mónaco", Netherlands: "Países Bajos",
+	Portugal: "Portugal", Qatar: "Catar", Singapore: "Singapur", "United Arab Emirates": "Emiratos Árabes Unidos",
+	"United States": "Estados Unidos", USA: "Estados Unidos", UK: "Reino Unido", Malaysia: "Malasia",
+};
+
 const translateStatus = (status: string): string => {
 	if (!status) return "";
-	const s = status.toLowerCase();
+	const s = status.toLowerCase().trim();
 	if (s === "finished") return "FINALIZADO";
+	if (s === "lapped" || s === "+1 lap" || s === "+1 vta") return "+1 VUELTA";
+	const lapsMatch = s.match(/^\+(\d+)\s+laps?/i);
+	if (lapsMatch) return `+${lapsMatch[1]} VUELTAS`;
+	const plainLaps = s.match(/^(\d+)\s+laps?/i);
+	if (plainLaps) return `+${plainLaps[1]} VUELTAS`;
+	if (s.includes("did not start") || s === "dns") return "NO LARGÓ";
+	if (s.includes("did not qualify") || s === "dnq") return "NO CLASIFICÓ";
+	if (s.includes("disqualified") || s.includes("dsq")) return "DESCALIFICADO";
+	if (s.includes("retired") || s.includes("withdrew") || s === "ret") return "RETIRADO";
 	if (s.includes("accident") || s.includes("collision") || s.includes("crash")) return "COLISIÓN";
 	if (s.includes("engine") || s.includes("power unit")) return "MOTOR";
 	if (s.includes("gearbox")) return "CAJA DE CAMBIOS";
@@ -56,11 +76,9 @@ const translateStatus = (status: string): string => {
 	if (s.includes("suspension")) return "SUSPENSIÓN";
 	if (s.includes("hydraulics")) return "HIDRÁULICA";
 	if (s.includes("electrical")) return "ELÉCTRICO";
-	if (s.includes("retired") || s.includes("withdrew")) return "RETIRADO";
 	if (s.includes("puncture") || s.includes("tyre") || s.includes("tire")) return "PINCHAZO";
-	if (s.includes("disqualified") || s.includes("dsq")) return "DESCALIFICADO";
 	if (s.includes("spun") || s.includes("spin")) return "TROMPO";
-	if (s.includes("lap") || s.includes("laps")) return status.toUpperCase().replace("LAPS", "VUELTAS").replace("LAP", "VUELTA");
+	if (s === "dnf") return "RETIRADO";
 	return status.toUpperCase();
 };
 
@@ -299,7 +317,7 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 							RESULTADOS OFICIALES FIA · CLASIFICACIÓN FINAL
 						</span>
 						<h2 className="text-base font-black text-white uppercase tracking-wide mt-1">
-							{raceName} {countryName ? `· ${countryName}` : ""}
+							{translateGpName(raceName)} {countryName ? `· ${countryTranslation[countryName] || countryName}` : ""}
 						</h2>
 					</div>
 					<button
@@ -416,7 +434,7 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 														: "text-zinc-300"
 												)}
 											>
-												{row.gapTime}
+												{translateStatus(row.gapTime)}
 											</span>
 											{row.points && (
 												<span className="text-[10px] font-bold text-amber-400">

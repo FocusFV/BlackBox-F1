@@ -407,6 +407,20 @@ const DEFAULT_2026_DRIVERS = [
 	{ position: "25", points: "0", Driver: { driverId: "rafael_camara", code: "CAM", givenName: "Rafael", familyName: "Camara", nationality: "Brazilian" }, Constructors: [{ name: "Haas F1 Team" }] },
 ];
 
+// 🛠️ Escuderías oficiales reales de la temporada 2025 (Campeonato F1 2025)
+const DEFAULT_2025_TEAMS = [
+	{ position: "1", points: "833", Constructor: { constructorId: "mclaren", name: "McLaren" } },
+	{ position: "2", points: "469", Constructor: { constructorId: "mercedes", name: "Mercedes" } },
+	{ position: "3", points: "451", Constructor: { constructorId: "red_bull", name: "Red Bull" } },
+	{ position: "4", points: "398", Constructor: { constructorId: "ferrari", name: "Ferrari" } },
+	{ position: "5", points: "137", Constructor: { constructorId: "williams", name: "Williams" } },
+	{ position: "6", points: "92", Constructor: { constructorId: "rb", name: "RB F1 Team" } },
+	{ position: "7", points: "89", Constructor: { constructorId: "aston_martin", name: "Aston Martin" } },
+	{ position: "8", points: "79", Constructor: { constructorId: "haas", name: "Haas F1 Team" } },
+	{ position: "9", points: "70", Constructor: { constructorId: "sauber", name: "Kick Sauber" } },
+	{ position: "10", points: "22", Constructor: { constructorId: "alpine", name: "Alpine F1 Team" } },
+];
+
 // 🛠️ Escuderías oficiales reales de la temporada 2026
 const DEFAULT_2026_TEAMS = [
 	{ position: "1", points: "652", Constructor: { constructorId: "mercedes", name: "Mercedes" } },
@@ -568,37 +582,43 @@ export default function Standings() {
 				setLoadingBackup(false);
 				return;
 			}
+			if (year === 2025) {
+				setExtTeams(DEFAULT_2025_TEAMS);
+			} else {
+				setExtTeams([]);
+			}
 			try {
-				const resDrivers = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/driverStandings.json`);
-				const dataDrivers = await resDrivers.json();
-				const dList = dataDrivers?.MRData?.StandingsTable?.StandingsLists[0]?.DriverStandings;
-				if (isMounted) {
+				const [resDrivers, resTeams] = await Promise.all([
+					fetch(`https://api.jolpi.ca/ergast/f1/${year}/driverStandings.json`).catch(() => null),
+					year >= 1958
+						? fetch(`https://api.jolpi.ca/ergast/f1/${year}/constructorStandings.json`).catch(() => null)
+						: Promise.resolve(null),
+				]);
+
+				if (isMounted && resDrivers && resDrivers.ok) {
+					const dataDrivers = await resDrivers.json();
+					const dList = dataDrivers?.MRData?.StandingsTable?.StandingsLists[0]?.DriverStandings;
 					if (dList && dList.length > 0) {
 						setExtDrivers(dList);
-					} else {
-						setExtDrivers([]);
 					}
 				}
 
-				if (year >= 1958) {
-					const resTeams = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/constructorStandings.json`);
+				if (isMounted && resTeams && resTeams.ok) {
 					const dataTeams = await resTeams.json();
 					const tList = dataTeams?.MRData?.StandingsTable?.StandingsLists[0]?.ConstructorStandings;
-					if (isMounted) {
-						if (tList && tList.length > 0) {
-							setExtTeams(tList);
-						} else {
-							setExtTeams([]);
-						}
+					if (tList && tList.length > 0) {
+						setExtTeams(tList);
 					}
-				} else {
-					if (isMounted) setExtTeams([]);
 				}
 			} catch (err) {
 				console.error(err);
 				if (isMounted) {
-					setExtDrivers([]);
-					setExtTeams([]);
+					if (year === 2025) {
+						setExtTeams(DEFAULT_2025_TEAMS);
+					} else {
+						setExtDrivers([]);
+						setExtTeams([]);
+					}
 				}
 			} finally {
 				if (isMounted) setLoadingBackup(false);

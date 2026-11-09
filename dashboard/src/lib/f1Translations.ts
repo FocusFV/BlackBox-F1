@@ -28,6 +28,10 @@ const GP_TRANSLATIONS: Record<string, string> = {
 	"são paulo grand prix": "Gran Premio de São Paulo",
 	"sao paulo grand prix": "Gran Premio de São Paulo",
 	"brazilian grand prix": "Gran Premio de Brasil",
+	"barcelona grand prix": "Gran Premio de Barcelona",
+	"barcelona": "Gran Premio de Barcelona",
+	"gran premio de barcelona": "Gran Premio de Barcelona",
+	"catalunya grand prix": "Gran Premio de Barcelona",
 	"las vegas grand prix": "Gran Premio de Las Vegas",
 	"qatar grand prix": "Gran Premio de Catar",
 	"abu dhabi grand prix": "Gran Premio de Abu Dabi",
@@ -45,6 +49,7 @@ const COUNTRY_TO_CODE: Record<string, string> = {
 	china: "chn",
 	spain: "esp",
 	españa: "esp",
+	barcelona: "esp",
 	france: "fra",
 	francia: "fra",
 	"great britain": "gbr",
@@ -62,6 +67,7 @@ const COUNTRY_TO_CODE: Record<string, string> = {
 	arabia: "ksa",
 	malaysia: "mys",
 	malasia: "mys",
+	sepang: "mys",
 	mexico: "mex",
 	monaco: "mon",
 	netherlands: "ned",
@@ -73,8 +79,14 @@ const COUNTRY_TO_CODE: Record<string, string> = {
 	"united states": "usa",
 	usa: "usa",
 	"estados unidos": "usa",
+	"las vegas": "usa",
+	miami: "usa",
+	austin: "usa",
 	uae: "uae",
 	"united arab emirates": "uae",
+	"emiratos arabes": "uae",
+	"emiratos árabes": "uae",
+	"emiratos árabes unidos": "uae",
 };
 
 export function translateGpName(rawName?: string): string {
@@ -88,9 +100,13 @@ export function translateGpName(rawName?: string): string {
 			return translated;
 		}
 	}
-	return rawName
-		.replace(/grand prix/i, "Gran Premio")
-		.replace(/gp/i, "Gran Premio");
+	const cleaned = rawName
+		.replace(/grand prix/i, "")
+		.replace(/gp/i, "")
+		.replace(/gran premio de/i, "")
+		.replace(/gran premio/i, "")
+		.trim();
+	return cleaned ? `Gran Premio de ${cleaned}` : "Gran Premio";
 }
 
 export function getCountryCodeForGp(gpName?: string, countryRaw?: string): string {
