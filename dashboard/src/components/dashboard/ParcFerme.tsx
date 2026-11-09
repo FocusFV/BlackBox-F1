@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "motion/react";
 import Flag from "@/components/Flag";
 import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
@@ -134,6 +134,12 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 	const initialGpName = currentGpName ? translateGpName(currentGpName) : "Gran Premio de São Paulo";
 
 	const getInitialTab = (): SessionTab => {
+		if (typeof window !== "undefined") {
+			const saved = sessionStorage.getItem("bb_parc_ferme_tab") as SessionTab;
+			if (saved && ["FP1", "FP2", "FP3", "QUALY", "SPRINT", "SQ", "RACE"].includes(saved)) {
+				return saved;
+			}
+		}
 		const sName = (liveSession?.Name || "").toLowerCase();
 		const sType = (liveSession?.Type || "").toLowerCase();
 		if (
@@ -161,8 +167,14 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 
 	const [smartContext, setSmartContext] = useState<SmartGpContext | null>(null);
 	const [activeTab, setActiveTab] = useState<SessionTab>(getInitialTab);
-	const [tabManuallySelected, setTabManuallySelected] = useState(false);
+	const [tabManuallySelected, setTabManuallySelected] = useState<boolean>(() => {
+		if (typeof window !== "undefined") {
+			return sessionStorage.getItem("bb_parc_ferme_manual") === "true";
+		}
+		return false;
+	});
 	const [results, setResults] = useState<DriverResult[]>([]);
+	const sessionResultsCache = useRef<Record<string, DriverResult[]>>({});
 	const [gpName, setGpName] = useState(initialGpName);
 	const [countryCode, setCountryCode] = useState<string>(initialCountry);
 	const [raceDate, setRaceDate] = useState<string>(() => (liveSession?.StartDate ? liveSession.StartDate.split("T")[0] : ""));
@@ -251,7 +263,10 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 			setCountryCode(getCountryCodeForGp(targetGp, targetCountry) || ctx.countryCode);
 			setRaceDate(liveSession?.StartDate ? liveSession.StartDate.split("T")[0] : ctx.raceDate);
 			setHasSprint(ctx.hasSprint);
-			if (!tabManuallySelected || !ctx.availableTabs.includes(activeTab)) {
+			const storedTab = typeof window !== "undefined" ? (sessionStorage.getItem("bb_parc_ferme_tab") as SessionTab) : null;
+			if (storedTab && ctx.availableTabs.includes(storedTab)) {
+				setActiveTab(storedTab);
+			} else if (!tabManuallySelected || !ctx.availableTabs.includes(activeTab)) {
 				setActiveTab(ctx.defaultTab);
 			}
 		});
@@ -262,7 +277,18 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 
 	useEffect(() => {
 		async function fetchSessionData() {
-			setLoading(true);
+			const isPractice = activeTab === "FP1" || activeTab === "FP2" || activeTab === "FP3";
+
+			// 🛡️ Si ya tenemos resultados para esta sesión en memoria, mostrarlos al instante (0ms) sin parpadeo
+			if (sessionResultsCache.current[activeTab] && sessionResultsCache.current[activeTab].length > 0) {
+				setResults(sessionResultsCache.current[activeTab]);
+				setLoading(false);
+				// Para sesiones de práctica ya concluidas, evitar saturar la API en cada paquete del websocket
+				if (isPractice) return;
+			} else {
+				setLoading(true);
+			}
+
 			try {
 				let currentTiming = liveTiming;
 				let currentSession = liveSession;
@@ -392,6 +418,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 						});
 
 						if (liveResults.length > 0) {
+							sessionResultsCache.current[activeTab] = liveResults;
 							setResults(liveResults);
 							setLoading(false);
 							return;
@@ -459,6 +486,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 						});
 
 						if (liveResults.length > 0) {
+							sessionResultsCache.current[activeTab] = liveResults;
 							setResults(liveResults);
 							setLoading(false);
 							return;
@@ -478,6 +506,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 									setGpName(translateGpName(currentGpName));
 									setCountryCode(getCountryCodeForGp(currentGpName, currentCountryName) || "bra");
 								}
+								sessionResultsCache.current[activeTab] = data.results;
 								setResults(data.results);
 								setLoading(false);
 								return;
@@ -485,6 +514,12 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 						}
 					} catch (e) {
 						console.error("Error obteniendo prácticas libres:", e);
+					}
+					// 🛡️ Si la consulta falló pero ya teníamos resultados en caché, NO borrarlos
+					if (sessionResultsCache.current[activeTab] && sessionResultsCache.current[activeTab].length > 0) {
+						setResults(sessionResultsCache.current[activeTab]);
+						setLoading(false);
+						return;
 					}
 					// 🚫 NUNCA consultar Jolpica para prácticas libres (evita cargar carreras anteriores)
 					setResults([]);
@@ -638,6 +673,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 						};
 					});
 
+					sessionResultsCache.current[activeTab] = fetchedResults;
 					setResults(fetchedResults);
 					setLoading(false);
 					return;
@@ -651,6 +687,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 						if (openF1Res.ok) {
 							const openF1Data = await openF1Res.json();
 							if (Array.isArray(openF1Data.results) && openF1Data.results.length > 0) {
+								sessionResultsCache.current[activeTab] = openF1Data.results;
 								setResults(openF1Data.results);
 								setLoading(false);
 								return;
@@ -661,8 +698,12 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					}
 				}
 
-				// Si ninguna fuente tiene resultados aún para este GP, limpiamos lista sin tocar el nombre del GP ni la bandera
-				setResults([]);
+				// Si ninguna fuente tiene resultados nuevos, pero ya teníamos datos en caché para esta sesión, mantenerlos
+				if (sessionResultsCache.current[activeTab] && sessionResultsCache.current[activeTab].length > 0) {
+					setResults(sessionResultsCache.current[activeTab]);
+				} else {
+					setResults([]);
+				}
 			} catch (error) {
 				console.error("Error al obtener resultados oficiales:", error);
 			} finally {
@@ -761,6 +802,10 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 										onClick={() => {
 											setTabManuallySelected(true);
 											setActiveTab(tab.id);
+											if (typeof window !== "undefined") {
+												sessionStorage.setItem("bb_parc_ferme_tab", tab.id);
+												sessionStorage.setItem("bb_parc_ferme_manual", "true");
+											}
 											triggerHaptic("light");
 										}}
 										className={`relative flex-1 py-2.5 px-3 min-w-[65px] rounded-xl text-center font-mono transition-colors duration-200 select-none cursor-pointer border ${
