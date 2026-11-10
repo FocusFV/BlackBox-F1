@@ -1,9 +1,8 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState, useMemo } from "react";
-import Link from "next/link";
 import clsx from "clsx";
 
 import { useSidebarStore } from "@/stores/useSidebarStore";
@@ -318,7 +317,6 @@ type ItemProps = {
 
 const Item = ({ target, item, icon: Icon, pathname, onClickItem }: ItemProps) => {
 	const active = pathname === item.href;
-	const router = useRouter();
 
 	const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
 		// Permitir que Ctrl+Click, Meta+Click, Shift+Click o clic de rueda abran en nueva pestaña normalmente
@@ -328,35 +326,35 @@ const Item = ({ target, item, icon: Icon, pathname, onClickItem }: ItemProps) =>
 
 		triggerHaptic("light");
 
+		// Modal de Donación
 		if (item.href === "#support" || item.name === "Donar un Cafecito") {
 			e.preventDefault();
 			useSupportModalStore.getState().open();
 			return;
 		}
 
+		// Enlaces externos (Sponsor)
 		if (target === "_blank" || item.href.startsWith("http")) {
 			return;
 		}
 
 		e.preventDefault();
 
-		if (pathname !== item.href) {
-			try {
-				router.push(item.href);
-			} catch {
-				window.location.href = item.href;
-			}
+		if (onClickItem) {
+			onClickItem();
 		}
 
-		if (onClickItem) {
-			setTimeout(() => {
-				onClickItem();
-			}, 120);
+		// Si ya está en esa misma ruta, no recargar
+		if (pathname === item.href) {
+			return;
 		}
+
+		// 🚀 Navegación nativa garantizada que nunca se bloquea
+		window.location.href = item.href;
 	};
 
 	return (
-		<Link 
+		<a 
 			href={item.href} 
 			target={target} 
 			onClick={handleClick}
@@ -377,6 +375,6 @@ const Item = ({ target, item, icon: Icon, pathname, onClickItem }: ItemProps) =>
 				<div className={clsx("absolute left-0 top-0 bottom-0 w-[3px] bg-amber-500 transition-transform duration-300 origin-bottom", active ? "scale-y-100" : "scale-y-0 group-hover:scale-y-100")} />
 			</div>
 			<div className="absolute -inset-0.5 rounded-xl bg-amber-500/5 opacity-0 group-hover:opacity-100 blur-lg transition-opacity duration-500 pointer-events-none -z-10" />
-		</Link>
+		</a>
 	);
 };
