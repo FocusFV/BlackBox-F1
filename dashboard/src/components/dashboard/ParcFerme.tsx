@@ -237,17 +237,17 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 		const baseTabs = hasSprint
 			? [
 					{ id: "FP1" as SessionTab, label: "FP1", sub: "Libres 1" },
-					{ id: "SQ" as SessionTab, label: "SQ", sub: "Clasif. Sprint" },
+					{ id: "SQ" as SessionTab, label: "SQ", sub: "Sprint Q." },
 					{ id: "SPRINT" as SessionTab, label: "SPRINT", sub: "Sprint" },
-					{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasificación" },
-					{ id: "RACE" as SessionTab, label: "CARRERA", sub: "Gran Premio" },
+					{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasif." },
+					{ id: "RACE" as SessionTab, label: "CARRERA", sub: "GP" },
 			  ]
 			: [
 					{ id: "FP1" as SessionTab, label: "FP1", sub: "Libres 1" },
 					{ id: "FP2" as SessionTab, label: "FP2", sub: "Libres 2" },
 					{ id: "FP3" as SessionTab, label: "FP3", sub: "Libres 3" },
-					{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasificación" },
-					{ id: "RACE" as SessionTab, label: "CARRERA", sub: "Gran Premio" },
+					{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasif." },
+					{ id: "RACE" as SessionTab, label: "CARRERA", sub: "GP" },
 			  ];
 
 		// 🔒 Si estamos en fin de semana en curso, solo se muestran las sesiones que ya se han disputado
@@ -928,7 +928,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 				<div className="lg:col-start-3 lg:col-span-8 flex flex-col bg-zinc-950/50 border border-zinc-800/80 rounded-2xl p-4 md:p-5 backdrop-blur-xl max-w-full shadow-2xl">
 					{/* SELECTOR PANORÁMICO DE SESIONES ESTILO PIT-WALL (UNIFICADO EN ORO LÍQUIDO) */}
 					<div className="flex flex-col gap-2.5 mb-5 border-b border-zinc-900/80 pb-4">
-						<div className="w-full bg-zinc-950/80 p-1.5 rounded-2xl border border-zinc-800/80 shadow-[0_8px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl flex flex-nowrap overflow-x-auto no-scrollbar gap-1.5 select-none relative max-w-full">
+						<div className="w-full bg-zinc-950/80 p-1 sm:p-1.5 rounded-2xl border border-zinc-800/80 shadow-[0_8px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl flex flex-nowrap overflow-x-hidden gap-1 sm:gap-1.5 select-none relative max-w-full">
 							{sessionTabs.map((tab) => {
 								const isActive = activeTab === tab.id;
 								return (
@@ -949,7 +949,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 											}
 											triggerHaptic("light");
 										}}
-										className={`relative flex-1 py-2.5 px-3 min-w-[65px] rounded-xl text-center font-mono transition-colors duration-200 select-none cursor-pointer border ${
+										className={`relative flex-1 min-w-0 py-2 sm:py-2.5 px-0.5 sm:px-2 rounded-xl text-center font-mono transition-colors duration-200 select-none cursor-pointer border overflow-hidden ${
 											isActive
 												? "border-amber-400/80 text-black shadow-[0_0_25px_rgba(245,158,11,0.35)]"
 												: "bg-zinc-900/40 border-zinc-800/60 text-zinc-400 hover:text-white hover:bg-zinc-800/60 hover:border-zinc-700/80"
@@ -962,11 +962,11 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 												transition={{ type: "spring", stiffness: 380, damping: 30 }}
 											/>
 										)}
-										<span className={`text-xs font-black tracking-wider block relative z-10 ${isActive ? "text-black" : ""}`}>
+										<span className={`text-[11px] sm:text-xs font-black tracking-wider block relative z-10 truncate ${isActive ? "text-black" : ""}`}>
 											{tab.label}
 										</span>
 										<span
-											className={`text-[9px] uppercase tracking-tight block mt-0.5 relative z-10 ${
+											className={`text-[8px] sm:text-[9px] uppercase tracking-tight block mt-0.5 relative z-10 truncate ${
 												isActive ? "text-black/85 font-bold" : "text-zinc-500 font-medium"
 											}`}
 										>
@@ -1127,7 +1127,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 												isCompact ? "h-10 py-1.5" : "h-12"
 											} overflow-hidden ${rowBg} hover:border-zinc-700/80 cursor-pointer`}
 										>
-											<div className="flex items-center gap-2.5 z-10 truncate flex-1 min-w-0 pr-2">
+											<div className="flex items-center gap-1.5 sm:gap-2.5 z-10 truncate flex-1 min-w-0 pr-1 sm:pr-2">
 												{/* Franja vertical de escudería con ensanchamiento reactivo en hover/touch de 4px a 6px con resplandor */}
 												<div
 													className="w-1 group-hover/row:w-1.5 self-stretch rounded-full shrink-0 my-0.5 transition-all duration-300"
@@ -1153,7 +1153,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 													<TeamLogo teamName={row.team} />
 												</div>
 
-												<div className="flex items-center gap-2 truncate min-w-0">
+												<div className="flex items-center gap-1.5 sm:gap-2 truncate min-w-0">
 													<p
 														className={`text-xs md:text-sm truncate font-bold ${
 															isP1 ? "text-amber-200" : "text-zinc-100"
@@ -1161,14 +1161,14 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 													>
 														{row.name}
 													</p>
-													<span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded border bg-zinc-900/90 text-zinc-400 border-zinc-800 shrink-0">
+													<span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded border bg-zinc-900/90 text-zinc-400 border-zinc-800 shrink-0 hidden sm:inline-block">
 														#{row.number}
 													</span>
 												</div>
 											</div>
 
 											{/* Datos derecha (Tiempos, Penalizaciones y Puntos) */}
-											<div className="flex items-center gap-2 shrink-0 font-mono">
+											<div className="flex items-center gap-1.5 sm:gap-2 shrink-0 font-mono">
 												{row.penaltyNote && (
 													<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-amber-300 shrink-0">
 														{row.penaltyNote}
@@ -1202,8 +1202,9 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 													{row.gapTime}
 												</p>
 												{row.points && (
-													<span className="text-amber-400 font-bold text-xs pl-1">
-														{row.points}
+													<span className="text-amber-400 font-bold text-xs pl-0.5 sm:pl-1 shrink-0 font-mono">
+														<span className="sm:hidden">+{row.points.replace(/[^0-9]/g, "")}</span>
+														<span className="hidden sm:inline">{row.points}</span>
 													</span>
 												)}
 											</div>

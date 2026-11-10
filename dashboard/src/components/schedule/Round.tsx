@@ -132,27 +132,27 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 			<div className="pointer-events-none absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-amber-500/30 rounded-br-3xl group-hover/card:border-amber-400 transition-colors" />
 
 			{/* HEADER */}
-			<div className="relative z-10 flex items-center justify-between border-b border-zinc-800/80 pb-4 gap-3">
-				<div className="flex items-center gap-3">
+			<div className="relative z-10 flex items-center justify-between border-b border-zinc-800/80 pb-4 gap-2 sm:gap-3">
+				<div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 pr-1">
 					<Flag
 						countryCode={countryCode}
-						className="h-6 w-9 rounded object-cover shadow-2xl ring-1 ring-zinc-700/80"
+						className="h-6 w-9 rounded object-cover shadow-2xl ring-1 ring-zinc-700/80 shrink-0"
 					/>
 
-					<div className="flex flex-col min-w-0">
-						<div className="flex items-center gap-2">
-							<h3 className="text-base font-black tracking-tight text-white uppercase font-sans truncate">
+					<div className="flex flex-col min-w-0 flex-1">
+						<div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+							<h3 className="text-sm sm:text-base font-black tracking-tight text-white uppercase font-sans truncate">
 								{translateGpName(round.name)}
 							</h3>
 
 							{round.name === nextName && !hideBadge && (
 								<>
 									{isLiveNow ? (
-										<span className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/40 animate-pulse">
+										<span className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/40 animate-pulse shrink-0">
 											<Radio className="w-2.5 h-2.5" /> LIVE
 										</span>
 									) : (
-										<span className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-amber-300 bg-amber-950/70 px-2 py-0.5 rounded-full border border-amber-500/40 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+										<span className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-amber-300 bg-amber-950/70 px-2 py-0.5 rounded-full border border-amber-500/40 shadow-[0_0_10px_rgba(245,158,11,0.2)] shrink-0">
 											<Flame className="w-2.5 h-2.5 text-amber-400 animate-bounce" /> PRÓXIMO
 										</span>
 									)}
@@ -160,7 +160,7 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 							)}
 
 							{isRoundOver && (
-								<span className="text-[8px] font-bold uppercase tracking-widest text-zinc-500 bg-zinc-900/80 px-2 py-0.5 rounded-full border border-zinc-800">
+								<span className="text-[8px] font-bold uppercase tracking-widest text-zinc-500 bg-zinc-900/80 px-2 py-0.5 rounded-full border border-zinc-800 shrink-0">
 									FINALIZADO
 								</span>
 							)}
@@ -172,11 +172,11 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 					</div>
 				</div>
 
-				<div className="text-right flex flex-col items-end">
-					<span className="text-xs font-black uppercase tracking-widest text-amber-400">
+				<div className="text-right flex flex-col items-end shrink-0 whitespace-nowrap pl-1">
+					<span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-amber-400">
 						{mounted ? formatMonth(round.start, round.end) : "..."}
 					</span>
-					<span className="text-[10px] font-medium text-zinc-400 tracking-wider">
+					<span className="text-[10px] font-bold text-zinc-400 tracking-wider">
 						{mounted ? formatDayRange(round.start, round.end) : "..."}
 					</span>
 				</div>

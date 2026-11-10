@@ -281,50 +281,53 @@ export default function DriverProfileModal() {
 				{/* BOTÓN CERRAR - Con z-index y posición libre para no tapar los números */}
 				<button
 					onClick={close}
-					className="absolute top-4 right-4 p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all cursor-pointer z-20"
+					className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all cursor-pointer z-20"
 				>
 					<X className="w-4 h-4" />
 				</button>
 
-				{/* CABECERA: FOTO, NOMBRE, EQUIPO Y PUNTOS - Con espacio suficiente a la derecha (pr-20) */}
-				<div className="flex items-center gap-4 pb-4 border-b border-zinc-800/80 pr-20 sm:pr-24">
-					<div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-zinc-900 border border-zinc-700/80 p-1 flex items-center justify-center shrink-0 shadow-lg overflow-hidden">
+				{/* CABECERA: FOTO, NOMBRE, EQUIPO Y PUNTOS */}
+				<div className="flex items-center gap-3 sm:gap-4 pb-4 border-b border-zinc-800/80 pr-10 sm:pr-14">
+					<div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-zinc-900 border border-zinc-700/80 p-1 flex items-center justify-center shrink-0 shadow-lg overflow-hidden">
 						{avatarUrl ? (
 							<img src={avatarUrl} alt={fullName} className="w-full h-full object-cover object-top rounded-xl" />
 						) : (
-							<span className="font-black text-amber-400 text-lg">{driverCode}</span>
+							<span className="font-black text-amber-400 text-base sm:text-lg">{driverCode}</span>
 						)}
 					</div>
 
 					<div className="flex flex-col min-w-0 flex-1">
-						<div className="flex items-center gap-2">
+						<div className="flex items-center gap-1.5 sm:gap-2">
 							{countryCode && (
 								<img
 									src={`https://flagcdn.com/w20/${countryCode.toLowerCase()}.png`}
 									alt=""
-									className="w-4 h-auto rounded-xs opacity-90 shadow-xs shrink-0"
+									className="w-3.5 sm:w-4 h-auto rounded-xs opacity-90 shadow-xs shrink-0"
 								/>
 							)}
-							<span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase w-fit bg-zinc-900 border border-zinc-800 text-amber-400">
-								2026 · Posición #{standingPos}
+							<span className="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded uppercase w-fit bg-zinc-900 border border-zinc-800 text-amber-400">
+								2026 · #{standingPos}
 							</span>
 						</div>
 
-						<h3 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight truncate mt-1">
+						<h3 className="text-base sm:text-2xl font-black text-white uppercase tracking-tight leading-tight mt-0.5 line-clamp-2 sm:truncate">
 							{fullName}
 						</h3>
 
-						<div className="flex items-center gap-2 mt-0.5">
+						<div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 min-w-0">
 							<TeamLogo teamName={teamName} />
 							<span className="text-xs text-zinc-400 font-bold uppercase truncate">{teamName}</span>
 						</div>
 					</div>
 
-					<div className="text-right shrink-0 mr-2 sm:mr-3">
-						<span className="text-2xl sm:text-4xl font-black text-amber-400 tracking-tight">
+					<div className="text-right shrink-0">
+						<span className="text-xl sm:text-3xl font-black text-amber-400 tracking-tight font-mono">
 							{officialTotalPoints}
 						</span>
-						<span className="text-[10px] text-zinc-400 block font-bold uppercase">Puntos Totales</span>
+						<span className="text-[9px] sm:text-[10px] text-zinc-400 block font-bold uppercase whitespace-nowrap">
+							<span className="sm:hidden">PTS</span>
+							<span className="hidden sm:inline">Puntos Totales</span>
+						</span>
 					</div>
 				</div>
 

@@ -110,7 +110,7 @@ export function WeatherMap() {
 				interactive: true,
 			});
 
-			libMap.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+			libMap.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
 
 			const safetyTimer = setTimeout(() => {
 				if (isMounted) setLoading(false);

@@ -146,21 +146,23 @@ export default function WeatherPage() {
 			{/* 🛰️ MONITOR ALFA: RADAR SATELITAL DE PRECIPITACIÓN */}
 			<div className="md:col-span-5 md:row-span-4 relative border border-zinc-900 rounded-xl overflow-hidden bg-black shadow-2xl min-h-[300px] md:min-h-0">
 				<WeatherMap />
-				<div className="absolute top-3 left-3 z-10 bg-black/90 border border-[#00A19B]/30 px-3 py-1.5 rounded text-xs text-[#00A19B] tracking-widest font-bold">
-					🛰️ RADAR_SATELITAL_DOPPLER // CAPA_NUBOSA
+				<div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10 bg-black/90 border border-[#00A19B]/30 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded text-[10px] sm:text-xs text-[#00A19B] tracking-wider sm:tracking-widest font-bold max-w-[calc(100%-20px)] truncate shadow-lg backdrop-blur-md">
+					<span className="sm:hidden">🛰️ RADAR DOPPLER · NUBOSIDAD</span>
+					<span className="hidden sm:inline">🛰️ RADAR_SATELITAL_DOPPLER // CAPA_NUBOSA</span>
 				</div>
 			</div>
 
 			{/* 🏎️ MONITOR BRAVO: MAPA DE TELEMETRÍA Y TRAZADA EXACTA EN VIVO */}
-			<div className="md:col-span-3 md:row-span-4 relative border border-[#00A19B]/30 rounded-xl overflow-hidden bg-[#050608] flex items-center justify-center p-4 sm:p-6 shadow-2xl min-h-[260px] md:min-h-0">
+			<div className="md:col-span-3 md:row-span-4 relative border border-[#00A19B]/30 rounded-xl overflow-hidden bg-[#050608] flex items-center justify-center pt-12 pb-4 px-4 sm:p-6 shadow-2xl min-h-[260px] md:min-h-0">
 				<div className="absolute inset-0 bg-[linear-gradient(to_right,#0c0e12_1px,transparent_1px),linear-gradient(to_bottom,#0c0e12_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] opacity-60" />
 				
 				<div className="w-full h-full relative z-10 flex items-center justify-center filter drop-shadow-[0_0_15px_rgba(0,161,155,0.25)]">
 					<Map circuitKey={152} />
 				</div>
 
-				<div className="absolute top-3 left-3 z-10 bg-black/80 border border-zinc-800 px-3 py-1.5 rounded text-xs text-zinc-400 tracking-widest font-bold">
-					🏎️ TRAZADA_DIGITAL_REAL // {circuitoNombre} (17 CURVAS)
+				<div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10 bg-black/85 border border-zinc-800 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded text-[10px] sm:text-xs text-zinc-300 tracking-wider sm:tracking-widest font-bold max-w-[calc(100%-20px)] truncate shadow-lg backdrop-blur-md">
+					<span className="sm:hidden">🏎️ TRAZADA REAL · {circuitoNombre} (17 CURVAS)</span>
+					<span className="hidden sm:inline">🏎️ TRAZADA_DIGITAL_REAL // {circuitoNombre} (17 CURVAS)</span>
 				</div>
 			</div>
 
