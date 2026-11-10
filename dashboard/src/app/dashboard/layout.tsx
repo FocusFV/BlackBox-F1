@@ -121,7 +121,7 @@ export default function DashboardLayout({ children }: Props) {
 function MobileDynamicBar() {
 	return (
 		<div className="flex flex-col divide-y divide-zinc-800 border-b border-zinc-800 md:hidden">
-			<div className="p-2">
+			<div className="px-3.5 py-2">
 				<SessionInfo />
 			</div>
 		</div>

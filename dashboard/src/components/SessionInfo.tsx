@@ -260,18 +260,18 @@ export default function SessionInfo() {
 	// Render fuera de sesión (diseño con bandera oficial y estilo Pit-Wall)
 	if (isOfflineOrFinished) {
 		return (
-			<div className="flex items-center gap-2.5 sm:gap-3 max-w-full overflow-hidden">
+			<div className="flex items-center gap-2.5 sm:gap-3 max-w-full overflow-hidden pr-2 sm:pr-0">
 				{/* Banderita del país del próximo GP */}
 				<div className="flex items-center justify-center overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/80 p-0.5 shadow-md shrink-0">
 					<Flag countryCode={countryCode} className="h-6 w-9 object-cover rounded-md" />
 				</div>
 
-				<div className="flex flex-col justify-center min-w-0 flex-1 overflow-hidden pr-1">
+				<div className="flex flex-col justify-center min-w-0 flex-1 overflow-hidden pr-2 sm:pr-1">
 					<div className="flex items-center gap-2 min-w-0 max-w-full">
 						<span className="truncate text-xs leading-none font-black text-amber-400 uppercase tracking-widest font-mono drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] min-w-0 shrink">
 							{nextGpName}
 						</span>
-						<span className="rounded bg-zinc-900/90 border border-zinc-800 px-1.5 py-0.5 text-[9px] font-bold text-zinc-300 uppercase tracking-wider shrink-0 whitespace-nowrap">
+						<span className="rounded bg-zinc-900/90 border border-zinc-800 px-1.5 py-0.5 text-[9px] font-bold text-zinc-300 uppercase tracking-wider shrink-0 whitespace-nowrap mr-1 sm:mr-0">
 							{nextSessionName}
 						</span>
 					</div>

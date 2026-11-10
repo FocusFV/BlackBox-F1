@@ -132,16 +132,16 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 			<div className="pointer-events-none absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-amber-500/30 rounded-br-3xl group-hover/card:border-amber-400 transition-colors" />
 
 			{/* HEADER */}
-			<div className="relative z-10 flex items-center justify-between border-b border-zinc-800/80 pb-4 gap-2 sm:gap-3">
-				<div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 pr-1">
+			<div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-800/80 pb-3 sm:pb-4 gap-2 sm:gap-3">
+				<div className="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
 					<Flag
 						countryCode={countryCode}
-						className="h-6 w-9 rounded object-cover shadow-2xl ring-1 ring-zinc-700/80 shrink-0"
+						className="h-6 w-9 rounded object-cover shadow-2xl ring-1 ring-zinc-700/80 shrink-0 mt-0.5 sm:mt-0"
 					/>
 
 					<div className="flex flex-col min-w-0 flex-1">
-						<div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-							<h3 className="text-sm sm:text-base font-black tracking-tight text-white uppercase font-sans truncate">
+						<div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+							<h3 className="text-sm sm:text-base font-black tracking-tight text-white uppercase font-sans leading-snug">
 								{translateGpName(round.name)}
 							</h3>
 
@@ -166,14 +166,21 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 							)}
 						</div>
 
-						<span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider truncate">
-							{translatedCountry} · {round.roundNumber ? `Ronda ${round.roundNumber}` : ""}
-						</span>
+						<div className="flex items-center justify-between sm:justify-start gap-2 mt-1 sm:mt-0.5">
+							<span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
+								{translatedCountry} · {round.roundNumber ? `Ronda ${round.roundNumber}` : ""}
+							</span>
+							{/* Fecha móvil visible y completa sin competir con el título */}
+							<span className="sm:hidden text-[11px] font-black uppercase tracking-wider text-amber-400 font-mono shrink-0">
+								{mounted ? `${formatMonth(round.start, round.end)} ${formatDayRange(round.start, round.end)}` : "..."}
+							</span>
+						</div>
 					</div>
 				</div>
 
-				<div className="text-right flex flex-col items-end shrink-0 whitespace-nowrap pl-1">
-					<span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-amber-400">
+				{/* Fecha en desktop (columna derecha clásica) */}
+				<div className="hidden sm:flex text-right flex-col items-end shrink-0 whitespace-nowrap pl-2">
+					<span className="text-xs font-black uppercase tracking-wider text-amber-400">
 						{mounted ? formatMonth(round.start, round.end) : "..."}
 					</span>
 					<span className="text-[10px] font-bold text-zinc-400 tracking-wider">

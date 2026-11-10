@@ -160,7 +160,7 @@ export default function WeatherPage() {
 					<Map circuitKey={152} />
 				</div>
 
-				<div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10 bg-black/85 border border-zinc-800 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded text-[10px] sm:text-xs text-zinc-300 tracking-wider sm:tracking-widest font-bold max-w-[calc(100%-20px)] truncate shadow-lg backdrop-blur-md">
+				<div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10 bg-black/90 border border-zinc-800 px-2 py-1 sm:px-3 sm:py-1.5 rounded text-[8.5px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs text-zinc-300 tracking-normal sm:tracking-widest font-bold shadow-lg backdrop-blur-md whitespace-nowrap">
 					<span className="sm:hidden">🏎️ TRAZADA REAL · {circuitoNombre} (17 CURVAS)</span>
 					<span className="hidden sm:inline">🏎️ TRAZADA_DIGITAL_REAL // {circuitoNombre} (17 CURVAS)</span>
 				</div>

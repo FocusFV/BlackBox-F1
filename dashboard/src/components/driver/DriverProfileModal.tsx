@@ -406,7 +406,7 @@ export default function DriverProfileModal() {
 									<div
 										key={i}
 										className={clsx(
-											"flex items-center justify-between p-2.5 rounded-xl border text-xs transition-colors",
+											"flex items-center justify-between p-2 sm:p-2.5 rounded-xl border text-xs transition-colors gap-2",
 											isP1
 												? "bg-amber-500/10 border-amber-500/40 text-amber-200"
 												: isPodium
@@ -414,24 +414,25 @@ export default function DriverProfileModal() {
 												: "bg-zinc-900/30 border-zinc-800/60 text-zinc-400"
 										)}
 									>
-										<div className="flex items-center gap-2.5 min-w-0">
-											<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-800/80 text-zinc-400 border border-zinc-700/40">
+										<div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
+											<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-800/80 text-zinc-400 border border-zinc-700/40 shrink-0">
 												R{race.round}
 											</span>
-											<p className="font-bold truncate text-white uppercase">
+											<p className="font-bold text-white uppercase text-[11px] sm:text-xs leading-snug break-words">
 												{translateGpName(race.raceName)}
 											</p>
-											<span className="text-[10px] text-zinc-500 truncate hidden sm:inline">
+											<span className="text-[10px] text-zinc-500 truncate hidden sm:inline shrink-0">
 												({race.Circuit?.circuitName || ""})
 											</span>
 										</div>
 
-										<div className="flex items-center gap-3 shrink-0">
-											<span className={clsx("font-black font-mono", isP1 ? "text-amber-400" : isPodium ? "text-white" : "text-zinc-400")}>
+										<div className="flex items-center gap-2 sm:gap-3 shrink-0">
+											<span className={clsx("font-black font-mono text-xs sm:text-sm", isP1 ? "text-amber-400" : isPodium ? "text-white" : "text-zinc-400")}>
 												P{pos}
 											</span>
-											<span className="font-mono text-[11px] text-zinc-500 font-semibold w-16 text-right">
-												{pts}
+											<span className="font-mono text-[10px] sm:text-[11px] text-zinc-500 font-semibold text-right whitespace-nowrap">
+												<span className="sm:hidden">+{res?.points || 0}</span>
+												<span className="hidden sm:inline">{pts}</span>
 											</span>
 										</div>
 									</div>
@@ -449,18 +450,19 @@ export default function DriverProfileModal() {
 										{upcoming.map((ur: any, i: number) => (
 											<div
 												key={`up-${i}`}
-												className="flex items-center justify-between p-2.5 rounded-xl border border-dashed border-zinc-800/80 bg-zinc-950/40 text-xs"
+												className="flex items-center justify-between p-2 sm:p-2.5 rounded-xl border border-dashed border-zinc-800/80 bg-zinc-950/40 text-xs gap-2"
 											>
-												<div className="flex items-center gap-2.5 min-w-0">
-													<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-600 border border-zinc-800">
+												<div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
+													<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-600 border border-zinc-800 shrink-0">
 														R{ur.round}
 													</span>
-													<p className="font-semibold truncate text-zinc-400 uppercase">
+													<p className="font-semibold text-zinc-300 uppercase text-[11px] sm:text-xs leading-snug break-words">
 														{translateGpName(ur.raceName)}
 													</p>
 												</div>
-												<span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-zinc-800/80 text-amber-400/90 border border-zinc-700/60 shrink-0">
-													{formatUpcomingRaceDate(ur.round, ur.date)} · POR DISPUTAR
+												<span className="text-[9px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded bg-zinc-800/80 text-amber-400/90 border border-zinc-700/60 shrink-0 whitespace-nowrap">
+													<span className="sm:hidden">{formatUpcomingRaceDate(ur.round, ur.date)}</span>
+													<span className="hidden sm:inline">{formatUpcomingRaceDate(ur.round, ur.date)} · POR DISPUTAR</span>
 												</span>
 											</div>
 										))}

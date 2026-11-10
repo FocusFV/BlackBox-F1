@@ -1153,7 +1153,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 													<TeamLogo teamName={row.team} />
 												</div>
 
-												<div className="flex items-center gap-1.5 sm:gap-2 truncate min-w-0">
+												<div className="flex items-center gap-1.5 sm:gap-2 truncate min-w-0 flex-1">
 													<p
 														className={`text-xs md:text-sm truncate font-bold ${
 															isP1 ? "text-amber-200" : "text-zinc-100"
@@ -1168,15 +1168,16 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 											</div>
 
 											{/* Datos derecha (Tiempos, Penalizaciones y Puntos) */}
-											<div className="flex items-center gap-1.5 sm:gap-2 shrink-0 font-mono">
+											<div className="flex items-center gap-1 sm:gap-2 shrink-0 font-mono">
 												{row.penaltyNote && (
-													<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-amber-300 shrink-0">
-														{row.penaltyNote}
+													<span className="text-[9px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-amber-300 shrink-0 whitespace-nowrap">
+														<span className="sm:hidden">{row.penaltyNote.replace(/\s*\([^)]*\)/, "")}</span>
+														<span className="hidden sm:inline">{row.penaltyNote}</span>
 													</span>
 												)}
 												{qualyViewMode === "grid" && typeof row.delta === "number" && row.delta !== 0 && (
 													<span
-														className={`text-[10px] font-bold px-1.5 py-0.5 rounded border shrink-0 ${
+														className={`text-[9px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 rounded border shrink-0 ${
 															row.delta > 0
 																? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
 																: "bg-red-500/15 border-red-500/40 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
@@ -1190,17 +1191,34 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 														(Q: P{row.qualyPos})
 													</span>
 												)}
-												<p
-													className={`text-xs font-bold tracking-tight uppercase ${
-														row.isDNF
-															? "text-red-400/80 text-[10px]"
-															: isP1
-															? "text-amber-300"
-															: "text-zinc-300"
-													}`}
-												>
-													{row.gapTime}
-												</p>
+												{qualyViewMode === "grid" ? (
+													<p
+														className={`text-xs font-bold tracking-tight uppercase ${
+															isP1 ? "text-amber-300" : "text-zinc-400 hidden sm:inline-block"
+														}`}
+													>
+														{isP1 ? (
+															<>
+																<span className="sm:hidden">POLE</span>
+																<span className="hidden sm:inline">POLE POSITION</span>
+															</>
+														) : (
+															row.gapTime
+														)}
+													</p>
+												) : (
+													<p
+														className={`text-xs font-bold tracking-tight uppercase ${
+															row.isDNF
+																? "text-red-400/80 text-[10px]"
+																: isP1
+																? "text-amber-300"
+																: "text-zinc-300"
+														}`}
+													>
+														{row.gapTime}
+													</p>
+												)}
 												{row.points && (
 													<span className="text-amber-400 font-bold text-xs pl-0.5 sm:pl-1 shrink-0 font-mono">
 														<span className="sm:hidden">+{row.points.replace(/[^0-9]/g, "")}</span>
