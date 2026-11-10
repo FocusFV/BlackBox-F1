@@ -467,6 +467,7 @@ function getDriverAvatarUrl(driverCode?: string, driverId?: string, familyName?:
 	if (code === "LIN" || id.includes("lindblad")) return "/drivers/grid/lindblad.jpg";
 	if (code === "CAM" || id.includes("camara") || id.includes("câmara")) return "/drivers/grid/camara.jpg";
 	if (code === "HIR" || id.includes("hirakawa")) return "/drivers/grid/hirakawa.jpg";
+	if (code === "DOO" || id.includes("doohan")) return "/drivers/grid/doohan.jpg";
 
 	// Pilotos de récords históricos
 	if (id.includes("schumacher")) return "/drivers/records/schumacher.jpg";

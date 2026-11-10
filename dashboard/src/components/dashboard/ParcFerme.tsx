@@ -36,7 +36,36 @@ const driverNationalityMap: Record<string, string> = {
 	NOR: "gb", PIA: "au", ALB: "th", GAS: "fr", OCO: "fr", HUL: "de",
 	TSU: "jp", RIC: "au", BOT: "fi", ZHO: "cn", MAG: "dk", STR: "ca",
 	ALO: "es", PER: "mx", BEA: "gb", HAD: "fr", BOR: "br", LIN: "gb",
-	LAW: "nz", ANT: "it", CAM: "br", HIR: "jp"
+	LAW: "nz", ANT: "it", CAM: "br", HIR: "jp",
+	// Rookies y pilotos de pruebas
+	MIN: "it", HER: "us", FOR: "it", BRO: "gb", BEG: "se", SLA: "gb",
+	DOO: "au", DRU: "br", OWA: "mx", POU: "fr", ARO: "ee", MAI: "in",
+	IWA: "jp", MAL: "bb", HAU: "no", FIT: "br", MAR: "es", VES: "dk",
+	SCH: "de", MSC: "de", SHW: "il", SAR: "us", DEV: "nl", LAT: "ca",
+	GIO: "it", KUB: "pl", KVY: "ru", MAZ: "ru", RAI: "fi", VET: "de"
+};
+
+const getDriverFlag = (code?: string, name?: string): string => {
+	const c = (code || "").toUpperCase().trim();
+	if (driverNationalityMap[c]) return driverNationalityMap[c];
+	const n = (name || "").toLowerCase().trim();
+	if (n.includes("mini")) return "it";
+	if (n.includes("fornaroli")) return "it";
+	if (n.includes("browning")) return "gb";
+	if (n.includes("herta")) return "us";
+	if (n.includes("beganovic")) return "se";
+	if (n.includes("slater")) return "gb";
+	if (n.includes("doohan")) return "au";
+	if (n.includes("camara")) return "br";
+	if (n.includes("hirakawa")) return "jp";
+	if (n.includes("lindblad")) return "gb";
+	if (n.includes("bortoleto")) return "br";
+	if (n.includes("hadjar")) return "fr";
+	if (n.includes("bearman")) return "gb";
+	if (n.includes("colapinto")) return "ar";
+	if (n.includes("antonelli")) return "it";
+	if (n.includes("lawson")) return "nz";
+	return "";
 };
 
 const driverTeamColorMap: Record<string, { bg: string; text: string }> = {
@@ -66,6 +95,14 @@ const driverTeamColorMap: Record<string, { bg: string; text: string }> = {
 	BOT: { bg: "#94a3b8", text: "#000000" }, // Cadillac F1 Team
 	HUL: { bg: "#c0c0c0", text: "#000000" }, // Audi
 	BOR: { bg: "#c0c0c0", text: "#000000" }, // Audi
+	// Rookies
+	MIN: { bg: "#0093cc", text: "#ffffff" }, // Alpine
+	FOR: { bg: "#ff8700", text: "#ffffff" }, // McLaren
+	BRO: { bg: "#005aff", text: "#ffffff" }, // Williams
+	HER: { bg: "#94a3b8", text: "#000000" }, // Cadillac
+	BEG: { bg: "#e10600", text: "#ffffff" }, // Ferrari
+	SLA: { bg: "#c0c0c0", text: "#000000" }, // Audi
+	DOO: { bg: "#0093cc", text: "#ffffff" }, // Alpine
 };
 
 const TeamLogo: React.FC<{ teamName: string }> = ({ teamName }) => {
@@ -1024,7 +1061,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 						/* LISTA UNIFICADA Y COMPACTA (DE P1 A P22 SIN TARJETAS GIGANTES) */
 						<div className="flex flex-col gap-1.5 max-h-[500px] overflow-y-auto pr-1 no-scrollbar">
 							{displayResults.map((row, index) => {
-								const driverFlag = driverNationalityMap[row.code];
+								const driverFlag = getDriverFlag(row.code, row.name);
 								const teamColor = driverTeamColorMap[row.code]?.bg || "#3f3f46";
 								const posNum = parseInt(row.pos, 10);
 

@@ -51,6 +51,7 @@ const DRIVER_STANDINGS_2026: Record<string, { pos: string; points: string; count
 	BOT: { pos: "23", points: "0", countryCode: "fi", team: "Cadillac F1 Team", name: "Valtteri Bottas" },
 	PER: { pos: "24", points: "0", countryCode: "mx", team: "Cadillac F1 Team", name: "Sergio Pérez" },
 	CAM: { pos: "25", points: "0", countryCode: "br", team: "Haas F1 Team", name: "Rafael Camara" },
+	DOO: { pos: "21", points: "0", countryCode: "au", team: "Alpine F1 Team", name: "Jack Doohan" },
 };
 
 // 🗺️ Mapeo estricto del código TLA hacia el ID oficial de la API de Ergast/Jolpica
@@ -80,6 +81,7 @@ const DRIVER_CODE_TO_ERGAST_ID: Record<string, string> = {
 	BOT: "bottas",
 	PER: "perez",
 	CAM: "rafael_camara",
+	DOO: "doohan",
 };
 
 // 🏆 Respaldo fidedigno de estadísticas de temporada 2026 (0ms)
@@ -140,6 +142,7 @@ const getDriverAvatarUrl = (driverCode: string, driverId: string) => {
 	if (code === "LIN" || id.includes("lindblad")) return "/drivers/grid/lindblad.jpg";
 	if (code === "CAM" || id.includes("camara") || id.includes("câmara")) return "/drivers/grid/camara.jpg";
 	if (code === "HIR" || id.includes("hirakawa")) return "/drivers/grid/hirakawa.jpg";
+	if (code === "DOO" || id.includes("doohan")) return "/drivers/grid/doohan.jpg";
 
 	return "";
 };

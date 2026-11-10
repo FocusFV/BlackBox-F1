@@ -42,7 +42,13 @@ const driverNationalityMap: Record<string, string> = {
 	NOR: "gb", PIA: "au", ALB: "th", GAS: "fr", OCO: "fr", HUL: "de",
 	TSU: "jp", RIC: "au", BOT: "fi", ZHO: "cn", MAG: "dk", STR: "ca",
 	ALO: "es", PER: "mx", BEA: "gb", HAD: "fr", BOR: "br", LIN: "gb",
-	LAW: "nz", ANT: "it", CAM: "br", HIR: "jp"
+	LAW: "nz", ANT: "it", CAM: "br", HIR: "jp",
+	// Rookies y pilotos de pruebas
+	MIN: "it", HER: "us", FOR: "it", BRO: "gb", BEG: "se", SLA: "gb",
+	DOO: "au", DRU: "br", OWA: "mx", POU: "fr", ARO: "ee", MAI: "in",
+	IWA: "jp", MAL: "bb", HAU: "no", FIT: "br", MAR: "es", VES: "dk",
+	SCH: "de", MSC: "de", SHW: "il", SAR: "us", DEV: "nl", LAT: "ca",
+	GIO: "it", KUB: "pl", KVY: "ru", MAZ: "ru", RAI: "fi", VET: "de"
 };
 
 const countryTranslation: Record<string, string> = {
