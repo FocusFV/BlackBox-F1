@@ -69,6 +69,11 @@ const config: NextConfig = {
 			destination: "/dashboard",
 			permanent: true,
 		},
+		{
+			source: "/settings",
+			destination: "/dashboard/settings",
+			permanent: true,
+		},
 	],
 
 	webpack: (config, { dev }) => {

@@ -267,15 +267,15 @@ export default function SessionInfo() {
 				</div>
 
 				<div className="flex flex-col justify-center min-w-0 flex-1 overflow-hidden pr-2 sm:pr-1">
-					<div className="flex items-center gap-2 min-w-0 max-w-full">
-						<span className="truncate text-xs leading-none font-black text-amber-400 uppercase tracking-widest font-mono drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] min-w-0 shrink">
+					<div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0 max-w-full">
+						<span className="text-[11px] sm:text-xs leading-none font-black text-amber-400 uppercase tracking-tight sm:tracking-widest font-mono drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] whitespace-nowrap">
 							{nextGpName}
 						</span>
 						<span className="rounded bg-zinc-900/90 border border-zinc-800 px-1.5 py-0.5 text-[9px] font-bold text-zinc-300 uppercase tracking-wider shrink-0 whitespace-nowrap mr-1 sm:mr-0">
 							{nextSessionName}
 						</span>
 					</div>
-					<p className="text-xl md:text-2xl leading-none font-black text-white font-mono tracking-wider mt-1.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] truncate">
+					<p className="text-xl md:text-2xl leading-none font-black text-white font-mono tracking-wider mt-1 sm:mt-1.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] truncate">
 						{countdown}
 					</p>
 				</div>
