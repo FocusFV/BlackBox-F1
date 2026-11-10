@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
@@ -318,20 +318,49 @@ type ItemProps = {
 
 const Item = ({ target, item, icon: Icon, pathname, onClickItem }: ItemProps) => {
 	const active = pathname === item.href;
+	const router = useRouter();
+
+	const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+		// Permitir que Ctrl+Click, Meta+Click, Shift+Click o clic de rueda abran en nueva pestaña normalmente
+		if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) {
+			return;
+		}
+
+		triggerHaptic("light");
+
+		if (item.href === "#support" || item.name === "Donar un Cafecito") {
+			e.preventDefault();
+			useSupportModalStore.getState().open();
+			return;
+		}
+
+		if (target === "_blank" || item.href.startsWith("http")) {
+			return;
+		}
+
+		e.preventDefault();
+
+		if (pathname !== item.href) {
+			try {
+				router.push(item.href);
+			} catch {
+				window.location.href = item.href;
+			}
+		}
+
+		if (onClickItem) {
+			setTimeout(() => {
+				onClickItem();
+			}, 120);
+		}
+	};
 
 	return (
 		<Link 
 			href={item.href} 
 			target={target} 
-			onClick={(e) => {
-				triggerHaptic("light");
-				if (item.href === "#support" || item.name === "Donar un Cafecito") {
-					e.preventDefault();
-					useSupportModalStore.getState().open();
-				}
-				onClickItem?.();
-			}}
-			className="block relative group"
+			onClick={handleClick}
+			className="block relative group cursor-pointer"
 		>
 			<div
 				className={clsx(
