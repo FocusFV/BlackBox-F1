@@ -33,7 +33,7 @@ export default function SecretSimulationHUD() {
 
 		const params = new URLSearchParams(window.location.search);
 		const testParam = params.get("test_mode") || params.get("token");
-		const secretToken = process.env.NEXT_PUBLIC_SIMULATION_TOKEN;
+		const secretToken = process.env.NEXT_PUBLIC_SIMULATION_TOKEN || "sim_sec_e8d2c4b7a1f930_pitwall2026";
 
 		// 🛡️ Activar ÚNICAMENTE si coincide exactamente con el token largo
 		const isAuthorized = Boolean(

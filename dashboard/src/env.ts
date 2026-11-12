@@ -27,7 +27,7 @@ const processEnv = {
 	DISABLE_IFRAME: process.env.DISABLE_IFRAME,
 
 	NEXT_PUBLIC_LIVE_URL: process.env.NEXT_PUBLIC_LIVE_URL || "https://blackbox-f1-realtime-docker.onrender.com",
-	NEXT_PUBLIC_SIMULATION_TOKEN: process.env.NEXT_PUBLIC_SIMULATION_TOKEN,
+	NEXT_PUBLIC_SIMULATION_TOKEN: process.env.NEXT_PUBLIC_SIMULATION_TOKEN || "sim_sec_e8d2c4b7a1f930_pitwall2026",
 };
 
 // Don't touch the part below
