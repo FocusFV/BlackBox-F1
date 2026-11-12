@@ -340,6 +340,7 @@ class SimulatorService {
 		let savedStatus: string | null = null;
 		let savedIntervals: Record<string, number> | null = null;
 		let savedProgress: Record<string, number> | null = null;
+		let initialRcMessages: any[] = [];
 
 		if (typeof window !== "undefined") {
 			const strLap = sessionStorage.getItem("f1_sim_lap");
@@ -375,6 +376,43 @@ class SimulatorService {
 					}
 				} catch {}
 			}
+			const strRcMsgs = sessionStorage.getItem("f1_sim_rc_messages");
+			if (strRcMsgs) {
+				try {
+					const parsed = JSON.parse(strRcMsgs);
+					if (Array.isArray(parsed) && parsed.length > 0) {
+						initialRcMessages = parsed;
+					}
+				} catch {}
+			}
+		}
+
+		if (initialRcMessages.length === 0) {
+			// Marcas de tiempo escalonadas para que los mensajes históricos no compartan el mismo segundo
+			initialRcMessages = [
+				{
+					Utc: new Date(Date.now() - 180000).toISOString(),
+					Lap: 26,
+					Message: "TRACK CLEAR - GREEN FLAG IN ALL SECTORS",
+					Category: "Flag",
+					Flag: "GREEN",
+					Scope: "Track",
+				},
+				{
+					Utc: new Date(Date.now() - 90000).toISOString(),
+					Lap: 27,
+					Message: "FIA REGLAMENTO 2026: BOOST (SOBREPASO ELÉCTRICO) Y AERO ACTIVA HABILITADOS",
+					Category: "Other",
+					Status: "ENABLED",
+				},
+				{
+					Utc: new Date(Date.now() - 25000).toISOString(),
+					Lap: 28,
+					Message: "AUTO 43 (COL) EN ZONA DE DRS/BOOST: 0.740s CON AUTO 11 (PER)",
+					Category: "Other",
+					Scope: "Track",
+				},
+			];
 		}
 
 		this.tickCount = savedTick !== null ? savedTick : 0;
@@ -466,39 +504,10 @@ class SimulatorService {
 				WindSpeed: "3.4",
 			},
 			RaceControlMessages: {
-				Messages: [
-					{
-						Utc: nowIso,
-						Lap: 26,
-						Message: "TRACK CLEAR - GREEN FLAG IN ALL SECTORS",
-						Category: "Flag",
-						Flag: "GREEN",
-						Scope: "Track",
-					},
-					{
-						Utc: nowIso,
-						Lap: 27,
-						Message: "FIA REGLAMENTO 2026: BOOST (SOBREPASO ELÉCTRICO) Y AERO ACTIVA HABILITADOS",
-						Category: "Other",
-						Status: "ENABLED",
-					},
-					{
-						Utc: nowIso,
-						Lap: 28,
-						Message: "AUTO 43 (COL) EN ZONA DE DRS/BOOST: 0.740s CON AUTO 11 (PER)",
-						Category: "Other",
-						Scope: "Track",
-					},
-				],
+				Messages: initialRcMessages,
 			},
 			TeamRadio: {
-				Captures: [
-					{
-						Utc: nowIso,
-						RacingNumber: "43",
-						Path: "simulated_colapinto_radio.mp3",
-					},
-				],
+				Captures: [],
 			},
 			Heartbeat: {
 				Utc: nowIso,
@@ -745,13 +754,7 @@ class SimulatorService {
 			WindSpeed: (3.4 + Math.sin(this.tickCount * 0.1) * 0.5).toFixed(1),
 		};
 
-		// 6. Incrementar vueltas periódicamente (cada ~35 segundos)
-		if (this.tickCount % 35 === 0 && this.lap < this.totalLaps) {
-			this.lap++;
-			this.saveSimState();
-		}
-
-		// 7. Ciclo de eventos automáticos si no se forzó nada manualmente
+		// 6. Ciclo de eventos automáticos si no se forzó nada manualmente
 		this.handleScheduledEvents();
 
 		// 8. Commit al store global
@@ -807,9 +810,12 @@ class SimulatorService {
 		const defenderProg = this.driverProgress[defenderNum] || 0;
 		this.driverProgress[overtakerNum] = (defenderProg + 12) % circuit65Track.x.length;
 
-		// Intercambiar intervalos
-		this.driverIntervals[overtakerNum] = 0.45;
-		this.driverIntervals[defenderNum] = 0.62;
+		// Preservar la física y continuidad de los gaps:
+		// El auto que adelanta asume el gap respecto al auto de adelante.
+		// El auto defendido queda inmediatamente detrás (~+0.380s).
+		const origAheadInterval = this.driverIntervals[defenderNum] || 0.65;
+		this.driverIntervals[overtakerNum] = origAheadInterval;
+		this.driverIntervals[defenderNum] = 0.38;
 
 		const overtaker = DRIVERS_2026[overtakerNum];
 		const defender = DRIVERS_2026[defenderNum];
@@ -918,22 +924,29 @@ class SimulatorService {
 	) {
 		const nowIso = new Date().toISOString();
 		const existing = useDataStore.getState().state?.RaceControlMessages?.Messages || [];
+		const updated = [
+			{
+				Utc: nowIso,
+				Lap: this.lap,
+				Message: message,
+				Category: category,
+				Scope: scope,
+				Flag: flag,
+			},
+			...existing.slice(0, 15),
+		];
 
 		useDataStore.getState().setState({
 			RaceControlMessages: {
-				Messages: [
-					{
-						Utc: nowIso,
-						Lap: this.lap,
-						Message: message,
-						Category: category,
-						Scope: scope,
-						Flag: flag,
-					},
-					...existing.slice(0, 15),
-				],
+				Messages: updated,
 			},
 		});
+
+		if (typeof window !== "undefined") {
+			try {
+				sessionStorage.setItem("f1_sim_rc_messages", JSON.stringify(updated));
+			} catch {}
+		}
 	}
 
 	public stop() {
@@ -950,6 +963,7 @@ class SimulatorService {
 			sessionStorage.removeItem("f1_sim_status");
 			sessionStorage.removeItem("f1_sim_intervals");
 			sessionStorage.removeItem("f1_sim_progress");
+			sessionStorage.removeItem("f1_sim_rc_messages");
 		}
 	}
 

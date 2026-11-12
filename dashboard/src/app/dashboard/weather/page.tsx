@@ -131,14 +131,14 @@ export default function WeatherPage() {
 		? infoSesionMilitar.Meeting.Country.Name.toUpperCase()
 		: "ESTADOS UNIDOS";
 
-	// 🌡️ Variables climáticas activas
-	const tempAire = isLiveTelemetryPresent ? weatherData!.AirTemp : backupWeather.airTemp;
-	const tempPista = isLiveTelemetryPresent ? weatherData!.TrackTemp : backupWeather.trackTemp;
-	const humedad = isLiveTelemetryPresent ? weatherData!.Humidity : backupWeather.humidity;
-	const presion = isLiveTelemetryPresent ? weatherData!.Pressure : backupWeather.pressure;
-	const velViento = isLiveTelemetryPresent ? weatherData!.WindSpeed : backupWeather.windSpeed;
-	const dirVientoGrados = isLiveTelemetryPresent ? (weatherData!.WindDirection ?? "0") : backupWeather.windDir;
-	const tieneLluvia = isLiveTelemetryPresent ? weatherData!.Rainfall === "1" : backupWeather.rainfall;
+	// 🌡️ Variables climáticas activas (con guardas seguras para evitar errores de lectura)
+	const tempAire = weatherData?.AirTemp ?? backupWeather.airTemp;
+	const tempPista = weatherData?.TrackTemp ?? backupWeather.trackTemp;
+	const humedad = weatherData?.Humidity ?? backupWeather.humidity;
+	const presion = weatherData?.Pressure ?? backupWeather.pressure;
+	const velViento = weatherData?.WindSpeed ?? backupWeather.windSpeed;
+	const dirVientoGrados = weatherData?.WindDirection ?? backupWeather.windDir;
+	const tieneLluvia = weatherData?.Rainfall ? weatherData.Rainfall === "1" : backupWeather.rainfall;
 
 	// 🧭 Conversión de grados a coordenadas cardinales
 	const obtenerPuntoCardinal = (grados: string | number) => {

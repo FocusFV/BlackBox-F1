@@ -201,6 +201,24 @@ function getWednesdayNightPriorMs(fp1DateStr: string, fp1TimeStr?: string): numb
 }
 
 export async function getSmartGpContext(): Promise<SmartGpContext> {
+	if (typeof window !== "undefined" && (
+		sessionStorage.getItem("f1_pitwall_sim") === "active"
+	)) {
+		return {
+			isWeekendActive: true,
+			round: 20,
+			raceName: "Mexico City Grand Prix",
+			country: "Mexico",
+			countryCode: "mex",
+			stage: "SUNDAY",
+			defaultTab: "RACE",
+			availableTabs: ["FP1", "FP2", "FP3", "QUALY", "RACE"],
+			hasSprint: false,
+			raceDate: "2026-10-25",
+			firstPracticeDate: "2026-10-23",
+		};
+	}
+
 	try {
 		const res = await fetch("https://api.jolpi.ca/ergast/f1/current.json", {
 			next: { revalidate: 1800 },

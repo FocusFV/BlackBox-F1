@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { simulator } from "@/lib/simulatorFeed";
 import { useDataStore } from "@/stores/useDataStore";
 import { triggerHaptic } from "@/lib/haptics";
@@ -18,6 +19,7 @@ import {
 } from "lucide-react";
 
 export default function SecretSimulationHUD() {
+	const pathname = usePathname();
 	const [isActive, setIsActive] = useState(false);
 	const [isCollapsed, setIsCollapsed] = useState(false);
 	const [flagToggle, setFlagToggle] = useState<"1" | "6">("1");
@@ -31,7 +33,7 @@ export default function SecretSimulationHUD() {
 
 		const params = new URLSearchParams(window.location.search);
 		const testParam = params.get("test_mode") || params.get("token");
-		const secretToken = process.env.NEXT_PUBLIC_SIMULATION_TOKEN || "sim_sec_9f7a8b3e2c1d04_pitwall2026";
+		const secretToken = process.env.NEXT_PUBLIC_SIMULATION_TOKEN;
 
 		// 🛡️ Activar ÚNICAMENTE si coincide exactamente con el token largo
 		const isAuthorized = Boolean(
@@ -58,19 +60,20 @@ export default function SecretSimulationHUD() {
 			sessionStorage.removeItem("f1_sim_status");
 			sessionStorage.removeItem("f1_sim_intervals");
 			sessionStorage.removeItem("f1_sim_progress");
+			sessionStorage.removeItem("f1_sim_rc_messages");
 			setIsActive(false);
 			simulator.stop();
 			useDataStore.getState().resetSession();
 			const cleanUrl = window.location.pathname;
 			window.history.replaceState({}, "", cleanUrl);
 			triggerHaptic("medium");
-		} else if (sessionStorage.getItem("f1_pitwall_sim") === "active") {
+		} else if (sessionStorage.getItem("f1_pitwall_sim") === "active" || simulator.getActive()) {
 			setIsActive(true);
 			if (!simulator.getActive()) {
 				simulator.start();
 			}
 		}
-	}, []);
+	}, [pathname]);
 
 	const handleStop = () => {
 		triggerHaptic("heavy");
@@ -81,6 +84,7 @@ export default function SecretSimulationHUD() {
 		sessionStorage.removeItem("f1_sim_status");
 		sessionStorage.removeItem("f1_sim_intervals");
 		sessionStorage.removeItem("f1_sim_progress");
+		sessionStorage.removeItem("f1_sim_rc_messages");
 		setIsActive(false);
 		simulator.stop();
 		useDataStore.getState().resetSession();
@@ -139,7 +143,7 @@ export default function SecretSimulationHUD() {
 	};
 
 	return (
-		<div className="fixed top-0 left-0 right-0 z-[9999] pointer-events-auto select-none font-mono">
+		<div className="fixed top-0 left-0 right-0 z-[99999] pointer-events-auto select-none font-mono">
 			{isCollapsed ? (
 				/* BOTÓN FLOTANTE MINIMIZADO PARA MÓVIL */
 				<div className="flex justify-end p-2 pr-3">

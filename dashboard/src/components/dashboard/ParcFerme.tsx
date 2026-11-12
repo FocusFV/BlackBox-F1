@@ -170,8 +170,11 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 	const roundNumber = (liveSession?.Meeting as any)?.Number || (liveSession as any)?.Number;
 	const currentGpName = liveSession?.Meeting?.Name;
 	const currentCountryName = liveSession?.Meeting?.Country?.Name;
-	const initialCountry = (currentGpName ? getCountryCodeForGp(currentGpName, currentCountryName) : null) || "bra";
-	const initialGpName = currentGpName ? translateGpName(currentGpName) : "Gran Premio de São Paulo";
+	const isSimActive = typeof window !== "undefined" && (
+		sessionStorage.getItem("f1_pitwall_sim") === "active"
+	);
+	const initialCountry = isSimActive ? "mex" : ((currentGpName ? getCountryCodeForGp(currentGpName, currentCountryName) : null) || "bra");
+	const initialGpName = isSimActive ? "Gran Premio de la Ciudad de México" : (currentGpName ? translateGpName(currentGpName) : "Gran Premio de São Paulo");
 
 	const getInitialTab = (): SessionTab => {
 		if (typeof window !== "undefined") {

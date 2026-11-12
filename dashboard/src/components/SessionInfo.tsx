@@ -8,6 +8,7 @@ import { useSettingsStore } from "@/stores/useSettingsStore";
 import Flag from "@/components/Flag";
 import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
 import { parseUtcMs, parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
+import { simulator } from "@/lib/simulatorFeed";
 
 const translateSessionName = (name?: string) => {
 	if (!name) return "En Vivo";
@@ -105,15 +106,20 @@ export default function SessionInfo() {
 		)
 	);
 
+	const isSimActive = typeof window !== "undefined" && (
+		sessionStorage.getItem("f1_pitwall_sim") === "active" || simulator.getActive()
+	);
+
 	const isLive = Boolean(
-		!isSessionTerminated &&
+		isSimActive ||
+		(!isSessionTerminated &&
 		(hasActiveTiming ||
 			Boolean(clock?.Remaining) ||
 			(session &&
 				(sessionStatus === "Started" ||
 					sessionStatus === "Running" ||
 					sessionStatus === "PitsOpen" ||
-					sessionStatus === "StartedOnTime")))
+					sessionStatus === "StartedOnTime"))))
 	);
 
 	const isOfflineOrFinished = !isLive;
@@ -138,7 +144,7 @@ export default function SessionInfo() {
 
 	// Obtener la próxima carrera y calcular el contador
 	useEffect(() => {
-		if (!isOfflineOrFinished) return;
+		if (!isOfflineOrFinished || isSimActive) return;
 
 		let targetDate: Date | null = null;
 		let intervalId: any = null;

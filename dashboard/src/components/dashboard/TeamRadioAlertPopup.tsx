@@ -37,7 +37,15 @@ export function TeamRadioAlertPopup() {
 			(a, b) => new Date(b.Utc).getTime() - new Date(a.Utc).getTime()
 		);
 		const latest = captures[0];
-		if (!latest || latest.Utc === lastProcessedUtc.current) return;
+		if (!latest) return;
+
+		// Si es el montaje inicial, registrar el radio más reciente existente para no disparar alertas fantasma al recargar o navegar
+		if (lastProcessedUtc.current === null) {
+			lastProcessedUtc.current = latest.Utc;
+			return;
+		}
+
+		if (latest.Utc === lastProcessedUtc.current) return;
 		lastProcessedUtc.current = latest.Utc;
 
 		// Si el usuario tiene pilotos favoritos, filtramos por ellos. Si no tiene ninguno seleccionado, mostramos de cualquiera.

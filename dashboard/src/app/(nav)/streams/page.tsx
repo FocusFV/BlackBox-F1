@@ -303,18 +303,19 @@ export default function StreamsPage() {
 		isUnlockingRef.current = isUnlocking;
 	}, [isLive, bypass, isUnlocking]);
 
-	// Cargar cronograma del fin de semana y verificar acceso de administrador
+	// Cargar cronograma del fin de semana y verificar modo simulación o token
 	useEffect(() => {
 		if (typeof window !== "undefined") {
 			const params = new URLSearchParams(window.location.search);
-			const secretToken = process.env.NEXT_PUBLIC_SIMULATION_TOKEN || "sim_sec_9f7a8b3e2c1d04_pitwall2026";
+			const secretToken = process.env.NEXT_PUBLIC_SIMULATION_TOKEN;
 			const isTokenMatch = Boolean(secretToken && secretToken.length >= 16 && params.get("test_mode") === secretToken);
-			if (
-				params.get("admin") === "focus" ||
-				params.get("pass") === "focus" ||
-				isTokenMatch ||
-				sessionStorage.getItem("f1_pitwall_sim") === "active"
-			) {
+			const isSimActive = sessionStorage.getItem("f1_pitwall_sim") === "active" || simulator.getActive();
+
+			if (isSimActive && !simulator.getActive()) {
+				simulator.start();
+			}
+
+			if (isTokenMatch || isSimActive) {
 				setBypass(true);
 			}
 		}
@@ -342,12 +343,22 @@ export default function StreamsPage() {
 				isBackendSessionLive
 			);
 
-			const isSimActive = typeof window !== "undefined" && sessionStorage.getItem("f1_pitwall_sim") === "active";
+			const isSimActive = typeof window !== "undefined" && (
+				sessionStorage.getItem("f1_pitwall_sim") === "active" || simulator.getActive()
+			);
 			const shouldBeLive = status.isLiveWindow || isTelemetryActive || isBackendSessionLive || isSimActive || bypass;
 
 			if (shouldBeLive) {
-				const displayTitle = backendSessionTitle || status.activeSessionName || sessionInfo?.Name || "Sesión Oficial";
-				if (!isLiveRef.current && !bypassRef.current && !isUnlockingRef.current) {
+				const displayTitle = isSimActive
+					? "GRAN PREMIO DE LA CIUDAD DE MÉXICO 2026 · CARRERA (SIMULACIÓN)"
+					: (backendSessionTitle || status.activeSessionName || sessionInfo?.Name || "Sesión Oficial");
+
+				if (isSimActive || bypassRef.current) {
+					// En modo simulación o bypass manual, desbloquear DE INMEDIATO sin bloquear en pantalla de motores apagados
+					setIsLive(true);
+					setActiveSessionName(translateSessionName(displayTitle));
+					setCountdownText("");
+				} else if (!isLiveRef.current && !isUnlockingRef.current) {
 					// 🚀 Secuencia animada de desbloqueo al llegar a los 15 min antes o por F1 en vivo
 					setIsUnlocking(true);
 					triggerHaptic("heavy");
