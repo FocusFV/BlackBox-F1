@@ -12,6 +12,8 @@ import DriverLapTime from "@/components/driver/DriverLapTime";
 import { sortPos } from "@/lib/sorting";
 import { useDataStore } from "@/stores/useDataStore";
 import type { Driver, TimingDataDriver } from "@/types/state.type";
+import { useEffect } from "react";
+import { simulator } from "@/lib/simulatorFeed";
 
 const driverTeamColorMap: { [key: string]: string } = {
 	NOR: "#ff8000", PIA: "#ff8000",
@@ -28,6 +30,15 @@ const driverTeamColorMap: { [key: string]: string } = {
 };
 
 export default function TrackMap() {
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			const isSimActive = sessionStorage.getItem("f1_pitwall_sim") === "active";
+			if (isSimActive && !simulator.getActive()) {
+				simulator.start();
+			}
+		}
+	}, []);
+
 	const drivers = useDataStore((state) => state.state?.DriverList);
 	const driversTiming = useDataStore((state) => state.state?.TimingData);
 	const activeTrackName = useDataStore((state) => (state.state as any)?.RaceInfo?.TrackName || "Circuito Activo");

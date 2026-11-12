@@ -90,6 +90,13 @@ export default function Page() {
 					window.location.hostname.endsWith(".local")));
 		setIsLocalDev(isLocal);
 
+		if (typeof window !== "undefined") {
+			const isSimActive = sessionStorage.getItem("f1_pitwall_sim") === "active";
+			if (isSimActive && !simulator.getActive()) {
+				simulator.start();
+			}
+		}
+
 		if (isLocal && typeof window !== "undefined") {
 			const saved = sessionStorage.getItem("f1_dev_view_mode") as DevViewMode;
 			if (saved === "telemetry" || saved === "parc_ferme" || saved === "auto") {
@@ -268,10 +275,14 @@ export default function Page() {
 		(!isSessionFinished && (isCalendarLive || isF1ActiveSession || (isTrackActive && isSessionStarted))) ||
 		isPostSessionWindow;
 
-	// Vista activa: en local respeta el switch exclusivo de dev, en producción es 100% automático
+	const isSimActive =
+		simulator.getActive() ||
+		(typeof window !== "undefined" && sessionStorage.getItem("f1_pitwall_sim") === "active");
+
+	// Vista activa: en local respeta el switch exclusivo de dev, en modo simulación se activa, en producción es 100% automático
 	const showTelemetry = isLocalDev && devMode !== "auto"
 		? devMode === "telemetry"
-		: isLiveAuto;
+		: (isSimActive || isLiveAuto);
 
 	// 🎬 Detectar cambio de Parque Cerrado a Telemetría en Vivo para lanzar la animación
 	useEffect(() => {

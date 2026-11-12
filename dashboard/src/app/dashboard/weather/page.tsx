@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Map from "@/components/dashboard/Map";
 import { useDataStore } from "@/stores/useDataStore";
+import { simulator } from "@/lib/simulatorFeed";
 
 const WeatherMap = dynamic(
 	() => import("@/app/dashboard/weather/map").then((mod) => mod.WeatherMap),
@@ -79,15 +80,26 @@ export default function WeatherPage() {
 		};
 	}, []);
 
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			const isSimActive = sessionStorage.getItem("f1_pitwall_sim") === "active";
+			if (isSimActive && !simulator.getActive()) {
+				simulator.start();
+			}
+		}
+	}, []);
+
+	const isSimActive = typeof window !== "undefined" && (sessionStorage.getItem("f1_pitwall_sim") === "active" || simulator.getActive());
+
 	const isLiveTelemetryPresent = Boolean(
-		weatherData?.AirTemp && weatherData.AirTemp !== "0.0" && weatherData.AirTemp !== "0"
+		(weatherData?.AirTemp && weatherData.AirTemp !== "0.0" && weatherData.AirTemp !== "0") || isSimActive
 	);
 
 	const isLiveSessionRunning = Boolean(
-		infoSesionMilitar?.SessionStatus &&
+		(infoSesionMilitar?.SessionStatus &&
 		infoSesionMilitar.SessionStatus !== "Finalised" &&
 		infoSesionMilitar.SessionStatus !== "Complete" &&
-		infoSesionMilitar?.Name
+		infoSesionMilitar?.Name) || isSimActive
 	);
 
 	const gpNombre = infoSesionMilitar?.Meeting?.OfficialName

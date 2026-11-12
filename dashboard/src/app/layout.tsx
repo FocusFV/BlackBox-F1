@@ -11,6 +11,7 @@ import OledModeProvider from "@/components/OledModeProvider";
 import Navbar from "@/components/Navbar";
 import SupportModal from "@/components/SupportModal";
 import VersionGuard from "@/components/VersionGuard";
+import SecretSimulationHUD from "@/components/SecretSimulationHUD";
 import { PwaRegister } from "@/components/PwaRegister";
 
 import { GeistMono } from "geist/font/mono";
@@ -39,6 +40,9 @@ export default function RootLayout({ children }: Props) {
 			{/* El body queda sobrio y limpio, ya que la Navbar se encarga de su propia estética */}
 			<body className="bg-zinc-950 antialiased min-h-screen relative max-w-full overflow-x-hidden">
 				<OledModeProvider>
+					{/* 🏎️ HUD SECRETO DE SIMULACIÓN FIA (Solo visible con ?test_mode=pitwall2026) */}
+					<SecretSimulationHUD />
+
 					{/* La Navbar ahora tiene el patrón encapsulado adentro */}
 					<Navbar />
 					

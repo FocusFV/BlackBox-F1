@@ -297,7 +297,12 @@ export default function StreamsPage() {
 	useEffect(() => {
 		if (typeof window !== "undefined") {
 			const params = new URLSearchParams(window.location.search);
-			if (params.get("admin") === "focus" || params.get("pass") === "focus") {
+			if (
+				params.get("admin") === "focus" ||
+				params.get("pass") === "focus" ||
+				params.get("test_mode") === "pitwall2026" ||
+				sessionStorage.getItem("f1_pitwall_sim") === "active"
+			) {
 				setBypass(true);
 			}
 		}
@@ -325,7 +330,8 @@ export default function StreamsPage() {
 				isBackendSessionLive
 			);
 
-			const shouldBeLive = status.isLiveWindow || isTelemetryActive || isBackendSessionLive;
+			const isSimActive = typeof window !== "undefined" && sessionStorage.getItem("f1_pitwall_sim") === "active";
+			const shouldBeLive = status.isLiveWindow || isTelemetryActive || isBackendSessionLive || isSimActive || bypass;
 
 			if (shouldBeLive) {
 				const displayTitle = backendSessionTitle || status.activeSessionName || sessionInfo?.Name || "Sesión Oficial";

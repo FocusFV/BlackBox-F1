@@ -1,425 +1,359 @@
 import { useDataStore } from "@/stores/useDataStore";
-import type { DriverList, CarsData } from "@/types/state.type";
+import type { DriverList, CarsData, Positions } from "@/types/state.type";
+import circuit65Track from "@/data/circuit65Track.json";
+
+// 🏎️ PARRILLA 2026 COMPLETA OFICIAL FIA (22 PILOTOS - 11 ESCUDERÍAS)
+export const DRIVERS_2026: DriverList = {
+	"4": {
+		RacingNumber: "4",
+		BroadcastName: "L NORRIS",
+		FullName: "Lando NORRIS",
+		Tla: "NOR",
+		Line: 1,
+		TeamName: "McLaren",
+		TeamColour: "ff8000",
+		FirstName: "Lando",
+		LastName: "Norris",
+		Reference: "NORRIS",
+		HeadshotUrl: "",
+		CountryCode: "GBR",
+	},
+	"1": {
+		RacingNumber: "1",
+		BroadcastName: "M VERSTAPPEN",
+		FullName: "Max VERSTAPPEN",
+		Tla: "VER",
+		Line: 2,
+		TeamName: "Red Bull Racing",
+		TeamColour: "3671c6",
+		FirstName: "Max",
+		LastName: "Verstappen",
+		Reference: "VERSTAPPEN",
+		HeadshotUrl: "",
+		CountryCode: "NED",
+	},
+	"16": {
+		RacingNumber: "16",
+		BroadcastName: "C LECLERC",
+		FullName: "Charles LECLERC",
+		Tla: "LEC",
+		Line: 3,
+		TeamName: "Ferrari",
+		TeamColour: "e80020",
+		FirstName: "Charles",
+		LastName: "Leclerc",
+		Reference: "LECLERC",
+		HeadshotUrl: "",
+		CountryCode: "MON",
+	},
+	"81": {
+		RacingNumber: "81",
+		BroadcastName: "O PIASTRI",
+		FullName: "Oscar PIASTRI",
+		Tla: "PIA",
+		Line: 4,
+		TeamName: "McLaren",
+		TeamColour: "ff8000",
+		FirstName: "Oscar",
+		LastName: "Piastri",
+		Reference: "PIASTRI",
+		HeadshotUrl: "",
+		CountryCode: "AUS",
+	},
+	"44": {
+		RacingNumber: "44",
+		BroadcastName: "L HAMILTON",
+		FullName: "Lewis HAMILTON",
+		Tla: "HAM",
+		Line: 5,
+		TeamName: "Ferrari",
+		TeamColour: "e80020",
+		FirstName: "Lewis",
+		LastName: "Hamilton",
+		Reference: "HAMILTON",
+		HeadshotUrl: "",
+		CountryCode: "GBR",
+	},
+	"63": {
+		RacingNumber: "63",
+		BroadcastName: "G RUSSELL",
+		FullName: "George RUSSELL",
+		Tla: "RUS",
+		Line: 6,
+		TeamName: "Mercedes",
+		TeamColour: "27f4d2",
+		FirstName: "George",
+		LastName: "Russell",
+		Reference: "RUSSELL",
+		HeadshotUrl: "",
+		CountryCode: "GBR",
+	},
+	"12": {
+		RacingNumber: "12",
+		BroadcastName: "K ANTONELLI",
+		FullName: "Kimi ANTONELLI",
+		Tla: "ANT",
+		Line: 7,
+		TeamName: "Mercedes",
+		TeamColour: "27f4d2",
+		FirstName: "Kimi",
+		LastName: "Antonelli",
+		Reference: "ANTONELLI",
+		HeadshotUrl: "",
+		CountryCode: "ITA",
+	},
+	"43": {
+		RacingNumber: "43",
+		BroadcastName: "F COLAPINTO",
+		FullName: "Franco COLAPINTO",
+		Tla: "COL",
+		Line: 8,
+		TeamName: "Alpine F1 Team",
+		TeamColour: "0093cc",
+		FirstName: "Franco",
+		LastName: "Colapinto",
+		Reference: "COLAPINTO",
+		HeadshotUrl: "",
+		CountryCode: "ARG",
+	},
+	"11": {
+		RacingNumber: "11",
+		BroadcastName: "S PEREZ",
+		FullName: "Sergio PEREZ",
+		Tla: "PER",
+		Line: 9,
+		TeamName: "Cadillac F1 Team",
+		TeamColour: "94a3b8",
+		FirstName: "Sergio",
+		LastName: "Perez",
+		Reference: "PEREZ",
+		HeadshotUrl: "",
+		CountryCode: "MEX",
+	},
+	"55": {
+		RacingNumber: "55",
+		BroadcastName: "C SAINZ",
+		FullName: "Carlos SAINZ",
+		Tla: "SAI",
+		Line: 10,
+		TeamName: "Williams",
+		TeamColour: "005aff",
+		FirstName: "Carlos",
+		LastName: "Sainz",
+		Reference: "SAINZ",
+		HeadshotUrl: "",
+		CountryCode: "ESP",
+	},
+	"14": {
+		RacingNumber: "14",
+		BroadcastName: "F ALONSO",
+		FullName: "Fernando ALONSO",
+		Tla: "ALO",
+		Line: 11,
+		TeamName: "Aston Martin",
+		TeamColour: "229971",
+		FirstName: "Fernando",
+		LastName: "Alonso",
+		Reference: "ALONSO",
+		HeadshotUrl: "",
+		CountryCode: "ESP",
+	},
+	"23": {
+		RacingNumber: "23",
+		BroadcastName: "A ALBON",
+		FullName: "Alexander ALBON",
+		Tla: "ALB",
+		Line: 12,
+		TeamName: "Williams",
+		TeamColour: "005aff",
+		FirstName: "Alexander",
+		LastName: "Albon",
+		Reference: "ALBON",
+		HeadshotUrl: "",
+		CountryCode: "THA",
+	},
+	"10": {
+		RacingNumber: "10",
+		BroadcastName: "P GASLY",
+		FullName: "Pierre GASLY",
+		Tla: "GAS",
+		Line: 13,
+		TeamName: "Alpine F1 Team",
+		TeamColour: "0093cc",
+		FirstName: "Pierre",
+		LastName: "Gasly",
+		Reference: "GASLY",
+		HeadshotUrl: "",
+		CountryCode: "FRA",
+	},
+	"30": {
+		RacingNumber: "30",
+		BroadcastName: "L LAWSON",
+		FullName: "Liam LAWSON",
+		Tla: "LAW",
+		Line: 14,
+		TeamName: "Racing Bulls",
+		TeamColour: "6692ff",
+		FirstName: "Liam",
+		LastName: "Lawson",
+		Reference: "LAWSON",
+		HeadshotUrl: "",
+		CountryCode: "NZL",
+	},
+	"22": {
+		RacingNumber: "22",
+		BroadcastName: "Y TSUNODA",
+		FullName: "Yuki TSUNODA",
+		Tla: "TSU",
+		Line: 15,
+		TeamName: "Racing Bulls",
+		TeamColour: "6692ff",
+		FirstName: "Yuki",
+		LastName: "Tsunoda",
+		Reference: "TSUNODA",
+		HeadshotUrl: "",
+		CountryCode: "JPN",
+	},
+	"87": {
+		RacingNumber: "87",
+		BroadcastName: "O BEARMAN",
+		FullName: "Oliver BEARMAN",
+		Tla: "BEA",
+		Line: 16,
+		TeamName: "Haas F1 Team",
+		TeamColour: "b6babd",
+		FirstName: "Oliver",
+		LastName: "Bearman",
+		Reference: "BEARMAN",
+		HeadshotUrl: "",
+		CountryCode: "GBR",
+	},
+	"31": {
+		RacingNumber: "31",
+		BroadcastName: "E OCON",
+		FullName: "Esteban OCON",
+		Tla: "OCO",
+		Line: 17,
+		TeamName: "Haas F1 Team",
+		TeamColour: "b6babd",
+		FirstName: "Esteban",
+		LastName: "Ocon",
+		Reference: "OCON",
+		HeadshotUrl: "",
+		CountryCode: "FRA",
+	},
+	"18": {
+		RacingNumber: "18",
+		BroadcastName: "L STROLL",
+		FullName: "Lance STROLL",
+		Tla: "STR",
+		Line: 18,
+		TeamName: "Aston Martin",
+		TeamColour: "229971",
+		FirstName: "Lance",
+		LastName: "Stroll",
+		Reference: "STROLL",
+		HeadshotUrl: "",
+		CountryCode: "CAN",
+	},
+	"27": {
+		RacingNumber: "27",
+		BroadcastName: "N HULKENBERG",
+		FullName: "Nico HULKENBERG",
+		Tla: "HUL",
+		Line: 19,
+		TeamName: "Audi",
+		TeamColour: "c0c0c0",
+		FirstName: "Nico",
+		LastName: "Hulkenberg",
+		Reference: "HULKENBERG",
+		HeadshotUrl: "",
+		CountryCode: "GER",
+	},
+	"5": {
+		RacingNumber: "5",
+		BroadcastName: "G BORTOLETO",
+		FullName: "Gabriel BORTOLETO",
+		Tla: "BOR",
+		Line: 20,
+		TeamName: "Audi",
+		TeamColour: "c0c0c0",
+		FirstName: "Gabriel",
+		LastName: "Bortoleto",
+		Reference: "BORTOLETO",
+		HeadshotUrl: "",
+		CountryCode: "BRA",
+	},
+	"77": {
+		RacingNumber: "77",
+		BroadcastName: "V BOTTAS",
+		FullName: "Valtteri BOTTAS",
+		Tla: "BOT",
+		Line: 21,
+		TeamName: "Cadillac F1 Team",
+		TeamColour: "94a3b8",
+		FirstName: "Valtteri",
+		LastName: "Bottas",
+		Reference: "BOTTAS",
+		HeadshotUrl: "",
+		CountryCode: "FIN",
+	},
+	"6": {
+		RacingNumber: "6",
+		BroadcastName: "I HADJAR",
+		FullName: "Isack HADJAR",
+		Tla: "HAD",
+		Line: 22,
+		TeamName: "Red Bull Racing",
+		TeamColour: "3671c6",
+		FirstName: "Isack",
+		LastName: "Hadjar",
+		Reference: "HADJAR",
+		HeadshotUrl: "",
+		CountryCode: "FRA",
+	},
+};
 
 class SimulatorService {
 	private intervalId: ReturnType<typeof setInterval> | null = null;
+	private tickCount = 0;
 	private lap = 28;
+	private totalLaps = 53;
 	private isRunning = false;
+	private trackStatus = "1"; // "1" = Verde, "2" = Amarilla, "4" = SC, "6" = VSC
+	private currentOrder: string[] = [
+		"4", "1", "16", "81", "44", "63", "12", "43", "11", "55",
+		"14", "23", "10", "30", "22", "87", "31", "18", "27", "5", "77", "6"
+	];
+	private driverProgress: Record<string, number> = {};
+	private driverIntervals: Record<string, number> = {};
+	private overtakeCount = 0;
 
 	public start() {
 		if (this.isRunning) return;
 		this.isRunning = true;
+		this.tickCount = 0;
+		this.lap = 28;
+		this.trackStatus = "1";
+		this.overtakeCount = 0;
 
-		// 🏎️ PARRILLA 2026 COMPLETA (22 PILOTOS - 11 ESCUDERÍAS)
-		const drivers2026: DriverList = {
-			"4": {
-				RacingNumber: "4",
-				BroadcastName: "L NORRIS",
-				FullName: "Lando NORRIS",
-				Tla: "NOR",
-				Line: 1,
-				TeamName: "McLaren",
-				TeamColour: "ff8000",
-				FirstName: "Lando",
-				LastName: "Norris",
-				Reference: "NORRIS",
-				HeadshotUrl: "",
-				CountryCode: "GBR",
-			},
-			"1": {
-				RacingNumber: "1",
-				BroadcastName: "M VERSTAPPEN",
-				FullName: "Max VERSTAPPEN",
-				Tla: "VER",
-				Line: 2,
-				TeamName: "Red Bull Racing",
-				TeamColour: "3671c6",
-				FirstName: "Max",
-				LastName: "Verstappen",
-				Reference: "VERSTAPPEN",
-				HeadshotUrl: "",
-				CountryCode: "NED",
-			},
-			"16": {
-				RacingNumber: "16",
-				BroadcastName: "C LECLERC",
-				FullName: "Charles LECLERC",
-				Tla: "LEC",
-				Line: 3,
-				TeamName: "Ferrari",
-				TeamColour: "e80020",
-				FirstName: "Charles",
-				LastName: "Leclerc",
-				Reference: "LECLERC",
-				HeadshotUrl: "",
-				CountryCode: "MON",
-			},
-			"81": {
-				RacingNumber: "81",
-				BroadcastName: "O PIASTRI",
-				FullName: "Oscar PIASTRI",
-				Tla: "PIA",
-				Line: 4,
-				TeamName: "McLaren",
-				TeamColour: "ff8000",
-				FirstName: "Oscar",
-				LastName: "Piastri",
-				Reference: "PIASTRI",
-				HeadshotUrl: "",
-				CountryCode: "AUS",
-			},
-			"44": {
-				RacingNumber: "44",
-				BroadcastName: "L HAMILTON",
-				FullName: "Lewis HAMILTON",
-				Tla: "HAM",
-				Line: 5,
-				TeamName: "Ferrari",
-				TeamColour: "e80020",
-				FirstName: "Lewis",
-				LastName: "Hamilton",
-				Reference: "HAMILTON",
-				HeadshotUrl: "",
-				CountryCode: "GBR",
-			},
-			"63": {
-				RacingNumber: "63",
-				BroadcastName: "G RUSSELL",
-				FullName: "George RUSSELL",
-				Tla: "RUS",
-				Line: 6,
-				TeamName: "Mercedes",
-				TeamColour: "27f4d2",
-				FirstName: "George",
-				LastName: "Russell",
-				Reference: "RUSSELL",
-				HeadshotUrl: "",
-				CountryCode: "GBR",
-			},
-			"12": {
-				RacingNumber: "12",
-				BroadcastName: "K ANTONELLI",
-				FullName: "Kimi ANTONELLI",
-				Tla: "ANT",
-				Line: 7,
-				TeamName: "Mercedes",
-				TeamColour: "27f4d2",
-				FirstName: "Kimi",
-				LastName: "Antonelli",
-				Reference: "ANTONELLI",
-				HeadshotUrl: "",
-				CountryCode: "ITA",
-			},
-			"43": {
-				RacingNumber: "43",
-				BroadcastName: "F COLAPINTO",
-				FullName: "Franco COLAPINTO",
-				Tla: "COL",
-				Line: 8,
-				TeamName: "Alpine F1 Team",
-				TeamColour: "0093cc",
-				FirstName: "Franco",
-				LastName: "Colapinto",
-				Reference: "COLAPINTO",
-				HeadshotUrl: "",
-				CountryCode: "ARG",
-			},
-			"11": {
-				RacingNumber: "11",
-				BroadcastName: "S PEREZ",
-				FullName: "Sergio PEREZ",
-				Tla: "PER",
-				Line: 9,
-				TeamName: "Cadillac F1 Team",
-				TeamColour: "94a3b8",
-				FirstName: "Sergio",
-				LastName: "Perez",
-				Reference: "PEREZ",
-				HeadshotUrl: "",
-				CountryCode: "MEX",
-			},
-			"55": {
-				RacingNumber: "55",
-				BroadcastName: "C SAINZ",
-				FullName: "Carlos SAINZ",
-				Tla: "SAI",
-				Line: 10,
-				TeamName: "Williams",
-				TeamColour: "005aff",
-				FirstName: "Carlos",
-				LastName: "Sainz",
-				Reference: "SAINZ",
-				HeadshotUrl: "",
-				CountryCode: "ESP",
-			},
-			"14": {
-				RacingNumber: "14",
-				BroadcastName: "F ALONSO",
-				FullName: "Fernando ALONSO",
-				Tla: "ALO",
-				Line: 11,
-				TeamName: "Aston Martin",
-				TeamColour: "229971",
-				FirstName: "Fernando",
-				LastName: "Alonso",
-				Reference: "ALONSO",
-				HeadshotUrl: "",
-				CountryCode: "ESP",
-			},
-			"23": {
-				RacingNumber: "23",
-				BroadcastName: "A ALBON",
-				FullName: "Alexander ALBON",
-				Tla: "ALB",
-				Line: 12,
-				TeamName: "Williams",
-				TeamColour: "005aff",
-				FirstName: "Alexander",
-				LastName: "Albon",
-				Reference: "ALBON",
-				HeadshotUrl: "",
-				CountryCode: "THA",
-			},
-			"10": {
-				RacingNumber: "10",
-				BroadcastName: "P GASLY",
-				FullName: "Pierre GASLY",
-				Tla: "GAS",
-				Line: 13,
-				TeamName: "Alpine F1 Team",
-				TeamColour: "0093cc",
-				FirstName: "Pierre",
-				LastName: "Gasly",
-				Reference: "GASLY",
-				HeadshotUrl: "",
-				CountryCode: "FRA",
-			},
-			"30": {
-				RacingNumber: "30",
-				BroadcastName: "L LAWSON",
-				FullName: "Liam LAWSON",
-				Tla: "LAW",
-				Line: 14,
-				TeamName: "Racing Bulls",
-				TeamColour: "6692ff",
-				FirstName: "Liam",
-				LastName: "Lawson",
-				Reference: "LAWSON",
-				HeadshotUrl: "",
-				CountryCode: "NZL",
-			},
-			"22": {
-				RacingNumber: "22",
-				BroadcastName: "Y TSUNODA",
-				FullName: "Yuki TSUNODA",
-				Tla: "TSU",
-				Line: 15,
-				TeamName: "Racing Bulls",
-				TeamColour: "6692ff",
-				FirstName: "Yuki",
-				LastName: "Tsunoda",
-				Reference: "TSUNODA",
-				HeadshotUrl: "",
-				CountryCode: "JPN",
-			},
-			"87": {
-				RacingNumber: "87",
-				BroadcastName: "O BEARMAN",
-				FullName: "Oliver BEARMAN",
-				Tla: "BEA",
-				Line: 16,
-				TeamName: "Haas F1 Team",
-				TeamColour: "b6babd",
-				FirstName: "Oliver",
-				LastName: "Bearman",
-				Reference: "BEARMAN",
-				HeadshotUrl: "",
-				CountryCode: "GBR",
-			},
-			"31": {
-				RacingNumber: "31",
-				BroadcastName: "E OCON",
-				FullName: "Esteban OCON",
-				Tla: "OCO",
-				Line: 17,
-				TeamName: "Haas F1 Team",
-				TeamColour: "b6babd",
-				FirstName: "Esteban",
-				LastName: "Ocon",
-				Reference: "OCON",
-				HeadshotUrl: "",
-				CountryCode: "FRA",
-			},
-			"18": {
-				RacingNumber: "18",
-				BroadcastName: "L STROLL",
-				FullName: "Lance STROLL",
-				Tla: "STR",
-				Line: 18,
-				TeamName: "Aston Martin",
-				TeamColour: "229971",
-				FirstName: "Lance",
-				LastName: "Stroll",
-				Reference: "STROLL",
-				HeadshotUrl: "",
-				CountryCode: "CAN",
-			},
-			"27": {
-				RacingNumber: "27",
-				BroadcastName: "N HULKENBERG",
-				FullName: "Nico HULKENBERG",
-				Tla: "HUL",
-				Line: 19,
-				TeamName: "Audi",
-				TeamColour: "c0c0c0",
-				FirstName: "Nico",
-				LastName: "Hulkenberg",
-				Reference: "HULKENBERG",
-				HeadshotUrl: "",
-				CountryCode: "GER",
-			},
-			"5": {
-				RacingNumber: "5",
-				BroadcastName: "G BORTOLETO",
-				FullName: "Gabriel BORTOLETO",
-				Tla: "BOR",
-				Line: 20,
-				TeamName: "Audi",
-				TeamColour: "c0c0c0",
-				FirstName: "Gabriel",
-				LastName: "Bortoleto",
-				Reference: "BORTOLETO",
-				HeadshotUrl: "",
-				CountryCode: "BRA",
-			},
-			"77": {
-				RacingNumber: "77",
-				BroadcastName: "V BOTTAS",
-				FullName: "Valtteri BOTTAS",
-				Tla: "BOT",
-				Line: 21,
-				TeamName: "Cadillac F1 Team",
-				TeamColour: "94a3b8",
-				FirstName: "Valtteri",
-				LastName: "Bottas",
-				Reference: "BOTTAS",
-				HeadshotUrl: "",
-				CountryCode: "FIN",
-			},
-			"6": {
-				RacingNumber: "6",
-				BroadcastName: "I HADJAR",
-				FullName: "Isack HADJAR",
-				Tla: "HAD",
-				Line: 22,
-				TeamName: "Red Bull Racing",
-				TeamColour: "3671c6",
-				FirstName: "Isack",
-				LastName: "Hadjar",
-				Reference: "HADJAR",
-				HeadshotUrl: "",
-				CountryCode: "FRA",
-			},
-		};
+		this.currentOrder = [
+			"4", "1", "16", "81", "44", "63", "12", "43", "11", "55",
+			"14", "23", "10", "30", "22", "87", "31", "18", "27", "5", "77", "6"
+		];
 
-		const buildLine = (
-			num: string,
-			pos: string,
-			gap: string,
-			int: string,
-			lastLap: string,
-			bestLap: string,
-			s1: string,
-			s2: string,
-			s3: string,
-			speed: string,
-			isFastest = false,
-			isPersonalFastest = false,
-		) => ({
-			RacingNumber: num,
-			Position: pos,
-			ShowPosition: true,
-			Retired: false,
-			InPit: false,
-			PitOut: false,
-			Stopped: false,
-			Status: 0,
-			GapToLeader: gap,
-			IntervalToPositionAhead: { Value: int, Catching: int.startsWith("-") || isPersonalFastest },
-			BestLapTime: { Value: bestLap, Position: parseInt(pos, 10) },
-			LastLapTime: { Value: lastLap, Status: 2049, OverallFastest: isFastest, PersonalFastest: isPersonalFastest },
-			NumberOfLaps: 28,
-			Sectors: [
-				{
-					Stopped: false,
-					Value: s1,
-					Status: isFastest ? 2051 : isPersonalFastest ? 2049 : 2048,
-					OverallFastest: isFastest,
-					PersonalFastest: isPersonalFastest,
-					Segments: [
-						{ Status: isFastest ? 2051 : isPersonalFastest ? 2049 : 2048 },
-						{ Status: isFastest ? 2051 : 2049 },
-						{ Status: 2048 },
-					],
-				},
-				{
-					Stopped: false,
-					Value: s2,
-					Status: isPersonalFastest ? 2049 : 2048,
-					OverallFastest: false,
-					PersonalFastest: isPersonalFastest,
-					Segments: [
-						{ Status: 2049 },
-						{ Status: 2048 },
-						{ Status: isPersonalFastest ? 2049 : 2048 },
-					],
-				},
-				{
-					Stopped: false,
-					Value: s3,
-					Status: 2048,
-					OverallFastest: false,
-					PersonalFastest: false,
-					Segments: [
-						{ Status: 2048 },
-						{ Status: 2048 },
-						{ Status: 2049 },
-					],
-				},
-			],
-			Speeds: {
-				St: { Value: speed, Status: 2049, OverallFastest: isFastest, PersonalFastest: isPersonalFastest },
-			},
+		// Distribuir a los 22 autos en puntos de la pista del circuito (721 coordenadas)
+		const trackLength = circuit65Track.x.length;
+		this.currentOrder.forEach((num, index) => {
+			// Espaciado dinámico: los primeros van en paquete, luego se distancian
+			const offset = (index * 31) % trackLength;
+			this.driverProgress[num] = (trackLength - offset) % trackLength;
+			this.driverIntervals[num] = index === 0 ? 0 : 0.65 + (index * 0.12);
 		});
-
-		const lines: Record<string, any> = {
-			"4": buildLine("4", "1", "LÍDER", "", "1:18.230", "1:18.230", "26.410", "26.890", "24.930", "345", true, true),
-			"1": buildLine("1", "2", "+0.640", "+0.640", "1:18.310", "1:18.290", "26.450", "26.920", "24.940", "344"),
-			"16": buildLine("16", "3", "+2.110", "+1.470", "1:18.450", "1:18.380", "26.500", "26.980", "24.970", "346"),
-			"81": buildLine("81", "4", "+3.480", "+1.370", "1:18.520", "1:18.460", "26.520", "27.010", "24.990", "343"),
-			"44": buildLine("44", "5", "+5.920", "+2.440", "1:18.690", "1:18.610", "26.590", "27.080", "25.020", "345"),
-			"63": buildLine("63", "6", "+7.800", "+1.880", "1:18.730", "1:18.700", "26.620", "27.100", "25.010", "342"),
-			"12": buildLine("12", "7", "+10.150", "+2.350", "1:19.010", "1:18.980", "26.710", "27.140", "25.160", "340"),
-			"43": buildLine("43", "8", "+14.320", "+4.170", "1:19.420", "1:19.420", "26.920", "27.180", "25.320", "343", false, true),
-			"11": buildLine("11", "9", "+15.060", "+0.740", "1:19.780", "1:19.710", "27.050", "27.240", "25.490", "341"),
-			"55": buildLine("55", "10", "+16.890", "+1.830", "1:19.920", "1:19.850", "27.100", "27.300", "25.520", "339"),
-			"14": buildLine("14", "11", "+18.420", "+1.530", "1:20.040", "1:19.980", "27.150", "27.350", "25.540", "338"),
-			"23": buildLine("23", "12", "+20.110", "+1.690", "1:20.180", "1:20.100", "27.200", "27.400", "25.580", "340"),
-			"10": buildLine("10", "13", "+22.050", "+1.940", "1:20.310", "1:20.250", "27.240", "27.450", "25.620", "339"),
-			"30": buildLine("30", "14", "+24.300", "+2.250", "1:20.450", "1:20.390", "27.300", "27.500", "25.650", "337"),
-			"22": buildLine("22", "15", "+26.550", "+2.250", "1:20.580", "1:20.500", "27.350", "27.550", "25.680", "336"),
-			"87": buildLine("87", "16", "+29.120", "+2.570", "1:20.720", "1:20.650", "27.400", "27.600", "25.720", "335"),
-			"31": buildLine("31", "17", "+31.840", "+2.720", "1:20.890", "1:20.800", "27.450", "27.650", "25.790", "335"),
-			"18": buildLine("18", "18", "+34.200", "+2.360", "1:21.050", "1:20.950", "27.500", "27.700", "25.850", "334"),
-			"27": buildLine("27", "19", "+37.600", "+3.400", "1:21.220", "1:21.100", "27.550", "27.780", "25.890", "333"),
-			"5": buildLine("5", "20", "+40.150", "+2.550", "1:21.400", "1:21.320", "27.600", "27.850", "25.950", "332"),
-			"77": buildLine("77", "21", "+43.820", "+3.670", "1:21.650", "1:21.500", "27.680", "27.920", "26.050", "334"),
-			"6": buildLine("6", "22", "+47.500", "+3.680", "1:21.920", "1:21.800", "27.750", "28.020", "26.150", "331"),
-		};
 
 		// Neumáticos (TimingAppData) para los 22 pilotos
 		const timingAppDataLines: Record<string, any> = {};
-		Object.keys(drivers2026).forEach((num, index) => {
+		this.currentOrder.forEach((num, index) => {
 			let compound: "SOFT" | "MEDIUM" | "HARD" = "MEDIUM";
 			let laps = 18;
 			if (num === "43") { compound = "MEDIUM"; laps = 18; }
@@ -469,9 +403,9 @@ class SimulatorService {
 			},
 			SessionStatus: { Status: "Started" },
 			TrackStatus: { Status: "1", Message: "AllClear" },
-			LapCount: { CurrentLap: 28, TotalLaps: 53 },
-			DriverList: drivers2026,
-			TimingData: { Lines: lines },
+			LapCount: { CurrentLap: this.lap, TotalLaps: this.totalLaps },
+			DriverList: DRIVERS_2026,
+			TimingData: { Lines: this.buildLines(), Withheld: false },
 			TimingAppData: { Lines: timingAppDataLines },
 			WeatherData: {
 				AirTemp: "23.8",
@@ -486,7 +420,7 @@ class SimulatorService {
 				Messages: [
 					{
 						Utc: nowIso,
-						Lap: 25,
+						Lap: 26,
 						Message: "TRACK CLEAR - GREEN FLAG IN ALL SECTORS",
 						Category: "Flag",
 						Flag: "GREEN",
@@ -494,29 +428,15 @@ class SimulatorService {
 					},
 					{
 						Utc: nowIso,
-						Lap: 26,
-						Message: "REGLAMENTO 2026: BOOST (SOBREPASO ELÉCTRICO) Y AERO ACTIVA HABILITADOS",
+						Lap: 27,
+						Message: "FIA REGLAMENTO 2026: BOOST (SOBREPASO ELÉCTRICO) Y AERO ACTIVA HABILITADOS",
 						Category: "Other",
 						Status: "ENABLED",
 					},
 					{
 						Utc: nowIso,
-						Lap: 27,
-						Message: "FIA STEWARDS: TURN 4 INCIDENT INVOLVING CARS 18 (STR) AND 27 (HUL) NOTED",
-						Category: "Incident",
-						Scope: "Track",
-					},
-					{
-						Utc: nowIso,
-						Lap: 27,
-						Message: "AUTO 43 (COL) MEJOR VUELTA PERSONAL 1:19.420 EN SECTOR 1 Y 2",
-						Category: "Sector",
-						Scope: "Driver",
-					},
-					{
-						Utc: nowIso,
 						Lap: 28,
-						Message: "AUTO 11 (PER) EN ZONA DE ATAQUE: 0.740s CON AUTO 43 (COL) - BOOST ACTIVO",
+						Message: "AUTO 43 (COL) EN ZONA DE DRS/BOOST: 0.740s CON AUTO 11 (PER)",
 						Category: "Other",
 						Scope: "Track",
 					},
@@ -529,11 +449,6 @@ class SimulatorService {
 						RacingNumber: "43",
 						Path: "simulated_colapinto_radio.mp3",
 					},
-					{
-						Utc: nowIso,
-						RacingNumber: "11",
-						Path: "simulated_perez_radio.mp3",
-					},
 				],
 			},
 			Heartbeat: {
@@ -541,38 +456,182 @@ class SimulatorService {
 			},
 		};
 
-		// Inyectar estado inicial en el store
+		// 1. Inyectar estado inicial en el store
 		useDataStore.getState().setState(initialState);
 
-		// Inyectar telemetría en vivo (RPM, velocidad, marcha, acelerador, MOM) para TODOS los 22 autos
+		// 2. Inyectar posiciones GPS en el trazado
+		this.updateGpsPositions();
+
+		// 3. Inyectar telemetría dinámica de autos (RPM, velocidad, marcha, acelerador, MOM)
 		useDataStore.getState().setCarsData(this.generateAllCarsData());
 
-		// Loop de actualización viva
+		// 4. Iniciar loop vivo cada 1000ms
 		this.intervalId = setInterval(() => {
 			this.tick();
-		}, 1500);
+		}, 1000);
+	}
+
+	private updateGpsPositions() {
+		const trackX = circuit65Track.x;
+		const trackY = circuit65Track.y;
+		const trackLength = trackX.length;
+
+		const positions: Positions = {};
+		this.currentOrder.forEach((num) => {
+			const prog = this.driverProgress[num] || 0;
+			const idx = Math.floor(prog) % trackLength;
+			positions[num] = {
+				X: trackX[idx],
+				Y: trackY[idx],
+				Z: 0,
+				Status: "OnTrack",
+			};
+		});
+
+		useDataStore.getState().setPositions(positions);
+	}
+
+	private buildLine(
+		num: string,
+		pos: string,
+		gap: string,
+		int: string,
+		lastLap: string,
+		bestLap: string,
+		s1: string,
+		s2: string,
+		s3: string,
+		speed: string,
+		isFastest = false,
+		isPersonalFastest = false
+	) {
+		return {
+			RacingNumber: num,
+			Position: pos,
+			ShowPosition: true,
+			Retired: false,
+			InPit: false,
+			PitOut: false,
+			Stopped: false,
+			Status: 0,
+			GapToLeader: gap,
+			IntervalToPositionAhead: { Value: int, Catching: int.startsWith("-") || isPersonalFastest },
+			BestLapTime: { Value: bestLap, Position: parseInt(pos, 10) },
+			LastLapTime: { Value: lastLap, Status: 2049, OverallFastest: isFastest, PersonalFastest: isPersonalFastest },
+			NumberOfLaps: this.lap,
+			Sectors: [
+				{
+					Stopped: false,
+					Value: s1,
+					Status: isFastest ? 2051 : isPersonalFastest ? 2049 : 2048,
+					OverallFastest: isFastest,
+					PersonalFastest: isPersonalFastest,
+					Segments: [
+						{ Status: isFastest ? 2051 : isPersonalFastest ? 2049 : 2048 },
+						{ Status: isFastest ? 2051 : 2049 },
+						{ Status: 2048 },
+					],
+				},
+				{
+					Stopped: false,
+					Value: s2,
+					Status: isPersonalFastest ? 2049 : 2048,
+					OverallFastest: false,
+					PersonalFastest: isPersonalFastest,
+					Segments: [
+						{ Status: 2049 },
+						{ Status: 2048 },
+						{ Status: isPersonalFastest ? 2049 : 2048 },
+					],
+				},
+				{
+					Stopped: false,
+					Value: s3,
+					Status: 2048,
+					OverallFastest: false,
+					PersonalFastest: false,
+					Segments: [
+						{ Status: 2048 },
+						{ Status: 2048 },
+						{ Status: 2049 },
+					],
+				},
+			],
+			Speeds: {
+				St: { Value: speed, Status: 2049, OverallFastest: isFastest, PersonalFastest: isPersonalFastest },
+			},
+		};
+	}
+
+	private buildLines(): Record<string, any> {
+		const newLines: Record<string, any> = {};
+		let cumulativeGap = 0;
+
+		this.currentOrder.forEach((num, index) => {
+			const pos = String(index + 1);
+			const interval = index === 0 ? 0 : this.driverIntervals[num] || (0.7 + (index * 0.15));
+			if (index > 0) cumulativeGap += interval;
+
+			const gapStr = index === 0 ? "LÍDER" : `+${cumulativeGap.toFixed(3)}`;
+			const intStr = index === 0 ? "" : `+${interval.toFixed(3)}`;
+
+			const baseSec = 78.0 + (index * 0.15) + (Math.sin(this.tickCount * 0.15 + index) * 0.25);
+			const m = Math.floor(baseSec / 60);
+			const s = (baseSec % 60).toFixed(3).padStart(6, "0");
+			const lastLapStr = `${m}:${s}`;
+			const bestLapStr = index === 0 ? "1:18.230" : num === "43" ? "1:19.420" : `1:${(18.230 + index * 0.16).toFixed(3)}`;
+
+			const s1 = (26.3 + (index * 0.04) + Math.sin(this.tickCount * 0.1) * 0.08).toFixed(3);
+			const s2 = (26.8 + (index * 0.04) + Math.cos(this.tickCount * 0.1) * 0.08).toFixed(3);
+			const s3 = (24.9 + (index * 0.04) + Math.sin(this.tickCount * 0.12) * 0.08).toFixed(3);
+			const speed = String(Math.floor(338 + (index % 4) * 2 + Math.random() * 4));
+
+			const isLeader = index === 0;
+			const isColapinto = num === "43";
+			const isFastest = isLeader && this.tickCount % 5 === 0;
+			const isPersonalFastest = (isColapinto || index < 6) && this.tickCount % 3 === 0;
+
+			newLines[num] = this.buildLine(
+				num,
+				pos,
+				gapStr,
+				intStr,
+				lastLapStr,
+				bestLapStr,
+				s1,
+				s2,
+				s3,
+				speed,
+				isFastest,
+				isPersonalFastest
+			);
+		});
+
+		return newLines;
 	}
 
 	private generateAllCarsData(): CarsData {
-		const allNumbers = [
-			"4", "1", "16", "81", "44", "63", "12", "43", "11", "55",
-			"14", "23", "10", "30", "22", "87", "31", "18", "27", "5", "77", "6"
-		];
-
+		const isNeutralized = this.trackStatus === "4" || this.trackStatus === "6";
 		const mock: CarsData = {};
-		allNumbers.forEach((num, idx) => {
-			// Activar MOM en Franco, Checo, Verstappen, Norris y algunos pilotos estratégicos
-			const isMom = num === "43" || num === "11" || num === "1" || num === "4" || (idx % 2 === 0);
-			const baseSpeed = num === "43" ? 343 : num === "11" ? 341 : num === "4" ? 345 : 332;
+
+		this.currentOrder.forEach((num, idx) => {
+			const isMom = !isNeutralized && (num === "43" || num === "11" || num === "1" || num === "4" || (idx % 2 === 0));
+			const baseSpeed = isNeutralized
+				? 165
+				: num === "43" ? 343 : num === "11" ? 341 : num === "4" ? 345 : 332;
 
 			mock[num] = {
 				Channels: {
-					0: Math.floor(10500 + Math.random() * 1400), // RPM
-					2: Math.floor(baseSpeed - 3 + Math.random() * 6), // Velocidad km/h
-					3: 8, // Marcha 8
-					4: Math.floor(88 + Math.random() * 12), // Acelerador %
+					0: isNeutralized
+						? Math.floor(7400 + Math.random() * 400)
+						: Math.floor(10800 + Math.random() * 1400), // RPM
+					2: isNeutralized
+						? Math.floor(baseSpeed - 2 + Math.random() * 4)
+						: Math.floor(baseSpeed - 3 + Math.random() * 6), // Velocidad km/h
+					3: isNeutralized ? 5 : 8, // Marcha
+					4: isNeutralized ? 45 : Math.floor(88 + Math.random() * 12), // Acelerador %
 					5: 0, // Freno
-					45: isMom ? 10 : 8, // 10 = MOM Activo, 8 = MOM Disponible
+					45: isMom ? 10 : 8, // MOM
 				},
 			};
 		});
@@ -581,16 +640,270 @@ class SimulatorService {
 	}
 
 	private tick() {
-		const state = useDataStore.getState().state;
-		if (!state?.TimingData?.Lines) return;
+		this.tickCount++;
+		const trackLength = circuit65Track.x.length;
+		const isNeutralized = this.trackStatus === "4" || this.trackStatus === "6";
 
-		// Actualizamos telemetría oscilante de todos los 22 autos
+		// 1. Avanzar monoplazas a lo largo del circuito
+		const baseStep = isNeutralized ? 4.0 : 8.8; // ~9 puntos/segundo a 340 km/h
+		this.currentOrder.forEach((num, idx) => {
+			// Variaciones de ritmo para que los autos se acerquen y alejen naturalmente
+			const driverDelta = isNeutralized ? 0 : Math.sin(this.tickCount * 0.1 + idx) * 0.4;
+			const speed = baseStep + driverDelta;
+			this.driverProgress[num] = (this.driverProgress[num] + speed) % trackLength;
+
+			// Pequeña oscilación de intervalos
+			if (idx > 0) {
+				const currentInt = this.driverIntervals[num] || 0.8;
+				const jitter = (Math.random() - 0.5) * 0.04;
+				this.driverIntervals[num] = Math.max(0.25, Math.min(4.5, currentInt + jitter));
+			}
+		});
+
+		// 2. Actualizar posiciones GPS para el mapa
+		this.updateGpsPositions();
+
+		// 3. Actualizar telemetría de motor
 		useDataStore.getState().setCarsData(this.generateAllCarsData());
 
-		// Mantener Heartbeat vivo para que los widgets reconozcan actividad continua
+		// 4. Actualizar tabla de tiempos y sectores oscilantes
+		const updatedLines = this.buildLines();
+
+		// 5. Clima fluctuante
+		const weatherUpdate = {
+			AirTemp: (23.8 + Math.sin(this.tickCount * 0.08) * 0.4).toFixed(1),
+			Humidity: String(Math.round(46 + Math.cos(this.tickCount * 0.06) * 3)),
+			Pressure: "1014.2",
+			Rainfall: "0",
+			TrackTemp: (38.5 + Math.sin(this.tickCount * 0.07) * 0.9).toFixed(1),
+			WindDirection: String(Math.round(190 + Math.sin(this.tickCount * 0.05) * 8)),
+			WindSpeed: (3.4 + Math.sin(this.tickCount * 0.1) * 0.5).toFixed(1),
+		};
+
+		// 6. Incrementar vueltas periódicamente (cada ~35 segundos)
+		if (this.tickCount % 35 === 0 && this.lap < this.totalLaps) {
+			this.lap++;
+		}
+
+		// 7. Ciclo de eventos automáticos si no se forzó nada manualmente
+		this.handleScheduledEvents();
+
+		// 8. Commit al store global
 		useDataStore.getState().setState({
-			Heartbeat: {
-				Utc: new Date().toISOString(),
+			LapCount: { CurrentLap: this.lap, TotalLaps: this.totalLaps },
+			TimingData: { Lines: updatedLines, Withheld: false },
+			WeatherData: weatherUpdate,
+			TrackStatus: {
+				Status: this.trackStatus,
+				Message:
+					this.trackStatus === "1"
+						? "AllClear"
+						: this.trackStatus === "2"
+						? "Yellow"
+						: this.trackStatus === "4"
+						? "SafetyCar"
+						: "VSC",
+			},
+			Heartbeat: { Utc: new Date().toISOString() },
+		});
+	}
+
+	private handleScheduledEvents() {
+		// Segundo 18: Radio de Colapinto
+		if (this.tickCount === 18) {
+			this.triggerRadio("43");
+		}
+
+		// Segundo 28: Colapinto (#43) adelanta a Checo Pérez (#11) por P8
+		if (this.tickCount === 28) {
+			this.executeOvertake("43", "11");
+		}
+
+		// Segundo 55: Bandera Amarilla en Sector 2 (incidente de Lawson)
+		if (this.tickCount === 55) {
+			this.setTrackStatus(
+				"2",
+				"YELLOW FLAG IN SECTOR 2 - INCIDENT AT TURN 4 INVOLVING CAR 30 (LAW)"
+			);
+		}
+
+		// Segundo 70: VSC Desplegado
+		if (this.tickCount === 70) {
+			this.setTrackStatus(
+				"6",
+				"VIRTUAL SAFETY CAR (VSC) DEPLOYED - REDUCE SPEED AND MAINTAIN POSITIVE DELTA"
+			);
+		}
+
+		// Segundo 95: VSC Termina -> Pista Verde
+		if (this.tickCount === 95) {
+			this.addRaceControlMessage(
+				"VSC ENDING - TRACK CLEAR IN SECTOR 2",
+				"Flag",
+				"Track"
+			);
+			setTimeout(() => {
+				this.setTrackStatus("1", "TRACK CLEAR - GREEN FLAG IN ALL SECTORS");
+			}, 3000);
+		}
+
+		// Segundo 120: Verstappen (#1) ataca a Norris (#4) y toma la punta
+		if (this.tickCount === 120) {
+			this.executeOvertake("1", "4");
+		}
+
+		// Segundo 140: Radio de Lewis Hamilton
+		if (this.tickCount === 140) {
+			this.triggerRadio("44");
+		}
+
+		// Segundo 165: Norris contrataca con DRS y recupera la punta
+		if (this.tickCount === 165) {
+			this.executeOvertake("4", "1");
+		}
+
+		// Segundo 190: Radio de Verstappen
+		if (this.tickCount === 190) {
+			this.triggerRadio("1");
+		}
+	}
+
+	public executeOvertake(overtakerNum: string, defenderNum: string) {
+		const idxOvertaker = this.currentOrder.indexOf(overtakerNum);
+		const idxDefender = this.currentOrder.indexOf(defenderNum);
+
+		if (idxOvertaker === -1 || idxDefender === -1) return;
+
+		// Intercambiar posiciones en la lista
+		const temp = this.currentOrder[idxOvertaker];
+		this.currentOrder[idxOvertaker] = this.currentOrder[idxDefender];
+		this.currentOrder[idxDefender] = temp;
+
+		// Ajustar el progreso en pista para que el auto que adelantó esté físicamente por delante
+		const defenderProg = this.driverProgress[defenderNum] || 0;
+		this.driverProgress[overtakerNum] = (defenderProg + 12) % circuit65Track.x.length;
+
+		// Intercambiar intervalos
+		this.driverIntervals[overtakerNum] = 0.45;
+		this.driverIntervals[defenderNum] = 0.62;
+
+		const overtaker = DRIVERS_2026[overtakerNum];
+		const defender = DRIVERS_2026[defenderNum];
+		const newPos = this.currentOrder.indexOf(overtakerNum) + 1;
+
+		this.addRaceControlMessage(
+			`OVERTAKE · AUTO ${overtakerNum} (${overtaker?.Tla || overtakerNum}) ADELANTÓ A AUTO ${defenderNum} (${defender?.Tla || defenderNum}) POR P${newPos}`,
+			"Overtake",
+			"Track"
+		);
+
+		this.overtakeCount++;
+	}
+
+	public triggerOvertake() {
+		// Encuentra una pareja reñida para adelantar
+		if (this.overtakeCount % 3 === 0) {
+			this.executeOvertake("43", "11"); // Colapinto vs Perez
+		} else if (this.overtakeCount % 3 === 1) {
+			this.executeOvertake("1", "4"); // Verstappen vs Norris
+		} else {
+			this.executeOvertake("44", "81"); // Hamilton vs Piastri
+		}
+	}
+
+	public setTrackStatus(status: string, reasonMessage?: string) {
+		this.trackStatus = status;
+
+		if (reasonMessage) {
+			const flagType:
+				| "GREEN"
+				| "YELLOW"
+				| "BLACK AND WHITE"
+				| "BLUE"
+				| "CLEAR"
+				| "DOUBLE YELLOW"
+				| "RED"
+				| "CHEQUERED"
+				| undefined =
+				status === "1" ? "GREEN" : status === "2" ? "YELLOW" : undefined;
+			this.addRaceControlMessage(reasonMessage, "Flag", "Track", flagType);
+		}
+
+		useDataStore.getState().setState({
+			TrackStatus: {
+				Status: status,
+				Message:
+					status === "1"
+						? "AllClear"
+						: status === "2"
+						? "Yellow"
+						: status === "4"
+						? "SafetyCar"
+						: "VSC",
+			},
+		});
+	}
+
+	public triggerFlag(status: "1" | "2" | "4" | "6") {
+		const messages: Record<string, string> = {
+			"1": "TRACK CLEAR - GREEN FLAG IN ALL SECTORS",
+			"2": "YELLOW FLAG IN SECTOR 2 - HAZARD REPORTED AT TURN 4",
+			"4": "SAFETY CAR (SC) DEPLOYED - REDUCE SPEED IMMEDIATELY",
+			"6": "VIRTUAL SAFETY CAR (VSC) DEPLOYED - MAINTAIN POSITIVE DELTA",
+		};
+		this.setTrackStatus(status, messages[status]);
+	}
+
+	public triggerRadio(driverNum: string = "43") {
+		const nowIso = new Date().toISOString();
+		const driver = DRIVERS_2026[driverNum];
+		const currentRadio = useDataStore.getState().state?.TeamRadio?.Captures || [];
+
+		useDataStore.getState().setState({
+			TeamRadio: {
+				Captures: [
+					{
+						Utc: nowIso,
+						RacingNumber: driverNum,
+						Path: `simulated_${driver?.Tla?.toLowerCase() || "driver"}_radio.mp3`,
+					},
+					...currentRadio.slice(0, 5),
+				],
+			},
+		});
+	}
+
+	public triggerLapIncrement() {
+		if (this.lap < this.totalLaps) {
+			this.lap++;
+			useDataStore.getState().setState({
+				LapCount: { CurrentLap: this.lap, TotalLaps: this.totalLaps },
+			});
+		}
+	}
+
+	private addRaceControlMessage(
+		message: string,
+		category: string = "Other",
+		scope: "Track" | "Sector" | "Driver" = "Track",
+		flag?: "GREEN" | "YELLOW" | "BLACK AND WHITE" | "BLUE" | "CLEAR" | "DOUBLE YELLOW" | "RED" | "CHEQUERED"
+	) {
+		const nowIso = new Date().toISOString();
+		const existing = useDataStore.getState().state?.RaceControlMessages?.Messages || [];
+
+		useDataStore.getState().setState({
+			RaceControlMessages: {
+				Messages: [
+					{
+						Utc: nowIso,
+						Lap: this.lap,
+						Message: message,
+						Category: category,
+						Scope: scope,
+						Flag: flag,
+					},
+					...existing.slice(0, 15),
+				],
 			},
 		});
 	}
@@ -605,6 +918,14 @@ class SimulatorService {
 
 	public getActive(): boolean {
 		return this.isRunning;
+	}
+
+	public getCurrentLap(): number {
+		return this.lap;
+	}
+
+	public getTrackStatus(): string {
+		return this.trackStatus;
 	}
 }
 
