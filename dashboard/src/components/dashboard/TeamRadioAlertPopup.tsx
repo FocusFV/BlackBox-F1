@@ -56,7 +56,16 @@ export function TeamRadioAlertPopup() {
 
 	// Auto-play cuando se monta o cambia activeCapture
 	useEffect(() => {
-		if (!activeCapture || !sessionPath) return;
+		if (!activeCapture) return;
+
+		// ⏱️ Auto-cierre garantizado a los 5.5 segundos para que nunca se quede trabado en pantalla
+		const autoDismissTimer = setTimeout(() => {
+			setActiveCapture(null);
+		}, 5500);
+
+		if (!sessionPath) {
+			return () => clearTimeout(autoDismissTimer);
+		}
 
 		const audioUrl = `https://livetiming.formula1.com/static/${sessionPath}${activeCapture.capture.Path}`;
 		const audio = new Audio(audioUrl);
@@ -74,7 +83,11 @@ export function TeamRadioAlertPopup() {
 			// Cerrar notificación flotante 5s después de finalizar
 			setTimeout(() => {
 				setActiveCapture(null);
-			}, 5000);
+			}, 2000);
+		};
+
+		audio.onerror = () => {
+			// En caso de audio simulado o inexistente, el temporizador principal lo cerrará limpiamente
 		};
 
 		if (autoPlay) {
@@ -94,6 +107,7 @@ export function TeamRadioAlertPopup() {
 		}
 
 		return () => {
+			clearTimeout(autoDismissTimer);
 			if (audioRef.current) {
 				audioRef.current.pause();
 				audioRef.current = null;

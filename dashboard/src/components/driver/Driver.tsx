@@ -117,7 +117,10 @@ export default function Driver({ driver, timingDriver, position, teamColor, cumu
 		timingDriver.LastLapTime?.PersonalFastest
 	);
 
-	const carMetrics = useSettingsStore((state) => state.carMetrics);
+	const isSimActive =
+		typeof window !== "undefined" &&
+		sessionStorage.getItem("f1_pitwall_sim") === "active";
+	const carMetrics = useSettingsStore((state) => state.carMetrics) || isSimActive;
 	const gridDensity = useSettingsStore((state) => state.gridDensity);
 	const isCompact = gridDensity === "compact";
 

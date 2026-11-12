@@ -41,6 +41,7 @@ export default function TrackMap() {
 
 	const drivers = useDataStore((state) => state.state?.DriverList);
 	const driversTiming = useDataStore((state) => state.state?.TimingData);
+	const carsData = useDataStore((state) => state.carsData);
 	const activeTrackName = useDataStore((state) => (state.state as any)?.RaceInfo?.TrackName || "Circuito Activo");
 
 	return (
@@ -81,19 +82,27 @@ export default function TrackMap() {
 								.map((timingDriver: any, index) => {
 									const driverCode = drivers[timingDriver.RacingNumber]?.Tla || "F1";
 									const realTeamColor = driverTeamColorMap[driverCode] || drivers[timingDriver.RacingNumber]?.TeamColour || "#3f3f46";
+									const car = carsData?.[timingDriver.RacingNumber]?.Channels;
 									return (
 										<motion.div
 											layout="position"
 											className="flex flex-col gap-1 rounded-xl p-2 border border-zinc-900 bg-zinc-900/10 hover:border-zinc-800/80 transition-all min-h-14 justify-center select-none"
 											key={`trackmap.driver.${timingDriver.RacingNumber}`}
 										>
-											<div className="grid items-center gap-3 w-full" style={{ gridTemplateColumns: "5.5rem 3.5rem 4rem 1fr 5rem" }}>
+											<div className="grid items-center gap-2 w-full" style={{ gridTemplateColumns: "5.5rem 3.5rem 4rem 1fr auto 5rem" }}>
 												<DriverTag className="min-w-full!" short={driverCode} teamColor={realTeamColor} position={index + 1} />
 												<div className="flex flex-col items-center justify-center text-center">
 													<span className="text-[9px] font-black px-1 py-0.5 rounded bg-zinc-900 text-emerald-500/60 border border-zinc-800/60">MOM</span>
 												</div>
 												<DriverInfo timingDriver={timingDriver} gridPos={0} />
 												<DriverGap timingDriver={timingDriver} sessionPart={1} />
+												{car && (
+													<div className="flex items-center gap-1.5 px-1.5 py-0.5 rounded bg-zinc-900/90 border border-zinc-800 text-[10px] font-mono shrink-0">
+														<span className="text-amber-400 font-black">M{car[3] || "8"}</span>
+														<span className="text-zinc-200 font-bold">{car[2] || 338} <span className="text-[8px] text-zinc-500">km/h</span></span>
+														<span className="text-cyan-400 font-medium hidden xl:inline">{car[0] || 11200} <span className="text-[8px] text-zinc-500">RPM</span></span>
+													</div>
+												)}
 												<DriverLapTime last={timingDriver.LastLapTime} best={timingDriver.BestLapTime} hasFastest={false} />
 											</div>
 										</motion.div>

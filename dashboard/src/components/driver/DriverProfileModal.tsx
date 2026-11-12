@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "motion/react";
-import { X, Trophy, Swords, Calendar } from "lucide-react";
+import { X, Trophy, Swords, Calendar, Gauge, Activity, Zap } from "lucide-react";
 import { utc } from "moment";
 import clsx from "clsx";
 
+import { useDataStore } from "@/stores/useDataStore";
 import { useDriverModalStore } from "@/stores/useDriverModalStore";
 import { useHeadToHeadStore } from "@/stores/useHeadToHeadStore";
 import { translateGpName } from "@/lib/f1Translations";
@@ -199,6 +200,34 @@ export default function DriverProfileModal() {
 	const standingPos = driver?.position || officialData?.pos || "1";
 	const standingPoints = officialData?.points || driver?.points || "0";
 
+	const [activeTab, setActiveTab] = useState<"telemetry" | "season">("telemetry");
+
+	const driversList = useDataStore((state) => state.state?.DriverList);
+	const timingLines = useDataStore((state) => state.state?.TimingData?.Lines);
+	const appTimingLines = useDataStore((state) => state.state?.TimingAppData?.Lines);
+	const carsDataStore = useDataStore((state) => state.carsData);
+
+	// Buscar el número de carrera oficial del piloto por su código TLA
+	const resolvedRacingNumber = useMemo(() => {
+		if (!driversList) return null;
+		const match = Object.entries(driversList).find(
+			([_, d]) => d?.Tla?.toUpperCase() === driverCode?.toUpperCase()
+		);
+		return match ? match[0] : null;
+	}, [driversList, driverCode]);
+
+	const timingDriver = resolvedRacingNumber && timingLines ? timingLines[resolvedRacingNumber] : null;
+	const appTiming = resolvedRacingNumber && appTimingLines ? appTimingLines[resolvedRacingNumber] : null;
+	const carChannels = resolvedRacingNumber && carsDataStore ? carsDataStore[resolvedRacingNumber]?.Channels : null;
+
+	const hasLiveTelemetry = Boolean(timingDriver || carChannels);
+
+	useEffect(() => {
+		if (isOpen) {
+			setActiveTab(hasLiveTelemetry ? "telemetry" : "season");
+		}
+	}, [isOpen, hasLiveTelemetry]);
+
 	useEffect(() => {
 		if (!isOpen || !driver) {
 			setSeasonResults([]);
@@ -331,147 +360,308 @@ export default function DriverProfileModal() {
 					</div>
 				</div>
 
-				{/* MÉTRICAS RÁPIDAS */}
-				<div className="grid grid-cols-3 gap-2 py-3 border-b border-zinc-900 text-center">
-					<div className="p-2 rounded-xl bg-zinc-900/40 border border-zinc-900">
-						<span className="text-base font-black text-white">{totalRaces}</span>
-						<span className="text-[9px] block text-zinc-500 font-bold uppercase">Carreras</span>
-					</div>
-					<div className="p-2 rounded-xl bg-zinc-900/40 border border-zinc-900">
-						<span className="text-base font-black text-amber-400">{wins}</span>
-						<span className="text-[9px] block text-zinc-500 font-bold uppercase">Victorias</span>
-					</div>
-					<div className="p-2 rounded-xl bg-zinc-900/40 border border-zinc-900">
-						<span className="text-base font-black text-emerald-400">{podiums}</span>
-						<span className="text-[9px] block text-zinc-500 font-bold uppercase">Podios</span>
-					</div>
-				</div>
-
-				{/* BOTÓN PARA COMPARAR CARA A CARA */}
-				<div className="pt-3 pb-1">
+				{/* SELECTOR DE PESTAÑAS: TELEMETRÍA EN VIVO / TRAYECTORIA TEMPORADA */}
+				<div className="flex items-center gap-2 pt-3 pb-2 border-b border-zinc-900">
+					{hasLiveTelemetry && (
+						<button
+							type="button"
+							onClick={() => setActiveTab("telemetry")}
+							className={clsx(
+								"flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer",
+								activeTab === "telemetry"
+									? "bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-xs"
+									: "bg-zinc-900/60 text-zinc-400 hover:text-white border border-zinc-800"
+							)}
+						>
+							<Gauge className="w-3.5 h-3.5 text-amber-400" />
+							<span>Telemetría en Vivo</span>
+						</button>
+					)}
 					<button
 						type="button"
-						onClick={() => {
-							close();
-							useHeadToHeadStore.getState().open(driverCode || driverId);
-						}}
-						className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-98"
+						onClick={() => setActiveTab("season")}
+						className={clsx(
+							"flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer",
+							activeTab === "season" || !hasLiveTelemetry
+								? "bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-xs"
+								: "bg-zinc-900/60 text-zinc-400 hover:text-white border border-zinc-800"
+						)}
 					>
-						<Swords className="w-4 h-4" />
-						<span>Comparar en Cara a Cara</span>
+						<Trophy className="w-3.5 h-3.5 text-amber-400" />
+						<span>Trayectoria 2026</span>
 					</button>
 				</div>
 
-				{/* HISTORIAL CARRERA POR CARRERA */}
-				<div className="flex flex-col flex-1 overflow-hidden mt-2">
-					<div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-900 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-						<span>Resultados Temporada 2026</span>
-						<span>Posición & Puntos</span>
+				{/* VISTA 1: TELEMETRÍA EN VIVO */}
+				{activeTab === "telemetry" && hasLiveTelemetry && (
+					<div className="flex flex-col gap-3 py-3 overflow-y-auto flex-1 custom-scrollbar">
+						{/* POSICIÓN Y BRECHAS EN PISTA */}
+						<div className="grid grid-cols-3 gap-2 text-center font-mono">
+							<div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
+								<span className="text-[10px] text-zinc-500 font-bold uppercase block">Posición Actual</span>
+								<span className="text-xl font-black text-amber-400">P{timingDriver?.Position || "-"}</span>
+							</div>
+							<div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
+								<span className="text-[10px] text-zinc-500 font-bold uppercase block">Brecha Líder</span>
+								<span className="text-sm font-black text-white">{timingDriver?.GapToLeader || "LÍDER"}</span>
+							</div>
+							<div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
+								<span className="text-[10px] text-zinc-500 font-bold uppercase block">Intervalo Auto Del.</span>
+								<span className="text-sm font-black text-emerald-400">{timingDriver?.IntervalToPositionAhead?.Value || "-"}</span>
+							</div>
+						</div>
+
+						{/* TELEMETRÍA DE MOTOR ECU */}
+						{carChannels && (
+							<div className="p-3 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 flex flex-col gap-2.5">
+								<div className="flex items-center justify-between border-b border-zinc-800/60 pb-1.5">
+									<span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+										<Activity className="w-3 h-3 text-emerald-400" />
+										TELEMETRÍA ECU EN VIVO
+									</span>
+									<span className="text-[10px] font-bold text-amber-400 font-mono">
+										PU REGULACIÓN 2026
+									</span>
+								</div>
+
+								<div className="grid grid-cols-3 gap-2 text-center font-mono">
+									<div className="p-2 rounded-xl bg-zinc-950/80 border border-zinc-900">
+										<span className="text-[9px] text-zinc-500 font-bold uppercase block">Velocidad</span>
+										<span className="text-lg font-black text-white">{carChannels[2] || 0} <span className="text-xs text-zinc-500">km/h</span></span>
+									</div>
+									<div className="p-2 rounded-xl bg-zinc-950/80 border border-zinc-900">
+										<span className="text-[9px] text-zinc-500 font-bold uppercase block">Marcha</span>
+										<span className="text-lg font-black text-amber-400">M{carChannels[3] || "N"}</span>
+									</div>
+									<div className="p-2 rounded-xl bg-zinc-950/80 border border-zinc-900">
+										<span className="text-[9px] text-zinc-500 font-bold uppercase block">Régimen RPM</span>
+										<span className="text-lg font-black text-cyan-400">{carChannels[0] || 0}</span>
+									</div>
+								</div>
+
+								{/* Barras de Acelerador y Freno */}
+								<div className="grid grid-cols-2 gap-3 pt-1">
+									<div className="flex flex-col gap-1">
+										<div className="flex justify-between text-[10px] font-mono">
+											<span className="text-emerald-400 font-bold">ACELERADOR</span>
+											<span className="text-white font-black">{carChannels[4] || 0}%</span>
+										</div>
+										<div className="h-2 rounded-full bg-zinc-800 overflow-hidden">
+											<div className="h-full bg-emerald-400 transition-all duration-150" style={{ width: `${carChannels[4] || 0}%` }} />
+										</div>
+									</div>
+									<div className="flex flex-col gap-1">
+										<div className="flex justify-between text-[10px] font-mono">
+											<span className="text-red-400 font-bold">FRENO</span>
+											<span className="text-white font-black">{carChannels[5] ? "100%" : "0%"}</span>
+										</div>
+										<div className="h-2 rounded-full bg-zinc-800 overflow-hidden">
+											<div className="h-full bg-red-500 transition-all duration-150" style={{ width: carChannels[5] ? "100%" : "0%" }} />
+										</div>
+									</div>
+								</div>
+							</div>
+						)}
+
+						{/* TIEMPOS DE VUELTA Y SECTORES */}
+						{timingDriver && (
+							<div className="p-3 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 flex flex-col gap-2 font-mono">
+								<span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-800/60 pb-1.5">
+									SECTORES & VUELTAS
+								</span>
+								<div className="grid grid-cols-3 gap-2 text-center text-xs">
+									<div className="p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-900">
+										<span className="text-[9px] text-zinc-500 block">SECTOR 1</span>
+										<span className="font-bold text-white">{timingDriver.Sectors?.[0]?.Value || "-"}</span>
+									</div>
+									<div className="p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-900">
+										<span className="text-[9px] text-zinc-500 block">SECTOR 2</span>
+										<span className="font-bold text-white">{timingDriver.Sectors?.[1]?.Value || "-"}</span>
+									</div>
+									<div className="p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-900">
+										<span className="text-[9px] text-zinc-500 block">SECTOR 3</span>
+										<span className="font-bold text-white">{timingDriver.Sectors?.[2]?.Value || "-"}</span>
+									</div>
+								</div>
+
+								<div className="grid grid-cols-2 gap-2 text-center pt-1">
+									<div className="p-2 rounded-xl bg-zinc-950/60 border border-zinc-900">
+										<span className="text-[9px] text-zinc-500 block uppercase">Última Vuelta</span>
+										<span className="text-sm font-black text-zinc-200">{timingDriver.LastLapTime?.Value || "-"}</span>
+									</div>
+									<div className="p-2 rounded-xl bg-zinc-950/60 border border-zinc-900">
+										<span className="text-[9px] text-zinc-500 block uppercase">Mejor Vuelta</span>
+										<span className="text-sm font-black text-purple-400">{timingDriver.BestLapTime?.Value || "-"}</span>
+									</div>
+								</div>
+							</div>
+						)}
+
+						{/* NEUMÁTICOS Y STINT */}
+						{appTiming?.Stints && (
+							<div className="p-3 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 flex items-center justify-between font-mono text-xs">
+								<div className="flex items-center gap-2">
+									<span className="text-[9px] font-black px-2 py-1 rounded bg-zinc-800 text-amber-400 border border-zinc-700 uppercase">
+										{appTiming.Stints[appTiming.Stints.length - 1]?.Compound || "MEDIO"}
+									</span>
+									<span className="text-zinc-300 text-xs font-bold">
+										Stint Actual: {appTiming.Stints[appTiming.Stints.length - 1]?.TotalLaps || 1} Vueltas
+									</span>
+								</div>
+								<span className="text-[10px] text-zinc-500 font-bold uppercase">
+									{appTiming.Stints.length} {appTiming.Stints.length === 1 ? "STINT" : "STINTS"}
+								</span>
+							</div>
+						)}
 					</div>
+				)}
 
-					{/* Banner Sprint */}
-					{sprintPoints > 0 && (
-						<div className="flex items-center justify-between p-2.5 px-3 mb-2 rounded-xl bg-amber-500/10 border border-amber-500/30 font-mono text-xs shadow-xs">
-							<div className="flex items-center gap-2">
-								<span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-widest">
-									PUNTOS SPRINT
-								</span>
-								<span className="text-zinc-300 text-[11px] font-medium">
-									Carreras Sprint oficiales de la temporada
-								</span>
+				{/* VISTA 2: TRAYECTORIA 2026 */}
+				{(!hasLiveTelemetry || activeTab === "season") && (
+					<>
+						{/* MÉTRICAS RÁPIDAS */}
+						<div className="grid grid-cols-3 gap-2 py-3 border-b border-zinc-900 text-center">
+							<div className="p-2 rounded-xl bg-zinc-900/40 border border-zinc-900">
+								<span className="text-base font-black text-white">{totalRaces}</span>
+								<span className="text-[9px] block text-zinc-500 font-bold uppercase">Carreras</span>
 							</div>
-							<div className="text-right">
-								<span className="text-amber-400 font-black">+{sprintPoints} PTS</span>
-								<span className="text-[9px] text-zinc-500 ml-1.5 hidden sm:inline">
-									({racePointsSum} en GP + {sprintPoints} Sprint = {officialTotalPoints} PTS)
-								</span>
+							<div className="p-2 rounded-xl bg-zinc-900/40 border border-zinc-900">
+								<span className="text-base font-black text-amber-400">{wins}</span>
+								<span className="text-[9px] block text-zinc-500 font-bold uppercase">Victorias</span>
+							</div>
+							<div className="p-2 rounded-xl bg-zinc-900/40 border border-zinc-900">
+								<span className="text-base font-black text-emerald-400">{podiums}</span>
+								<span className="text-[9px] block text-zinc-500 font-bold uppercase">Podios</span>
 							</div>
 						</div>
-					)}
 
-					{loading ? (
-						<div className="h-48 flex items-center justify-center text-zinc-500 text-xs font-mono uppercase tracking-widest animate-pulse">
-							Cargando telemetría oficial de la temporada...
+						{/* BOTÓN PARA COMPARAR CARA A CARA */}
+						<div className="pt-3 pb-1">
+							<button
+								type="button"
+								onClick={() => {
+									close();
+									useHeadToHeadStore.getState().open(driverCode || driverId);
+								}}
+								className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-98"
+							>
+								<Swords className="w-4 h-4" />
+								<span>Comparar en Cara a Cara</span>
+							</button>
 						</div>
-					) : (
-						<div className="flex-1 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
-							{seasonResults.map((race: any, i: number) => {
-								const res = race.Results?.[0];
-								const pos = res?.position || "-";
-								const pts = res?.points ? `+${res.points} PTS` : "0 PTS";
-								const isP1 = pos === "1";
-								const isPodium = pos === "2" || pos === "3";
 
-								return (
-									<div
-										key={i}
-										className={clsx(
-											"flex items-center justify-between p-2 sm:p-2.5 rounded-xl border text-xs transition-colors gap-2",
-											isP1
-												? "bg-amber-500/10 border-amber-500/40 text-amber-200"
-												: isPodium
-												? "bg-zinc-900/60 border-zinc-700/60 text-zinc-200"
-												: "bg-zinc-900/30 border-zinc-800/60 text-zinc-400"
-										)}
-									>
-										<div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
-											<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-800/80 text-zinc-400 border border-zinc-700/40 shrink-0">
-												R{race.round}
-											</span>
-											<p className="font-bold text-white uppercase text-[11px] sm:text-xs leading-snug break-words">
-												{translateGpName(race.raceName)}
-											</p>
-											<span className="text-[10px] text-zinc-500 truncate hidden sm:inline shrink-0">
-												({race.Circuit?.circuitName || ""})
-											</span>
-										</div>
+						{/* HISTORIAL CARRERA POR CARRERA */}
+						<div className="flex flex-col flex-1 overflow-hidden mt-2">
+							<div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-900 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+								<span>Resultados Temporada 2026</span>
+								<span>Posición & Puntos</span>
+							</div>
 
-										<div className="flex items-center gap-2 sm:gap-3 shrink-0">
-											<span className={clsx("font-black font-mono text-xs sm:text-sm", isP1 ? "text-amber-400" : isPodium ? "text-white" : "text-zinc-400")}>
-												P{pos}
-											</span>
-											<span className="font-mono text-[10px] sm:text-[11px] text-zinc-500 font-semibold text-right whitespace-nowrap">
-												<span className="sm:hidden">+{res?.points || 0}</span>
-												<span className="hidden sm:inline">{pts}</span>
-											</span>
-										</div>
+							{/* Banner Sprint */}
+							{sprintPoints > 0 && (
+								<div className="flex items-center justify-between p-2.5 px-3 mb-2 rounded-xl bg-amber-500/10 border border-amber-500/30 font-mono text-xs shadow-xs">
+									<div className="flex items-center gap-2">
+										<span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-widest">
+											PUNTOS SPRINT
+										</span>
+										<span className="text-zinc-300 text-[11px] font-medium">
+											Carreras Sprint oficiales de la temporada
+										</span>
 									</div>
-								);
-							})}
-
-							{/* Próximas carreras */}
-							{upcoming.length > 0 && (
-								<div className="pt-2">
-									<div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-500/80 uppercase tracking-widest px-1 py-1">
-										<Calendar className="w-3 h-3" />
-										<span>Próximos Grandes Premios (3 Rondas Pendientes)</span>
-									</div>
-									<div className="space-y-1.5 mt-1">
-										{upcoming.map((ur: any, i: number) => (
-											<div
-												key={`up-${i}`}
-												className="flex items-center justify-between p-2 sm:p-2.5 rounded-xl border border-dashed border-zinc-800/80 bg-zinc-950/40 text-xs gap-2"
-											>
-												<div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
-													<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-600 border border-zinc-800 shrink-0">
-														R{ur.round}
-													</span>
-													<p className="font-semibold text-zinc-300 uppercase text-[11px] sm:text-xs leading-snug break-words">
-														{translateGpName(ur.raceName)}
-													</p>
-												</div>
-												<span className="text-[9px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded bg-zinc-800/80 text-amber-400/90 border border-zinc-700/60 shrink-0 whitespace-nowrap">
-													<span className="sm:hidden">{formatUpcomingRaceDate(ur.round, ur.date)}</span>
-													<span className="hidden sm:inline">{formatUpcomingRaceDate(ur.round, ur.date)} · POR DISPUTAR</span>
-												</span>
-											</div>
-										))}
+									<div className="text-right">
+										<span className="text-amber-400 font-black">+{sprintPoints} PTS</span>
+										<span className="text-[9px] text-zinc-500 ml-1.5 hidden sm:inline">
+											({racePointsSum} en GP + {sprintPoints} Sprint = {officialTotalPoints} PTS)
+										</span>
 									</div>
 								</div>
 							)}
+
+							{loading ? (
+								<div className="h-48 flex items-center justify-center text-zinc-500 text-xs font-mono uppercase tracking-widest animate-pulse">
+									Cargando telemetría oficial de la temporada...
+								</div>
+							) : (
+								<div className="flex-1 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
+									{seasonResults.map((race: any, i: number) => {
+										const res = race.Results?.[0];
+										const pos = res?.position || "-";
+										const pts = res?.points ? `+${res.points} PTS` : "0 PTS";
+										const isP1 = pos === "1";
+										const isPodium = pos === "2" || pos === "3";
+
+										return (
+											<div
+												key={i}
+												className={clsx(
+													"flex items-center justify-between p-2 sm:p-2.5 rounded-xl border text-xs transition-colors gap-2",
+													isP1
+														? "bg-amber-500/10 border-amber-500/40 text-amber-200"
+														: isPodium
+														? "bg-zinc-900/60 border-zinc-700/60 text-zinc-200"
+														: "bg-zinc-900/30 border-zinc-800/60 text-zinc-400"
+												)}
+											>
+												<div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
+													<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-800/80 text-zinc-400 border border-zinc-700/40 shrink-0">
+														R{race.round}
+													</span>
+													<p className="font-bold text-white uppercase text-[11px] sm:text-xs leading-snug break-words">
+														{translateGpName(race.raceName)}
+													</p>
+													<span className="text-[10px] text-zinc-500 truncate hidden sm:inline shrink-0">
+														({race.Circuit?.circuitName || ""})
+													</span>
+												</div>
+
+												<div className="flex items-center gap-2 sm:gap-3 shrink-0">
+													<span className={clsx("font-black font-mono text-xs sm:text-sm", isP1 ? "text-amber-400" : isPodium ? "text-white" : "text-zinc-400")}>
+														P{pos}
+													</span>
+													<span className="font-mono text-[10px] sm:text-[11px] text-zinc-500 font-semibold text-right whitespace-nowrap">
+														<span className="sm:hidden">+{res?.points || 0}</span>
+														<span className="hidden sm:inline">{pts}</span>
+													</span>
+												</div>
+											</div>
+										);
+									})}
+
+									{/* Próximas carreras */}
+									{upcoming.length > 0 && (
+										<div className="pt-2">
+											<div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-500/80 uppercase tracking-widest px-1 py-1">
+												<Calendar className="w-3 h-3" />
+												<span>Próximos Grandes Premios (3 Rondas Pendientes)</span>
+											</div>
+											<div className="space-y-1.5 mt-1">
+												{upcoming.map((ur: any, i: number) => (
+													<div
+														key={`up-${i}`}
+														className="flex items-center justify-between p-2 sm:p-2.5 rounded-xl border border-dashed border-zinc-800/80 bg-zinc-950/40 text-xs gap-2"
+													>
+														<div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
+															<span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-600 border border-zinc-800 shrink-0">
+																R{ur.round}
+															</span>
+															<p className="font-semibold text-zinc-300 uppercase text-[11px] sm:text-xs leading-snug break-words">
+																{translateGpName(ur.raceName)}
+															</p>
+														</div>
+														<span className="text-[9px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded bg-zinc-800/80 text-amber-400/90 border border-zinc-700/60 shrink-0 whitespace-nowrap">
+															<span className="sm:hidden">{formatUpcomingRaceDate(ur.round, ur.date)}</span>
+															<span className="hidden sm:inline">{formatUpcomingRaceDate(ur.round, ur.date)} · POR DISPUTAR</span>
+														</span>
+													</div>
+												))}
+											</div>
+										</div>
+									)}
+								</div>
+							)}
 						</div>
-					)}
-				</div>
+					</>
+				)}
 			</motion.div>
 		</div>
 	);

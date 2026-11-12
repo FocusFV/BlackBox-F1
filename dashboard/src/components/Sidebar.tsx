@@ -150,8 +150,11 @@ export default function Sidebar({ connected }: Props) {
 		return () => clearInterval(interval);
 	}, [sessions]);
 
-	// En vivo solo si no terminó y la ventana de 15m está activa o hay actividad reciente en pista
-	const isLive = !isSessionFinished && (isScheduleLive || isTrackActive);
+	// En vivo solo si no terminó y la ventana de 15m está activa o hay actividad reciente en pista (o simulación activa)
+	const isSimActive =
+		typeof window !== "undefined" &&
+		sessionStorage.getItem("f1_pitwall_sim") === "active";
+	const isLive = (!isSessionFinished && (isScheduleLive || isTrackActive)) || isSimActive;
 
 	const filteredCategories = useMemo(() => {
 		return categoriesMenu

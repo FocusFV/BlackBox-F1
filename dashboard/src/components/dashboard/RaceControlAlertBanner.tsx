@@ -57,13 +57,23 @@ export function RaceControlAlertBanner() {
 
 		switch (trackStatus) {
 			case "1":
-				// Si la pista pasa a verde desde SC (4), VSC (6), Red Flag (5) o inicio de carrera
+				// Si la pista pasa a verde desde SC (4), VSC (6), Red Flag (5), Amarilla (2) o inicio de carrera
 				if (prevTrackStatus.current && prevTrackStatus.current !== "1") {
+					const isRestart =
+						prevTrackStatus.current === "4" ||
+						prevTrackStatus.current === "6" ||
+						prevTrackStatus.current === "2" ||
+						prevTrackStatus.current === "5";
+
 					alert = {
 						id: `track-green-${Date.now()}`,
 						type: "GREEN_FLAG",
-						title: "¡LARGARON! · BANDERA VERDE EN PISTA",
-						subtitle: "Pista habilitada · ¡Aceleran a fondo!",
+						title: isRestart
+							? "PISTA HABILITADA · BANDERA VERDE"
+							: "¡LARGARON! · BANDERA VERDE EN PISTA",
+						subtitle: isRestart
+							? "Pista despejada · Fin de neutralización"
+							: "Pista habilitada · ¡Aceleran a fondo!",
 						badgeBg: "bg-emerald-400",
 						textColor: "text-emerald-200",
 						borderColor: "border-emerald-400/80 shadow-[0_0_35px_rgba(16,185,129,0.35)]",

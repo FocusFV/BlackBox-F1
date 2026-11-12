@@ -131,7 +131,8 @@ export default function LeaderBoard() {
 }
 
 const TableHeaders = () => {
-    const carMetrics = useSettingsStore((state) => state.carMetrics);
+    const isSimActive = typeof window !== "undefined" && (sessionStorage.getItem("f1_pitwall_sim") === "active");
+    const carMetrics = useSettingsStore((state) => state.carMetrics) || isSimActive;
 
     return (
         <div
@@ -159,7 +160,8 @@ const TableHeaders = () => {
 };
 
 const SkeletonDriver = () => {
-    const carMetrics = useSettingsStore((state) => state.carMetrics);
+    const isSimActive = typeof window !== "undefined" && (sessionStorage.getItem("f1_pitwall_sim") === "active");
+    const carMetrics = useSettingsStore((state) => state.carMetrics) || isSimActive;
 
     const animateClass = "h-8 animate-pulse rounded-md bg-zinc-800";
 

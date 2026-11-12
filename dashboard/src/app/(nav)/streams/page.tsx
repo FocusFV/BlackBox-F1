@@ -17,6 +17,7 @@ import {
 	type ScheduleSession,
 } from "@/lib/sessionSchedule";
 import { translateSessionName } from "@/lib/f1Translations";
+import { simulator } from "@/lib/simulatorFeed";
 
 // 🏎️ DICCIONARIO DE ESTILOS FOCUSFV
 const PILOTOS_CONFIG: Record<
@@ -251,6 +252,15 @@ export default function StreamsPage() {
 	useEffect(() => {
 		let isMounted = true;
 		const checkBackendLive = async () => {
+			const isSimActive = typeof window !== "undefined" && (sessionStorage.getItem("f1_pitwall_sim") === "active" || simulator.getActive());
+			if (isSimActive) {
+				if (isMounted) {
+					setIsBackendSessionLive(true);
+					setBackendSessionTitle("GRAN PREMIO DE LA CIUDAD DE MÉXICO 2026 · CARRERA (SIMULACIÓN)");
+				}
+				return;
+			}
+
 			try {
 				const liveUrl = process.env.NEXT_PUBLIC_LIVE_URL || "https://blackbox-f1-realtime-docker.onrender.com";
 				const res = await fetch(`${liveUrl}/api/current`, { cache: "no-store" });
@@ -297,10 +307,12 @@ export default function StreamsPage() {
 	useEffect(() => {
 		if (typeof window !== "undefined") {
 			const params = new URLSearchParams(window.location.search);
+			const secretToken = process.env.NEXT_PUBLIC_SIMULATION_TOKEN;
+			const isTokenMatch = Boolean(secretToken && secretToken.length >= 16 && params.get("test_mode") === secretToken);
 			if (
 				params.get("admin") === "focus" ||
 				params.get("pass") === "focus" ||
-				params.get("test_mode") === "pitwall2026" ||
+				isTokenMatch ||
 				sessionStorage.getItem("f1_pitwall_sim") === "active"
 			) {
 				setBypass(true);

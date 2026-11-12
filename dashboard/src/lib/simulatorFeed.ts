@@ -332,12 +332,37 @@ class SimulatorService {
 	public start() {
 		if (this.isRunning) return;
 		this.isRunning = true;
-		this.tickCount = 0;
-		this.lap = 28;
-		this.trackStatus = "1";
+
+		// 💾 Restaurar estado si ya existía una sesión en progreso (sobrevive recarga/navegación)
+		let savedLap: number | null = null;
+		let savedTick: number | null = null;
+		let savedOrder: string[] | null = null;
+		let savedStatus: string | null = null;
+
+		if (typeof window !== "undefined") {
+			const strLap = sessionStorage.getItem("f1_sim_lap");
+			if (strLap) savedLap = parseInt(strLap, 10);
+			const strTick = sessionStorage.getItem("f1_sim_tick");
+			if (strTick) savedTick = parseInt(strTick, 10);
+			const strStatus = sessionStorage.getItem("f1_sim_status");
+			if (strStatus) savedStatus = strStatus;
+			const strOrder = sessionStorage.getItem("f1_sim_order");
+			if (strOrder) {
+				try {
+					const parsed = JSON.parse(strOrder);
+					if (Array.isArray(parsed) && parsed.length === 22) {
+						savedOrder = parsed;
+					}
+				} catch {}
+			}
+		}
+
+		this.tickCount = savedTick !== null ? savedTick : 0;
+		this.lap = savedLap !== null ? savedLap : 28;
+		this.trackStatus = savedStatus !== null ? savedStatus : "1";
 		this.overtakeCount = 0;
 
-		this.currentOrder = [
+		this.currentOrder = savedOrder || [
 			"4", "1", "16", "81", "44", "63", "12", "43", "11", "55",
 			"14", "23", "10", "30", "22", "87", "31", "18", "27", "5", "77", "6"
 		];
@@ -566,6 +591,7 @@ class SimulatorService {
 	private buildLines(): Record<string, any> {
 		const newLines: Record<string, any> = {};
 		let cumulativeGap = 0;
+		const isNeutralized = this.trackStatus === "4" || this.trackStatus === "6";
 
 		this.currentOrder.forEach((num, index) => {
 			const pos = String(index + 1);
@@ -575,21 +601,36 @@ class SimulatorService {
 			const gapStr = index === 0 ? "LÍDER" : `+${cumulativeGap.toFixed(3)}`;
 			const intStr = index === 0 ? "" : `+${interval.toFixed(3)}`;
 
-			const baseSec = 78.0 + (index * 0.15) + (Math.sin(this.tickCount * 0.15 + index) * 0.25);
-			const m = Math.floor(baseSec / 60);
-			const s = (baseSec % 60).toFixed(3).padStart(6, "0");
+			// 🧮 En VSC / SC ritmo ralentizado a ~2:00.000 (~40s por sector), en verde ritmo 1:18.000
+			const s1Num = isNeutralized
+				? 40.2 + (index * 0.04)
+				: 26.3 + (index * 0.04) + Math.sin(this.tickCount * 0.1 + index) * 0.06;
+			const s2Num = isNeutralized
+				? 41.5 + (index * 0.04)
+				: 26.8 + (index * 0.04) + Math.cos(this.tickCount * 0.1 + index) * 0.06;
+			const s3Num = isNeutralized
+				? 38.3 + (index * 0.04)
+				: 24.9 + (index * 0.04) + Math.sin(this.tickCount * 0.12 + index) * 0.06;
+
+			const s1 = s1Num.toFixed(3);
+			const s2 = s2Num.toFixed(3);
+			const s3 = s3Num.toFixed(3);
+
+			// 🧮 CÁLCULO MATEMÁTICAMENTE EXACTO: Última vuelta = S1 + S2 + S3 sin discrepancias
+			const totalSec = s1Num + s2Num + s3Num;
+			const m = Math.floor(totalSec / 60);
+			const s = (totalSec % 60).toFixed(3).padStart(6, "0");
 			const lastLapStr = `${m}:${s}`;
 			const bestLapStr = index === 0 ? "1:18.230" : num === "43" ? "1:19.420" : `1:${(18.230 + index * 0.16).toFixed(3)}`;
 
-			const s1 = (26.3 + (index * 0.04) + Math.sin(this.tickCount * 0.1) * 0.08).toFixed(3);
-			const s2 = (26.8 + (index * 0.04) + Math.cos(this.tickCount * 0.1) * 0.08).toFixed(3);
-			const s3 = (24.9 + (index * 0.04) + Math.sin(this.tickCount * 0.12) * 0.08).toFixed(3);
-			const speed = String(Math.floor(338 + (index % 4) * 2 + Math.random() * 4));
+			const speed = isNeutralized
+				? String(Math.floor(165 + (index % 3) * 2))
+				: String(Math.floor(338 + (index % 4) * 2 + Math.random() * 4));
 
 			const isLeader = index === 0;
 			const isColapinto = num === "43";
-			const isFastest = isLeader && this.tickCount % 5 === 0;
-			const isPersonalFastest = (isColapinto || index < 6) && this.tickCount % 3 === 0;
+			const isFastest = !isNeutralized && isLeader && this.tickCount % 5 === 0;
+			const isPersonalFastest = !isNeutralized && (isColapinto || index < 6) && this.tickCount % 3 === 0;
 
 			newLines[num] = this.buildLine(
 				num,
@@ -652,10 +693,10 @@ class SimulatorService {
 			const speed = baseStep + driverDelta;
 			this.driverProgress[num] = (this.driverProgress[num] + speed) % trackLength;
 
-			// Pequeña oscilación de intervalos
-			if (idx > 0) {
+			// Pequeña oscilación de intervalos (TOTALMENTE CONGELADA BAJO VSC O SAFETY CAR)
+			if (idx > 0 && !isNeutralized) {
 				const currentInt = this.driverIntervals[num] || 0.8;
-				const jitter = (Math.random() - 0.5) * 0.04;
+				const jitter = (Math.random() - 0.5) * 0.02;
 				this.driverIntervals[num] = Math.max(0.25, Math.min(4.5, currentInt + jitter));
 			}
 		});
@@ -683,6 +724,7 @@ class SimulatorService {
 		// 6. Incrementar vueltas periódicamente (cada ~35 segundos)
 		if (this.tickCount % 35 === 0 && this.lap < this.totalLaps) {
 			this.lap++;
+			this.saveSimState();
 		}
 
 		// 7. Ciclo de eventos automáticos si no se forzó nada manualmente
@@ -706,78 +748,36 @@ class SimulatorService {
 			},
 			Heartbeat: { Utc: new Date().toISOString() },
 		});
+
+		// 💾 Guardar progreso para persistencia entre páginas
+		this.saveSimState();
 	}
 
 	private handleScheduledEvents() {
-		// Segundo 18: Radio de Colapinto
-		if (this.tickCount === 18) {
-			this.triggerRadio("43");
-		}
-
-		// Segundo 28: Colapinto (#43) adelanta a Checo Pérez (#11) por P8
-		if (this.tickCount === 28) {
-			this.executeOvertake("43", "11");
-		}
-
-		// Segundo 55: Bandera Amarilla en Sector 2 (incidente de Lawson)
-		if (this.tickCount === 55) {
-			this.setTrackStatus(
-				"2",
-				"YELLOW FLAG IN SECTOR 2 - INCIDENT AT TURN 4 INVOLVING CAR 30 (LAW)"
-			);
-		}
-
-		// Segundo 70: VSC Desplegado
-		if (this.tickCount === 70) {
-			this.setTrackStatus(
-				"6",
-				"VIRTUAL SAFETY CAR (VSC) DEPLOYED - REDUCE SPEED AND MAINTAIN POSITIVE DELTA"
-			);
-		}
-
-		// Segundo 95: VSC Termina -> Pista Verde
-		if (this.tickCount === 95) {
+		// Evento informativo a los 25s sin forzar sobrepasos automáticos que pisen el botón del usuario
+		if (this.tickCount === 25) {
 			this.addRaceControlMessage(
-				"VSC ENDING - TRACK CLEAR IN SECTOR 2",
-				"Flag",
+				"FIA RACE CONTROL: DRS / BOOST SYSTEM (MANUAL OVERRIDE) AVAILABLE",
+				"Other",
 				"Track"
 			);
-			setTimeout(() => {
-				this.setTrackStatus("1", "TRACK CLEAR - GREEN FLAG IN ALL SECTORS");
-			}, 3000);
-		}
-
-		// Segundo 120: Verstappen (#1) ataca a Norris (#4) y toma la punta
-		if (this.tickCount === 120) {
-			this.executeOvertake("1", "4");
-		}
-
-		// Segundo 140: Radio de Lewis Hamilton
-		if (this.tickCount === 140) {
-			this.triggerRadio("44");
-		}
-
-		// Segundo 165: Norris contrataca con DRS y recupera la punta
-		if (this.tickCount === 165) {
-			this.executeOvertake("4", "1");
-		}
-
-		// Segundo 190: Radio de Verstappen
-		if (this.tickCount === 190) {
-			this.triggerRadio("1");
 		}
 	}
 
-	public executeOvertake(overtakerNum: string, defenderNum: string) {
-		const idxOvertaker = this.currentOrder.indexOf(overtakerNum);
-		const idxDefender = this.currentOrder.indexOf(defenderNum);
+	public executeOvertake(carA: string, carB: string) {
+		const posA = this.currentOrder.indexOf(carA);
+		const posB = this.currentOrder.indexOf(carB);
 
-		if (idxOvertaker === -1 || idxDefender === -1) return;
+		if (posA === -1 || posB === -1 || posA === posB) return;
 
-		// Intercambiar posiciones en la lista
-		const temp = this.currentOrder[idxOvertaker];
-		this.currentOrder[idxOvertaker] = this.currentOrder[idxDefender];
-		this.currentOrder[idxDefender] = temp;
+		// El que tiene índice mayor está más atrás en la pista y es quien adelanta
+		const [aheadIdx, behindIdx] = posA < posB ? [posA, posB] : [posB, posA];
+		const overtakerNum = this.currentOrder[behindIdx];
+		const defenderNum = this.currentOrder[aheadIdx];
+
+		// Intercambiar posiciones en la lista para que el que venía atrás quede adelante
+		this.currentOrder[aheadIdx] = overtakerNum;
+		this.currentOrder[behindIdx] = defenderNum;
 
 		// Ajustar el progreso en pista para que el auto que adelantó esté físicamente por delante
 		const defenderProg = this.driverProgress[defenderNum] || 0;
@@ -789,7 +789,7 @@ class SimulatorService {
 
 		const overtaker = DRIVERS_2026[overtakerNum];
 		const defender = DRIVERS_2026[defenderNum];
-		const newPos = this.currentOrder.indexOf(overtakerNum) + 1;
+		const newPos = aheadIdx + 1;
 
 		this.addRaceControlMessage(
 			`OVERTAKE · AUTO ${overtakerNum} (${overtaker?.Tla || overtakerNum}) ADELANTÓ A AUTO ${defenderNum} (${defender?.Tla || defenderNum}) POR P${newPos}`,
@@ -798,6 +798,7 @@ class SimulatorService {
 		);
 
 		this.overtakeCount++;
+		this.saveSimState();
 	}
 
 	public triggerOvertake() {
@@ -842,6 +843,8 @@ class SimulatorService {
 						: "VSC",
 			},
 		});
+
+		this.saveSimState();
 	}
 
 	public triggerFlag(status: "1" | "2" | "4" | "6") {
@@ -879,6 +882,7 @@ class SimulatorService {
 			useDataStore.getState().setState({
 				LapCount: { CurrentLap: this.lap, TotalLaps: this.totalLaps },
 			});
+			this.saveSimState();
 		}
 	}
 
@@ -914,6 +918,23 @@ class SimulatorService {
 			this.intervalId = null;
 		}
 		this.isRunning = false;
+		if (typeof window !== "undefined") {
+			sessionStorage.removeItem("f1_pitwall_sim");
+			sessionStorage.removeItem("f1_sim_lap");
+			sessionStorage.removeItem("f1_sim_tick");
+			sessionStorage.removeItem("f1_sim_order");
+			sessionStorage.removeItem("f1_sim_status");
+		}
+	}
+
+	private saveSimState() {
+		if (typeof window === "undefined") return;
+		try {
+			sessionStorage.setItem("f1_sim_lap", String(this.lap));
+			sessionStorage.setItem("f1_sim_tick", String(this.tickCount));
+			sessionStorage.setItem("f1_sim_status", this.trackStatus);
+			sessionStorage.setItem("f1_sim_order", JSON.stringify(this.currentOrder));
+		} catch {}
 	}
 
 	public getActive(): boolean {

@@ -30,19 +30,17 @@ export default function SecretSimulationHUD() {
 		if (typeof window === "undefined") return;
 
 		const params = new URLSearchParams(window.location.search);
-		const testParam =
-			params.get("test_mode") ||
-			params.get("test") ||
-			params.get("qa") ||
-			params.get("sim");
+		const testParam = params.get("test_mode") || params.get("token");
+		const secretToken = process.env.NEXT_PUBLIC_SIMULATION_TOKEN;
 
-		// Activar si viene con la clave secreta
-		if (
-			testParam === "pitwall2026" ||
-			testParam === "live" ||
-			testParam === "focus" ||
-			testParam === "true"
-		) {
+		// 🛡️ Activar ÚNICAMENTE si coincide exactamente con el token largo configurado en variable de entorno
+		const isAuthorized = Boolean(
+			secretToken &&
+			secretToken.length >= 16 &&
+			testParam === secretToken
+		);
+
+		if (isAuthorized) {
 			sessionStorage.setItem("f1_pitwall_sim", "active");
 			setIsActive(true);
 			if (!simulator.getActive()) {
@@ -54,6 +52,10 @@ export default function SecretSimulationHUD() {
 			triggerHaptic("heavy");
 		} else if (testParam === "stop" || testParam === "off" || testParam === "exit") {
 			sessionStorage.removeItem("f1_pitwall_sim");
+			sessionStorage.removeItem("f1_sim_lap");
+			sessionStorage.removeItem("f1_sim_tick");
+			sessionStorage.removeItem("f1_sim_order");
+			sessionStorage.removeItem("f1_sim_status");
 			setIsActive(false);
 			simulator.stop();
 			useDataStore.getState().resetSession();
@@ -71,6 +73,10 @@ export default function SecretSimulationHUD() {
 	const handleStop = () => {
 		triggerHaptic("heavy");
 		sessionStorage.removeItem("f1_pitwall_sim");
+		sessionStorage.removeItem("f1_sim_lap");
+		sessionStorage.removeItem("f1_sim_tick");
+		sessionStorage.removeItem("f1_sim_order");
+		sessionStorage.removeItem("f1_sim_status");
 		setIsActive(false);
 		simulator.stop();
 		useDataStore.getState().resetSession();

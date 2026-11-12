@@ -102,19 +102,27 @@ export default function WeatherPage() {
 		infoSesionMilitar?.Name) || isSimActive
 	);
 
-	const gpNombre = infoSesionMilitar?.Meeting?.OfficialName
+	const gpNombre = isSimActive
+		? "GRAN PREMIO DE LA CIUDAD DE MÉXICO 2026"
+		: infoSesionMilitar?.Meeting?.OfficialName
 		? infoSesionMilitar.Meeting.OfficialName.toUpperCase()
 		: "FORMULA 1 HEINEKEN SILVER LAS VEGAS GRAND PRIX 2026";
 
-	const sesionNombre = isLiveSessionRunning
+	const sesionNombre = isSimActive
+		? "CARRERA"
+		: isLiveSessionRunning && infoSesionMilitar?.Name
 		? (infoSesionMilitar.Name === "Race" ? "CARRERA" : infoSesionMilitar.Name.toUpperCase())
 		: "ENTRE SESIONES · PISTA EN PAUSA";
 
-	const circuitoNombre = infoSesionMilitar?.Meeting?.Circuit?.ShortName
+	const circuitoNombre = isSimActive
+		? "AUTÓDROMO HERMANOS RODRÍGUEZ"
+		: infoSesionMilitar?.Meeting?.Circuit?.ShortName
 		? infoSesionMilitar.Meeting.Circuit.ShortName.toUpperCase()
 		: "LAS VEGAS STRIP CIRCUIT";
 
-	const paisGP = infoSesionMilitar?.Meeting?.Country?.Name
+	const paisGP = isSimActive
+		? "MÉXICO"
+		: infoSesionMilitar?.Meeting?.Country?.Name
 		? infoSesionMilitar.Meeting.Country.Name.toUpperCase()
 		: "ESTADOS UNIDOS";
 

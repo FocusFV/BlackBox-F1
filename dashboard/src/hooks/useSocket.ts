@@ -13,9 +13,14 @@ export const useSocket = ({ handleInitial, handleUpdate }: Props) => {
 	const [connected, setConnected] = useState<boolean>(false);
 
 	useEffect(() => {
-		// 🛡️ Si estamos en la ruta de demostración (/dashboard/demo), no nos conectamos al servidor
-		// remoto para evitar que sesiones viejas o en pausa pisen la simulación activa de 2026.
-		if (typeof window !== "undefined" && window.location.pathname.includes("/demo")) {
+		// 🛡️ Si la simulación FIA está activa, aislamos completamente la app del backend remoto
+		// para evitar que datos vacíos o sesiones pasadas pisen la simulación en curso o los nombres de 2026.
+		const isSimActive =
+			typeof window !== "undefined" &&
+			sessionStorage.getItem("f1_pitwall_sim") === "active";
+
+		if (isSimActive) {
+			setConnected(true);
 			return;
 		}
 
