@@ -213,10 +213,15 @@ export function RaceControlAlertBanner() {
 		// 🟢 CELEBRACIÓN DE LARGADA / BANDERA VERDE
 		if (flag === "GREEN" || text.includes("GREEN LIGHT") || text.includes("GREEN FLAG")) {
 			const alertId = `rc-green-${latest.Utc}`;
+			const isStart =
+				(!latest.Lap || latest.Lap <= 1) &&
+				(text.includes("GREEN LIGHT") || text.includes("START") || text.includes("LARGADA") || text.includes("RACE STARTED"));
 			const messageAlert: AlertData = {
 				id: alertId,
 				type: "GREEN_FLAG",
-				title: "¡LARGARON! · BANDERA VERDE EN PISTA",
+				title: isStart
+					? "¡LARGARON! · BANDERA VERDE EN PISTA"
+					: "PISTA HABILITADA · BANDERA VERDE",
 				subtitle: translateFiaMessage(latest.Message),
 				badgeBg: "bg-emerald-400 text-black",
 				textColor: "text-emerald-200",

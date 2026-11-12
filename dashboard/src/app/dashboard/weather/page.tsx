@@ -27,7 +27,7 @@ export default function WeatherPage() {
 	const sessionInfo = useDataStore((state) => state?.state?.SessionInfo);
 	const infoSesionMilitar = sessionInfo as any;
 
-	// 🌦️ Telemetría meteorológica de alta precisión (Open-Meteo) para Las Vegas
+	// 🌦️ Telemetría meteorológica de alta precisión (Open-Meteo)
 	const [backupWeather, setBackupWeather] = useState<{
 		airTemp: string;
 		trackTemp: string;
@@ -37,35 +37,40 @@ export default function WeatherPage() {
 		windDir: string;
 		rainfall: boolean;
 	}>({
-		airTemp: "21.4",
-		trackTemp: "25.2",
-		humidity: "28",
-		pressure: "945.0",
-		windSpeed: "9.5",
-		windDir: "70",
+		airTemp: "23.8",
+		trackTemp: "38.5",
+		humidity: "46",
+		pressure: "1014.2",
+		windSpeed: "3.4",
+		windDir: "190",
 		rainfall: false,
 	});
 
 	useEffect(() => {
 		let isMounted = true;
-		async function fetchLasVegasWeather() {
+		async function fetchBackupWeather() {
 			try {
+				const isSim = typeof window !== "undefined" && (
+					sessionStorage.getItem("f1_pitwall_sim") === "active" || simulator.getActive()
+				);
+				const lat = isSim ? 19.4042 : 36.1147;
+				const lon = isSim ? -99.0907 : -115.173;
 				const res = await fetch(
-					"https://api.open-meteo.com/v1/forecast?latitude=36.1147&longitude=-115.173&current=temperature_2m,relative_humidity_2m,surface_pressure,wind_speed_10m,wind_direction_10m,precipitation&timezone=auto"
+					`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,surface_pressure,wind_speed_10m,wind_direction_10m,precipitation&timezone=auto`
 				);
 				if (res.ok) {
 					const data = await res.json();
 					const c = data?.current;
 					if (c && isMounted) {
-						const aTemp = Number(c.temperature_2m || 21).toFixed(1);
-						const tTemp = (Number(c.temperature_2m || 21) + 4.2).toFixed(1);
+						const aTemp = Number(c.temperature_2m || 23.8).toFixed(1);
+						const tTemp = (Number(c.temperature_2m || 23.8) + (isSim ? 14.7 : 4.2)).toFixed(1);
 						setBackupWeather({
 							airTemp: aTemp,
 							trackTemp: tTemp,
-							humidity: String(Math.round(c.relative_humidity_2m ?? 28)),
-							pressure: String(Math.round(c.surface_pressure ?? 945)),
-							windSpeed: String(Math.round(c.wind_speed_10m ?? 9.5)),
-							windDir: String(Math.round(c.wind_direction_10m ?? 70)),
+							humidity: String(Math.round(c.relative_humidity_2m ?? 46)),
+							pressure: String(Math.round(c.surface_pressure ?? 1014)),
+							windSpeed: String(Math.round(c.wind_speed_10m ?? 3.4)),
+							windDir: String(Math.round(c.wind_direction_10m ?? 190)),
 							rainfall: Boolean(c.precipitation && c.precipitation > 0),
 						});
 					}
@@ -74,7 +79,7 @@ export default function WeatherPage() {
 				console.warn("[WeatherPage] Error cargando clima de respaldo:", e);
 			}
 		}
-		fetchLasVegasWeather();
+		fetchBackupWeather();
 		return () => {
 			isMounted = false;
 		};
@@ -177,7 +182,7 @@ export default function WeatherPage() {
 				<div className="absolute inset-0 bg-[linear-gradient(to_right,#0c0e12_1px,transparent_1px),linear-gradient(to_bottom,#0c0e12_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] opacity-60" />
 				
 				<div className="w-full h-full relative z-10 flex items-center justify-center filter drop-shadow-[0_0_15px_rgba(0,161,155,0.25)]">
-					<Map circuitKey={152} />
+					<Map circuitKey={isSimActive ? 65 : 152} />
 				</div>
 
 				<div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10 bg-black/90 border border-zinc-800 px-2 py-1 sm:px-3 sm:py-1.5 rounded text-[8.5px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs text-zinc-300 tracking-normal sm:tracking-widest font-bold shadow-lg backdrop-blur-md whitespace-nowrap">
@@ -285,7 +290,9 @@ export default function WeatherPage() {
 						})
 					) : (
 						<div className="text-center text-zinc-500 text-xs py-4 uppercase tracking-widest font-mono">
-							Monitoreo meteorológico oficial FIA activo para el Gran Premio de Las Vegas. Sin incidentes en pista.
+							{isSimActive
+								? "Monitoreo meteorológico oficial FIA activo para el Gran Premio de la Ciudad de México. Sin incidentes en pista."
+								: "Monitoreo meteorológico oficial FIA activo para el Gran Premio de Las Vegas. Sin incidentes en pista."}
 						</div>
 					)}
 				</div>

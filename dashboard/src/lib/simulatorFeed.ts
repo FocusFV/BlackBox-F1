@@ -338,6 +338,8 @@ class SimulatorService {
 		let savedTick: number | null = null;
 		let savedOrder: string[] | null = null;
 		let savedStatus: string | null = null;
+		let savedIntervals: Record<string, number> | null = null;
+		let savedProgress: Record<string, number> | null = null;
 
 		if (typeof window !== "undefined") {
 			const strLap = sessionStorage.getItem("f1_sim_lap");
@@ -352,6 +354,24 @@ class SimulatorService {
 					const parsed = JSON.parse(strOrder);
 					if (Array.isArray(parsed) && parsed.length === 22) {
 						savedOrder = parsed;
+					}
+				} catch {}
+			}
+			const strIntervals = sessionStorage.getItem("f1_sim_intervals");
+			if (strIntervals) {
+				try {
+					const parsed = JSON.parse(strIntervals);
+					if (parsed && typeof parsed === "object") {
+						savedIntervals = parsed;
+					}
+				} catch {}
+			}
+			const strProgress = sessionStorage.getItem("f1_sim_progress");
+			if (strProgress) {
+				try {
+					const parsed = JSON.parse(strProgress);
+					if (parsed && typeof parsed === "object") {
+						savedProgress = parsed;
 					}
 				} catch {}
 			}
@@ -370,10 +390,14 @@ class SimulatorService {
 		// Distribuir a los 22 autos en puntos de la pista del circuito (721 coordenadas)
 		const trackLength = circuit65Track.x.length;
 		this.currentOrder.forEach((num, index) => {
-			// Espaciado dinámico: los primeros van en paquete, luego se distancian
+			// Espaciado dinámico: si ya venían corriendo se preserva exactamente su gap e intervalo acumulado
 			const offset = (index * 31) % trackLength;
-			this.driverProgress[num] = (trackLength - offset) % trackLength;
-			this.driverIntervals[num] = index === 0 ? 0 : 0.65 + (index * 0.12);
+			this.driverProgress[num] = savedProgress?.[num] !== undefined
+				? savedProgress[num]
+				: (trackLength - offset) % trackLength;
+			this.driverIntervals[num] = savedIntervals?.[num] !== undefined
+				? savedIntervals[num]
+				: (index === 0 ? 0 : 0.65 + (index * 0.12));
 		});
 
 		// Neumáticos (TimingAppData) para los 22 pilotos
@@ -924,6 +948,8 @@ class SimulatorService {
 			sessionStorage.removeItem("f1_sim_tick");
 			sessionStorage.removeItem("f1_sim_order");
 			sessionStorage.removeItem("f1_sim_status");
+			sessionStorage.removeItem("f1_sim_intervals");
+			sessionStorage.removeItem("f1_sim_progress");
 		}
 	}
 
@@ -934,6 +960,8 @@ class SimulatorService {
 			sessionStorage.setItem("f1_sim_tick", String(this.tickCount));
 			sessionStorage.setItem("f1_sim_status", this.trackStatus);
 			sessionStorage.setItem("f1_sim_order", JSON.stringify(this.currentOrder));
+			sessionStorage.setItem("f1_sim_intervals", JSON.stringify(this.driverIntervals));
+			sessionStorage.setItem("f1_sim_progress", JSON.stringify(this.driverProgress));
 		} catch {}
 	}
 

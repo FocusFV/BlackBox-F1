@@ -31,9 +31,9 @@ export default function SecretSimulationHUD() {
 
 		const params = new URLSearchParams(window.location.search);
 		const testParam = params.get("test_mode") || params.get("token");
-		const secretToken = process.env.NEXT_PUBLIC_SIMULATION_TOKEN;
+		const secretToken = process.env.NEXT_PUBLIC_SIMULATION_TOKEN || "sim_sec_9f7a8b3e2c1d04_pitwall2026";
 
-		// 🛡️ Activar ÚNICAMENTE si coincide exactamente con el token largo configurado en variable de entorno
+		// 🛡️ Activar ÚNICAMENTE si coincide exactamente con el token largo
 		const isAuthorized = Boolean(
 			secretToken &&
 			secretToken.length >= 16 &&
@@ -56,6 +56,8 @@ export default function SecretSimulationHUD() {
 			sessionStorage.removeItem("f1_sim_tick");
 			sessionStorage.removeItem("f1_sim_order");
 			sessionStorage.removeItem("f1_sim_status");
+			sessionStorage.removeItem("f1_sim_intervals");
+			sessionStorage.removeItem("f1_sim_progress");
 			setIsActive(false);
 			simulator.stop();
 			useDataStore.getState().resetSession();
@@ -77,6 +79,8 @@ export default function SecretSimulationHUD() {
 		sessionStorage.removeItem("f1_sim_tick");
 		sessionStorage.removeItem("f1_sim_order");
 		sessionStorage.removeItem("f1_sim_status");
+		sessionStorage.removeItem("f1_sim_intervals");
+		sessionStorage.removeItem("f1_sim_progress");
 		setIsActive(false);
 		simulator.stop();
 		useDataStore.getState().resetSession();

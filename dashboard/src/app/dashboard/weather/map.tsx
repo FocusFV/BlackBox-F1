@@ -19,8 +19,13 @@ export function WeatherMap() {
 		(async () => {
 			if (!mapContainerRef.current) return;
 
-			// Coordenadas oficiales: Circuito de Las Vegas Strip (36.1147, -115.173)
-			let coords: { lat: number; lon: number } = { lat: 36.1147, lon: -115.173 };
+			// Coordenadas oficiales: Si es simulación México Autódromo Hermanos Rodríguez (19.4042, -99.0907), si no Las Vegas Strip (36.1147, -115.173)
+			const isSim = typeof window !== "undefined" && (
+				sessionStorage.getItem("f1_pitwall_sim") === "active"
+			);
+			let coords: { lat: number; lon: number } = isSim
+				? { lat: 19.4042, lon: -99.0907 }
+				: { lat: 36.1147, lon: -115.173 };
 
 			if (meeting?.Location && meeting?.Country?.Name) {
 				try {
