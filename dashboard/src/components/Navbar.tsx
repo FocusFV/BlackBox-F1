@@ -38,6 +38,28 @@ export default function Navbar() {
 
 
 
+	// 🏎️ Desplazamiento reactivo si el HUD de simulación está activo y expandido
+	const [simOffset, setSimOffset] = useState<number>(0);
+
+	useEffect(() => {
+		const updateOffset = () => {
+			if (typeof window === "undefined") return;
+			const isSim = sessionStorage.getItem("f1_pitwall_sim") === "active";
+			const isCollapsed = sessionStorage.getItem("f1_sim_collapsed") === "true";
+			setSimOffset(isSim && !isCollapsed ? 48 : 0);
+		};
+
+		updateOffset();
+		window.addEventListener("f1_sim_state_change", updateOffset);
+		window.addEventListener("storage", updateOffset);
+		const interval = setInterval(updateOffset, 600);
+		return () => {
+			window.removeEventListener("f1_sim_state_change", updateOffset);
+			window.removeEventListener("storage", updateOffset);
+			clearInterval(interval);
+		};
+	}, []);
+
 	const navLinks = [
 		{ name: "Panel", href: "/dashboard" },
 		{ name: "Calendario", href: "/schedule" },
@@ -59,10 +81,11 @@ export default function Navbar() {
 
 			{/* 🏆 BARRA DE NAVEGACIÓN - EDICIÓN FIBRA DE CARBONO INTELIGENTE */}
 			<nav 
-				className={`fixed top-0 left-0 z-50 flex h-16 w-full items-center justify-between gap-4 border-b border-amber-500/10 px-6 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.8)] font-mono select-none overflow-hidden transition-transform duration-500 relative ${
+				className={`fixed left-0 z-50 flex h-16 w-full items-center justify-between gap-4 border-b border-amber-500/10 px-6 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.8)] font-mono select-none overflow-hidden transition-all duration-300 ${
 					isVisible ? "translate-y-0" : "-translate-y-full"
 				}`}
 				style={{
+					top: `${simOffset}px`,
 					backgroundColor: "#09090b",
 					backgroundImage: 
 						`linear-gradient(45deg, #111115 25%, transparent 25%), 

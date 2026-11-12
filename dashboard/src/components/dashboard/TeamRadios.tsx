@@ -33,7 +33,7 @@ export default function TeamRadios() {
 						.slice(0, 20)
 						.map((teamRadio, i) => (
 							<RadioMessage
-								key={`radio.${i}`}
+								key={teamRadio.Utc ? `radio.${teamRadio.Utc}` : `radio.${i}`}
 								driver={drivers[teamRadio.RacingNumber]}
 								capture={teamRadio}
 								basePath={basePath}

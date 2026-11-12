@@ -141,10 +141,10 @@ export default function SessionInfo() {
 
 	const isOfflineOrFinished = !isLive && !effectiveSimActive;
 
-	const [nextGpName, setNextGpName] = useState("Próximo Gran Premio");
-	const [nextSessionName, setNextSessionName] = useState("Sesión Oficial");
-	const [countdown, setCountdown] = useState("Cargando...");
-	const [countryCode, setCountryCode] = useState<string | undefined>(undefined);
+	const [nextGpName, setNextGpName] = useState("Gran Premio de la Ciudad de México");
+	const [nextSessionName, setNextSessionName] = useState("Carrera en Vivo");
+	const [countdown, setCountdown] = useState("EN PISTA");
+	const [countryCode, setCountryCode] = useState<string | undefined>("mex");
 
 	const calcCountdown = (target: Date) => {
 		const difference = target.getTime() - Date.now();
@@ -161,7 +161,10 @@ export default function SessionInfo() {
 
 	// Obtener la próxima carrera y calcular el contador
 	useEffect(() => {
-		if (!isOfflineOrFinished || isSimActive) return;
+		const isSimActiveSync = typeof window !== "undefined" && (
+			sessionStorage.getItem("f1_pitwall_sim") === "active" || simulator.getActive()
+		);
+		if (!isOfflineOrFinished || isSimActive || isSimActiveSync) return;
 
 		let targetDate: Date | null = null;
 		let intervalId: any = null;

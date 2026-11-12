@@ -44,6 +44,8 @@ export default function SecretSimulationHUD() {
 
 		if (isAuthorized) {
 			sessionStorage.setItem("f1_pitwall_sim", "active");
+			sessionStorage.setItem("f1_sim_collapsed", "false");
+			window.dispatchEvent(new Event("f1_sim_state_change"));
 			setIsActive(true);
 			if (!simulator.getActive()) {
 				simulator.start();
@@ -54,6 +56,7 @@ export default function SecretSimulationHUD() {
 			triggerHaptic("heavy");
 		} else if (testParam === "stop" || testParam === "off" || testParam === "exit") {
 			sessionStorage.removeItem("f1_pitwall_sim");
+			sessionStorage.removeItem("f1_sim_collapsed");
 			sessionStorage.removeItem("f1_sim_lap");
 			sessionStorage.removeItem("f1_sim_tick");
 			sessionStorage.removeItem("f1_sim_order");
@@ -62,6 +65,7 @@ export default function SecretSimulationHUD() {
 			sessionStorage.removeItem("f1_sim_progress");
 			sessionStorage.removeItem("f1_sim_rc_messages");
 			sessionStorage.removeItem("f1_sim_radios");
+			window.dispatchEvent(new Event("f1_sim_state_change"));
 			setIsActive(false);
 			simulator.stop();
 			useDataStore.getState().resetSession();
@@ -76,9 +80,18 @@ export default function SecretSimulationHUD() {
 		}
 	}, [pathname]);
 
+	const toggleCollapse = (collapsed: boolean) => {
+		setIsCollapsed(collapsed);
+		if (typeof window !== "undefined") {
+			sessionStorage.setItem("f1_sim_collapsed", String(collapsed));
+			window.dispatchEvent(new Event("f1_sim_state_change"));
+		}
+	};
+
 	const handleStop = () => {
 		triggerHaptic("heavy");
 		sessionStorage.removeItem("f1_pitwall_sim");
+		sessionStorage.removeItem("f1_sim_collapsed");
 		sessionStorage.removeItem("f1_sim_lap");
 		sessionStorage.removeItem("f1_sim_tick");
 		sessionStorage.removeItem("f1_sim_order");
@@ -87,6 +100,7 @@ export default function SecretSimulationHUD() {
 		sessionStorage.removeItem("f1_sim_progress");
 		sessionStorage.removeItem("f1_sim_rc_messages");
 		sessionStorage.removeItem("f1_sim_radios");
+		window.dispatchEvent(new Event("f1_sim_state_change"));
 		setIsActive(false);
 		simulator.stop();
 		useDataStore.getState().resetSession();
@@ -145,12 +159,12 @@ export default function SecretSimulationHUD() {
 	};
 
 	return (
-		<div className="fixed top-0 left-0 right-0 z-[99999] pointer-events-auto select-none font-mono">
+		<div className="fixed top-0 left-0 right-0 z-[99999] pointer-events-none select-none font-mono">
 			{isCollapsed ? (
 				/* BOTÓN FLOTANTE MINIMIZADO PARA MÓVIL */
-				<div className="flex justify-end p-2 pr-3">
+				<div className="flex justify-end p-2 pr-3 pointer-events-auto">
 					<button
-						onClick={() => setIsCollapsed(false)}
+						onClick={() => toggleCollapse(false)}
 						className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-950/90 border border-red-500/50 text-white shadow-2xl backdrop-blur-md text-[11px] font-black cursor-pointer hover:bg-red-900 transition-all"
 					>
 						<span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
@@ -160,7 +174,7 @@ export default function SecretSimulationHUD() {
 				</div>
 			) : (
 				/* BARRA DE CONTROL COMPLETA */
-				<div className="w-full bg-zinc-950/95 border-b border-red-500/50 backdrop-blur-xl shadow-2xl px-3 sm:px-4 py-2 transition-all">
+				<div className="w-full bg-zinc-950/95 border-b border-red-500/50 backdrop-blur-xl shadow-2xl px-3 sm:px-4 py-2 transition-all pointer-events-auto">
 					<div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2.5">
 						
 						{/* LADO IZQUIERDO: ESTADO Y VUELTAS */}
@@ -225,7 +239,7 @@ export default function SecretSimulationHUD() {
 						{/* LADO DERECHO: MINIMIZAR Y DETENER */}
 						<div className="flex items-center gap-1.5 ml-auto sm:ml-0">
 							<button
-								onClick={() => setIsCollapsed(true)}
+								onClick={() => toggleCollapse(true)}
 								className="p-1 rounded bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800 transition-all cursor-pointer"
 								title="Minimizar barra"
 							>

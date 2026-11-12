@@ -35,17 +35,28 @@ export default function RadioMessage({ driver, capture, basePath, gmtOffset }: P
 	const [subLoading, setSubLoading] = useState<boolean>(false);
 	const [showSub, setShowSub] = useState<boolean>(true);
 	const [subError, setSubError] = useState<string | null>(null);
-	const [isClosed, setIsClosed] = useState<boolean>(false);
 
-	// ⏱️ Auto-cierre suave a los 25 segundos para radios de simulación (no bloquea la pantalla indefinidamente)
+	// ⏱️ Auto-cierre suave e infalible a los 12 segundos para radios de simulación
+	// manualState: null (automático según tiempo), "open" (forzado por el usuario con Abrir), "closed" (forzado con X)
+	const [manualState, setManualState] = useState<"open" | "closed" | null>(null);
+	const [, setTimerTick] = useState<number>(0);
+
+	const captureTimeMs = capture?.Utc ? new Date(capture.Utc).getTime() : 0;
+	const ageMs = captureTimeMs > 0 ? Date.now() - captureTimeMs : 0;
+	const isSimulated = Boolean(simulatedTranscript);
+	// Si tiene más de 12 segundos de antigüedad, colapsa automáticamente a la vista compacta
+	const autoExpired = isSimulated && ageMs >= 12000;
+
 	useEffect(() => {
-		if (simulatedTranscript) {
-			const timer = setTimeout(() => {
-				setIsClosed(true);
-			}, 25000);
-			return () => clearTimeout(timer);
-		}
-	}, [simulatedTranscript]);
+		if (!isSimulated || manualState !== null) return;
+		const remainingMs = Math.max(100, 12000 - ageMs);
+		const timer = setTimeout(() => {
+			setTimerTick((t) => t + 1);
+		}, remainingMs);
+		return () => clearTimeout(timer);
+	}, [isSimulated, manualState, ageMs, capture.Utc]);
+
+	const isClosed = manualState !== null ? manualState === "closed" : autoExpired;
 
 	const audioUrl = `${basePath}${capture.Path}`;
 
@@ -143,7 +154,7 @@ export default function RadioMessage({ driver, capture, basePath, gmtOffset }: P
 				</div>
 				<button
 					type="button"
-					onClick={() => setIsClosed(false)}
+					onClick={() => setManualState("open")}
 					className="text-[10px] text-amber-400 hover:text-amber-300 font-bold uppercase tracking-wider underline cursor-pointer shrink-0 ml-1"
 				>
 					Abrir
@@ -196,7 +207,7 @@ export default function RadioMessage({ driver, capture, basePath, gmtOffset }: P
 					{simulatedTranscript && (
 						<button
 							type="button"
-							onClick={() => setIsClosed(true)}
+							onClick={() => setManualState("closed")}
 							className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
 							title="Cerrar reproductor"
 						>
