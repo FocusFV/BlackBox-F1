@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,28 +8,21 @@ import {
 	Gauge, 
 	Tv2, 
 	Trophy, 
-	Calendar, 
 	ChevronDown, 
-	ChevronRight,
 	Activity,
 	Radio,
 	Sparkles,
-	SlidersHorizontal,
 	Eye,
 	Zap,
-	Coffee,
-	Flag as FlagIcon
+	Coffee
 } from "lucide-react";
 
 import Button from "@/components/ui/Button";
 import ScrollHint from "@/components/ScrollHint";
-import Flag from "@/components/Flag";
 import { useSupportModalStore } from "@/stores/useSupportModalStore";
 
 import icon from "public/logoprincipal.png";
 import mosaicoEquipos from "public/equiposf1.png";
-import calendar2026 from "@/data/calendar2026.json";
-import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
 
 // PREGUNTAS FRECUENTES DEL SISTEMA
 const faqs = [
@@ -53,41 +46,7 @@ const faqs = [
 
 export default function Home() {
 	const [activeFaq, setActiveFaq] = useState<number | null>(null);
-	const [mounted, setMounted] = useState(false);
-	const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
 	const openSupportModal = useSupportModalStore((s) => s.open);
-
-	// Determinar el próximo GP de la temporada 2026 (Las Vegas GP R21, sábado 21 nov)
-	const nextRace = useMemo(() => {
-		const now = Date.now();
-		const upcoming = calendar2026.find((r: any) => {
-			const raceTime = new Date(`${r.date}T${r.time || "12:00:00Z"}`).getTime();
-			return raceTime + 4 * 3600 * 1000 >= now;
-		});
-		return upcoming || calendar2026[20] || calendar2026[calendar2026.length - 1];
-	}, []);
-
-	const translatedGp = useMemo(() => translateGpName(nextRace.raceName), [nextRace]);
-	const countryCode = useMemo(() => getCountryCodeForGp(nextRace.raceName) || "usa", [nextRace]);
-
-	// Timer de cuenta regresiva en vivo
-	useEffect(() => {
-		setMounted(true);
-		const targetTime = new Date(`${nextRace.date}T${nextRace.time || "04:00:00Z"}`).getTime();
-
-		const updateTime = () => {
-			const diff = Math.max(0, targetTime - Date.now());
-			const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-			const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-			const minutes = Math.floor((diff / (1000 * 60)) % 60);
-			const seconds = Math.floor((diff / 1000) % 60);
-			setTimeLeft({ days, hours, minutes, seconds });
-		};
-
-		updateTime();
-		const interval = setInterval(updateTime, 1000);
-		return () => clearInterval(interval);
-	}, [nextRace]);
 
 	const toggleFaq = (idx: number) => {
 		setActiveFaq(activeFaq === idx ? null : idx);
@@ -147,68 +106,6 @@ export default function Home() {
 					/>
 				</motion.div>
 
-				{/* HUD DEL PRÓXIMO GRAN PREMIO (CUENTA REGRESIVA EN VIVO) */}
-				<motion.div
-					initial={{ opacity: 0, y: 15 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.7, delay: 0.15 }}
-					className="w-full max-w-2xl mb-8 p-3.5 sm:p-4 rounded-2xl bg-zinc-950/85 border border-amber-500/40 backdrop-blur-xl shadow-[0_0_35px_rgba(245,158,11,0.15)] flex flex-col sm:flex-row items-center justify-between gap-4 text-left"
-				>
-					<div className="flex items-center gap-3 w-full sm:w-auto">
-						<div className="flex items-center justify-center overflow-hidden rounded-xl border border-zinc-700/60 bg-zinc-900 p-0.5 shadow-md shrink-0">
-							<Flag countryCode={countryCode} className="h-7 w-10 object-cover rounded-lg" />
-						</div>
-						<div>
-							<div className="flex items-center gap-2">
-								<span className="text-[10px] uppercase font-mono font-black tracking-widest text-amber-400">
-									Ronda {nextRace.round} · Las Vegas, Estados Unidos
-								</span>
-								<span className="inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono font-bold">
-									<span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
-									Próximo GP
-								</span>
-							</div>
-							<h3 className="text-sm sm:text-base font-black text-white tracking-wide truncate max-w-[280px] sm:max-w-[320px]">
-								{translatedGp}
-							</h3>
-							<p className="text-[11px] text-zinc-400 font-mono">
-								Las Vegas Strip Circuit · Sábado 21 Nov
-							</p>
-						</div>
-					</div>
-
-					{/* BLOQUES DE CUENTA REGRESIVA */}
-					<div className="flex items-center gap-1.5 sm:gap-2 font-mono text-center shrink-0 w-full sm:w-auto justify-center border-t sm:border-t-0 sm:border-l border-zinc-800/80 pt-2 sm:pt-0 sm:pl-4">
-						<div className="px-2.5 py-1.5 rounded-xl bg-zinc-900/90 border border-zinc-800 shadow-inner">
-							<span className="text-base sm:text-lg font-black text-amber-400 block leading-tight">
-								{mounted && timeLeft ? String(timeLeft.days).padStart(2, "0") : "--"}
-							</span>
-							<span className="text-[8px] uppercase tracking-wider text-zinc-500 block">Días</span>
-						</div>
-						<span className="text-amber-500/60 font-bold">:</span>
-						<div className="px-2.5 py-1.5 rounded-xl bg-zinc-900/90 border border-zinc-800 shadow-inner">
-							<span className="text-base sm:text-lg font-black text-amber-400 block leading-tight">
-								{mounted && timeLeft ? String(timeLeft.hours).padStart(2, "0") : "--"}
-							</span>
-							<span className="text-[8px] uppercase tracking-wider text-zinc-500 block">Horas</span>
-						</div>
-						<span className="text-amber-500/60 font-bold">:</span>
-						<div className="px-2.5 py-1.5 rounded-xl bg-zinc-900/90 border border-zinc-800 shadow-inner">
-							<span className="text-base sm:text-lg font-black text-amber-400 block leading-tight">
-								{mounted && timeLeft ? String(timeLeft.minutes).padStart(2, "0") : "--"}
-							</span>
-							<span className="text-[8px] uppercase tracking-wider text-zinc-500 block">Min</span>
-						</div>
-						<span className="text-amber-500/60 font-bold">:</span>
-						<div className="px-2.5 py-1.5 rounded-xl bg-zinc-900/90 border border-zinc-800 shadow-inner">
-							<span className="text-base sm:text-lg font-black text-amber-300 block leading-tight">
-								{mounted && timeLeft ? String(timeLeft.seconds).padStart(2, "0") : "--"}
-							</span>
-							<span className="text-[8px] uppercase tracking-wider text-zinc-500 block">Seg</span>
-						</div>
-					</div>
-				</motion.div>
-
 				{/* TÍTULO PRINCIPAL */}
 				<motion.h1 
 					initial={{ opacity: 0, y: 20 }}
@@ -242,18 +139,6 @@ export default function Home() {
 					<Link href="/dashboard" prefetch={false}>
 						<Button className="rounded-2xl border border-amber-300/60 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 px-9 py-4 font-black uppercase tracking-widest text-xs shadow-[0_0_35px_rgba(245,158,11,0.45)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_rgba(245,158,11,0.65)] flex items-center gap-3 cursor-pointer">
 							<Gauge className="w-5 h-5 text-black" /> Ingresar a la Telemetría
-						</Button>
-					</Link>
-
-					<Link href="/dashboard/standings">
-						<Button className="rounded-2xl border border-zinc-800 bg-zinc-900/80 text-neutral-200 px-8 py-4 font-bold uppercase tracking-widest text-xs backdrop-blur-xl transition duration-300 hover:border-amber-500/50 hover:text-amber-400 hover:bg-amber-500/[0.08] hover:scale-105 flex items-center gap-2.5 cursor-pointer">
-							<Trophy className="w-4 h-4 text-amber-500" /> Campeonatos FIA
-						</Button>
-					</Link>
-
-					<Link href="/schedule">
-						<Button className="rounded-2xl border border-zinc-800/80 bg-zinc-950/60 text-zinc-400 px-6 py-4 font-mono font-bold uppercase tracking-wider text-xs backdrop-blur-xl transition duration-300 hover:text-zinc-200 hover:border-zinc-700 hover:scale-105 flex items-center gap-2 cursor-pointer">
-							<Calendar className="w-4 h-4 text-amber-500" /> Calendario 2026
 						</Button>
 					</Link>
 
@@ -352,26 +237,20 @@ export default function Home() {
 							<p className="text-sm text-zinc-400 leading-relaxed font-medium mb-6">
 								Monitoreo en vivo sector a sector, mejores marcas de vuelta personales y absolutas, velocidad punta y diferencias directas entre autos.
 							</p>
-
-							{/* Mini Preview de Telemetría */}
-							<div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80 font-mono text-[11px] space-y-1.5 mb-6">
-								<div className="flex justify-between items-center text-zinc-400">
-									<span>SPEED TRAP</span>
-									<span className="text-amber-400 font-bold">347.8 KM/H</span>
-								</div>
-								<div className="flex gap-1.5">
-									<span className="flex-1 text-center py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold">S1 28.140</span>
-									<span className="flex-1 text-center py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">S2 29.890</span>
-									<span className="flex-1 text-center py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">S3 23.012</span>
-								</div>
-							</div>
 						</div>
 
-						<Link href="/dashboard" className="w-full">
-							<Button className="w-full rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-200 py-3 font-mono font-bold text-xs uppercase tracking-wider hover:border-amber-500/50 hover:text-amber-300 hover:bg-amber-500/10 transition-all flex items-center justify-center gap-2 cursor-pointer">
-								Abrir Telemetría <ChevronRight className="w-4 h-4" />
-							</Button>
-						</Link>
+						{/* Mini Preview de Telemetría */}
+						<div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80 font-mono text-[11px] space-y-1.5">
+							<div className="flex justify-between items-center text-zinc-400">
+								<span>SPEED TRAP</span>
+								<span className="text-amber-400 font-bold">347.8 KM/H</span>
+							</div>
+							<div className="flex gap-1.5">
+								<span className="flex-1 text-center py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold">S1 28.140</span>
+								<span className="flex-1 text-center py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">S2 29.890</span>
+								<span className="flex-1 text-center py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">S3 23.012</span>
+							</div>
+						</div>
 					</motion.div>
 
 					{/* MÓDULO 2: CAMPEONATOS FIA */}
@@ -396,29 +275,23 @@ export default function Home() {
 							<p className="text-sm text-zinc-400 leading-relaxed font-medium mb-6">
 								Tablas oficiales de puntos de Pilotos y Constructores. Modales inmersivos con colores oficiales de escudería, biografías, victorias y podios.
 							</p>
-
-							{/* Mini Preview de Podio */}
-							<div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80 font-mono text-[11px] space-y-1.5 mb-6">
-								<div className="flex justify-between items-center text-zinc-300">
-									<span className="text-amber-400 font-black">1. A. ANTONELLI</span>
-									<span className="font-bold">MERCEDES · 390 PTS</span>
-								</div>
-								<div className="flex justify-between items-center text-zinc-400">
-									<span className="text-zinc-200 font-bold">2. M. VERSTAPPEN</span>
-									<span>RED BULL · 279 PTS</span>
-								</div>
-								<div className="flex justify-between items-center text-zinc-400">
-									<span className="text-zinc-200 font-bold">3. G. RUSSELL</span>
-									<span>MERCEDES · 262 PTS</span>
-								</div>
-							</div>
 						</div>
 
-						<Link href="/dashboard/standings" className="w-full">
-							<Button className="w-full rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-200 py-3 font-mono font-bold text-xs uppercase tracking-wider hover:border-amber-500/50 hover:text-amber-300 hover:bg-amber-500/10 transition-all flex items-center justify-center gap-2 cursor-pointer">
-								Ver Clasificación Completa <ChevronRight className="w-4 h-4" />
-							</Button>
-						</Link>
+						{/* Mini Preview de Podio */}
+						<div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80 font-mono text-[11px] space-y-1.5">
+							<div className="flex justify-between items-center text-zinc-300">
+								<span className="text-amber-400 font-black">1. A. ANTONELLI</span>
+								<span className="font-bold">MERCEDES · 390 PTS</span>
+							</div>
+							<div className="flex justify-between items-center text-zinc-400">
+								<span className="text-zinc-200 font-bold">2. M. VERSTAPPEN</span>
+								<span>RED BULL · 279 PTS</span>
+							</div>
+							<div className="flex justify-between items-center text-zinc-400">
+								<span className="text-zinc-200 font-bold">3. G. RUSSELL</span>
+								<span>MERCEDES · 262 PTS</span>
+							</div>
+						</div>
 					</motion.div>
 
 					{/* MÓDULO 3: TV SYNC & DELAY */}
@@ -443,24 +316,18 @@ export default function Home() {
 							<p className="text-sm text-zinc-400 leading-relaxed font-medium mb-6">
 								Ajustá el retraso en segundos para sincronizar el panel con la transmisión de tu tele o streaming y vivir la carrera en sincronía perfecta.
 							</p>
-
-							{/* Mini Preview de Sincronización */}
-							<div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80 font-mono text-[11px] space-y-1.5 mb-6">
-								<div className="flex justify-between items-center text-zinc-400">
-									<span>OFFSET DE RETRASO</span>
-									<span className="text-amber-400 font-bold">+18.0s</span>
-								</div>
-								<div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
-									<div className="bg-gradient-to-r from-amber-500 to-amber-300 h-full w-2/3 rounded-full" />
-								</div>
-							</div>
 						</div>
 
-						<Link href="/dashboard/settings" className="w-full">
-							<Button className="w-full rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-200 py-3 font-mono font-bold text-xs uppercase tracking-wider hover:border-amber-500/50 hover:text-amber-300 hover:bg-amber-500/10 transition-all flex items-center justify-center gap-2 cursor-pointer">
-								Ajustes y Sincronización <SlidersHorizontal className="w-3.5 h-3.5" />
-							</Button>
-						</Link>
+						{/* Mini Preview de Sincronización */}
+						<div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80 font-mono text-[11px] space-y-1.5">
+							<div className="flex justify-between items-center text-zinc-400">
+								<span>OFFSET DE RETRASO</span>
+								<span className="text-amber-400 font-bold">+18.0s</span>
+							</div>
+							<div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+								<div className="bg-gradient-to-r from-amber-500 to-amber-300 h-full w-2/3 rounded-full" />
+							</div>
+						</div>
 					</motion.div>
 
 				</div>
