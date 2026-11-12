@@ -110,8 +110,25 @@ export default function SessionInfo() {
 		sessionStorage.getItem("f1_pitwall_sim") === "active" || simulator.getActive()
 	);
 
+	const [isSimMounted, setIsSimMounted] = useState<boolean>(false);
+
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			const active = sessionStorage.getItem("f1_pitwall_sim") === "active" || simulator.getActive();
+			setIsSimMounted(active);
+			if (active) {
+				setNextGpName("Gran Premio de la Ciudad de México");
+				setCountryCode("mex");
+				setNextSessionName("Carrera en Vivo");
+				setCountdown("EN PISTA");
+			}
+		}
+	}, []);
+
+	const effectiveSimActive = isSimActive || isSimMounted;
+
 	const isLive = Boolean(
-		isSimActive ||
+		effectiveSimActive ||
 		(!isSessionTerminated &&
 		(hasActiveTiming ||
 			Boolean(clock?.Remaining) ||
@@ -122,7 +139,7 @@ export default function SessionInfo() {
 					sessionStatus === "StartedOnTime"))))
 	);
 
-	const isOfflineOrFinished = !isLive;
+	const isOfflineOrFinished = !isLive && !effectiveSimActive;
 
 	const [nextGpName, setNextGpName] = useState("Próximo Gran Premio");
 	const [nextSessionName, setNextSessionName] = useState("Sesión Oficial");
@@ -269,20 +286,20 @@ export default function SessionInfo() {
 			<div className="flex items-center gap-2.5 sm:gap-3 max-w-full overflow-hidden pr-2 sm:pr-0">
 				{/* Banderita del país del próximo GP */}
 				<div className="flex items-center justify-center overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/80 p-0.5 shadow-md shrink-0">
-					<Flag countryCode={countryCode} className="h-6 w-9 object-cover rounded-md" />
+					<Flag countryCode={effectiveSimActive ? "mex" : countryCode} className="h-6 w-9 object-cover rounded-md" />
 				</div>
 
 				<div className="flex flex-col justify-center min-w-0 flex-1 overflow-hidden pr-2 sm:pr-1">
 					<div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0 max-w-full">
 						<span className="text-[11px] sm:text-xs leading-none font-black text-amber-400 uppercase tracking-tight sm:tracking-widest font-mono drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] whitespace-nowrap">
-							{nextGpName}
+							{effectiveSimActive ? "Gran Premio de la Ciudad de México" : nextGpName}
 						</span>
 						<span className="rounded bg-zinc-900/90 border border-zinc-800 px-1.5 py-0.5 text-[9px] font-bold text-zinc-300 uppercase tracking-wider shrink-0 whitespace-nowrap mr-1 sm:mr-0">
-							{nextSessionName}
+							{effectiveSimActive ? "Carrera en Vivo" : nextSessionName}
 						</span>
 					</div>
 					<p className="text-xl md:text-2xl leading-none font-black text-white font-mono tracking-wider mt-1 sm:mt-1.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] truncate">
-						{countdown}
+						{effectiveSimActive ? "EN PISTA" : countdown}
 					</p>
 				</div>
 			</div>
@@ -421,11 +438,11 @@ export default function SessionInfo() {
 
 	return (
 		<div className="flex items-center gap-2.5">
-			<Flag countryCode={session?.Meeting?.Country?.Code} />
+			<Flag countryCode={effectiveSimActive ? "mex" : session?.Meeting?.Country?.Code} />
 
 			<div className="flex flex-col justify-center">
 				<h1 className="truncate text-xs md:text-sm leading-none font-bold text-white font-mono uppercase tracking-wide">
-					{session?.Meeting?.Name}: {translateSessionName(session?.Name)}
+					{effectiveSimActive ? "Gran Premio de la Ciudad de México 2026" : (session?.Meeting?.Name || "Gran Premio")}: {effectiveSimActive ? "Carrera" : translateSessionName(session?.Name)}
 					{timingData?.SessionPart && session?.Name
 						? ` ${sessionPartPrefix(session.Name)}${timingData.SessionPart}`
 						: (isQualy ? ` Q${sessionPart}` : "")}
@@ -453,7 +470,7 @@ export default function SessionInfo() {
 					</div>
 				) : (
 					<p className="text-xs leading-none font-bold text-zinc-400 font-mono mt-1 uppercase tracking-wider">
-						{session?.Meeting?.Circuit?.ShortName || session?.Meeting?.Location || "Trazado Oficial"}
+						{effectiveSimActive ? "Autódromo Hermanos Rodríguez" : (session?.Meeting?.Circuit?.ShortName || session?.Meeting?.Location || "Trazado Oficial")}
 					</p>
 				)}
 			</div>

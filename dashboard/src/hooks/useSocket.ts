@@ -13,11 +13,16 @@ export const useSocket = ({ handleInitial, handleUpdate }: Props) => {
 	const [connected, setConnected] = useState<boolean>(false);
 
 	useEffect(() => {
-		// 🛡️ Si la simulación FIA está activa, aislamos completamente la app del backend remoto
-		// para evitar que datos vacíos o sesiones pasadas pisen la simulación en curso o los nombres de 2026.
+		// 🛡️ Si la simulación FIA está activa o hay token en URL, aislamos completamente la app del backend remoto
+		// para evitar que datos remotos o radios pasados (ej: HAM) pisen la simulación en curso.
+		const secretToken = process.env.NEXT_PUBLIC_SIMULATION_TOKEN || "sim_sec_e8d2c4b7a1f930_pitwall2026";
+		const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+		const hasSimToken = Boolean(
+			searchParams && (searchParams.get("test_mode") === secretToken || searchParams.get("token") === secretToken)
+		);
 		const isSimActive =
 			typeof window !== "undefined" &&
-			sessionStorage.getItem("f1_pitwall_sim") === "active";
+			(sessionStorage.getItem("f1_pitwall_sim") === "active" || hasSimToken);
 
 		if (isSimActive) {
 			setConnected(true);

@@ -11,6 +11,7 @@ import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useDataStore } from "@/stores/useDataStore";
 import { triggerHaptic } from "@/lib/haptics";
 import { getSmartGpContext, type SmartGpContext } from "@/lib/sessionSchedule";
+import { simulator } from "@/lib/simulatorFeed";
 
 interface DriverResult {
 	pos: string;
@@ -171,10 +172,23 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 	const currentGpName = liveSession?.Meeting?.Name;
 	const currentCountryName = liveSession?.Meeting?.Country?.Name;
 	const isSimActive = typeof window !== "undefined" && (
-		sessionStorage.getItem("f1_pitwall_sim") === "active"
+		sessionStorage.getItem("f1_pitwall_sim") === "active" || simulator.getActive()
 	);
-	const initialCountry = isSimActive ? "mex" : ((currentGpName ? getCountryCodeForGp(currentGpName, currentCountryName) : null) || "bra");
-	const initialGpName = isSimActive ? "Gran Premio de la Ciudad de México" : (currentGpName ? translateGpName(currentGpName) : "Gran Premio de São Paulo");
+	const [isSimMounted, setIsSimMounted] = useState<boolean>(false);
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			const active = sessionStorage.getItem("f1_pitwall_sim") === "active" || simulator.getActive();
+			setIsSimMounted(active);
+			if (active) {
+				setGpName("Gran Premio de la Ciudad de México");
+				setCountryCode("mex");
+				setLoading(false);
+			}
+		}
+	}, []);
+	const effectiveSim = isSimActive || isSimMounted;
+	const initialCountry = effectiveSim ? "mex" : ((currentGpName ? getCountryCodeForGp(currentGpName, currentCountryName) : null) || "bra");
+	const initialGpName = effectiveSim ? "Gran Premio de la Ciudad de México" : (currentGpName ? translateGpName(currentGpName) : "Gran Premio de São Paulo");
 
 	const getInitialTab = (): SessionTab => {
 		if (typeof window !== "undefined") {
@@ -351,12 +365,12 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 		getSmartGpContext().then((ctx) => {
 			if (!isMounted) return;
 			setSmartContext(ctx);
-			const targetGp = liveSession?.Meeting?.Name || ctx.raceName;
-			const targetCountry = liveSession?.Meeting?.Country?.Name || ctx.country;
-			setGpName(translateGpName(targetGp));
-			setCountryCode(getCountryCodeForGp(targetGp, targetCountry) || ctx.countryCode);
-			setRaceDate(liveSession?.StartDate ? liveSession.StartDate.split("T")[0] : ctx.raceDate);
-			setHasSprint(ctx.hasSprint);
+			const targetGp = effectiveSim ? "Gran Premio de la Ciudad de México" : (liveSession?.Meeting?.Name || ctx.raceName);
+			const targetCountry = effectiveSim ? "Mexico" : (liveSession?.Meeting?.Country?.Name || ctx.country);
+			setGpName(effectiveSim ? "Gran Premio de la Ciudad de México" : translateGpName(targetGp));
+			setCountryCode(effectiveSim ? "mex" : (getCountryCodeForGp(targetGp, targetCountry) || ctx.countryCode));
+			setRaceDate(effectiveSim ? "2026-10-25" : (liveSession?.StartDate ? liveSession.StartDate.split("T")[0] : ctx.raceDate));
+			setHasSprint(effectiveSim ? false : ctx.hasSprint);
 			const storedTab = typeof window !== "undefined" ? (sessionStorage.getItem("bb_parc_ferme_tab") as SessionTab) : null;
 			const isManual = typeof window !== "undefined" ? sessionStorage.getItem("bb_parc_ferme_manual") === "true" : false;
 			if (storedTab && (isManual || ctx.availableTabs.includes(storedTab))) {
@@ -913,7 +927,9 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					</span>
 					<div className="text-left font-mono">
 						<p className="text-[11px] font-bold text-zinc-200 uppercase tracking-tight leading-none">
-							{smartContext?.isWeekendActive
+							{effectiveSim
+								? "Sesión en Curso"
+								: smartContext?.isWeekendActive
 								? smartContext.stage === "PRE_WEEKEND"
 									? "Pista en Espera"
 									: "Sesión en Curso"
@@ -1032,7 +1048,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 						</div>
 					</div>
 
-					{loading ? (
+					{loading && !effectiveSim ? (
 						<div className="h-64 flex flex-col items-center justify-center gap-2 text-zinc-500 font-mono text-xs uppercase tracking-widest animate-pulse">
 							<span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
 							Cargando tiempos oficiales...

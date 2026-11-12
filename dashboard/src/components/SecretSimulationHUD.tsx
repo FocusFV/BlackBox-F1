@@ -61,6 +61,7 @@ export default function SecretSimulationHUD() {
 			sessionStorage.removeItem("f1_sim_intervals");
 			sessionStorage.removeItem("f1_sim_progress");
 			sessionStorage.removeItem("f1_sim_rc_messages");
+			sessionStorage.removeItem("f1_sim_radios");
 			setIsActive(false);
 			simulator.stop();
 			useDataStore.getState().resetSession();
@@ -85,6 +86,7 @@ export default function SecretSimulationHUD() {
 		sessionStorage.removeItem("f1_sim_intervals");
 		sessionStorage.removeItem("f1_sim_progress");
 		sessionStorage.removeItem("f1_sim_rc_messages");
+		sessionStorage.removeItem("f1_sim_radios");
 		setIsActive(false);
 		simulator.stop();
 		useDataStore.getState().resetSession();
@@ -174,7 +176,7 @@ export default function SecretSimulationHUD() {
 								</span>
 								<span className="hidden sm:inline text-zinc-600">•</span>
 								<span className="text-[10px] sm:text-[11px] font-bold text-zinc-300">
-									MÉXICO GP · VUELTA {currentLap}/{totalLaps}
+									{"MÉXICO GP · VUELTA "}{currentLap}/{totalLaps}
 								</span>
 							</div>
 

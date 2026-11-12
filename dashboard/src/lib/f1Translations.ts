@@ -27,7 +27,7 @@ const GP_TRANSLATIONS: Record<string, string> = {
 	"mexican grand prix": "Gran Premio de México",
 	"são paulo grand prix": "Gran Premio de São Paulo",
 	"sao paulo grand prix": "Gran Premio de São Paulo",
-	"brazilian grand prix": "Gran Premio de Brasil",
+	"brazilian grand prix": "Gran Premio de São Paulo",
 	"barcelona grand prix": "Gran Premio de Barcelona",
 	"barcelona": "Gran Premio de Barcelona",
 	"gran premio de barcelona": "Gran Premio de Barcelona",

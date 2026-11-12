@@ -20,7 +20,14 @@ export default function TeamRadios() {
 		<ul className="flex flex-col gap-2">
 			{!teamRadios && new Array(6).fill("").map((_, index) => <SkeletonMessage key={`radio.loading.${index}`} />)}
 
-			{teamRadios && gmtOffset && drivers && teamRadios.Captures && (
+			{teamRadios && drivers && teamRadios.Captures && teamRadios.Captures.length === 0 && (
+				<li className="flex flex-col items-center justify-center p-6 text-center text-zinc-500 font-mono text-xs bg-zinc-950/40 rounded-xl border border-zinc-900/60">
+					<span className="text-[10px] uppercase tracking-widest text-zinc-600 mb-1">CANAL DE RADIO DISPONIBLE</span>
+					<p className="text-zinc-400">Sin mensajes en este momento. Pulsa <strong className="text-amber-400">[Radio]</strong> en el HUD para emitir.</p>
+				</li>
+			)}
+
+			{teamRadios && (gmtOffset || true) && drivers && teamRadios.Captures && teamRadios.Captures.length > 0 && (
 				<AnimatePresence>
 					{teamRadios.Captures.sort(sortUtc)
 						.slice(0, 20)
@@ -30,7 +37,7 @@ export default function TeamRadios() {
 								driver={drivers[teamRadio.RacingNumber]}
 								capture={teamRadio}
 								basePath={basePath}
-								gmtOffset={gmtOffset}
+								gmtOffset={gmtOffset || "-06:00:00"}
 							/>
 						))}
 				</AnimatePresence>

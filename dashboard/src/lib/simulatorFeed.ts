@@ -341,6 +341,7 @@ class SimulatorService {
 		let savedIntervals: Record<string, number> | null = null;
 		let savedProgress: Record<string, number> | null = null;
 		let initialRcMessages: any[] = [];
+		let initialRadios: any[] = [];
 
 		if (typeof window !== "undefined") {
 			const strLap = sessionStorage.getItem("f1_sim_lap");
@@ -382,6 +383,15 @@ class SimulatorService {
 					const parsed = JSON.parse(strRcMsgs);
 					if (Array.isArray(parsed) && parsed.length > 0) {
 						initialRcMessages = parsed;
+					}
+				} catch {}
+			}
+			const strRadios = sessionStorage.getItem("f1_sim_radios");
+			if (strRadios) {
+				try {
+					const parsed = JSON.parse(strRadios);
+					if (Array.isArray(parsed)) {
+						initialRadios = parsed;
 					}
 				} catch {}
 			}
@@ -507,7 +517,7 @@ class SimulatorService {
 				Messages: initialRcMessages,
 			},
 			TeamRadio: {
-				Captures: [],
+				Captures: initialRadios,
 			},
 			Heartbeat: {
 				Utc: nowIso,
@@ -726,12 +736,8 @@ class SimulatorService {
 			const speed = baseStep + driverDelta;
 			this.driverProgress[num] = (this.driverProgress[num] + speed) % trackLength;
 
-			// Pequeña oscilación de intervalos (TOTALMENTE CONGELADA BAJO VSC O SAFETY CAR)
-			if (idx > 0 && !isNeutralized) {
-				const currentInt = this.driverIntervals[num] || 0.8;
-				const jitter = (Math.random() - 0.5) * 0.02;
-				this.driverIntervals[num] = Math.max(0.25, Math.min(4.5, currentInt + jitter));
-			}
+			// 🛡️ Intervalos estables: se congelan y mantienen exactos (sin deriva aleatoria ni jitter para respetar el spec de +0.380s estable)
+			// No se aplica Math.random() ni oscilaciones a los gaps en verde
 		});
 
 		// 2. Actualizar posiciones GPS para el mapa
@@ -891,19 +897,31 @@ class SimulatorService {
 		const nowIso = new Date().toISOString();
 		const driver = DRIVERS_2026[driverNum];
 		const currentRadio = useDataStore.getState().state?.TeamRadio?.Captures || [];
+		const transcriptText = driverNum === "43"
+			? "¡Buen balance con los neumáticos duros! Tenemos muy buen ritmo para atacar a Pérez."
+			: "Box box. Confirmamos parada en esta vuelta, neumáticos listos en boxes.";
+
+		const updated = [
+			{
+				Utc: nowIso,
+				RacingNumber: driverNum,
+				Path: `simulated_${driver?.Tla?.toLowerCase() || "driver"}_radio.mp3`,
+				Transcript: transcriptText,
+			},
+			...currentRadio.slice(0, 9),
+		];
 
 		useDataStore.getState().setState({
 			TeamRadio: {
-				Captures: [
-					{
-						Utc: nowIso,
-						RacingNumber: driverNum,
-						Path: `simulated_${driver?.Tla?.toLowerCase() || "driver"}_radio.mp3`,
-					},
-					...currentRadio.slice(0, 5),
-				],
+				Captures: updated,
 			},
 		});
+
+		if (typeof window !== "undefined") {
+			try {
+				sessionStorage.setItem("f1_sim_radios", JSON.stringify(updated));
+			} catch {}
+		}
 	}
 
 	public triggerLapIncrement() {
@@ -964,6 +982,7 @@ class SimulatorService {
 			sessionStorage.removeItem("f1_sim_intervals");
 			sessionStorage.removeItem("f1_sim_progress");
 			sessionStorage.removeItem("f1_sim_rc_messages");
+			sessionStorage.removeItem("f1_sim_radios");
 		}
 	}
 
