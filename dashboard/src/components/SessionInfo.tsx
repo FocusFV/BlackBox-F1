@@ -141,10 +141,22 @@ export default function SessionInfo() {
 
 	const isOfflineOrFinished = !isLive && !effectiveSimActive;
 
-	const [nextGpName, setNextGpName] = useState("Gran Premio de la Ciudad de México");
-	const [nextSessionName, setNextSessionName] = useState("Carrera en Vivo");
-	const [countdown, setCountdown] = useState("EN PISTA");
-	const [countryCode, setCountryCode] = useState<string | undefined>("mex");
+	const [nextGpName, setNextGpName] = useState("Gran Premio de Las Vegas");
+	const [nextSessionName, setNextSessionName] = useState("Práctica 1");
+	const [countdown, setCountdown] = useState(() => {
+		const target = new Date("2026-11-20T00:30:00Z");
+		const difference = target.getTime() - Date.now();
+		if (difference <= 0) return "00:00:00";
+		const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+		const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+		const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+		const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+		const pad = (n: number) => n.toString().padStart(2, "0");
+		return days > 0
+			? `${days}D ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+			: `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+	});
+	const [countryCode, setCountryCode] = useState<string | undefined>("usa");
 
 	const calcCountdown = (target: Date) => {
 		const difference = target.getTime() - Date.now();

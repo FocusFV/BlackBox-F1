@@ -37,12 +37,12 @@ export default function WeatherPage() {
 		windDir: string;
 		rainfall: boolean;
 	}>({
-		airTemp: "21.4",
-		trackTemp: "34.2",
-		humidity: "38",
-		pressure: "1022.0",
-		windSpeed: "4.1",
-		windDir: "140",
+		airTemp: "23.8",
+		trackTemp: "38.5",
+		humidity: "46",
+		pressure: "1014.2",
+		windSpeed: "3.4",
+		windDir: "190",
 		rainfall: false,
 	});
 
@@ -53,8 +53,8 @@ export default function WeatherPage() {
 				const isSim = typeof window !== "undefined" && (
 					sessionStorage.getItem("f1_pitwall_sim") === "active" || simulator.getActive()
 				);
-				const lat = isSim ? 19.4042 : 19.4042;
-				const lon = isSim ? -99.0907 : -99.0907;
+				const lat = isSim ? 19.4042 : 36.1147;
+				const lon = isSim ? -99.0907 : -115.173;
 				const res = await fetch(
 					`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,surface_pressure,wind_speed_10m,wind_direction_10m,precipitation&timezone=auto`
 				);
@@ -62,15 +62,17 @@ export default function WeatherPage() {
 					const data = await res.json();
 					const c = data?.current;
 					if (c && isMounted) {
-						const aTemp = Number(c.temperature_2m || 21.4).toFixed(1);
-						const tTemp = (Number(c.temperature_2m || 21.4) + 12.8).toFixed(1);
+						const defaultAir = isSim ? 21.4 : 23.8;
+						const trackDelta = isSim ? 12.8 : 14.7;
+						const aTemp = Number(c.temperature_2m || defaultAir).toFixed(1);
+						const tTemp = (Number(c.temperature_2m || defaultAir) + trackDelta).toFixed(1);
 						setBackupWeather({
 							airTemp: aTemp,
 							trackTemp: tTemp,
-							humidity: String(Math.round(c.relative_humidity_2m ?? 38)),
-							pressure: String(Math.round(c.surface_pressure ?? 1022)),
-							windSpeed: String(Math.round(c.wind_speed_10m ?? 4.1)),
-							windDir: String(Math.round(c.wind_direction_10m ?? 140)),
+							humidity: String(Math.round(c.relative_humidity_2m ?? (isSim ? 38 : 46))),
+							pressure: String(Math.round(c.surface_pressure ?? (isSim ? 1022 : 1014))),
+							windSpeed: String(Math.round(c.wind_speed_10m ?? (isSim ? 4.1 : 3.4))),
+							windDir: String(Math.round(c.wind_direction_10m ?? (isSim ? 140 : 190))),
 							rainfall: Boolean(c.precipitation && c.precipitation > 0),
 						});
 					}
@@ -107,23 +109,29 @@ export default function WeatherPage() {
 		infoSesionMilitar?.Name) || isSimActive
 	);
 
-	const gpNombre = isSimActive || !infoSesionMilitar?.Meeting?.OfficialName
+	const gpNombre = isSimActive
 		? "GRAN PREMIO DE LA CIUDAD DE MÉXICO 2026"
-		: infoSesionMilitar.Meeting.OfficialName.toUpperCase();
+		: infoSesionMilitar?.Meeting?.OfficialName
+		? infoSesionMilitar.Meeting.OfficialName.toUpperCase()
+		: "FORMULA 1 HEINEKEN SILVER LAS VEGAS GRAND PRIX 2026";
 
-	const sesionNombre = isSimActive || !isLiveSessionRunning
+	const sesionNombre = isSimActive
 		? "CARRERA"
-		: infoSesionMilitar?.Name
+		: isLiveSessionRunning && infoSesionMilitar?.Name
 		? (infoSesionMilitar.Name === "Race" ? "CARRERA" : infoSesionMilitar.Name.toUpperCase())
-		: "CARRERA";
+		: "ENTRE SESIONES · PISTA EN PAUSA";
 
-	const circuitoNombre = isSimActive || !infoSesionMilitar?.Meeting?.Circuit?.ShortName
+	const circuitoNombre = isSimActive
 		? "AUTÓDROMO HERMANOS RODRÍGUEZ"
-		: infoSesionMilitar.Meeting.Circuit.ShortName.toUpperCase();
+		: infoSesionMilitar?.Meeting?.Circuit?.ShortName
+		? infoSesionMilitar.Meeting.Circuit.ShortName.toUpperCase()
+		: "LAS VEGAS STRIP CIRCUIT";
 
-	const paisGP = isSimActive || !infoSesionMilitar?.Meeting?.Country?.Name
+	const paisGP = isSimActive
 		? "MÉXICO"
-		: infoSesionMilitar.Meeting.Country.Name.toUpperCase();
+		: infoSesionMilitar?.Meeting?.Country?.Name
+		? infoSesionMilitar.Meeting.Country.Name.toUpperCase()
+		: "ESTADOS UNIDOS";
 
 	// 🌡️ Variables climáticas activas (con guardas seguras para evitar errores de lectura)
 	const tempAire = weatherData?.AirTemp ?? backupWeather.airTemp;
@@ -176,7 +184,7 @@ export default function WeatherPage() {
 				<div className="absolute inset-0 bg-[linear-gradient(to_right,#0c0e12_1px,transparent_1px),linear-gradient(to_bottom,#0c0e12_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] opacity-60" />
 				
 				<div className="w-full h-full relative z-10 flex items-center justify-center filter drop-shadow-[0_0_15px_rgba(0,161,155,0.25)]">
-					<Map circuitKey={isSimActive || !infoSesionMilitar?.Meeting?.Circuit?.Key ? 65 : infoSesionMilitar.Meeting.Circuit.Key} />
+					<Map circuitKey={isSimActive ? 65 : (infoSesionMilitar?.Meeting?.Circuit?.Key || 152)} />
 				</div>
 
 				<div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10 bg-black/90 border border-zinc-800 px-2 py-1 sm:px-3 sm:py-1.5 rounded text-[8.5px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs text-zinc-300 tracking-normal sm:tracking-widest font-bold shadow-lg backdrop-blur-md whitespace-nowrap">
@@ -284,7 +292,9 @@ export default function WeatherPage() {
 						})
 					) : (
 						<div className="text-center text-zinc-500 text-xs py-4 uppercase tracking-widest font-mono">
-							Monitoreo meteorológico oficial FIA activo para el Gran Premio de la Ciudad de México. Sin incidentes en pista.
+							{isSimActive
+								? "Monitoreo meteorológico oficial FIA activo para el Gran Premio de la Ciudad de México. Sin incidentes en pista."
+								: "Monitoreo meteorológico oficial FIA activo para el Gran Premio de Las Vegas. Sin incidentes en pista."}
 						</div>
 					)}
 				</div>
