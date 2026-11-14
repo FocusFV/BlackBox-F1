@@ -1,9 +1,12 @@
+"use client";
+
 import clsx from "clsx";
 
 import type { TimingDataDriver } from "@/types/state.type";
 import { useDataStore } from "@/stores/useDataStore";
 import { isDriverFinished } from "@/lib/driverFinished";
 import WavingFlag from "@/components/ui/WavingFlag";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type Props = {
 	timingDriver: TimingDataDriver;
@@ -50,18 +53,19 @@ export default function DriverInfo({ timingDriver, gridPos }: Props) {
 	const gain = positionChange !== undefined && positionChange > 0;
 	const loss = positionChange !== undefined && positionChange < 0;
 
-	const laps = timingDriver.NumberOfLaps !== undefined ? `${timingDriver.NumberOfLaps}V` : "-";
+	const { t } = useTranslation();
+	const laps = timingDriver.NumberOfLaps !== undefined ? `${timingDriver.NumberOfLaps}${t("telemetry.lap_badge", "V")}` : "-";
 
 	const status = isEliminated
 		? "ELIM"
 		: timingDriver.Retired
-			? "ABAN"
+			? t("telemetry.out_badge", "ABAN")
 			: timingDriver.Stopped
-				? "DET"
+				? t("telemetry.stop_badge", "DET")
 				: isFinished
 					? "META"
 					: timingDriver.InPit
-						? "BOX"
+						? t("telemetry.pit_badge", "BOX")
 						: timingDriver.PitOut
 							? "SALIDA"
 							: timingDriver.Cutoff && isQualy

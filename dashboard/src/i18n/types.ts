@@ -10,6 +10,22 @@ export interface TranslationDictionary {
 		github: string;
 		language: string;
 	};
+	sidebar: {
+		operations: string;
+		analysis: string;
+		system: string;
+		links: string;
+		live_telemetry: string;
+		track_telemetry: string;
+		weather: string;
+		standings: string;
+		streams: string;
+		settings: string;
+		schedule: string;
+		help: string;
+		donate: string;
+		sponsor: string;
+	};
 	sessions: {
 		fp1: string;
 		fp2: string;
@@ -44,14 +60,34 @@ export interface TranslationDictionary {
 		laps_remaining: string;
 		position: string;
 		driver: string;
+		boost: string;
+		info: string;
+		gap_int: string;
+		telemetry_title: string;
+		lap_badge: string;
+		pit_badge: string;
+		out_badge: string;
+		stop_badge: string;
+		syncing_tv: string;
+		syncing_desc: string;
+		time_remaining: string;
+		live_direct: string;
 	};
 	parc_ferme: {
 		last_official_round: string;
+		next_round: string;
 		view_circuit: string;
 		track_paused: string;
+		session_in_progress: string;
+		track_waiting: string;
 		official_results: string;
 		final_classification: string;
+		best_laps: string;
+		sprint_points: string;
 		official_session: string;
+		qualy_times: string;
+		starting_grid: string;
+		race_tab: string;
 	};
 	race_control: {
 		yellow_flag: string;
@@ -63,6 +99,20 @@ export interface TranslationDictionary {
 		track_clear: string;
 		investigation: string;
 		penalty: string;
+		sc_title: string;
+		sc_sub: string;
+		vsc_title: string;
+		vsc_sub: string;
+		vsc_ending_title: string;
+		vsc_ending_sub: string;
+		red_flag_title: string;
+		red_flag_sub: string;
+		yellow_flag_title: string;
+		yellow_flag_sub: string;
+		green_flag_title: string;
+		green_flag_sub: string;
+		restart_green_title: string;
+		restart_green_sub: string;
 	};
 	weather: {
 		title: string;

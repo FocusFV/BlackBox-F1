@@ -11,6 +11,7 @@ import { isFavoriteDriver } from "@/lib/favoriteDriver";
 
 import { toTrackTime } from "@/lib/toTrackTime";
 import WavingFlag from "@/components/ui/WavingFlag";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
 	translateFiaMessage,
 	postProcessFiaTranslation,
@@ -27,19 +28,22 @@ const getDriverNumber = (msg: Message) => {
 };
 
 export function RaceControlMessage({ msg, gmtOffset }: Props) {
+	const { t, language } = useTranslation();
 	const favoriteDriver = useSettingsStore((state) => isFavoriteDriver(getDriverNumber(msg), state.favoriteDrivers));
 
 	const localTime = utc(msg.Utc).local().format("HH:mm:ss");
 	const trackTime = utc(toTrackTime(msg.Utc, gmtOffset)).format("HH:mm");
 
-	// 🏁 Traducción instantánea determinista oficial en español (0 ms, 0 llamadas de red, 0 consumo de servidor)
-	const initialTranslation = translateFiaMessage(msg.Message);
+	// 🏁 Traducción instantánea determinista oficial en el idioma activo
+	const initialTranslation = translateFiaMessage(msg.Message, language);
 	const [translatedText, setTranslatedText] = useState(initialTranslation);
 
 	useEffect(() => {
 		if (!msg.Message) return;
-		setTranslatedText(translateFiaMessage(msg.Message));
-	}, [msg.Message]);
+		setTranslatedText(translateFiaMessage(msg.Message, language));
+	}, [msg.Message, language]);
+
+	const lapWord = language === "en" ? "Lap" : language === "pt" ? "Volta" : "Vuelta";
 
 	const isChequered = msg.Flag === "CHEQUERED" || msg.Message?.toUpperCase().includes("CHEQUERED");
 	const isGreen = msg.Flag === "GREEN" || msg.Message?.toUpperCase().includes("GREEN LIGHT") || msg.Message?.toUpperCase().includes("GREEN FLAG");
@@ -57,10 +61,10 @@ export function RaceControlMessage({ msg, gmtOffset }: Props) {
 					<WavingFlag type="chequered" size="sm" />
 					<div>
 						<div className="flex items-center gap-1.5 text-xs font-mono font-bold leading-none text-amber-400">
-							{msg.Lap && <span>Vuelta {msg.Lap} ·</span>}
+							{msg.Lap && <span>{lapWord} {msg.Lap} ·</span>}
 							<time dateTime={localTime}>{localTime}</time>
 							<span className="rounded bg-amber-400/20 px-1 py-0.5 text-[9px] uppercase tracking-wider text-amber-300">
-								FINAL DE CARRERA
+								{t("sessions.finished", "FINAL DE CARRERA")}
 							</span>
 						</div>
 						<p className="mt-1 font-mono text-sm font-black uppercase tracking-wide text-zinc-100">
@@ -85,10 +89,10 @@ export function RaceControlMessage({ msg, gmtOffset }: Props) {
 					<WavingFlag type="green" size="sm" />
 					<div>
 						<div className="flex items-center gap-1.5 text-xs font-mono font-bold leading-none text-emerald-400">
-							{msg.Lap && <span>Vuelta {msg.Lap} ·</span>}
+							{msg.Lap && <span>{lapWord} {msg.Lap} ·</span>}
 							<time dateTime={localTime}>{localTime}</time>
 							<span className="rounded bg-emerald-400/20 px-1 py-0.5 text-[9px] uppercase tracking-wider text-emerald-300">
-								PISTA HABILITADA
+								{t("race_control.track_clear", "PISTA HABILITADA")}
 							</span>
 						</div>
 						<p className="mt-1 font-mono text-sm font-black uppercase tracking-wide text-zinc-100">

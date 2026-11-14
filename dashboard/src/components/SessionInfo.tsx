@@ -9,10 +9,33 @@ import Flag from "@/components/Flag";
 import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
 import { parseUtcMs, parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
 import { simulator } from "@/lib/simulatorFeed";
+import { useTranslation } from "@/hooks/useTranslation";
 
-const translateSessionName = (name?: string) => {
-	if (!name) return "En Vivo";
+const translateSessionName = (name?: string, lang: string = "es") => {
+	if (!name) {
+		return lang === "en" ? "Live" : lang === "pt" ? "Ao Vivo" : "En Vivo";
+	}
 	const clean = name.toLowerCase().trim();
+	if (lang === "en") {
+		if (clean === "race") return "Race";
+		if (clean === "qualifying") return "Qualifying";
+		if (clean === "sprint") return "Sprint Race";
+		if (clean === "sprint shootout" || clean === "sprint qualifying") return "Sprint Qualy";
+		if (clean === "practice 1" || clean === "práctica 1") return "Practice 1";
+		if (clean === "practice 2" || clean === "práctica 2") return "Practice 2";
+		if (clean === "practice 3" || clean === "práctica 3") return "Practice 3";
+		return name;
+	}
+	if (lang === "pt") {
+		if (clean === "race") return "Corrida";
+		if (clean === "qualifying") return "Classificação";
+		if (clean === "sprint") return "Corrida Sprint";
+		if (clean === "sprint shootout" || clean === "sprint qualifying") return "Classif. Sprint";
+		if (clean === "practice 1" || clean === "práctica 1") return "Treino Livre 1";
+		if (clean === "practice 2" || clean === "práctica 2") return "Treino Livre 2";
+		if (clean === "practice 3" || clean === "práctica 3") return "Treino Livre 3";
+		return name;
+	}
 	if (clean === "race") return "Carrera";
 	if (clean === "qualifying") return "Clasificación";
 	if (clean === "sprint") return "Carrera Sprint";
@@ -44,6 +67,7 @@ export default function SessionInfo() {
 	const raceControlMessages = useDataStore((state) => state.state?.RaceControlMessages?.Messages);
 
 	const delay = useSettingsStore((state) => state.delay);
+	const { t, language } = useTranslation();
 
 	// Actualización fluida cada segundo para el reloj de Qualy / Prácticas
 	const [currentTime, setCurrentTime] = useState<number>(0);
@@ -281,14 +305,14 @@ export default function SessionInfo() {
 				<div className="flex flex-col justify-center">
 					<div className="flex items-center gap-2">
 						<span className="text-[10px] font-black uppercase tracking-widest text-amber-400">
-							SESIÓN FINALIZADA
+							{t("sessions.finished", "SESIÓN FINALIZADA")}
 						</span>
 						<span className="rounded bg-zinc-900/90 border border-amber-500/30 px-1.5 py-0.5 text-[9px] font-bold text-amber-300 uppercase tracking-wider">
-							RESULTADOS FINALES
+							{t("parc_ferme.official_results", "RESULTADOS FINALES")}
 						</span>
 					</div>
 					<h1 className="text-sm md:text-base leading-none font-black text-white mt-1 uppercase tracking-wide">
-						{translateSessionName(session?.Name)} {session?.Meeting?.Country?.Name || session?.Meeting?.Name || ""}
+						{translateSessionName(session?.Name, language)} {session?.Meeting?.Country?.Name || session?.Meeting?.Name || ""}
 					</h1>
 				</div>
 			</div>
@@ -310,11 +334,11 @@ export default function SessionInfo() {
 							{effectiveSimActive ? "Gran Premio de la Ciudad de México" : nextGpName}
 						</span>
 						<span className="rounded bg-zinc-900/90 border border-zinc-800 px-1.5 py-0.5 text-[9px] font-bold text-zinc-300 uppercase tracking-wider shrink-0 whitespace-nowrap mr-1 sm:mr-0">
-							{effectiveSimActive ? "Carrera en Vivo" : nextSessionName}
+							{effectiveSimActive ? t("sessions.live", "Carrera en Vivo") : translateSessionName(nextSessionName, language)}
 						</span>
 					</div>
 					<p className="text-xl md:text-2xl leading-none font-black text-white font-mono tracking-wider mt-1 sm:mt-1.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] truncate">
-						{effectiveSimActive ? "EN PISTA" : countdown}
+						{effectiveSimActive ? t("sessions.on_track", "EN PISTA") : countdown === "EN PISTA" ? t("sessions.on_track", "EN PISTA") : countdown}
 					</p>
 				</div>
 			</div>
@@ -457,13 +481,13 @@ export default function SessionInfo() {
 
 			<div className="flex flex-col justify-center">
 				<h1 className="truncate text-xs md:text-sm leading-none font-bold text-white font-mono uppercase tracking-wide">
-					{effectiveSimActive ? "Gran Premio de la Ciudad de México 2026" : (session?.Meeting?.Name || "Gran Premio")}: {effectiveSimActive ? "Carrera" : translateSessionName(session?.Name)}
+					{effectiveSimActive ? "Gran Premio de la Ciudad de México 2026" : (session?.Meeting?.Name || "Gran Premio")}: {effectiveSimActive ? (language === "en" ? "Race" : language === "pt" ? "Corrida" : "Carrera") : translateSessionName(session?.Name, language)}
 					{timingData?.SessionPart && session?.Name
 						? ` ${sessionPartPrefix(session.Name)}${timingData.SessionPart}`
 						: (isQualy ? ` Q${sessionPart}` : "")}
 					{isRedFlag ? (
 						<span className="text-red-500 font-black ml-1.5 animate-pulse">
-							• BANDERA ROJA
+							• {t("race_control.red_flag", "BANDERA ROJA")}
 						</span>
 					) : isQualyBreak ? (
 						<span className="text-amber-400 font-black ml-1.5 animate-pulse">

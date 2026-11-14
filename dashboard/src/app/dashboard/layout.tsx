@@ -21,6 +21,7 @@ import DelayInput from '@/components/DelayInput';
 import DelayTimer from '@/components/DelayTimer';
 import ConnectionStatus from '@/components/ConnectionStatus';
 import SupportModal from '@/components/SupportModal';
+import { useTranslation } from '@/hooks/useTranslation';
 import { Radio } from 'lucide-react';
 
 type Props = {
@@ -28,6 +29,7 @@ type Props = {
 };
 
 export default function DashboardLayout({ children }: Props) {
+	const { t, language } = useTranslation();
 	const stores = useStores();
 	const { handleInitial, handleUpdate, maxDelay } = useDataEngine(stores);
 	const { connected } = useSocket({ handleInitial, handleUpdate });
@@ -70,25 +72,25 @@ export default function DashboardLayout({ children }: Props) {
 						</div>
 
 						<span className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1.5">
-							TELEMETRÍA EN BÚFER
+							{t("telemetry.telemetry_title", "TELEMETRÍA")} BÚFER
 						</span>
 						<h2 className="text-xl font-black uppercase tracking-tight text-zinc-100">
-							Sincronizando con la TV
+							{t("telemetry.syncing_tv", "Sincronizando con la TV")}
 						</h2>
 
 						<p className="text-zinc-400 text-xs font-sans mt-2 mb-5 leading-relaxed">
-							Calibrando el flujo de datos para sincronizar con tu transmisión en vivo.
+							{t("telemetry.syncing_desc", "Calibrando el flujo de datos para sincronizar con tu transmisión en vivo.")}
 						</p>
 
 						<div className="w-full px-5 py-4 rounded-2xl bg-zinc-950/90 border border-zinc-800/80 flex flex-col items-center mb-5">
 							<span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
-								Tiempo de espera restante
+								{t("telemetry.time_remaining", "Tiempo de espera restante")}
 							</span>
 							<span className="text-4xl font-black font-mono mt-1 tracking-widest text-emerald-400">
 								{Math.max(delay - maxDelay, 0)}s
 							</span>
 							<span className="text-[10px] text-zinc-500 mt-1">
-								Retraso deseado: <span className="text-zinc-300 font-semibold">{delay}s</span> • Búfer cargado: <span className="text-zinc-300 font-semibold">{maxDelay}s</span>
+								{language === "en" ? "Target delay:" : language === "pt" ? "Atraso desejado:" : "Retraso deseado:"} <span className="text-zinc-300 font-semibold">{delay}s</span> • {language === "en" ? "Buffer loaded:" : language === "pt" ? "Buffer carregado:" : "Búfer cargado:"} <span className="text-zinc-300 font-semibold">{maxDelay}s</span>
 							</span>
 						</div>
 
@@ -97,7 +99,7 @@ export default function DashboardLayout({ children }: Props) {
 								onClick={() => setDelay(0)}
 								className="w-full py-2.5 px-4 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/60 rounded-xl text-emerald-400 text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center gap-2"
 							>
-								Ver en vivo directo (0s de espera)
+								{t("telemetry.live_direct", "Ver en vivo directo (0s de espera)")}
 							</button>
 
 							{maxDelay > 0 && (

@@ -7,6 +7,7 @@ import { AlertTriangle, ShieldAlert, Flag, Volume2, VolumeX, X } from "lucide-re
 import { AnimatePresence, motion } from "motion/react";
 import { translateFiaMessage } from "@/lib/raceControlTranslations";
 import WavingFlag from "@/components/ui/WavingFlag";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface AlertData {
 	id: string;
@@ -26,6 +27,7 @@ export function RaceControlAlertBanner() {
 	const raceControlChime = useSettingsStore((state) => state.raceControlChime);
 	const setRaceControlChime = useSettingsStore((state) => state.setRaceControlChime);
 	const volume = useSettingsStore((state) => state.raceControlChimeVolume);
+	const { t, language } = useTranslation();
 
 	const [activeAlert, setActiveAlert] = useState<AlertData | null>(null);
 	const [dismissedId, setDismissedId] = useState<string | null>(null);
@@ -69,11 +71,11 @@ export function RaceControlAlertBanner() {
 						id: `track-green-${Date.now()}`,
 						type: "GREEN_FLAG",
 						title: isRestart
-							? "PISTA HABILITADA · BANDERA VERDE"
-							: "¡LARGARON! · BANDERA VERDE EN PISTA",
+							? t("race_control.restart_green_title", "PISTA HABILITADA · BANDERA VERDE")
+							: t("race_control.green_flag_title", "¡LARGARON! · BANDERA VERDE EN PISTA"),
 						subtitle: isRestart
-							? "Pista despejada · Fin de neutralización"
-							: "Pista habilitada · ¡Aceleran a fondo!",
+							? t("race_control.restart_green_sub", "Pista despejada · Fin de neutralización")
+							: t("race_control.green_flag_sub", "Pista habilitada · ¡Aceleran a fondo!"),
 						badgeBg: "bg-emerald-400",
 						textColor: "text-emerald-200",
 						borderColor: "border-emerald-400/80 shadow-[0_0_35px_rgba(16,185,129,0.35)]",
@@ -86,8 +88,8 @@ export function RaceControlAlertBanner() {
 				alert = {
 					id: "track-sc",
 					type: "SC",
-					title: "SAFETY CAR DESPLEGADO",
-					subtitle: "Reducir la velocidad · Prohibido adelantar",
+					title: t("race_control.sc_title", "SAFETY CAR DESPLEGADO"),
+					subtitle: t("race_control.sc_sub", "Reducir la velocidad · Prohibido adelantar"),
 					badgeBg: "bg-amber-500",
 					textColor: "text-amber-300",
 					borderColor: "border-amber-500/60",
@@ -99,8 +101,8 @@ export function RaceControlAlertBanner() {
 				alert = {
 					id: "track-vsc",
 					type: "VSC",
-					title: "VIRTUAL SAFETY CAR (VSC)",
-					subtitle: "Mantener delta positivo · Velocidad reducida",
+					title: t("race_control.vsc_title", "VIRTUAL SAFETY CAR (VSC)"),
+					subtitle: t("race_control.vsc_sub", "Mantener delta positivo · Velocidad reducida"),
 					badgeBg: "bg-amber-500",
 					textColor: "text-amber-300",
 					borderColor: "border-amber-500/60",
@@ -112,8 +114,8 @@ export function RaceControlAlertBanner() {
 				alert = {
 					id: "track-vsc-ending",
 					type: "VSC",
-					title: "VSC FINALIZANDO",
-					subtitle: "Prepararse para relanzamiento en verde",
+					title: t("race_control.vsc_ending_title", "VSC FINALIZANDO"),
+					subtitle: t("race_control.vsc_ending_sub", "Prepararse para relanzamiento en verde"),
 					badgeBg: "bg-amber-400",
 					textColor: "text-amber-200",
 					borderColor: "border-amber-400/60",
@@ -125,8 +127,8 @@ export function RaceControlAlertBanner() {
 				alert = {
 					id: "track-red-flag",
 					type: "RED_FLAG",
-					title: "BANDERA ROJA · SESIÓN SUSPENDIDA",
-					subtitle: "Todos los coches al Pit Lane inmediatamente",
+					title: t("race_control.red_flag_title", "BANDERA ROJA · SESIÓN SUSPENDIDA"),
+					subtitle: t("race_control.red_flag_sub", "Todos los coches al Pit Lane inmediatamente"),
 					badgeBg: "bg-red-600",
 					textColor: "text-red-300",
 					borderColor: "border-red-600/60",
@@ -138,8 +140,8 @@ export function RaceControlAlertBanner() {
 				alert = {
 					id: "track-yellow",
 					type: "YELLOW",
-					title: "BANDERA AMARILLA EN PISTA",
-					subtitle: "Precaución en pista · Prohibido adelantar en el sector",
+					title: t("race_control.yellow_flag_title", "BANDERA AMARILLA EN PISTA"),
+					subtitle: t("race_control.yellow_flag_sub", "Precaución en pista · Prohibido adelantar en el sector"),
 					badgeBg: "bg-yellow-500",
 					textColor: "text-yellow-300",
 					borderColor: "border-yellow-500/60",

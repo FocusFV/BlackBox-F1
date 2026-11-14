@@ -1,11 +1,15 @@
+"use client";
+
 import Image from "next/image";
 import type { Stint } from "@/types/state.type";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type Props = {
 	stints: Stint[] | undefined;
 };
 
 export default function DriverTire({ stints }: Props) {
+	const { t } = useTranslation();
 	const stops = stints && stints.length > 0 ? stints.length - 1 : 0;
 	const currentStint = stints && stints.length > 0 ? stints[stints.length - 1] : null;
 
@@ -33,11 +37,13 @@ export default function DriverTire({ stints }: Props) {
 
 			<div className="font-mono">
 				<p className="text-xs leading-none font-bold text-zinc-200 tabular-nums">
-					V {currentStint?.TotalLaps ?? 0}
+					{t("telemetry.lap_badge", "V")} {currentStint?.TotalLaps ?? 0}
 					{currentStint && !currentStint.New ? "*" : ""}
 				</p>
 
-				<p className="text-[10px] leading-none text-zinc-500 font-bold mt-1">BOX {stops}</p>
+				<p className="text-[10px] leading-none text-zinc-500 font-bold mt-1">
+					{t("telemetry.pit_badge", "BOX")} {stops}
+				</p>
 			</div>
 		</div>
 	);

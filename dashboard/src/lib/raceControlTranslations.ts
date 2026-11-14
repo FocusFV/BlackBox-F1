@@ -82,10 +82,47 @@ export function sanitizeF1DriverNames(text: string): string {
  * Motor de traducción oficial y determinista de mensajes de Dirección de Carrera (FIA).
  * Traduce en 0ms sin llamadas de red ni errores de CORS, garantizando español neutro/argentino de F1.
  */
-export function translateFiaMessage(msg: string): string {
+export function translateFiaMessage(msg: string, lang: string = "es"): string {
 	if (!msg) return "";
 	const trimmed = msg.trim();
+	if (lang === "en") return trimmed;
+
 	const upper = trimmed.toUpperCase();
+
+	if (lang === "pt") {
+		if (upper === "CHEQUERED FLAG" || upper === "CHEQUERED FLAG WAVED") return "BANDEIRA QUADRICULADA";
+		if (upper === "ALL PASS HOLDERS MAY ACCESS THE PIT LANE") return "TODOS OS CREDENCIADOS PODEM ACESSAR O PIT LANE";
+		if (upper === "GREEN LIGHT - PIT LANE OPEN" || upper === "PIT LANE OPEN") return "LUZ VERDE - PIT LANE ABERTO";
+		if (upper === "PIT LANE CLOSED") return "PIT LANE FECHADO";
+		if (upper === "SAFETY CAR DEPLOYED") return "SAFETY CAR NA PISTA";
+		if (upper === "VIRTUAL SAFETY CAR DEPLOYED") return "SAFETY CAR VIRTUAL (VSC) NA PISTA";
+		if (upper === "VIRTUAL SAFETY CAR ENDING") return "FINALIZANDO VIRTUAL SAFETY CAR (VSC)";
+		if (upper === "SAFETY CAR IN THIS LAP") return "SAFETY CAR ENTRA NESTA VOLTA";
+		if (upper === "TRACK CLEAR") return "PISTA LIBERADA";
+		if (upper === "DRS ENABLED") return "DRS HABILITADO";
+		if (upper === "DRS DISABLED") return "DRS DESABILITADO";
+		if (upper === "YELLOW FLAG") return "BANDEIRA AMARELA";
+		if (upper === "DOUBLE YELLOW FLAG" || upper === "DOUBLE YELLOW") return "BANDEIRA AMARELA DUPLA";
+		if (upper === "RED FLAG" || upper === "RED FLAG - SESSION SUSPENDED") return "BANDEIRA VERMELHA - SESSÃO SUSPENSA";
+		if (upper === "STANDING START") return "LARGADA PARADA";
+		if (upper === "ROLLING START") return "LARGADA EM MOVIMENTO";
+		if (upper === "SESSION SUSPENDED") return "SESSÃO SUSPENSA";
+		if (upper === "SESSION RESUMED") return "SESSÃO REINICIADA";
+		if (upper === "FORMATION LAP") return "VOLTA DE FORMAÇÃO";
+
+		let ptOut = trimmed;
+		ptOut = ptOut
+			.replace(/^FIA STEWARDS:\s*/i, "COMISSÁRIOS FIA: ")
+			.replace(/^RACE CONTROL:\s*/i, "DIREÇÃO DE PROVA: ")
+			.replace(/TURN\s+(\d+)\s+INCIDENT/gi, "INCIDENTE NA CURVA $1")
+			.replace(/AT\s+TURN\s+(\d+)/gi, "NA CURVA $1")
+			.replace(/TURN\s+(\d+)/gi, "CURVA $1")
+			.replace(/INCIDENT INVOLVING CARS?\s+/gi, "INCIDENTE ENVOLVENDO CARROS ")
+			.replace(/UNDER INVESTIGATION/gi, "SOB INVESTIGAÇÃO")
+			.replace(/NO FURTHER ACTION/gi, "SEM AÇÃO ADICIONAL")
+			.replace(/TRACK LIMITS/gi, "LIMITES DE PISTA");
+		return ptOut;
+	}
 
 	// 1. Mensajes exactos oficiales
 	if (upper === "CHEQUERED FLAG" || upper === "CHEQUERED FLAG WAVED") return "BANDERA A CUADROS";

@@ -1,8 +1,11 @@
+"use client";
+
 import { AnimatePresence, LayoutGroup } from "motion/react";
 import clsx from "clsx";
 
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useDataStore } from "@/stores/useDataStore";
+import { useTranslation } from "@/hooks/useTranslation";
 
 import { sortPos } from "@/lib/sorting";
 
@@ -133,6 +136,7 @@ export default function LeaderBoard() {
 const TableHeaders = () => {
     const isSimActive = typeof window !== "undefined" && (sessionStorage.getItem("f1_pitwall_sim") === "active");
     const carMetrics = useSettingsStore((state) => state.carMetrics) || isSimActive;
+    const { t } = useTranslation();
 
     return (
         <div
@@ -143,18 +147,18 @@ const TableHeaders = () => {
                     : "5.5rem 3.8rem 5.5rem 4rem 5.5rem 6.2rem auto",
             }}
         >
-            <p>POS</p>
-            <p className="text-center">BOOST</p>
-            <p className="text-center">GOMA</p>
-            <p className="text-center">INFO</p>
-            <p className="text-left pl-1">BRECHA / INT</p>
-            <p className="text-left pl-1">VUELTA</p>
+            <p>{t("telemetry.position", "POS")}</p>
+            <p className="text-center">{t("telemetry.boost", "BOOST")}</p>
+            <p className="text-center">{t("telemetry.tyre", "GOMA")}</p>
+            <p className="text-center">{t("telemetry.info", "INFO")}</p>
+            <p className="text-left pl-1">{t("telemetry.gap_int", "BRECHA / INT")}</p>
+            <p className="text-left pl-1">{t("telemetry.lap", "VUELTA")}</p>
             <div className="flex gap-1.5">
                 <p className="w-[4.85rem] text-center">S1</p>
                 <p className="w-[4.85rem] text-center">S2</p>
                 <p className="w-[4.85rem] text-center">S3</p>
             </div>
-            {carMetrics && <p className="pl-1">TELEMETRÍA</p>}
+            {carMetrics && <p className="pl-1">{t("telemetry.telemetry_title", "TELEMETRÍA")}</p>}
         </div>
     );
 };

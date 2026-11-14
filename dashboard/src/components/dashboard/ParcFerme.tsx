@@ -12,6 +12,7 @@ import { useDataStore } from "@/stores/useDataStore";
 import { triggerHaptic } from "@/lib/haptics";
 import { getSmartGpContext, type SmartGpContext } from "@/lib/sessionSchedule";
 import { simulator } from "@/lib/simulatorFeed";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface DriverResult {
 	pos: string;
@@ -158,6 +159,7 @@ interface ParcFermeProps {
 }
 
 export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded }) => {
+	const { t } = useTranslation();
 	const gridDensity = useSettingsStore((state) => state.gridDensity);
 	const isCompact = gridDensity === "compact";
 
@@ -253,18 +255,18 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 	const sessionTabs = useMemo(() => {
 		const baseTabs = hasSprint
 			? [
-					{ id: "FP1" as SessionTab, label: "FP1", sub: "Libres 1" },
-					{ id: "SQ" as SessionTab, label: "SQ", sub: "Sprint Q." },
-					{ id: "SPRINT" as SessionTab, label: "SPRINT", sub: "Sprint" },
-					{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasif." },
-					{ id: "RACE" as SessionTab, label: "CARRERA", sub: "GP" },
+					{ id: "FP1" as SessionTab, label: "FP1", sub: t("sessions.fp1", "Libres 1") },
+					{ id: "SQ" as SessionTab, label: "SQ", sub: t("sessions.sprint_qualy", "Sprint Q.") },
+					{ id: "SPRINT" as SessionTab, label: "SPRINT", sub: t("sessions.sprint", "Sprint") },
+					{ id: "QUALY" as SessionTab, label: "QUALY", sub: t("sessions.qualy", "Clasif.") },
+					{ id: "RACE" as SessionTab, label: t("parc_ferme.race_tab", "CARRERA"), sub: "GP" },
 			  ]
 			: [
-					{ id: "FP1" as SessionTab, label: "FP1", sub: "Libres 1" },
-					{ id: "FP2" as SessionTab, label: "FP2", sub: "Libres 2" },
-					{ id: "FP3" as SessionTab, label: "FP3", sub: "Libres 3" },
-					{ id: "QUALY" as SessionTab, label: "QUALY", sub: "Clasif." },
-					{ id: "RACE" as SessionTab, label: "CARRERA", sub: "GP" },
+					{ id: "FP1" as SessionTab, label: "FP1", sub: t("sessions.fp1", "Libres 1") },
+					{ id: "FP2" as SessionTab, label: "FP2", sub: t("sessions.fp2", "Libres 2") },
+					{ id: "FP3" as SessionTab, label: "FP3", sub: t("sessions.fp3", "Libres 3") },
+					{ id: "QUALY" as SessionTab, label: "QUALY", sub: t("sessions.qualy", "Clasif.") },
+					{ id: "RACE" as SessionTab, label: t("parc_ferme.race_tab", "CARRERA"), sub: "GP" },
 			  ];
 
 		// 🔒 Si estamos en fin de semana en curso, solo se muestran las sesiones que ya se han disputado
@@ -273,7 +275,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 		}
 		// Si el Gran Premio ya concluyó (OFF_WEEK), todas sus sesiones están disponibles
 		return baseTabs;
-	}, [hasSprint, smartContext]);
+	}, [hasSprint, smartContext, t]);
 
 	// 🎯 Sincronización inteligente de pestaña activa si no corresponde a las sesiones disponibles
 	useEffect(() => {
@@ -898,18 +900,18 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 							<span className="text-[11px] uppercase font-mono font-bold tracking-wider text-amber-400">
 								{smartContext?.isWeekendActive
 									? smartContext.stage === "PRE_WEEKEND"
-										? "Próxima Ronda · Pista en Espera"
+										? `${t("parc_ferme.next_round", "Próxima Ronda")} · ${t("parc_ferme.track_waiting", "Pista en Espera")}`
 										: smartContext.stage === "FRIDAY"
-										? "Fin de Semana en Vivo · Libres"
+										? `${t("sessions.live", "En Vivo")} · ${t("sessions.fp1", "Libres")}`
 										: smartContext.stage === "SATURDAY"
-										? "Fin de Semana en Vivo · Clasificación"
+										? `${t("sessions.live", "En Vivo")} · ${t("sessions.qualy", "Clasificación")}`
 										: smartContext.stage === "SUNDAY"
-										? "Fin de Semana en Vivo · Gran Premio"
-										: "Gran Premio Finalizado"
-									: "Última Ronda Oficial"}
+										? `${t("sessions.live", "En Vivo")} · ${t("sessions.race", "Gran Premio")}`
+										: t("sessions.finished", "Gran Premio Finalizado")
+									: t("parc_ferme.last_official_round", "Última Ronda Oficial")}
 							</span>
 							<span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono font-bold uppercase group-hover:border-amber-500/40 group-hover:text-amber-300 transition-colors">
-								Ver Circuito 🏁
+								{t("parc_ferme.view_circuit", "Ver Circuito")} 🏁
 							</span>
 						</div>
 						<div className="flex items-center gap-2.5 flex-wrap mt-0.5">
@@ -928,15 +930,15 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					<div className="text-left font-mono">
 						<p className="text-[11px] font-bold text-zinc-200 uppercase tracking-tight leading-none">
 							{effectiveSim
-								? "Sesión en Curso"
+								? t("parc_ferme.session_in_progress", "Sesión en Curso")
 								: smartContext?.isWeekendActive
 								? smartContext.stage === "PRE_WEEKEND"
-									? "Pista en Espera"
-									: "Sesión en Curso"
-								: "Pista en Pausa"}
+									? t("parc_ferme.track_waiting", "Pista en Espera")
+									: t("parc_ferme.session_in_progress", "Sesión en Curso")
+								: t("parc_ferme.track_paused", "Pista en Pausa")}
 						</p>
 						<p className="text-[10px] text-zinc-400 font-medium tracking-normal leading-tight mt-0.5">
-							Resultados Oficiales FIA
+							{t("parc_ferme.official_results", "Resultados Oficiales FIA")}
 						</p>
 					</div>
 				</div>
@@ -1011,7 +1013,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 												: "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
 										}`}
 									>
-										⏱️ Tiempos Clasificación
+										⏱️ {t("parc_ferme.qualy_times", "Tiempos Clasificación")}
 									</button>
 									<button
 										type="button"
@@ -1025,7 +1027,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 												: "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
 										}`}
 									>
-										<span>🚦 Grilla de Salida</span>
+										<span>🚦 {t("parc_ferme.starting_grid", "Grilla de Salida")}</span>
 										{startingGrid && startingGrid.length > 0 && (
 											<span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
 										)}
@@ -1034,15 +1036,15 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 							) : (
 								<span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
 									{activeTab === "RACE"
-										? "Clasificación Final Oficial"
+										? t("parc_ferme.final_classification", "Clasificación Final Oficial")
 										: activeTab.startsWith("FP")
-										? "Mejores Vueltas en Pista"
-										: "Puntos Oficiales Sprint"}
+										? t("parc_ferme.best_laps", "Mejores Vueltas en Pista")
+										: t("parc_ferme.sprint_points", "Puntos Oficiales Sprint")}
 								</span>
 							)}
 							<span className="text-[10px] font-mono text-amber-400/80 font-bold uppercase tracking-wider hidden sm:inline-block">
 								{activeTab === "QUALY" && qualyViewMode === "grid"
-									? "Parrilla Oficial de Salida FIA"
+									? t("parc_ferme.starting_grid", "Parrilla Oficial de Salida FIA")
 									: "Blackbox Timing Console"}
 							</span>
 						</div>
@@ -1051,7 +1053,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					{loading && !effectiveSim ? (
 						<div className="h-64 flex flex-col items-center justify-center gap-2 text-zinc-500 font-mono text-xs uppercase tracking-widest animate-pulse">
 							<span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-							Cargando tiempos oficiales...
+							{t("common.loading", "Cargando tiempos oficiales...")}
 						</div>
 					) : activeTab === "QUALY" && qualyViewMode === "grid" && displayResults.length === 0 ? (
 						<div className="h-48 flex flex-col items-center justify-center gap-2 text-zinc-400 font-mono text-xs text-center p-6 bg-zinc-950/40 rounded-xl border border-zinc-900/80">

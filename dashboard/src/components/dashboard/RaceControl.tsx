@@ -1,3 +1,5 @@
+"use client";
+
 import { AnimatePresence } from "motion/react";
 import { useEffect, useRef } from "react";
 import clsx from "clsx";

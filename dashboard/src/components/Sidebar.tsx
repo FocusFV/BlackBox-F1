@@ -18,6 +18,7 @@ import ConnectionStatus from "@/components/ConnectionStatus";
 import SidenavButton from "@/components/SidenavButton";
 import { triggerHaptic } from "@/lib/haptics";
 import { useSupportModalStore } from "@/stores/useSupportModalStore";
+import { useTranslation } from "@/hooks/useTranslation";
 
 import { 
 	LayoutDashboard, 
@@ -45,51 +46,52 @@ interface MenuCategory {
 	items: MenuItem[];
 }
 
-const categoriesMenu: MenuCategory[] = [
-	{
-		titulo: "OPERACIONES",
-		items: [
-			{ href: "/dashboard", name: "Telemetría en Vivo", icon: LayoutDashboard },
-			{ href: "/dashboard/track-map", name: "Telemetría Pista", icon: MapIcon },
-		]
-	},
-	{
-		titulo: "ANÁLISIS",
-		items: [
-			{ href: "/dashboard/weather", name: "El Clima", icon: CloudSun },
-			{ href: "/dashboard/standings", name: "Campeonatos FIA", icon: Trophy },
-			{ href: "/streams", name: "Feed Satelital", icon: Radio },
-		]
-	},
-	{
-		titulo: "SISTEMA",
-		items: [
-			{ href: "/dashboard/settings", name: "Ajustes", icon: Settings },
-			{ href: "/schedule", name: "Calendario GP", icon: Calendar },
-			{ href: "/help", name: "Ayuda", icon: HelpCircle },
-		]
-	},
-	{
-		titulo: "ENLACES",
-		items: [
-			{ href: "https://buymeacoffee.com/focusfv", name: "Donar un Cafecito", icon: Coffee, target: "_blank" },
-			{ href: "https://github.com/sponsors/FocusFV", name: "Sponsor Oficial", icon: Heart, target: "_blank" },
-		]
-	}
-];
-
 type Props = {
 	connected: boolean;
 };
 
 export default function Sidebar({ connected }: Props) {
 	const pathname = usePathname();
+	const { t } = useTranslation();
 	const opened = useSidebarStore((state) => state.opened);
 	const pinned = useSidebarStore((state) => state.pinned);
 	const close = useSidebarStore((state) => state.close);
 	const open = useSidebarStore((state) => state.open);
 	const togglePin = useSidebarStore((state) => state.togglePin);
 	const toggle = useSidebarStore((state) => state.toggle);
+
+	const categoriesMenu: MenuCategory[] = useMemo(() => [
+		{
+			titulo: t("sidebar.operations", "OPERACIONES"),
+			items: [
+				{ href: "/dashboard", name: t("sidebar.live_telemetry", "Telemetría en Vivo"), icon: LayoutDashboard },
+				{ href: "/dashboard/track-map", name: t("sidebar.track_telemetry", "Telemetría Pista"), icon: MapIcon },
+			]
+		},
+		{
+			titulo: t("sidebar.analysis", "ANÁLISIS"),
+			items: [
+				{ href: "/dashboard/weather", name: t("sidebar.weather", "El Clima"), icon: CloudSun },
+				{ href: "/dashboard/standings", name: t("sidebar.standings", "Campeonatos FIA"), icon: Trophy },
+				{ href: "/streams", name: t("sidebar.streams", "Feed Satelital"), icon: Radio },
+			]
+		},
+		{
+			titulo: t("sidebar.system", "SISTEMA"),
+			items: [
+				{ href: "/dashboard/settings", name: t("sidebar.settings", "Ajustes"), icon: Settings },
+				{ href: "/schedule", name: t("sidebar.schedule", "Calendario GP"), icon: Calendar },
+				{ href: "/help", name: t("sidebar.help", "Ayuda"), icon: HelpCircle },
+			]
+		},
+		{
+			titulo: t("sidebar.links", "ENLACES"),
+			items: [
+				{ href: "https://buymeacoffee.com/focusfv", name: t("sidebar.donate", "Donar un Cafecito"), icon: Coffee, target: "_blank" },
+				{ href: "https://github.com/sponsors/FocusFV", name: t("sidebar.sponsor", "Sponsor Oficial"), icon: Heart, target: "_blank" },
+			]
+		}
+	], [t]);
 
 	const oledMode = useSettingsStore((state) => state.oledMode);
 	const [currentTime, setCurrentTime] = useState<number>(0);
@@ -169,7 +171,7 @@ export default function Sidebar({ connected }: Props) {
 				}),
 			}))
 			.filter((cat) => cat.items.length > 0);
-	}, [isLive]);
+	}, [isLive, categoriesMenu]);
 
 	useEffect(() => {
 		const handleResize = () => {

@@ -1,6 +1,9 @@
+"use client";
+
 import { useRef } from "react";
 import clsx from "clsx";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useTranslation } from "@/hooks/useTranslation";
 import type { TimingDataDriver } from "@/types/state.type";
 
 type Props = {
@@ -34,14 +37,19 @@ export default function DriverGap({ timingDriver, sessionPart, cumulativeGap, in
 
 	const isP1 = position === 1 || timingDriver.Position === "1" || timingDriver.Line === 1;
 
+	const { t, language } = useTranslation();
+	const leaderText = t("telemetry.leader", "LÍDER");
+	const lapBadge = language === "en" ? "LAP" : "VTA";
+	const lapsBadge = language === "en" ? "LAPS" : "VTAS";
+
 	// 🏁 Formatear brecha acumulada con el líder (estrictamente monótona y creciente)
 	const formatLeaderGap = (gap: string): string => {
-		if (isP1) return "LÍDER";
+		if (isP1) return leaderText;
 		if (!gap) return "";
 		const lapMatch = gap.match(/^(\d+)\s*L/i) || gap.match(/^\+(\d+)\s*L/i);
 		if (lapMatch) {
 			const laps = parseInt(lapMatch[1], 10);
-			return laps === 1 ? "+1 VTA" : `+${laps} VTAS`;
+			return laps === 1 ? `+1 ${lapBadge}` : `+${laps} ${lapsBadge}`;
 		}
 		if (gap.includes(":") || gap.startsWith("+")) return gap;
 		const num = parseFloat(gap);
@@ -55,7 +63,7 @@ export default function DriverGap({ timingDriver, sessionPart, cumulativeGap, in
 	const catching = timingDriver.IntervalToPositionAhead?.Catching;
 
 	// Un solo criterio en BlackBox: la brecha principal siempre es la acumulada con el líder
-	const newPrimary = gapToLeader || (isP1 ? "LÍDER" : gapToFront);
+	const newPrimary = gapToLeader || (isP1 ? leaderText : gapToFront);
 	const newSecondary = isP1 ? "" : gapToFront;
 
 	if (newPrimary && newPrimary !== "--.---") {
