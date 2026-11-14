@@ -248,6 +248,7 @@ export const pt: TranslationDictionary = {
 		mph_unit: "Milhas por hora (mph)",
 		units_fia_note: "Padrão internacional FIA: km/h para telemetria oficial de monopostos e sensores de Speed Trap.",
 		fav_drivers_desc: "Destacar pilotos prioritários na tabela de telemetria.",
+		search_driver_placeholder: "Digite um nome ou número (ex: HAM, 44, COL...)",
 	},
 	common: {
 		loading: "Carregando...",
@@ -411,6 +412,7 @@ export const pt: TranslationDictionary = {
 		season_results_2026: "Resultados da Temporada 2026",
 		upcoming_gps_pending: "Próximos Grandes Prêmios (3 Rodadas Pendentes)",
 		total_points: "Pontos Totais",
+		team_points: "Pontos da Equipe",
 		team_track_performance: "Desempenho na Pista",
 	},
 	streams_page: {
@@ -494,6 +496,17 @@ export const pt: TranslationDictionary = {
 		circuit_official_record: "Recorde Oficial",
 		circuit_top_speed_max: "Velocidade Máxima",
 		circuit_layout_straight: "Traçado & Reta",
+		circuit_close_tooltip: "Fechar e voltar aos resultados",
+		circuit_tap_to_return: "Toque em qualquer lugar para voltar",
+		continue_to_app: "Continuar para o app",
+		sectors_and_laps: "SETORES & VOLTAS",
+		sim_hud_badge: "SIMULAÇÃO FIA AO VIVO",
+		sim_overtake: "Ultrapassagem",
+		sim_force_vsc: "Forçar VSC",
+		sim_force_green: "Forçar Verde",
+		sim_radio: "Rádio",
+		sim_plus_one_lap: "+1 Vta",
+		sim_minimize: "Minimizar barra",
 		youtube_full_archive: "Explorar arquivo completo",
 	},
 		tv_sync: {

@@ -469,7 +469,7 @@ export default function DriverProfileModal() {
 						{timingDriver && (
 							<div className="p-3 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 flex flex-col gap-2 font-mono">
 								<span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-800/60 pb-1.5">
-									SECTORES & VUELTAS
+									{t("modals.sectors_and_laps", "SECTORES & VUELTAS")}
 								</span>
 								<div className="grid grid-cols-3 gap-2 text-center text-xs">
 									<div className="p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-900">

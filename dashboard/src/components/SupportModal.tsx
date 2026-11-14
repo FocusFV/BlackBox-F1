@@ -94,7 +94,7 @@ export default function SupportModal() {
 						<button
 							onClick={handleClose}
 							className="absolute right-4 top-4 p-1.5 text-zinc-400 hover:text-white transition-colors rounded-lg bg-zinc-900 border border-zinc-800 cursor-pointer"
-							title="Cerrar"
+							title={t("common.close", "Cerrar")}
 						>
 							<X className="w-4 h-4" />
 						</button>
@@ -219,7 +219,7 @@ export default function SupportModal() {
 									onClick={handleClose}
 									className="w-full py-2 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs font-mono font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer"
 								>
-									Continuar a la app
+									{t("modals.continue_to_app", "Continuar a la app")}
 								</button>
 							</div>
 
@@ -233,7 +233,7 @@ export default function SupportModal() {
 								) : (
 									<Square className="w-3.5 h-3.5 text-zinc-600" />
 								)}
-								<span className="text-[11px]">No volver a mostrar por hoy</span>
+								<span className="text-[11px]">{t("modals.support_dont_show", "No volver a mostrar por hoy")}</span>
 							</div>
 						</div>
 					</motion.div>

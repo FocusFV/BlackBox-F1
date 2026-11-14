@@ -1,4 +1,3 @@
-import { connection } from "next/server";
 import Script from "next/script";
 
 import { PUBLIC_ENV_KEY } from "@/env";
@@ -9,9 +8,7 @@ export const getPublicEnv = () => ({
 	NEXT_PUBLIC_LIVE_URL: process.env.NEXT_PUBLIC_LIVE_URL,
 });
 
-export default async function EnvScript() {
-	await connection();
-
+export default function EnvScript() {
 	const env = getPublicEnv();
 
 	const innerHTML = {

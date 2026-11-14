@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { simulator } from "@/lib/simulatorFeed";
 import { useDataStore } from "@/stores/useDataStore";
 import { triggerHaptic } from "@/lib/haptics";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
 	Radio,
 	Zap,
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 
 export default function SecretSimulationHUD() {
+	const { t } = useTranslation();
 	const pathname = usePathname();
 	const [isActive, setIsActive] = useState(false);
 	const [isCollapsed, setIsCollapsed] = useState(false);
@@ -189,7 +191,7 @@ export default function SecretSimulationHUD() {
 
 							<div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
 								<span className="text-[11px] sm:text-xs font-black tracking-wider text-red-400 uppercase">
-									SIMULACIÓN FIA EN VIVO
+									{t("modals.sim_hud_badge", "SIMULACIÓN FIA EN VIVO")}
 								</span>
 								<span className="hidden sm:inline text-zinc-600">•</span>
 								<span className="text-[10px] sm:text-[11px] font-bold text-zinc-300">
@@ -208,7 +210,7 @@ export default function SecretSimulationHUD() {
 								className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-700/80 hover:border-amber-400 text-zinc-200 hover:text-amber-300 text-[10px] sm:text-[11px] font-bold transition-all cursor-pointer active:scale-95"
 							>
 								<Zap className="w-3 h-3 text-amber-400" />
-								<span>Sobrepaso</span>
+								<span>{t("modals.sim_overtake", "Sobrepaso")}</span>
 							</button>
 
 							<button
@@ -217,7 +219,7 @@ export default function SecretSimulationHUD() {
 								className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-700/80 hover:border-amber-400 text-zinc-200 hover:text-amber-300 text-[10px] sm:text-[11px] font-bold transition-all cursor-pointer active:scale-95"
 							>
 								<AlertTriangle className="w-3 h-3 text-yellow-400" />
-								<span>{trackStatus === "1" ? "Forzar VSC" : "Forzar Verde"}</span>
+								<span>{trackStatus === "1" ? t("modals.sim_force_vsc", "Forzar VSC") : t("modals.sim_force_green", "Forzar Verde")}</span>
 							</button>
 
 							<button
@@ -226,7 +228,7 @@ export default function SecretSimulationHUD() {
 								className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-700/80 hover:border-cyan-400 text-zinc-200 hover:text-cyan-300 text-[10px] sm:text-[11px] font-bold transition-all cursor-pointer active:scale-95"
 							>
 								<Radio className="w-3 h-3 text-cyan-400" />
-								<span>Radio</span>
+								<span>{t("modals.sim_radio", "Radio")}</span>
 							</button>
 
 							<button
@@ -235,7 +237,7 @@ export default function SecretSimulationHUD() {
 								className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-700/80 hover:border-zinc-500 text-zinc-300 text-[10px] sm:text-[11px] font-bold transition-all cursor-pointer active:scale-95"
 							>
 								<RotateCcw className="w-3 h-3 text-zinc-400" />
-								<span>+1 Vta</span>
+								<span>{t("modals.sim_plus_one_lap", "+1 Vta")}</span>
 							</button>
 						</div>
 
@@ -244,7 +246,7 @@ export default function SecretSimulationHUD() {
 							<button
 								onClick={() => toggleCollapse(true)}
 								className="p-1 rounded bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800 transition-all cursor-pointer"
-								title="Minimizar barra"
+								title={t("modals.sim_minimize", "Minimizar barra")}
 							>
 								<ChevronUp className="w-3.5 h-3.5" />
 							</button>

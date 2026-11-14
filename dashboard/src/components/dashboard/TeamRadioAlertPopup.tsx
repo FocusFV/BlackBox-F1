@@ -179,7 +179,7 @@ export function TeamRadioAlertPopup() {
 						type="button"
 						onClick={() => setActiveCapture(null)}
 						className="rounded p-1 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors"
-						title="Cerrar"
+						title={t("common.close", "Cerrar")}
 					>
 						<X className="h-3.5 w-3.5" />
 					</button>

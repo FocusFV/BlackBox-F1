@@ -227,11 +227,11 @@ export default function WeatherPage() {
 					<div className="space-y-2 sm:space-y-2.5">
 						<div className="grid grid-cols-2 gap-2">
 							<div className="bg-black/40 border border-zinc-900 p-2 sm:p-2.5 rounded-lg">
-								<p className="text-[11px] text-zinc-500 uppercase tracking-wider font-bold">Temp. Aire</p>
+								<p className="text-[11px] text-zinc-500 uppercase tracking-wider font-bold">{t("weather.air_temp", "Temp. Aire")}</p>
 								<p className="text-xl sm:text-2xl font-bold text-zinc-100 font-mono mt-0.5">{tempAire}<span className="text-xs text-zinc-500">°C</span></p>
 							</div>
 							<div className="bg-black/40 border border-zinc-900 p-2 sm:p-2.5 rounded-lg border-b-2 border-b-amber-500">
-								<p className="text-[11px] text-zinc-500 uppercase tracking-wider font-bold">Temp. Pista</p>
+								<p className="text-[11px] text-zinc-500 uppercase tracking-wider font-bold">{t("weather.track_temp", "Temp. Pista")}</p>
 								<p className="text-xl sm:text-2xl font-bold text-amber-400 font-mono mt-0.5">{tempPista}<span className="text-xs text-amber-500/60">°C</span></p>
 							</div>
 						</div>

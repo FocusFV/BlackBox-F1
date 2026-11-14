@@ -353,7 +353,7 @@ export function CircuitBackdrop({
 			<div
 				onClick={handleContainerClick}
 				className="fixed inset-0 select-none z-0 pointer-events-auto cursor-pointer overflow-hidden"
-				title="Toca para ver el circuito completo"
+				title={t("parc_ferme.tap_to_view_circuit", "Toca para ver el circuito completo")}
 			>
 				<img
 					key={`bg-${imageUrl}`}
@@ -472,7 +472,7 @@ export function CircuitBackdrop({
 									onToggleCinematic?.();
 								}}
 								className="self-end sm:self-center p-2 rounded-full bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-300 hover:text-white backdrop-blur-md transition-all cursor-pointer shadow-lg"
-								title="Cerrar y volver a los resultados"
+								title={t("modals.circuit_close_tooltip", "Cerrar y volver a los resultados")}
 							>
 								<X className="w-5 h-5" />
 							</button>
@@ -839,7 +839,7 @@ export function CircuitBackdrop({
 						<div className="flex justify-center w-full max-w-7xl mx-auto">
 							<div className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-black/65 px-4 py-1.5 font-mono text-[11px] font-bold text-amber-300 shadow-lg backdrop-blur-md">
 								<RotateCcw className="w-3.5 h-3.5 text-amber-400" />
-								<span>Toca en cualquier parte para volver</span>
+								<span>{t("modals.circuit_tap_to_return", "Toca en cualquier parte para volver")}</span>
 							</div>
 						</div>
 					</div>

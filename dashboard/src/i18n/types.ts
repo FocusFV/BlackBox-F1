@@ -248,6 +248,7 @@ export interface TranslationDictionary {
 		kmh_unit: string;
 		mph_unit: string;
 		units_fia_note: string;
+		search_driver_placeholder: string;
 	};
 	common: {
 		loading: string;
@@ -392,6 +393,7 @@ export interface TranslationDictionary {
 		team_points_contribution: string;
 		team_track_performance: string;
 		total_points: string;
+		team_points: string;
 		wcc_tap_hint: string;
 		wcc_prior_1958_title: string;
 		wcc_prior_1958_desc: string;
@@ -495,6 +497,17 @@ export interface TranslationDictionary {
 		circuit_official_record: string;
 		circuit_top_speed_max: string;
 		circuit_layout_straight: string;
+		circuit_close_tooltip: string;
+		circuit_tap_to_return: string;
+		continue_to_app: string;
+		sectors_and_laps: string;
+		sim_hud_badge: string;
+		sim_overtake: string;
+		sim_force_vsc: string;
+		sim_force_green: string;
+		sim_radio: string;
+		sim_plus_one_lap: string;
+		sim_minimize: string;
 	};
 	tv_sync: {
 		title: string;

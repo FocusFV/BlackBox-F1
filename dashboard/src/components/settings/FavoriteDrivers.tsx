@@ -123,7 +123,7 @@ export default function FavoriteDrivers() {
 			{/* Input Buscador */}
 			<div className="w-full max-w-md relative">
 				<SelectMultiple
-					placeholder="Escribí un nombre o número (ej: HAM, 44, COL...)"
+					placeholder={t("settings.search_driver_placeholder", "Escribí un nombre o número (ej: HAM, 44, COL...)")}
 					options={options}
 					selected={favoriteDrivers}
 					setSelected={setFavoriteDrivers}

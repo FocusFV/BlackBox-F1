@@ -248,6 +248,7 @@ export const en: TranslationDictionary = {
 		mph_unit: "Miles per hour (mph)",
 		units_fia_note: "FIA international standard: km/h for official car telemetry and Speed Trap sensors.",
 		fav_drivers_desc: "Highlight priority drivers in the telemetry leaderboard.",
+		search_driver_placeholder: "Type a name or number (e.g. HAM, 44, COL...)",
 	},
 	common: {
 		loading: "Loading...",
@@ -411,6 +412,7 @@ export const en: TranslationDictionary = {
 		season_results_2026: "2026 Season Results",
 		upcoming_gps_pending: "Upcoming Grands Prix (3 Pending Rounds)",
 		total_points: "Total Points",
+		team_points: "Team Points",
 		team_track_performance: "Track Performance",
 	},
 	streams_page: {
@@ -494,6 +496,17 @@ export const en: TranslationDictionary = {
 		circuit_official_record: "Official Record",
 		circuit_top_speed_max: "Maximum Top Speed",
 		circuit_layout_straight: "Layout & Straight",
+		circuit_close_tooltip: "Close and return to results",
+		circuit_tap_to_return: "Tap anywhere to return",
+		continue_to_app: "Continue to app",
+		sectors_and_laps: "SECTORS & LAPS",
+		sim_hud_badge: "FIA LIVE SIMULATION",
+		sim_overtake: "Overtake",
+		sim_force_vsc: "Force VSC",
+		sim_force_green: "Force Green",
+		sim_radio: "Radio",
+		sim_plus_one_lap: "+1 Lap",
+		sim_minimize: "Minimize bar",
 		youtube_full_archive: "Browse Full Archive",
 	},
 		tv_sync: {

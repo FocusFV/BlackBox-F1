@@ -1319,7 +1319,7 @@ export default function Standings() {
 													textShadow: `0 0 25px ${pTheme.glowShadow}`,
 												}}
 											/>
-											<span className="text-[10px] text-zinc-400 block font-bold uppercase">Puntos Totales</span>
+											<span className="text-[10px] text-zinc-400 block font-bold uppercase">{t("standings_page.total_points", "Puntos Totales")}</span>
 										</div>
 
 										<button
@@ -1556,7 +1556,7 @@ export default function Standings() {
 													textShadow: `0 0 25px ${cTheme.glowShadow}`,
 												}}
 											/>
-											<span className="text-[10px] text-zinc-400 block font-bold uppercase">Puntos del Equipo</span>
+											<span className="text-[10px] text-zinc-400 block font-bold uppercase">{t("standings_page.team_points", "Puntos del Equipo")}</span>
 										</div>
 
 										<button

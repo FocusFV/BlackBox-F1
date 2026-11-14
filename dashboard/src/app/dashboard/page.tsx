@@ -375,10 +375,10 @@ export default function Page() {
 									type="button"
 									onClick={() => openH2H()}
 									className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/90 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 hover:border-red-500/50 hover:bg-zinc-800 hover:text-white transition-all cursor-pointer"
-									title="Abrir comparador Cara a Cara entre dos pilotos"
+									title={t("modals.compare_h2h", "Abrir comparador Cara a Cara entre dos pilotos")}
 								>
 									<Swords className="h-3.5 w-3.5 text-red-500" />
-									<span>Cara a Cara</span>
+									<span>{t("modals.h2h_title", "Cara a Cara")}</span>
 								</button>
 
 								<TvSyncControl />
