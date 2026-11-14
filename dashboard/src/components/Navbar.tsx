@@ -38,6 +38,9 @@ export default function Navbar() {
 
 
 
+	const isDashboard = pathname?.startsWith("/dashboard");
+	const shouldBeVisible = isDashboard ? true : isVisible;
+
 	const navLinks = [
 		{ name: "Panel", href: "/dashboard" },
 		{ name: "Calendario", href: "/schedule" },
@@ -60,7 +63,7 @@ export default function Navbar() {
 			{/* 🏆 BARRA DE NAVEGACIÓN - EDICIÓN FIBRA DE CARBONO INTELIGENTE */}
 			<nav 
 				className={`relative z-50 flex h-16 w-full items-center justify-between gap-4 border-b border-amber-500/10 px-6 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.8)] font-mono select-none overflow-hidden transition-transform duration-500 ${
-					isVisible ? "translate-y-0" : "-translate-y-full"
+					shouldBeVisible ? "translate-y-0" : "-translate-y-full"
 				}`}
 				style={{
 					backgroundColor: "#09090b",
