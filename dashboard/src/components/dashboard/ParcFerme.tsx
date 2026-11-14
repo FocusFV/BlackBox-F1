@@ -889,7 +889,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 			<div
 				onClick={() => onOpenCircuit ? onOpenCircuit(gpName, countryCode) : undefined}
 				className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-2xl bg-zinc-950/75 border border-zinc-800/80 shadow-[0_4px_25px_rgba(0,0,0,0.5)] backdrop-blur-xl lg:w-8/12 w-full cursor-pointer hover:border-amber-500/50 hover:bg-zinc-900/80 transition-all group"
-				title="Toca para ver el circuito completo en alta resolución"
+				title={t("parc_ferme.tap_to_view_circuit", "Toca para ver el circuito completo en alta resolución")}
 			>
 				<div className="flex items-center gap-3 w-full sm:w-auto">
 					<div className="flex items-center justify-center overflow-hidden rounded-lg border border-zinc-700/60 bg-zinc-900 p-0.5 shadow-md shrink-0">
@@ -1058,24 +1058,24 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					) : activeTab === "QUALY" && qualyViewMode === "grid" && displayResults.length === 0 ? (
 						<div className="h-48 flex flex-col items-center justify-center gap-2 text-zinc-400 font-mono text-xs text-center p-6 bg-zinc-950/40 rounded-xl border border-zinc-900/80">
 							<span className="text-amber-400 font-bold text-xs uppercase tracking-wider">
-								🚦 Grilla de Salida en Homologación FIA
+								{t("parc_ferme.grid_homologation_title", "🚦 Grilla de Salida en Homologación FIA")}
 							</span>
 							<p className="max-w-md text-zinc-400 text-[11px] leading-relaxed">
-								Los comisarios de la FIA están confirmando las penalizaciones técnicas y conformando la grilla oficial de largada para el Gran Premio. Se actualizará automáticamente en cuanto se publique el documento oficial.
+								{t("parc_ferme.grid_homologation_desc", "Los comisarios de la FIA están confirmando las penalizaciones técnicas y conformando la grilla oficial de largada para el Gran Premio. Se actualizará automáticamente en cuanto se publique el documento oficial.")}
 							</p>
 							<button
 								type="button"
 								onClick={() => setQualyViewMode("times")}
 								className="mt-2 text-[10px] text-amber-400 underline uppercase tracking-wider cursor-pointer hover:text-amber-300"
 							>
-								Ver tiempos de clasificación
+								{t("parc_ferme.view_qualy_times", "Ver tiempos de clasificación")}
 							</button>
 						</div>
 					) : results.length === 0 ? (
 						<div className="h-48 flex flex-col items-center justify-center gap-2 text-zinc-400 font-mono text-xs text-center p-6 bg-zinc-950/40 rounded-xl border border-zinc-900/80">
-							<span className="text-amber-400 font-bold text-xs uppercase tracking-wider">⏱️ Tiempos en Homologación FIA</span>
+							<span className="text-amber-400 font-bold text-xs uppercase tracking-wider">{t("parc_ferme.times_homologation_title", "⏱️ Tiempos en Homologación FIA")}</span>
 							<p className="max-w-md text-zinc-400 text-[11px] leading-relaxed">
-								Aguardando la publicación de registros oficiales para esta sesión del {gpName}. Los resultados se actualizarán automáticamente en la consola apenas estén disponibles.
+								{t("parc_ferme.times_homologation_desc", "Aguardando la publicación de registros oficiales para esta sesión del {gpName}. Los resultados se actualizarán automáticamente en la consola apenas estén disponibles.").replace("{gpName}", gpName)}
 							</p>
 						</div>
 					) : (

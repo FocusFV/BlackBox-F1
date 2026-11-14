@@ -163,7 +163,7 @@ export default function Navbar() {
 					<button
 						onClick={() => setIsOpen(!isOpen)}
 						className="flex flex-col items-center justify-center h-8 w-8 rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 transition-all hover:text-amber-400 active:scale-95"
-						aria-label="Menú"
+						aria-label={t("nav.menu", "Menú")}
 					>
 						<div className="relative w-4 h-3 flex flex-col justify-between">
 							<span className={`w-full h-[1px] bg-current rounded-full transition-transform duration-300 ${isOpen ? "rotate-45 translate-y-[5px]" : ""}`} />
@@ -180,7 +180,7 @@ export default function Navbar() {
 			}`}>
 				<div className="flex flex-col gap-4 p-6 font-mono text-sm font-bold uppercase tracking-widest">
 					<Link href="/" onClick={() => setIsOpen(false)} className={`transition-colors py-1 ${pathname === "/" ? "text-amber-400" : "text-zinc-400 hover:text-zinc-100"}`}>
-						Inicio
+						{t("nav.home", "Inicio")}
 					</Link>
 					{navLinks.map((link) => (
 						<Link key={link.href} href={link.href} onClick={() => setIsOpen(false)} className={`transition-colors py-1 ${pathname === link.href ? "text-amber-400" : "text-zinc-400 hover:text-zinc-100"}`}>
@@ -194,7 +194,7 @@ export default function Navbar() {
 					<div className="flex justify-between items-center gap-4">
 						<Link className="flex flex-1 items-center justify-center gap-2 px-4 py-2 rounded-xl bg-transparent border border-zinc-800 text-xs text-zinc-400 cursor-pointer" href="https://buymeacoffee.com/focusfv" onClick={(e) => { e.preventDefault(); setIsOpen(false); useSupportModalStore.getState().open(); }}>
 							<Image src={coffeeIcon} alt="Café" width={18} height={18} className="brightness-0 invert opacity-60" />
-							<span>Café</span>
+							<span>{t("nav.coffee", "Café")}</span>
 						</Link>
 						<Link className="flex items-center justify-center p-2.5 rounded-xl bg-transparent border border-zinc-800 text-zinc-400" href="https://github.com/FocusFV/Blackbox-F1" target="_blank">
 							<Image src={githubIcon} alt="GitHub" width={16} height={16} className="brightness-0 invert opacity-60" />

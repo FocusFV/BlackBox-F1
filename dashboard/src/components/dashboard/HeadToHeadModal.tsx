@@ -296,9 +296,7 @@ export function HeadToHeadModal({
 						{/* {t("modals.h2h_last_lap", "Última Vuelta")} */}
 						<div className="flex items-center justify-between rounded-lg bg-zinc-900/30 p-2.5 text-xs">
 							<span className="font-mono text-zinc-300">{t1?.LastLapTime?.Value || "-"}</span>
-							<span className="font-bold uppercase tracking-wider text-zinc-400 text-[11px]">
-								Última Vuelta
-							</span>
+							<span className="font-bold uppercase tracking-wider text-zinc-400 text-[11px]">{t("modals.h2h_last_lap", "Última Vuelta")}</span>
 							<span className="font-mono text-zinc-300">{t2?.LastLapTime?.Value || "-"}</span>
 						</div>
 

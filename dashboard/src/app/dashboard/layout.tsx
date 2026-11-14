@@ -134,6 +134,7 @@ function MobileDynamicBar() {
 }
 
 function MobileStaticBar({ show, connected }: { show: boolean; connected: boolean }) {
+	const { t } = useTranslation();
 	const toggle = useSidebarStore((state) => state.toggle);
 
 	return (
@@ -142,7 +143,7 @@ function MobileStaticBar({ show, connected }: { show: boolean; connected: boolea
 			style={{ backgroundColor: "#09090b" }}
 		>
 			<div className="flex items-center gap-2">
-				<SidenavButton key="mobile" onClick={() => toggle()} title="Menú lateral" />
+				<SidenavButton key="mobile" onClick={() => toggle()} title={t("sidebar.side_menu", "Menú lateral")} />
 
 				<DelayInput saveDelay={500} />
 				<DelayTimer />
@@ -156,6 +157,7 @@ function MobileStaticBar({ show, connected }: { show: boolean; connected: boolea
 }
 
 function DesktopStaticBar({ show }: { show: boolean }) {
+	const { t } = useTranslation();
 	const pinned = useSidebarStore((state) => state.pinned);
 	const togglePin = useSidebarStore((state) => state.togglePin);
 
@@ -169,7 +171,7 @@ function DesktopStaticBar({ show }: { show: boolean }) {
 					key="desktop" 
 					className="shrink-0" 
 					onClick={() => togglePin()} 
-					title={pinned ? "Ocultar menú lateral" : "Fijar menú lateral"}
+					title={pinned ? t("sidebar.hide_sidebar", "Ocultar menú lateral") : t("sidebar.pin_sidebar", "Fijar menú lateral")}
 				/>
 
 				<motion.div key="session-info" layout="position">

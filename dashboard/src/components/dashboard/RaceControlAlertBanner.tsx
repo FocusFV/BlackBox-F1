@@ -224,7 +224,7 @@ export function RaceControlAlertBanner() {
 				title: isStart
 					? "¡LARGARON! · BANDERA VERDE EN PISTA"
 					: "PISTA HABILITADA · BANDERA VERDE",
-				subtitle: translateFiaMessage(latest.Message),
+				subtitle: translateFiaMessage(latest.Message, language),
 				badgeBg: "bg-emerald-400 text-black",
 				textColor: "text-emerald-200",
 				borderColor: "border-emerald-400/80 shadow-[0_0_35px_rgba(16,185,129,0.35)]",
@@ -256,7 +256,7 @@ export function RaceControlAlertBanner() {
 			const messageAlert: AlertData = {
 				id: alertId,
 				type: "MESSAGE",
-				title: "DIRECCIÓN DE CARRERA",
+				title: t("dashboard.panel_race_control", "Dirección de Carrera").toUpperCase(),
 				subtitle: translateFiaMessage(latest.Message),
 				badgeBg: "bg-red-600 text-white",
 				textColor: "text-white",

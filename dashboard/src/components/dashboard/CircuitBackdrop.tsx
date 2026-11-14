@@ -460,7 +460,7 @@ export function CircuitBackdrop({
 									<span className="text-zinc-500">·</span>
 									<span className="text-zinc-300">Debut F1: {circuit.firstGp}</span>
 									<span className="text-zinc-500">·</span>
-									<span className="text-zinc-300">Diseñado por {circuit.designer}</span>
+									<span className="text-zinc-300">{t("modals.circuit_designed_by", "Diseñado por {designer}").replace("{designer}", circuit.designer)}</span>
 								</p>
 							</div>
 
@@ -780,7 +780,7 @@ export function CircuitBackdrop({
 											<div className="flex flex-col min-w-0">
 												<span className="text-[10px] sm:text-xs text-purple-300 uppercase tracking-wider flex items-center gap-1.5 font-bold">
 													<Timer className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-													Récord Oficial
+													{t("modals.circuit_official_record", "Récord Oficial")}
 												</span>
 												<span className="text-sm sm:text-base md:text-lg font-black text-purple-200 truncate">
 													{recordInfo.time}
@@ -800,14 +800,14 @@ export function CircuitBackdrop({
 											<span className="text-sm sm:text-base md:text-lg font-black text-cyan-300">
 												{circuit.topSpeed}
 											</span>
-											<span className="text-[10px] text-zinc-400 font-medium">Velocidad Punta Máxima</span>
+											<span className="text-[10px] text-zinc-400 font-medium">{t("modals.circuit_top_speed_max", "Velocidad Punta Máxima")}</span>
 										</div>
 
 										{/* 3. GEOMETRÍA Y RECTA */}
 										<div className="flex flex-col justify-center gap-1 bg-zinc-900/60 p-3 sm:p-3.5 rounded-xl border border-white/10">
 											<span className="text-[10px] sm:text-xs text-zinc-300 uppercase tracking-wider flex items-center gap-1.5 font-bold">
 												<Gauge className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-												Trazado & Recta
+												{t("modals.circuit_layout_straight", "Trazado & Recta")}
 											</span>
 											<span className="text-sm sm:text-base md:text-lg font-black text-amber-300">
 												{circuit.length}
@@ -821,13 +821,13 @@ export function CircuitBackdrop({
 										<div className="flex flex-col justify-center gap-1 bg-zinc-900/60 p-3 sm:p-3.5 rounded-xl border border-white/10">
 											<span className="text-[10px] sm:text-xs text-zinc-300 uppercase tracking-wider flex items-center gap-1.5 font-bold">
 												<RotateCcw className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-												Distancia de Carrera
+												{t("modals.circuit_distance_total", "Distancia de Carrera")}
 											</span>
 											<span className="text-sm sm:text-base md:text-lg font-black text-emerald-300">
 												{circuit.raceDistance}
 											</span>
 											<span className="text-[10px] text-zinc-300 font-medium">
-												Número de Vueltas: <strong className="text-white">{circuit.raceLaps}</strong> · {circuit.maxGForce}
+												{t("modals.circuit_laps_count", "Número de Vueltas:")} <strong className="text-white">{circuit.raceLaps}</strong> · {circuit.maxGForce}
 											</span>
 										</div>
 									</div>

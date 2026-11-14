@@ -15,7 +15,7 @@ export default async function NextRound() {
 	if (!schedule || schedule.length === 0) {
 		return (
 			<div className="flex h-44 flex-col items-center justify-center border border-dashed border-zinc-800 rounded-2xl bg-zinc-950/30">
-				<p className="text-zinc-500 font-medium tracking-wide">No se encontró ningún próximo evento de F1</p>
+				<p className="text-zinc-500 font-medium tracking-wide">No upcoming F1 event found · No se encontró ningún próximo evento de F1</p>
 			</div>
 		);
 	}

@@ -238,30 +238,30 @@ export default function WeatherPage() {
 
 						<div className="grid grid-cols-2 gap-2">
 							<div className="bg-black/40 border border-zinc-900 p-2 sm:p-2.5 rounded-lg">
-								<p className="text-[11px] text-zinc-500 uppercase tracking-wider font-bold">Humedad</p>
+								<p className="text-[11px] text-zinc-500 uppercase tracking-wider font-bold">{t("weather.humidity", "Humedad")}</p>
 								<p className="text-lg sm:text-xl font-bold text-zinc-200 mt-0.5">{humedad}<span className="text-xs text-zinc-400">%</span></p>
 							</div>
 							<div className="bg-black/40 border border-zinc-900 p-2 sm:p-2.5 rounded-lg">
-								<p className="text-[11px] text-zinc-500 uppercase tracking-wider font-bold">Presión Atm.</p>
+								<p className="text-[11px] text-zinc-500 uppercase tracking-wider font-bold">{t("weather.pressure", "Presión Atm.")}</p>
 								<p className="text-lg sm:text-xl font-bold text-zinc-200 mt-0.5">{presion}<span className="text-[10px] text-zinc-500"> hPa</span></p>
 							</div>
 						</div>
 
 						<div className="bg-black/40 border border-zinc-900 p-2.5 sm:p-3 rounded-lg flex items-center justify-between">
 							<div>
-								<p className="text-[11px] text-zinc-500 uppercase tracking-wider font-bold">Vel. Viento</p>
+								<p className="text-[11px] text-zinc-500 uppercase tracking-wider font-bold">{t("weather.wind", "Vel. Viento")}</p>
 								<p className="text-xl sm:text-2xl font-bold text-zinc-100 mt-0.5">{velViento}<span className="text-xs text-zinc-500"> km/h</span></p>
 							</div>
 							<div className="text-right">
-								<p className="text-[10px] text-zinc-600 uppercase tracking-wider font-bold">Dirección</p>
+								<p className="text-[10px] text-zinc-600 uppercase tracking-wider font-bold">{t("weather.wind_dir", "Dirección")}</p>
 								<p className="text-[11px] font-bold text-[#00A19B] mt-1 tracking-tight">{vientoCardinal}</p>
-								<p className="text-[10px] text-zinc-500 font-sans font-semibold">Azimut: {dirVientoGrados}°</p>
+								<p className="text-[10px] text-zinc-500 font-sans font-semibold">{t("weather.azimuth", "Azimut:")} {dirVientoGrados}°</p>
 							</div>
 						</div>
 
 						{/* Estado de Precipitación */}
 						<div className={`p-2 sm:p-2.5 rounded-lg border text-center font-bold text-xs ${tieneLluvia ? "bg-blue-950/40 border-blue-800 text-blue-400 animate-pulse" : "bg-black/40 border-zinc-900 text-zinc-400"}`}>
-							{tieneLluvia ? "⚠️ ADVERTENCIA: DETECCIÓN DE AGUA ACTIVA" : "✓ MONITOREO AMBIENTAL: PISTA SECA"}
+							{tieneLluvia ? t("weather.water_detected", "⚠️ ADVERTENCIA: DETECCIÓN DE AGUA ACTIVA") : t("weather.track_dry", "✓ MONITOREO AMBIENTAL: PISTA SECA")}
 						</div>
 					</div>
 				</div>
@@ -275,7 +275,7 @@ export default function WeatherPage() {
 			<div className="md:col-span-12 md:row-span-2 bg-[#07080a] border border-zinc-900 rounded-xl p-4 flex flex-col justify-between shadow-2xl">
 				<div className="text-xs text-[#00A19B] font-bold tracking-wider border-b border-zinc-900 pb-2 mb-2 flex justify-between items-center">
 					<span>// REGISTRO_DE_INCIDENTES_FIA // RACE_CONTROL_FEED</span>
-					<span className="text-[11px] text-zinc-600 uppercase tracking-widest font-bold">Actualización Automática</span>
+					<span className="text-[11px] text-zinc-600 uppercase tracking-widest font-bold">{t("weather.auto_update", "Actualización Automática")}</span>
 				</div>
 				
 				<div className="flex-1 flex flex-col justify-center space-y-2 overflow-hidden">
@@ -287,16 +287,14 @@ export default function WeatherPage() {
 							return (
 								<div key={idx} className="flex items-center gap-4 text-xs font-mono bg-black/50 border border-zinc-900/80 px-3 py-2 rounded-lg transition duration-200 hover:border-zinc-800">
 									<span className="text-amber-500 font-bold bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 shadow-inner">[{marcaTiempo}]</span>
-									<span className="text-zinc-500 font-bold uppercase tracking-wider text-[11px]">Categoría: {msgAny.Category ?? "GENERAL"}</span>
+									<span className="text-zinc-500 font-bold uppercase tracking-wider text-[11px]">{t("weather.category_label", "Categoría:")} {msgAny.Category ?? "GENERAL"}</span>
 									<span className="text-zinc-200 flex-1 font-sans font-semibold tracking-wide border-l border-zinc-800 pl-4">{msgAny.Message ?? ""}</span>
 								</div>
 							);
 						})
 					) : (
 						<div className="text-center text-zinc-500 text-xs py-4 uppercase tracking-widest font-mono">
-							{isSimActive
-								? "Monitoreo meteorológico oficial FIA activo para el Gran Premio de la Ciudad de México. Sin incidentes en pista."
-								: "Monitoreo meteorológico oficial FIA activo para el Gran Premio de Las Vegas. Sin incidentes en pista."}
+							{isSimActive ? t("weather.monitoring_active_mexico", "Monitoreo meteorológico oficial FIA activo para el Gran Premio de la Ciudad de México. Sin incidentes en pista.") : t("weather.monitoring_active_vegas", "Monitoreo meteorológico oficial FIA activo para el Gran Premio de Las Vegas. Sin incidentes en pista.")}
 						</div>
 					)}
 				</div>

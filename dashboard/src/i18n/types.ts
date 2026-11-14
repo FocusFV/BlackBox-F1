@@ -9,6 +9,7 @@ export interface TranslationDictionary {
 		coffee: string;
 		github: string;
 		language: string;
+		menu: string;
 	};
 	sidebar: {
 		operations: string;
@@ -28,6 +29,7 @@ export interface TranslationDictionary {
 		hide_sidebar: string;
 		pin_sidebar: string;
 		close_sidebar: string;
+		side_menu: string;
 	};
 	sessions: {
 		fp1: string;
@@ -95,6 +97,7 @@ export interface TranslationDictionary {
 		boost_pu_2026: string;
 		pit_lane_stopped: string;
 		pit_exit_running: string;
+		current_stint: string;
 	};
 	parc_ferme: {
 		last_official_round: string;
@@ -111,6 +114,12 @@ export interface TranslationDictionary {
 		qualy_times: string;
 		starting_grid: string;
 		race_tab: string;
+		grid_homologation_title: string;
+		grid_homologation_desc: string;
+		view_qualy_times: string;
+		times_homologation_title: string;
+		times_homologation_desc: string;
+		tap_to_view_circuit: string;
 	};
 	race_control: {
 		yellow_flag: string;
@@ -164,6 +173,14 @@ export interface TranslationDictionary {
 		rain_risk_low: string;
 		connecting_radar: string;
 		between_sessions: string;
+		wind_dir: string;
+		azimuth: string;
+		water_detected: string;
+		track_dry: string;
+		auto_update: string;
+		category_label: string;
+		monitoring_active_mexico: string;
+		monitoring_active_vegas: string;
 	};
 	settings: {
 		title: string;
@@ -377,6 +394,10 @@ export interface TranslationDictionary {
 		position_and_points: string;
 		upcoming_2026_races: string;
 		pending_dispute: string;
+		position_prefix: string;
+		loading_telemetry: string;
+		season_results_2026: string;
+		upcoming_gps_pending: string;
 	};
 	streams_page: {
 		engines_off_title: string;
@@ -455,6 +476,11 @@ export interface TranslationDictionary {
 		laps_abbr: string;
 		close_modal: string;
 		h2h_open_tooltip: string;
+		compare_h2h: string;
+		circuit_designed_by: string;
+		circuit_official_record: string;
+		circuit_top_speed_max: string;
+		circuit_layout_straight: string;
 	};
 	tv_sync: {
 		title: string;

@@ -1285,7 +1285,7 @@ export default function Standings() {
 														color: pTheme.primary,
 													}}
 												>
-													{year} · Posición #{selectedDriver.position}
+													{year} · {t("standings_page.position_prefix", "Posición")} #{selectedDriver.position}
 												</span>
 												{selectedDriver.countryCode && (
 													<img
@@ -1371,7 +1371,7 @@ export default function Standings() {
 
 									{loadingDriverModal ? (
 										<div className="h-48 flex items-center justify-center text-zinc-500 text-xs font-mono uppercase tracking-widest animate-pulse">
-											Cargando telemetría oficial de la temporada...
+											{t("standings_page.loading_telemetry", "Cargando telemetría oficial de la temporada...")}
 										</div>
 									) : driverSeasonResults.length === 0 ? (
 										<div className="h-48 flex items-center justify-center text-zinc-500 text-xs text-center p-4">
@@ -1531,7 +1531,7 @@ export default function Standings() {
 													color: cTheme.primary,
 												}}
 											>
-												{year} · Posición #{selectedConstructor.position}
+												{year} · {t("standings_page.position_prefix", "Posición")} #{selectedConstructor.position}
 											</span>
 
 											<h3 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight truncate mt-1">

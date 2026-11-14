@@ -376,7 +376,7 @@ export default function DriverProfileModal() {
 							)}
 						>
 							<Gauge className="w-3.5 h-3.5 text-amber-400" />
-							<span>Telemetría en Vivo</span>
+							<span>{t("standings_page.driver_modal_telemetry_tab", "Telemetría en Vivo")}</span>
 						</button>
 					)}
 					<button
@@ -390,7 +390,7 @@ export default function DriverProfileModal() {
 						)}
 					>
 						<Trophy className="w-3.5 h-3.5 text-amber-400" />
-						<span>Trayectoria 2026</span>
+						<span>{t("standings_page.driver_modal_season_tab", "Trayectoria 2026")}</span>
 					</button>
 				</div>
 
@@ -405,7 +405,7 @@ export default function DriverProfileModal() {
 							</div>
 							<div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
 								<span className="text-[10px] text-zinc-500 font-bold uppercase block">{t("telemetry.gap_to_leader", "Brecha Líder")}</span>
-								<span className="text-sm font-black text-white">{timingDriver?.GapToLeader || "LÍDER"}</span>
+								<span className="text-sm font-black text-white">{timingDriver?.GapToLeader || t("telemetry.leader", "LÍDER")}</span>
 							</div>
 							<div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
 								<span className="text-[10px] text-zinc-500 font-bold uppercase block">{t("telemetry.interval_ahead", "Intervalo Auto Del.")}</span>
@@ -488,11 +488,11 @@ export default function DriverProfileModal() {
 
 								<div className="grid grid-cols-2 gap-2 text-center pt-1">
 									<div className="p-2 rounded-xl bg-zinc-950/60 border border-zinc-900">
-										<span className="text-[9px] text-zinc-500 block uppercase">Última Vuelta</span>
+										<span className="text-[9px] text-zinc-500 block uppercase">{t("modals.h2h_last_lap", "Última Vuelta")}</span>
 										<span className="text-sm font-black text-zinc-200">{timingDriver.LastLapTime?.Value || "-"}</span>
 									</div>
 									<div className="p-2 rounded-xl bg-zinc-950/60 border border-zinc-900">
-										<span className="text-[9px] text-zinc-500 block uppercase">Mejor Vuelta</span>
+										<span className="text-[9px] text-zinc-500 block uppercase">{t("modals.h2h_best_lap", "Mejor Vuelta")}</span>
 										<span className="text-sm font-black text-purple-400">{timingDriver.BestLapTime?.Value || "-"}</span>
 									</div>
 								</div>
@@ -507,7 +507,7 @@ export default function DriverProfileModal() {
 										{appTiming.Stints[appTiming.Stints.length - 1]?.Compound || "MEDIO"}
 									</span>
 									<span className="text-zinc-300 text-xs font-bold">
-										Stint Actual: {appTiming.Stints[appTiming.Stints.length - 1]?.TotalLaps || 1} Vueltas
+										{t("telemetry.current_stint", "Stint Actual: {laps} Vueltas").replace("{laps}", String(appTiming.Stints[appTiming.Stints.length - 1]?.TotalLaps || 1))}
 									</span>
 								</div>
 								<span className="text-[10px] text-zinc-500 font-bold uppercase">
@@ -525,15 +525,15 @@ export default function DriverProfileModal() {
 						<div className="grid grid-cols-3 gap-2 py-3 border-b border-zinc-900 text-center">
 							<div className="p-2 rounded-xl bg-zinc-900/40 border border-zinc-900">
 								<span className="text-base font-black text-white">{totalRaces}</span>
-								<span className="text-[9px] block text-zinc-500 font-bold uppercase">Carreras</span>
+								<span className="text-[9px] block text-zinc-500 font-bold uppercase">{t("standings_page.races_label", "Carreras")}</span>
 							</div>
 							<div className="p-2 rounded-xl bg-zinc-900/40 border border-zinc-900">
 								<span className="text-base font-black text-amber-400">{wins}</span>
-								<span className="text-[9px] block text-zinc-500 font-bold uppercase">Victorias</span>
+								<span className="text-[9px] block text-zinc-500 font-bold uppercase">{t("standings_page.wins_label_plur", "Victorias")}</span>
 							</div>
 							<div className="p-2 rounded-xl bg-zinc-900/40 border border-zinc-900">
 								<span className="text-base font-black text-emerald-400">{podiums}</span>
-								<span className="text-[9px] block text-zinc-500 font-bold uppercase">Podios</span>
+								<span className="text-[9px] block text-zinc-500 font-bold uppercase">{t("standings_page.podiums_label", "Podios")}</span>
 							</div>
 						</div>
 
@@ -548,15 +548,15 @@ export default function DriverProfileModal() {
 								className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-98"
 							>
 								<Swords className="w-4 h-4" />
-								<span>Comparar en Cara a Cara</span>
+								<span>{t("modals.compare_h2h", "Comparar en Cara a Cara")}</span>
 							</button>
 						</div>
 
 						{/* HISTORIAL CARRERA POR CARRERA */}
 						<div className="flex flex-col flex-1 overflow-hidden mt-2">
 							<div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-900 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-								<span>Resultados Temporada 2026</span>
-								<span>Posición & Puntos</span>
+								<span>{t("standings_page.season_results_2026", "Resultados Temporada 2026")}</span>
+								<span>{t("standings_page.position_and_points", "Posición & Puntos")}</span>
 							</div>
 
 							{/* Banner Sprint */}
@@ -581,7 +581,7 @@ export default function DriverProfileModal() {
 
 							{loading ? (
 								<div className="h-48 flex items-center justify-center text-zinc-500 text-xs font-mono uppercase tracking-widest animate-pulse">
-									Cargando telemetría oficial de la temporada...
+									{t("standings_page.loading_telemetry", "Cargando telemetría oficial de la temporada...")}
 								</div>
 							) : (
 								<div className="flex-1 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
@@ -634,7 +634,7 @@ export default function DriverProfileModal() {
 										<div className="pt-2">
 											<div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-500/80 uppercase tracking-widest px-1 py-1">
 												<Calendar className="w-3 h-3" />
-												<span>Próximos Grandes Premios (3 Rondas Pendientes)</span>
+												<span>{t("standings_page.upcoming_gps_pending", "Próximos Grandes Premios (3 Rondas Pendientes)")}</span>
 											</div>
 											<div className="space-y-1.5 mt-1">
 												{upcoming.map((ur: any, i: number) => (
