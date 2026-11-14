@@ -11,10 +11,17 @@ export const dictionaries: Record<Language, TranslationDictionary> = {
 	pt,
 };
 
-export const languages: { code: Language; name: string; flag: string }[] = [
-	{ code: "es", name: "Español", flag: "🇪🇸" },
-	{ code: "en", name: "English", flag: "🇬🇧" },
-	{ code: "pt", name: "Português", flag: "🇧🇷" },
+export interface LanguageItem {
+	code: Language;
+	name: string;
+	flag: string;
+	countryCode: string;
+}
+
+export const languages: LanguageItem[] = [
+	{ code: "es", name: "Español", flag: "🇪🇸", countryCode: "esp" },
+	{ code: "en", name: "English", flag: "🇬🇧", countryCode: "gbr" },
+	{ code: "pt", name: "Português", flag: "🇧🇷", countryCode: "bra" },
 ];
 
 export function getDictionary(lang: Language = "es"): TranslationDictionary {

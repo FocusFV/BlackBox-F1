@@ -65,7 +65,7 @@ export default function Navbar() {
 
 			{/* 🏆 BARRA DE NAVEGACIÓN - EDICIÓN FIBRA DE CARBONO INTELIGENTE */}
 			<nav 
-				className={`relative z-50 flex h-16 w-full items-center justify-between gap-4 border-b border-amber-500/10 px-6 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.8)] font-mono select-none overflow-hidden transition-transform duration-500 ${
+				className={`relative z-50 flex h-16 w-full items-center justify-between gap-4 border-b border-amber-500/10 px-6 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.8)] font-mono select-none overflow-visible transition-transform duration-500 ${
 					shouldBeVisible ? "translate-y-0" : "-translate-y-full"
 				}`}
 				style={{

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
-import { ChevronDown, Globe } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { triggerHaptic } from "@/lib/haptics";
 
 interface LanguageSelectorProps {
@@ -29,7 +29,7 @@ export default function LanguageSelector({ variant = "navbar" }: LanguageSelecto
 
 	const currentLang = languages.find((l) => l.code === language) || languages[0];
 
-	// Variante 1: Cajón Móvil (3 botones compactos alineados)
+	// Variante 1: Cajón Móvil (3 botones compactos alineados con bandera SVG)
 	if (variant === "drawer") {
 		return (
 			<div className="flex items-center gap-1.5 w-full bg-zinc-900/60 p-1.5 rounded-xl border border-zinc-800">
@@ -49,7 +49,11 @@ export default function LanguageSelector({ variant = "navbar" }: LanguageSelecto
 									: "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
 							}`}
 						>
-							<span className="text-sm">{lang.flag}</span>
+							<img
+								src={`/country-flags/${lang.countryCode || "esp"}.svg`}
+								alt={lang.name}
+								className="w-4 h-2.5 object-cover rounded-xs border border-zinc-700/60 shadow-xs shrink-0"
+							/>
 							<span>{lang.code.toUpperCase()}</span>
 						</button>
 					);
@@ -78,7 +82,13 @@ export default function LanguageSelector({ variant = "navbar" }: LanguageSelecto
 									: "bg-zinc-950/60 border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:bg-zinc-900/40"
 							}`}
 						>
-							<span className="text-2xl">{lang.flag}</span>
+							<div className="flex items-center justify-center p-1 rounded-lg bg-zinc-900 border border-zinc-700/60 shadow-sm shrink-0">
+								<img
+									src={`/country-flags/${lang.countryCode || "esp"}.svg`}
+									alt={lang.name}
+									className="w-7 h-5 object-cover rounded-xs"
+								/>
+							</div>
 							<div className="flex flex-col">
 								<span className="text-xs font-black uppercase tracking-wider">
 									{lang.name}
@@ -94,22 +104,26 @@ export default function LanguageSelector({ variant = "navbar" }: LanguageSelecto
 		);
 	}
 
-	// Variante 3: Navbar Escritorio (Dropdown compacto elegante)
+	// Variante 3: Navbar Escritorio (Dropdown compacto elegante con bandera SVG nítida)
 	return (
-		<div className="relative" ref={dropdownRef}>
+		<div className="relative z-50" ref={dropdownRef}>
 			<button
 				type="button"
 				onClick={() => setIsOpen((prev) => !prev)}
 				className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-transparent border border-transparent hover:border-zinc-800 hover:bg-zinc-900/40 text-xs font-mono font-bold text-zinc-300 hover:text-amber-400 transition-all cursor-pointer active:scale-95"
 				title="Cambiar idioma / Switch language"
 			>
-				<span className="text-sm">{currentLang.flag}</span>
+				<img
+					src={`/country-flags/${currentLang.countryCode || "esp"}.svg`}
+					alt={currentLang.name}
+					className="w-4 h-3 object-cover rounded-xs border border-zinc-700/60 shadow-xs shrink-0"
+				/>
 				<span className="uppercase text-[11px] tracking-wider">{currentLang.code}</span>
 				<ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform duration-200 ${isOpen ? "rotate-180 text-amber-400" : ""}`} />
 			</button>
 
 			{isOpen && (
-				<div className="absolute right-0 top-full mt-1.5 w-36 rounded-xl border border-zinc-800 bg-[#09090b]/95 backdrop-blur-xl p-1 shadow-2xl z-[99999] font-mono animate-fade-in">
+				<div className="absolute right-0 top-full mt-2 w-44 rounded-xl border border-zinc-800/90 bg-[#09090b] p-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.95)] z-[99999] font-mono animate-fade-in">
 					{languages.map((lang) => {
 						const isSelected = lang.code === language;
 						return (
@@ -121,17 +135,21 @@ export default function LanguageSelector({ variant = "navbar" }: LanguageSelecto
 									setLanguage(lang.code);
 									setIsOpen(false);
 								}}
-								className={`flex items-center justify-between w-full px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
+								className={`flex items-center justify-between w-full px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer ${
 									isSelected
 										? "bg-amber-500/15 text-amber-400 font-black border border-amber-500/30"
 										: "text-zinc-300 hover:bg-zinc-900 hover:text-white"
 								}`}
 							>
-								<div className="flex items-center gap-2">
-									<span className="text-sm">{lang.flag}</span>
+								<div className="flex items-center gap-2.5">
+									<img
+										src={`/country-flags/${lang.countryCode || "esp"}.svg`}
+										alt={lang.name}
+										className="w-4 h-3 object-cover rounded-xs border border-zinc-700/60 shadow-xs shrink-0"
+									/>
 									<span>{lang.name}</span>
 								</div>
-								{isSelected && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+								{isSelected && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />}
 							</button>
 						);
 					})}
