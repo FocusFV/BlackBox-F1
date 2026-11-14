@@ -41,7 +41,7 @@ export default function DashboardLayout({ children }: Props) {
 	const ended = useDataStore(({ state }) => state?.SessionStatus?.Status === 'Ends');
 
 	return (
-		<div className="flex h-screen w-full md:pt-2 md:pr-2 md:pb-2">
+		<div className="flex h-[calc(100dvh-4rem)] w-full md:pt-2 md:pr-2 md:pb-2">
 			<Sidebar key="sidebar" connected={connected} />
 
 			<motion.div layout="size" className="flex h-full w-full flex-1 flex-col md:gap-2">
@@ -120,7 +120,7 @@ export default function DashboardLayout({ children }: Props) {
 
 function MobileDynamicBar() {
 	return (
-		<div className="flex flex-col divide-y divide-zinc-800 border-b border-zinc-800 md:hidden">
+		<div className="flex flex-col divide-y divide-zinc-800/80 border-b border-zinc-800/90 bg-zinc-950/95 backdrop-blur-md md:hidden shadow-md">
 			<div className="px-3.5 py-2">
 				<SessionInfo />
 			</div>

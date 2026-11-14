@@ -158,23 +158,26 @@ export default function SecretSimulationHUD() {
 		);
 	};
 
+	if (isCollapsed) {
+		return (
+			/* BOTÓN FLOTANTE MINIMIZADO PARA MÓVIL */
+			<div className="fixed top-2 right-3 z-[99999] select-none font-mono">
+				<button
+					onClick={() => toggleCollapse(false)}
+					className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-950/90 border border-red-500/50 text-white shadow-2xl backdrop-blur-md text-[11px] font-black cursor-pointer hover:bg-red-900 transition-all"
+				>
+					<span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+					<span>SIMULACIÓN FIA (V{currentLap})</span>
+					<ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+				</button>
+			</div>
+		);
+	}
+
 	return (
-		<div className="fixed top-0 left-0 right-0 z-[99999] pointer-events-none select-none font-mono">
-			{isCollapsed ? (
-				/* BOTÓN FLOTANTE MINIMIZADO PARA MÓVIL */
-				<div className="flex justify-end p-2 pr-3 pointer-events-auto">
-					<button
-						onClick={() => toggleCollapse(false)}
-						className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-950/90 border border-red-500/50 text-white shadow-2xl backdrop-blur-md text-[11px] font-black cursor-pointer hover:bg-red-900 transition-all"
-					>
-						<span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-						<span>SIMULACIÓN FIA (V{currentLap})</span>
-						<ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
-					</button>
-				</div>
-			) : (
-				/* BARRA DE CONTROL COMPLETA */
-				<div className="w-full bg-zinc-950/95 border-b border-red-500/50 backdrop-blur-xl shadow-2xl px-3 sm:px-4 py-2 transition-all pointer-events-auto">
+		<div className="relative z-[99999] w-full select-none font-mono">
+			{/* BARRA DE CONTROL COMPLETA */}
+			<div className="w-full bg-zinc-950/95 border-b border-red-500/50 backdrop-blur-xl shadow-2xl px-3 sm:px-4 py-2 transition-all">
 					<div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2.5">
 						
 						{/* LADO IZQUIERDO: ESTADO Y VUELTAS */}
@@ -257,7 +260,6 @@ export default function SecretSimulationHUD() {
 
 					</div>
 				</div>
-			)}
 		</div>
 	);
 }
