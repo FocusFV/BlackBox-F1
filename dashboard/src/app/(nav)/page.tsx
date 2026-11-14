@@ -83,29 +83,29 @@ export default function Home() {
 			<div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[850px] bg-amber-500/[0.07] blur-[170px] rounded-full pointer-events-none z-0" />
 
 			{/* HERO PRINCIPAL OPTIMIZADO ABOVE-THE-FOLD */}
-			<section className="relative z-10 flex min-h-[100dvh] w-full flex-col items-center justify-center max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-6 pb-12 sm:pt-8 sm:pb-14 text-center">
+			<section className="relative z-10 flex min-h-[100dvh] w-full flex-col items-center justify-center max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-4 pb-8 sm:pt-6 sm:pb-10 text-center">
 
-				{/* LOGO GIGANTE DESTACADO (MÁS COMPACTO Y CERCA DEL TÍTULO) */}
+				{/* LOGO GIGANTE DESTACADO (TAMAÑO ORIGINAL RESTAURADO Y CERCA DEL TÍTULO) */}
 				<motion.div 
 					initial={{ opacity: 0, scale: 0.88 }}
 					animate={{ opacity: 1, scale: 1 }}
 					transition={{ duration: 0.8 }}
-					className="w-full max-w-[280px] sm:max-w-[380px] md:max-w-[440px] drop-shadow-[0_0_50px_rgba(245,158,11,0.35)] hover:scale-105 hover:drop-shadow-[0_0_75px_rgba(245,158,11,0.5)] transition duration-500 flex justify-center select-none mb-2 sm:mb-3 cursor-pointer"
+					className="w-full max-w-[360px] sm:max-w-[480px] md:max-w-[560px] drop-shadow-[0_0_55px_rgba(245,158,11,0.35)] hover:scale-105 hover:drop-shadow-[0_0_75px_rgba(245,158,11,0.5)] transition duration-500 flex justify-center select-none -mt-4 sm:-mt-8 md:-mt-10 -mb-10 sm:-mb-16 md:-mb-20 cursor-pointer"
 				>
 					<Image 
 						src={icon} 
 						alt="Blackbox-F1 Logo" 
-						className="w-full h-auto object-contain max-h-[160px] sm:max-h-[200px]" 
+						className="w-full h-auto object-contain" 
 						priority 
 					/>
 				</motion.div>
 
-				{/* TÍTULO PRINCIPAL */}
+				{/* TÍTULO PRINCIPAL (COMPACTO Y PEGADO AL LOGO) */}
 				<motion.h1 
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.8, delay: 0.2 }}
-					className="text-center text-3xl sm:text-5xl md:text-6xl font-black uppercase tracking-tight text-zinc-100 leading-[1.08] mb-3 sm:mb-3.5"
+					className="text-center text-2xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight text-zinc-100 leading-[1.08] mb-2 sm:mb-2.5"
 				>
 					{t("home.hero_title_1", "Cockpit de Telemetría")} <br />
 					<span className="bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 bg-clip-text text-transparent drop-shadow-[0_2px_15px_rgba(245,158,11,0.35)]">
@@ -118,7 +118,7 @@ export default function Home() {
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.8, delay: 0.3 }}
-					className="text-center text-zinc-400 text-xs sm:text-sm md:text-base max-w-2xl font-medium leading-relaxed mb-6 sm:mb-7"
+					className="text-center text-zinc-400 text-xs sm:text-sm max-w-xl font-medium leading-relaxed mb-5 sm:mb-6"
 				>
 					{t("home.hero_subtitle", "Tiempos sector a sector en milésimas, diferencias en pista, compuestos de neumáticos, control de retraso sin spoilers y Wake Lock permanente.")}
 				</motion.p>
@@ -128,7 +128,7 @@ export default function Home() {
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.8, delay: 0.4 }}
-					className="flex flex-wrap justify-center gap-3 sm:gap-4 z-20 mb-6 sm:mb-8"
+					className="flex flex-wrap justify-center gap-3 sm:gap-4 z-20 mb-4 sm:mb-6"
 				>
 					<Link href="/dashboard" prefetch={false}>
 						<Button className="rounded-2xl border border-amber-300/60 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 px-8 sm:px-9 py-3.5 sm:py-4 font-black uppercase tracking-widest text-xs shadow-[0_0_35px_rgba(245,158,11,0.45)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_rgba(245,158,11,0.65)] flex items-center gap-3 cursor-pointer">
@@ -148,7 +148,7 @@ export default function Home() {
 			</section>
 
 			{/* FICHA TÉCNICA HORIZONTAL DEL COCKPIT (PLATFORM SPECS & METRICS) */}
-			<section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 -mt-10 mb-16">
+			<section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 mt-6 sm:mt-10 mb-16">
 				<div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3.5 rounded-2xl bg-zinc-950/90 border border-zinc-800/80 backdrop-blur-2xl shadow-[0_10px_35px_rgba(0,0,0,0.6)]">
 					<div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 border border-zinc-800/50">
 						<div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
