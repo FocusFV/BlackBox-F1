@@ -89,26 +89,6 @@ const COUNTRY_TO_CODE: Record<string, string> = {
 	"emiratos árabes unidos": "uae",
 };
 
-export function translateGpName(rawName?: string): string {
-	if (!rawName) return "Gran Premio";
-	const normalized = rawName.toLowerCase().trim();
-	if (GP_TRANSLATIONS[normalized]) {
-		return GP_TRANSLATIONS[normalized];
-	}
-	for (const [key, translated] of Object.entries(GP_TRANSLATIONS)) {
-		if (normalized.includes(key.replace(" grand prix", ""))) {
-			return translated;
-		}
-	}
-	const cleaned = rawName
-		.replace(/grand prix/i, "")
-		.replace(/gp/i, "")
-		.replace(/gran premio de/i, "")
-		.replace(/gran premio/i, "")
-		.trim();
-	return cleaned ? `Gran Premio de ${cleaned}` : "Gran Premio";
-}
-
 export function getCountryCodeForGp(gpName?: string, countryRaw?: string): string {
 	if (countryRaw) {
 		const cleanCountry = countryRaw.toLowerCase().trim();
@@ -127,43 +107,130 @@ export function getCountryCodeForGp(gpName?: string, countryRaw?: string): strin
 	return "";
 }
 
-export function translateSessionName(session?: string): string {
-	if (!session) return "Sesión Oficial";
+export type F1Lang = "es" | "en" | "pt";
+
+export function translateGpName(rawName?: string, lang: F1Lang = "es"): string {
+	if (!rawName) {
+		return lang === "en" ? "Grand Prix" : lang === "pt" ? "Grande Prêmio" : "Gran Premio";
+	}
+	const normalized = rawName.toLowerCase().trim();
+	if (lang === "en") {
+		// En inglés, preservar o asegurar nombre con Grand Prix
+		if (normalized.includes("grand prix")) {
+			return rawName;
+		}
+		const cleaned = rawName.replace(/gran premio de/i, "").replace(/gran premio/i, "").replace(/grande prêmio de/i, "").replace(/grande prêmio/i, "").trim();
+		return `${cleaned} Grand Prix`;
+	}
+	if (lang === "pt") {
+		const esName = GP_TRANSLATIONS[normalized];
+		if (esName) {
+			return esName.replace(/^Gran Premio de/i, "Grande Prêmio da").replace(/^Gran Premio del/i, "Grande Prêmio do").replace(/^Gran Premio/i, "Grande Prêmio");
+		}
+		const cleaned = rawName.replace(/grand prix/i, "").replace(/gp/i, "").replace(/gran premio de/i, "").replace(/gran premio/i, "").trim();
+		return cleaned ? `Grande Prêmio de ${cleaned}` : "Grande Prêmio";
+	}
+	// Español (por defecto)
+	if (GP_TRANSLATIONS[normalized]) {
+		return GP_TRANSLATIONS[normalized];
+	}
+	for (const [key, translated] of Object.entries(GP_TRANSLATIONS)) {
+		if (normalized.includes(key.replace(" grand prix", ""))) {
+			return translated;
+		}
+	}
+	const cleaned = rawName
+		.replace(/grand prix/i, "")
+		.replace(/gp/i, "")
+		.replace(/gran premio de/i, "")
+		.replace(/gran premio/i, "")
+		.trim();
+	return cleaned ? `Gran Premio de ${cleaned}` : "Gran Premio";
+}
+
+export function translateSessionName(session?: string, lang: F1Lang = "es"): string {
+	if (!session) {
+		return lang === "en" ? "Official Session" : lang === "pt" ? "Sessão Oficial" : "Sesión Oficial";
+	}
 	const lower = session.toLowerCase().trim();
-	if (lower.includes("fp1") || lower.includes("practice 1") || lower.includes("práctica 1") || lower.includes("practica 1")) return "Práctica 1";
-	if (lower.includes("fp2") || lower.includes("practice 2") || lower.includes("práctica 2") || lower.includes("practica 2")) return "Práctica 2";
-	if (lower.includes("fp3") || lower.includes("practice 3") || lower.includes("práctica 3") || lower.includes("practica 3")) return "Práctica 3";
-	if (lower.includes("sprint shootout") || lower.includes("sprint qualifying") || lower.includes("sq")) return "Clasificación Sprint";
-	if (lower.includes("sprint")) return "Carrera Sprint";
-	if (lower.includes("qualifying") || lower.includes("qualy") || lower.includes("clasificación") || lower.includes("clasificacion")) return "Clasificación";
-	if (lower.includes("race") || lower.includes("carrera")) return "Gran Premio";
+	if (lower.includes("fp1") || lower.includes("practice 1") || lower.includes("práctica 1") || lower.includes("practica 1") || lower.includes("treino 1")) {
+		return lang === "en" ? "Practice 1" : lang === "pt" ? "Treino Livre 1" : "Práctica 1";
+	}
+	if (lower.includes("fp2") || lower.includes("practice 2") || lower.includes("práctica 2") || lower.includes("practica 2") || lower.includes("treino 2")) {
+		return lang === "en" ? "Practice 2" : lang === "pt" ? "Treino Livre 2" : "Práctica 2";
+	}
+	if (lower.includes("fp3") || lower.includes("practice 3") || lower.includes("práctica 3") || lower.includes("practica 3") || lower.includes("treino 3")) {
+		return lang === "en" ? "Practice 3" : lang === "pt" ? "Treino Livre 3" : "Práctica 3";
+	}
+	if (lower.includes("sprint shootout") || lower.includes("sprint qualifying") || lower.includes("sq")) {
+		return lang === "en" ? "Sprint Qualifying" : lang === "pt" ? "Classificação Sprint" : "Clasificación Sprint";
+	}
+	if (lower.includes("sprint")) {
+		return lang === "en" ? "Sprint Race" : lang === "pt" ? "Corrida Sprint" : "Carrera Sprint";
+	}
+	if (lower.includes("qualifying") || lower.includes("qualy") || lower.includes("clasificación") || lower.includes("clasificacion")) {
+		return lang === "en" ? "Qualifying" : lang === "pt" ? "Classificação" : "Clasificación";
+	}
+	if (lower.includes("race") || lower.includes("carrera") || lower.includes("corrida")) {
+		return lang === "en" ? "Grand Prix" : lang === "pt" ? "Grande Prêmio" : "Gran Premio";
+	}
 	return session;
 }
 
-export function translateStatus(status?: string): string {
+export function translateStatus(status?: string, lang: F1Lang = "es"): string {
 	if (!status) return "";
 	const s = status.toLowerCase().trim();
-	if (s === "finished") return "FINALIZADO";
-	if (s === "lapped" || s === "+1 lap" || s === "+1 vta") return "+1 VUELTA";
+	if (s === "finished") {
+		return lang === "en" ? "FINISHED" : "FINALIZADO";
+	}
+	if (s === "lapped" || s === "+1 lap" || s === "+1 vta") {
+		return lang === "en" ? "+1 LAP" : lang === "pt" ? "+1 VOLTA" : "+1 VUELTA";
+	}
 	const lapsMatch = s.match(/^\+(\d+)\s+laps?/i);
-	if (lapsMatch) return `+${lapsMatch[1]} VUELTAS`;
-	const plainLaps = s.match(/^(\d+)\s+laps?/i);
-	if (plainLaps) return `+${plainLaps[1]} VUELTAS`;
-	if (s.includes("did not start") || s === "dns") return "NO LARGÓ";
-	if (s.includes("did not qualify") || s === "dnq") return "NO CLASIFICÓ";
-	if (s.includes("disqualified") || s.includes("dsq")) return "DESCALIFICADO";
-	if (s.includes("retired") || s.includes("withdrew") || s === "ret") return "RETIRADO";
-	if (s.includes("accident") || s.includes("collision") || s.includes("crash")) return "COLISIÓN";
-	if (s.includes("engine") || s.includes("power unit")) return "MOTOR";
-	if (s.includes("gearbox")) return "CAJA DE CAMBIOS";
-	if (s.includes("transmission")) return "TRANSMISIÓN";
-	if (s.includes("brakes")) return "FRENOS";
-	if (s.includes("suspension")) return "SUSPENSIÓN";
-	if (s.includes("hydraulics")) return "HIDRÁULICA";
-	if (s.includes("electrical")) return "ELÉCTRICO";
-	if (s.includes("puncture") || s.includes("tyre") || s.includes("tire")) return "PINCHAZO";
-	if (s.includes("spun") || s.includes("spin")) return "TROMPO";
-	if (s === "dnf" || s === "out") return "RETIRADO";
+	if (lapsMatch) {
+		return lang === "en" ? `+${lapsMatch[1]} LAPS` : lang === "pt" ? `+${lapsMatch[1]} VOLTAS` : `+${lapsMatch[1]} VUELTAS`;
+	}
+	if (s.includes("did not start") || s === "dns") {
+		return lang === "en" ? "DNS" : lang === "pt" ? "NÃO LARGOU" : "NO LARGÓ";
+	}
+	if (s.includes("did not qualify") || s === "dnq") {
+		return lang === "en" ? "DNQ" : lang === "pt" ? "NÃO CLASSIF." : "NO CLASIFICÓ";
+	}
+	if (s.includes("disqualified") || s.includes("dsq")) {
+		return lang === "en" ? "DISQUALIFIED" : lang === "pt" ? "DESCLASSIFICADO" : "DESCALIFICADO";
+	}
+	if (s.includes("retired") || s.includes("withdrew") || s === "ret" || s === "dnf" || s === "out") {
+		return lang === "en" ? "RETIRED" : lang === "pt" ? "ABANDONOU" : "RETIRADO";
+	}
+	if (s.includes("accident") || s.includes("collision") || s.includes("crash")) {
+		return lang === "en" ? "COLLISION" : lang === "pt" ? "COLISÃO" : "COLISIÓN";
+	}
+	if (s.includes("engine") || s.includes("power unit")) {
+		return lang === "en" ? "ENGINE" : "MOTOR";
+	}
+	if (s.includes("gearbox")) {
+		return lang === "en" ? "GEARBOX" : lang === "pt" ? "CÂMBIO" : "CAJA DE CAMBIOS";
+	}
+	if (s.includes("transmission")) {
+		return lang === "en" ? "TRANSMISSION" : lang === "pt" ? "TRANSMISSÃO" : "TRANSMISIÓN";
+	}
+	if (s.includes("brakes")) {
+		return lang === "en" ? "BRAKES" : lang === "pt" ? "FREIOS" : "FRENOS";
+	}
+	if (s.includes("suspension")) {
+		return lang === "en" ? "SUSPENSION" : lang === "pt" ? "SUSPENSÃO" : "SUSPENSIÓN";
+	}
+	if (s.includes("hydraulics")) {
+		return lang === "en" ? "HYDRAULICS" : lang === "pt" ? "HIDRÁULICA" : "HIDRÁULICA";
+	}
+	if (s.includes("electrical")) {
+		return lang === "en" ? "ELECTRICAL" : lang === "pt" ? "ELÉTRICO" : "ELÉCTRICO";
+	}
+	if (s.includes("puncture") || s.includes("tyre") || s.includes("tire")) {
+		return lang === "en" ? "PUNCTURE" : lang === "pt" ? "FURO NO PNEU" : "PINCHAZO";
+	}
+	if (s.includes("spun") || s.includes("spin")) {
+		return lang === "en" ? "SPUN OFF" : lang === "pt" ? "RODOU" : "TROMPO";
+	}
 	return status.toUpperCase();
 }
-

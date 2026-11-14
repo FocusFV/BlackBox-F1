@@ -2,6 +2,7 @@
 
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useDataStore } from "@/stores/useDataStore";
+import { useTranslation } from "@/hooks/useTranslation";
 import { fetchMap } from "@/lib/fetchMap";
 import { rotate, rad } from "@/lib/map";
 import { getCircuitDetails, type CircuitDetails, DEFAULT_CIRCUIT } from "@/lib/circuitBackdrops";
@@ -167,6 +168,7 @@ export function CircuitBackdrop({
 	isCinematic = false,
 	onToggleCinematic,
 }: Props) {
+	const { t } = useTranslation();
 	const oledMode = useSettingsStore((state) => state.oledMode);
 	const liveCircuitKey = useDataStore(
 		(state) =>
@@ -587,7 +589,7 @@ export function CircuitBackdrop({
 																fill="#ffffff"
 																fontFamily="monospace"
 															>
-																🏁 META
+																{t("common.meta", "🏁 META")}
 															</text>
 														</g>
 													</g>
@@ -711,7 +713,7 @@ export function CircuitBackdrop({
 															/>
 														</g>
 
-														{/* Badge 🏁 META */}
+														{/* Badge {t("common.meta", "🏁 META")} */}
 														<g
 															transform={`translate(${finishLine.x0 + (finishLine.x0 > 200 ? -48 : 12)}, ${
 																finishLine.y0 + (finishLine.y0 > 150 ? -16 : 14)
@@ -737,7 +739,7 @@ export function CircuitBackdrop({
 																fill="#ffffff"
 																fontFamily="monospace"
 															>
-																🏁 META
+																{t("common.meta", "🏁 META")}
 															</text>
 														</g>
 													</g>

@@ -1,4 +1,6 @@
+"use client";
 import Image from "next/image";
+import { useTranslation } from "@/hooks/useTranslation";
 
 import Note from "@/components/Note";
 import DriverDRS from "@/components/driver/DriverDRS";
@@ -17,6 +19,7 @@ import softTireIcon from "public/tires/soft.svg";
 import wetTireIcon from "public/tires/wet.svg";
 
 export default function HelpPage() {
+	const { t } = useTranslation();
 	return (
 		<div className="mx-auto max-w-6xl space-y-12 px-4 py-8 text-zinc-100">
 			{/* HERO SECTION */}
@@ -24,13 +27,13 @@ export default function HelpPage() {
 				<div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-red-600/10 blur-3xl pointer-events-none" />
 				<div className="flex flex-col gap-3">
 					<div className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-400 w-fit uppercase tracking-widest">
-						<span className="size-2 rounded-full bg-red-500 animate-pulse" /> Guía Oficial de Telemetría
+						<span className="size-2 rounded-full bg-red-500 animate-pulse" /> {t("help_page.guide_badge", "Guía Oficial de Telemetría")}
 					</div>
 					<h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl bg-gradient-to-r from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent">
-						Centro de Ayuda Blackbox F1
+						{t("help_page.title", "Centro de Ayuda Blackbox F1")}
 					</h1>
 					<p className="max-w-2xl text-zinc-400 text-base leading-relaxed">
-						Dominá la interfaz de telemetría en tiempo real. Conocé la codificación de colores, indicadores de estado de los monoplazas y cómo sincronizar los datos en vivo con tu transmisión.
+						{t("help_page.subtitle", "Dominá la interfaz de telemetría en tiempo real. Conocé la codificación de colores, indicadores de estado de los monoplazas y cómo sincronizar los datos en vivo con tu transmisión.")}
 					</p>
 				</div>
 			</div>
@@ -39,10 +42,10 @@ export default function HelpPage() {
 			<section className="space-y-6">
 				<div className="border-b border-zinc-800/80 pb-4">
 					<h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-						<span className="text-red-500">#</span> Sistema de Codificación por Colores
+						<span className="text-red-500">#</span> {t("help_page.color_system_title", "Sistema de Codificación por Colores")}
 					</h2>
 					<p className="text-sm text-zinc-400 mt-1">
-						Inspirado en los gráficos oficiales de la Fórmula 1 para tiempos de vuelta, sectores y deltas.
+						{t("help_page.color_system_desc", "Inspirado en los gráficos oficiales de la Fórmula 1 para tiempos de vuelta, sectores y deltas.")}
 					</p>
 				</div>
 
@@ -50,41 +53,41 @@ export default function HelpPage() {
 					<div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 backdrop-blur-sm hover:border-zinc-700 transition-all">
 						<div className="flex items-center gap-3">
 							<span className="size-5 rounded-md bg-white shadow-sm shadow-white/20" />
-							<span className="font-bold text-white">Blanco</span>
+							<span className="font-bold text-white">{t("help_page.white_title", "Blanco")}</span>
 						</div>
-						<p className="mt-2 text-sm text-zinc-400">Tiempo de la última vuelta registrada por el piloto.</p>
+						<p className="mt-2 text-sm text-zinc-400">{t("help_page.white_desc", "Tiempo de la última vuelta registrada por el piloto.")}</p>
 					</div>
 
 					<div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 backdrop-blur-sm hover:border-zinc-700 transition-all">
 						<div className="flex items-center gap-3">
 							<span className="size-5 rounded-md bg-amber-400 shadow-sm shadow-amber-400/20" />
-							<span className="font-bold text-amber-400">Amarillo</span>
+							<span className="font-bold text-amber-400">{t("help_page.yellow_title", "Amarillo")}</span>
 						</div>
-						<p className="mt-2 text-sm text-zinc-400">Sector o vuelta más lenta que la mejor marca personal.</p>
+						<p className="mt-2 text-sm text-zinc-400">{t("help_page.yellow_desc", "Sector o vuelta más lenta que la mejor marca personal.")}</p>
 					</div>
 
 					<div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 backdrop-blur-sm hover:border-zinc-700 transition-all">
 						<div className="flex items-center gap-3">
 							<span className="size-5 rounded-md bg-emerald-500 shadow-sm shadow-emerald-500/20" />
-							<span className="font-bold text-emerald-400">Verde</span>
+							<span className="font-bold text-emerald-400">{t("help_page.green_title", "Verde")}</span>
 						</div>
-						<p className="mt-2 text-sm text-zinc-400">Mejor marca personal del piloto (récord personal en la sesión).</p>
+						<p className="mt-2 text-sm text-zinc-400">{t("help_page.green_desc", "Mejor marca personal del piloto (récord personal en la sesión).")}</p>
 					</div>
 
 					<div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 backdrop-blur-sm hover:border-zinc-700 transition-all">
 						<div className="flex items-center gap-3">
 							<span className="size-5 rounded-md bg-violet-500 shadow-sm shadow-violet-500/20" />
-							<span className="font-bold text-violet-400">Violeta</span>
+							<span className="font-bold text-violet-400">{t("help_page.violet_title", "Violeta")}</span>
 						</div>
-						<p className="mt-2 text-sm text-zinc-400">Mejor marca absoluta de toda la sesión (récord de pista).</p>
+						<p className="mt-2 text-sm text-zinc-400">{t("help_page.violet_desc", "Mejor marca absoluta de toda la sesión (récord de pista).")}</p>
 					</div>
 
 					<div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 backdrop-blur-sm hover:border-zinc-700 transition-all md:col-span-2 lg:col-span-2">
 						<div className="flex items-center gap-3">
 							<span className="size-5 rounded-md bg-blue-500 shadow-sm shadow-blue-500/20" />
-							<span className="font-bold text-blue-400">Azul</span>
+							<span className="font-bold text-blue-400">{t("help_page.blue_title", "Azul")}</span>
 						</div>
-						<p className="mt-2 text-sm text-zinc-400">Indica que el piloto se encuentra transitando por la calle de boxes (pit lane).</p>
+						<p className="mt-2 text-sm text-zinc-400">{t("help_page.blue_desc", "Indica que el piloto se encuentra transitando por la calle de boxes (pit lane).")}</p>
 					</div>
 				</div>
 
@@ -97,7 +100,7 @@ export default function HelpPage() {
 			<section className="space-y-6">
 				<div className="border-b border-zinc-800/80 pb-4">
 					<h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-						<span className="text-red-500">#</span> Clasificación y Tabla de Posiciones
+						<span className="text-red-500">#</span> {t("help_page.leaderboard_title", "Clasificación y Tabla de Posiciones")}
 					</h2>
 					<p className="text-sm text-zinc-400 mt-1">
 						Estados especiales destacados en el leaderboard según el transcurso de la sesión.

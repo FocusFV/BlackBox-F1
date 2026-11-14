@@ -7,6 +7,7 @@ import clsx from "clsx";
 
 import type { Session } from "@/types/schedule.type";
 import { translateGpName } from "@/lib/f1Translations";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type Props = {
 	next: Session;
@@ -26,6 +27,7 @@ const countryTranslation: Record<string, string> = {
 };
 
 export default function Countdown({ next, type, countryName, eventName }: Props) {
+	const { t } = useTranslation();
 	const [[days, hours, minutes, seconds], setDuration] = useState<
 		[number | null, number | null, number | null, number | null]
 	>([null, null, null, null]);
@@ -134,7 +136,7 @@ export default function Countdown({ next, type, countryName, eventName }: Props)
 				<div className="flex items-center gap-3 py-1.5">
 					<span className="flex items-center gap-2 text-xs font-mono font-black uppercase tracking-widest text-emerald-300 bg-emerald-950/80 px-3 py-1.5 rounded-xl border border-emerald-500/40 animate-pulse">
 						<span className="h-2 w-2 rounded-full bg-emerald-400" />
-						SESIÓN EN VIVO EN PISTA
+						{t("schedule_page.session_live_track", "SESIÓN EN VIVO EN PISTA")}
 					</span>
 				</div>
 			) : (
@@ -148,7 +150,7 @@ export default function Countdown({ next, type, countryName, eventName }: Props)
 							) : (
 								<div className="h-9 w-12 animate-pulse rounded-md bg-zinc-900/80 border border-zinc-800/40" />
 							)}
-							<p className="text-[10px] font-sans font-bold uppercase tracking-widest text-zinc-500 mt-1">Días</p>
+							<p className="text-[10px] font-sans font-bold uppercase tracking-widest text-zinc-500 mt-1">{t("common.days", "Días")}</p>
 						</div>
 
 						<div className="text-center min-w-12">
@@ -159,7 +161,7 @@ export default function Countdown({ next, type, countryName, eventName }: Props)
 							) : (
 								<div className="h-9 w-12 animate-pulse rounded-md bg-zinc-900/80 border border-zinc-800/40" />
 							)}
-							<p className="text-[10px] font-sans font-bold uppercase tracking-widest text-zinc-500 mt-1">Hs</p>
+							<p className="text-[10px] font-sans font-bold uppercase tracking-widest text-zinc-500 mt-1">{t("common.hours", "Hs")}</p>
 						</div>
 
 						<div className="text-center min-w-12">
@@ -170,7 +172,7 @@ export default function Countdown({ next, type, countryName, eventName }: Props)
 							) : (
 								<div className="h-9 w-12 animate-pulse rounded-md bg-zinc-900/80 border border-zinc-800/40" />
 							)}
-							<p className="text-[10px] font-sans font-bold uppercase tracking-widest text-zinc-500 mt-1">Min</p>
+							<p className="text-[10px] font-sans font-bold uppercase tracking-widest text-zinc-500 mt-1">{t("common.minutes", "Min")}</p>
 						</div>
 
 						<div className="text-center min-w-12">
@@ -181,7 +183,7 @@ export default function Countdown({ next, type, countryName, eventName }: Props)
 							) : (
 								<div className="h-9 w-12 animate-pulse rounded-md bg-zinc-900/80 border border-zinc-800/40" />
 							)}
-							<p className="text-[10px] font-sans font-bold uppercase tracking-widest text-zinc-500 mt-1">Seg</p>
+							<p className="text-[10px] font-sans font-bold uppercase tracking-widest text-zinc-500 mt-1">{t("common.seconds", "Seg")}</p>
 						</div>
 					</div>
 				</AnimatePresence>

@@ -36,32 +36,32 @@ export default function Settings() {
 	}[] = [
 		{
 			value: "classic",
-			label: "Oro 24K Blackbox Clásico",
-			desc: "El tono ámbar dorado oficial de la plataforma con contraste cinematográfico y sombras profundas.",
+			label: t("settings.theme_classic", "Oro 24K Blackbox Clásico"),
+			desc: t("settings.theme_classic_desc", "El tono ámbar dorado oficial de la plataforma con contraste cinematográfico y sombras profundas."),
 			icon: "🏆",
 			swatchGradient: "from-amber-600 via-amber-400 to-amber-500",
 			glowBorder: "border-amber-500/60 shadow-[0_0_20px_rgba(245,158,11,0.25)]",
 		},
 		{
 			value: "neon",
-			label: "Oro Neón Ultra-Glow",
-			desc: "Dorado electrizante de alta luminosidad (#FFD700) para máxima visibilidad nocturna.",
+			label: t("settings.theme_neon", "Oro Neón Ultra-Glow"),
+			desc: t("settings.theme_neon_desc", "Dorado electrizante de alta luminosidad (#FFD700) para máxima visibilidad nocturna."),
 			icon: "⚡",
 			swatchGradient: "from-yellow-400 via-yellow-200 to-amber-300",
 			glowBorder: "border-yellow-400/80 shadow-[0_0_25px_rgba(255,215,0,0.4)]",
 		},
 		{
 			value: "rose",
-			label: "Oro Rosa / Champagne",
-			desc: "Matiz cobrizo cálido de súper lujo con acabado de metal pulido rosáceo (#F43F5E).",
+			label: t("settings.theme_rose", "Oro Rosa / Champagne"),
+			desc: t("settings.theme_rose_desc", "Matiz cobrizo cálido de súper lujo con acabado de metal pulido rosáceo (#F43F5E)."),
 			icon: "💎",
 			swatchGradient: "from-rose-500 via-rose-300 to-amber-300",
 			glowBorder: "border-rose-400/80 shadow-[0_0_20px_rgba(244,63,94,0.35)]",
 		},
 		{
 			value: "oled",
-			label: "Modo OLED Negro Puro",
-			desc: "Negro absoluto (#000000) con oro de alto contraste para ahorrar batería en pantallas OLED.",
+			label: t("settings.theme_oled", "Modo OLED Negro Puro"),
+			desc: t("settings.theme_oled_desc", "Negro absoluto (#000000) con oro de alto contraste para ahorrar batería en pantallas OLED."),
 			icon: "🌙",
 			swatchGradient: "from-amber-500 via-amber-300 to-black",
 			glowBorder: "border-amber-400/70 shadow-[0_0_20px_rgba(234,179,8,0.3)]",
@@ -84,7 +84,7 @@ export default function Settings() {
 					{/* Badge Wake Lock siempre activo */}
 					<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold uppercase tracking-wider mt-3 shadow-xs">
 						<Smartphone className="w-3.5 h-3.5" />
-						<span>Modo Segunda Pantalla: Wake Lock permanente activo (pantalla encendida)</span>
+						<span>{t("settings.wake_lock_badge", "Modo Segunda Pantalla: Wake Lock permanente activo (pantalla encendida)")}</span>
 					</div>
 				</div>
 
@@ -113,10 +113,10 @@ export default function Settings() {
 						<Sparkles className="w-4 h-4 text-amber-400" />
 						<div>
 							<h2 className="text-sm font-bold text-amber-400 uppercase tracking-widest">
-								Paleta de Oro & Tema Blackbox
+								{t("settings.theme", "Paleta de Oro & Tema Blackbox")}
 							</h2>
 							<p className="text-[11px] text-zinc-400 font-sans">
-								Elegí el estilo de acento dorado que viste la barra de navegación, botones, tacómetros y modales.
+								{t("settings.theme_desc", "Elegí el estilo de acento dorado que viste la barra de navegación, botones, tacómetros y modales.")}
 							</p>
 						</div>
 					</div>
@@ -170,10 +170,10 @@ export default function Settings() {
 						<Vibrate className="w-4 h-4 text-amber-400" />
 						<div>
 							<h2 className="text-sm font-bold text-amber-400 uppercase tracking-widest">
-								Interacción Táctil & Densidad
+								{t("settings.density", "Interacción Táctil & Densidad")}
 							</h2>
 							<p className="text-[11px] text-zinc-400 font-sans">
-								Personalizá la respuesta física en mano y el tamaño de las grillas de telemetría.
+								{t("settings.density_desc", "Personalizá la respuesta física en mano y el tamaño de las grillas de telemetría.")}
 							</p>
 						</div>
 					</div>
@@ -190,7 +190,7 @@ export default function Settings() {
 									}} 
 								/>
 								<div className="flex flex-col">
-									<span className="text-xs font-bold text-zinc-200 uppercase">Respuesta Háptica Táctil</span>
+									<span className="text-xs font-bold text-zinc-200 uppercase">{t("settings.haptic_feedback", "Respuesta Háptica Táctil")}</span>
 									<span className="text-[11px] text-zinc-400 font-sans mt-0.5 leading-snug">
 										Emite una micro-vibración física estilo volante F1 al tocar botones, pestañas de sesión y pilotos (en celulares compatibles).
 									</span>
@@ -354,10 +354,10 @@ export default function Settings() {
 				<section className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 backdrop-blur-xl space-y-4 shadow-2xl flex flex-col items-center text-center">
 					<div className="flex flex-col items-center border-b border-zinc-800/80 pb-3 w-full">
 						<h2 className="text-sm font-bold text-amber-400 uppercase tracking-widest">
-							Pilotos Preferidos
+							{t("settings.fav_drivers", "Pilotos Preferidos")}
 						</h2>
 						<p className="text-[11px] text-zinc-400 font-sans max-w-md mt-0.5">
-							Tus pilotos seleccionados aparecerán con un marco destacado en la tabla de tiempos y sus radios de equipo se priorizarán en vivo.
+							{t("settings.fav_drivers_desc", "Tus pilotos seleccionados aparecerán con un marco destacado en la tabla de tiempos.")}
 						</p>
 					</div>
 					
@@ -372,10 +372,10 @@ export default function Settings() {
 						<Volume2 className="w-4 h-4 text-amber-400" />
 						<div>
 							<h2 className="text-sm font-bold text-amber-400 uppercase tracking-widest">
-								Dirección de Carrera & Audio
+								{t("settings.radio_title", "Dirección de Carrera & Audio")}
 							</h2>
 							<p className="text-[11px] text-zinc-400 font-sans">
-								Alertas audibles y reproducción automática de comunicaciones por radio del Pit-Wall.
+								{t("settings.radio_desc", "Alertas audibles y reproducción automática de comunicaciones por radio del Pit-Wall.")}
 							</p>
 						</div>
 					</div>

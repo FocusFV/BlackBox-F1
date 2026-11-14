@@ -1,3 +1,4 @@
+"use client";
 import { Suspense } from "react";
 import Link from "next/link";
 
@@ -5,8 +6,10 @@ import NextRound from "@/components/schedule/NextRound";
 import Schedule from "@/components/schedule/Schedule";
 
 import { useDataStore } from "@/stores/useDataStore";
+import { useTranslation } from "@/hooks/useTranslation";
 
-export default async function SchedulePage() {
+export default function SchedulePage() {
+	const { t } = useTranslation();
 	// 🏎️ LEEMOS EL ESTADO EN VIVO DE LA PISTA CORREGIDO:
 	const stateAny = useDataStore.getState().state as any;
 	const archiveStatus = stateAny?.ArchiveStatus?.Status || stateAny?.SessionInfo?.ArchiveStatus?.Status;
@@ -29,15 +32,15 @@ export default async function SchedulePage() {
 					{/* Encabezado de sesión activa */}
 					<div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 px-4 py-1.5 rounded-full text-emerald-400 text-xs font-black tracking-widest uppercase animate-pulse mb-6">
 						<span className="w-2 h-2 rounded-full bg-emerald-400" />
-						<span>Sesión en Vivo en Pista</span>
+						<span>{t("schedule_page.live_now_badge", "Sesión en Vivo en Pista")}</span>
 					</div>
 
 					<h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-zinc-100 max-w-3xl">
-						{activeRace} está en marcha
+						{activeRace} {t("schedule_page.active_race_running", "está en marcha")}
 					</h1>
 					
 					<p className="text-zinc-400 text-sm md:text-base mt-4 max-w-xl font-sans">
-						La sesión oficial está en curso. Podés seguir todos los tiempos por sector, neumáticos y posiciones en tiempo real.
+						{t("schedule_page.active_race_desc", "La sesión oficial está en curso. Podés seguir todos los tiempos por sector, neumáticos y posiciones en tiempo real.")}
 					</p>
 
 					{/* Botón para saltar al Dashboard */}
@@ -46,14 +49,14 @@ export default async function SchedulePage() {
 							href="/dashboard" 
 							className="inline-flex items-center gap-3 text-sm md:text-base font-black bg-emerald-500 text-black hover:bg-emerald-400 active:scale-95 transition-all px-8 py-4 rounded-2xl uppercase tracking-widest shadow-[0_0_30px_rgba(16,185,129,0.35)] border border-emerald-300/30 group"
 						>
-							<span>Ver Telemetría en Vivo</span>
+							<span>{t("schedule_page.view_live_telemetry", "Ver Telemetría en Vivo")}</span>
 						</Link>
 					</div>
 
 					{/* REPRODUCTOR DE AUDIO DE TRANSMISIÓN DE BOXES */}
 					<div className="w-full max-w-lg border border-zinc-800 bg-zinc-950/80 backdrop-blur-md p-4 rounded-2xl flex flex-col gap-3 text-left">
 						<div className="flex items-center justify-between border-b border-zinc-900 pb-2">
-							<span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Audio de Boxes (En Vivo)</span>
+							<span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{t("schedule_page.pit_audio_title", "Audio de Boxes (En Vivo)")}</span>
 							<span className="text-[10px] bg-zinc-800 px-2 py-0.5 rounded text-amber-400 font-bold">2026</span>
 						</div>
 						
@@ -62,7 +65,7 @@ export default async function SchedulePage() {
 							className="w-full accent-emerald-500 h-9 rounded-lg"
 							src="https://stream.publicbroadcasting.net/production/mp3/kcur/local-kcur-993740.mp3"
 						>
-							Tu navegador no soporta el elemento de reproducción de audio.
+							{t("schedule_page.audio_not_supported", "Tu navegador no soporta el elemento de reproducción de audio.")}
 						</audio>
 					</div>
 
@@ -70,12 +73,12 @@ export default async function SchedulePage() {
 			) : (
 				/* ⏳ MODO ESTÁNDAR: Si los motores están apagados, se muestra el contador y el calendario tradicional */
 				<>
-					{/* Sección Próximo Evento */}
+					{/* Sección {t("schedule_page.next_event_title", "Próximo Evento")} */}
 					<div className="my-6">
 						<h1 className="text-3xl font-extrabold uppercase tracking-wider text-zinc-100 border-l-4 border-amber-500 pl-3">
 							Próximo Evento
 						</h1>
-						<p className="text-zinc-500 text-sm mt-1">Todos los horarios corresponden a tu hora local</p>
+						<p className="text-zinc-500 text-sm mt-1">{t("schedule_page.local_time_note", "Todos los horarios corresponden a tu hora local")}</p>
 					</div>
 
 					<Suspense fallback={<NextRoundLoading />}>
@@ -85,9 +88,9 @@ export default async function SchedulePage() {
 					{/* Sección Calendario */}
 					<div className="my-10">
 						<h1 className="text-3xl font-extrabold uppercase tracking-wider text-zinc-100 border-l-4 border-amber-500 pl-3">
-							Calendario del Campeonato
+							{t("schedule_page.championship_calendar_title", "Calendario del Campeonato")}
 						</h1>
-						<p className="text-zinc-500 text-sm mt-1">Todos los horarios corresponden a tu hora local</p>
+						<p className="text-zinc-500 text-sm mt-1">{t("schedule_page.local_time_note", "Todos los horarios corresponden a tu hora local")}</p>
 					</div>
 
 					<Suspense fallback={<FullScheduleLoading />}>

@@ -24,6 +24,7 @@ function formatUpcomingRaceDate(round: string | number, rawDate: string): string
 
 import React, { useEffect, useState, useMemo } from "react";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useTranslation } from "@/hooks/useTranslation";
 import { isFavoriteDriver } from "@/lib/favoriteDriver";
 import { motion, AnimatePresence } from "motion/react";
 import clsx from "clsx";
@@ -551,6 +552,7 @@ const TeamLogo = ({ teamName, className = "w-5 h-5" }: { teamName: string; class
 };
 
 export default function Standings() {
+	const { t, language } = useTranslation();
 	const [year, setYear] = useState(2026);
 	const favoriteDrivers = useSettingsStore((state) => state.favoriteDrivers);
 
@@ -965,9 +967,9 @@ export default function Standings() {
 							</div>
 							<div>
 								<h2 className="text-xs sm:text-sm font-black uppercase tracking-wider text-white">
-									Campeonato de Pilotos
+									{t("standings_page.drivers_title", "Campeonato de Pilotos")}
 								</h2>
-								<p className="text-[10px] text-zinc-400 font-medium">Toca un piloto para ver su desglose</p>
+								<p className="text-[10px] text-zinc-400 font-medium">{t("standings_page.drivers_subtitle", "Toca un piloto para ver su desglose")}</p>
 							</div>
 						</div>
 						
@@ -981,7 +983,7 @@ export default function Standings() {
 							>
 								{availableYears.map((y) => (
 									<option key={y} value={y} className="bg-zinc-950 text-zinc-300 font-mono">
-										TEMPORADA {y}
+										{t("standings_page.season_prefix", "TEMPORADA")} {y}
 									</option>
 								))}
 							</select>
@@ -1124,7 +1126,7 @@ export default function Standings() {
 							</div>
 							<div>
 								<h2 className="text-xs sm:text-sm font-black uppercase tracking-wider text-white">
-									Campeonato de Constructores
+									{t("standings_page.constructors_title", "Campeonato de Constructores")}
 								</h2>
 								<p className="text-[10px] text-zinc-400 font-medium">Toca un equipo para ver sus pilotos</p>
 							</div>

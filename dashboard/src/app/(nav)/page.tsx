@@ -26,29 +26,21 @@ import icon from "public/logoprincipal.png";
 import mosaicoEquipos from "public/equiposf1.png";
 
 // PREGUNTAS FRECUENTES DEL SISTEMA
-const faqs = [
-	{
-		q: "¿Tengo que pagar o registrarme para usar la plataforma?",
-		a: "No, para nada. Blackbox-F1 es un cockpit de telemetría 100% libre y gratuito, optimizado para la comunidad de fanáticos del automovilismo."
-	},
-	{
-		q: "¿Cómo sincronizo los datos con mi televisor o streaming?",
-		a: "Las transmisiones por TV o Star+/F1TV suelen tener entre 10 y 45 segundos de retraso. Desde los Ajustes podés configurar el offset de delay para pausar la telemetría y hacer que coincida exactamente con tu pantalla."
-	},
-	{
-		q: "¿La pantalla de mi tablet o celular se apaga durante la carrera?",
-		a: "¡No! Integramos la tecnología Wake Lock automática en segundo plano: mientras tengas la pestaña de Blackbox-F1 abierta, tu dispositivo mantendrá la pantalla encendida sin bloquearse jamás."
-	},
-	{
-		q: "¿Puedo personalizar los colores y temas de la plataforma?",
-		a: "Sí. En el menú de Ajustes podés elegir entre cuatro acabados: Oro 24K Clásico, Oro Neón Ultra-Glow, Oro Rosa Champagne y Modo OLED de contraste puro para ahorrar batería."
-	}
-];
+// FAQs dinámicas según idioma oficial
+function getFaqs(t: (k: string, fb?: string) => string) {
+	return [
+		{ q: t("home.faq_q1", "¿Tengo que pagar o registrarme para usar la plataforma?"), a: t("home.faq_a1", "No, para nada. Blackbox-F1 es un cockpit de telemetría 100% libre y gratuito, optimizado para la comunidad de fanáticos del automovilismo.") },
+		{ q: t("home.faq_q2", "¿Cómo sincronizo los datos con mi televisor o streaming?"), a: t("home.faq_a2", "Las transmisiones por TV o Star+/F1TV suelen tener entre 10 y 45 segundos de retraso. Desde los Ajustes podés configurar el offset de delay para pausar la telemetría y hacer que coincida exactamente con tu pantalla.") },
+		{ q: t("home.faq_q3", "¿La pantalla de mi tablet o celular se apaga durante la carrera?"), a: t("home.faq_a3", "¡No! Integramos la tecnología Wake Lock automática en segundo plano: mientras tengas la pestaña de Blackbox-F1 abierta, tu dispositivo mantendrá la pantalla encendida sin bloquearse jamás.") },
+		{ q: t("home.faq_q4", "¿Puedo personalizar los colores y temas de la plataforma?"), a: t("home.faq_a4", "Sí. En el menú de Ajustes podés elegir entre cuatro acabados: Oro 24K Clásico, Oro Neón Ultra-Glow, Oro Rosa Champagne y Modo OLED de contraste puro para ahorrar batería.") }
+	];
+}
 
 export default function Home() {
 	const [activeFaq, setActiveFaq] = useState<number | null>(null);
 	const openSupportModal = useSupportModalStore((s) => s.open);
 	const { t } = useTranslation();
+	const faqs = getFaqs(t);
 
 	const toggleFaq = (idx: number) => {
 		setActiveFaq(activeFaq === idx ? null : idx);
@@ -163,8 +155,8 @@ export default function Home() {
 							<Zap className="w-5 h-5" />
 						</div>
 						<div className="text-left font-mono">
-							<p className="text-[10px] text-zinc-500 uppercase tracking-widest">TEMPORADA 2026</p>
-							<p className="text-xs font-black text-zinc-200">23 Grandes Premios</p>
+							<p className="text-[10px] text-zinc-500 uppercase tracking-widest">{t("home.specs_season_label", "TEMPORADA 2026")}</p>
+							<p className="text-xs font-black text-zinc-200">{t("home.specs_season_val", "23 Grandes Premios")}</p>
 						</div>
 					</div>
 
@@ -173,8 +165,8 @@ export default function Home() {
 							<Activity className="w-5 h-5" />
 						</div>
 						<div className="text-left font-mono">
-							<p className="text-[10px] text-zinc-500 uppercase tracking-widest">PRECISIÓN</p>
-							<p className="text-xs font-black text-zinc-200">0.001s Milésimas</p>
+							<p className="text-[10px] text-zinc-500 uppercase tracking-widest">{t("home.specs_precision_label", "PRECISIÓN")}</p>
+							<p className="text-xs font-black text-zinc-200">{t("home.specs_precision_val", "0.001s Milésimas")}</p>
 						</div>
 					</div>
 
@@ -183,8 +175,8 @@ export default function Home() {
 							<Eye className="w-5 h-5" />
 						</div>
 						<div className="text-left font-mono">
-							<p className="text-[10px] text-zinc-500 uppercase tracking-widest">WAKE LOCK</p>
-							<p className="text-xs font-black text-amber-300">Siempre Activo</p>
+							<p className="text-[10px] text-zinc-500 uppercase tracking-widest">{t("home.specs_wakelock_label", "WAKE LOCK")}</p>
+							<p className="text-xs font-black text-amber-300">{t("home.specs_wakelock_val", "Siempre Activo")}</p>
 						</div>
 					</div>
 
@@ -193,8 +185,8 @@ export default function Home() {
 							<Sparkles className="w-5 h-5" />
 						</div>
 						<div className="text-left font-mono">
-							<p className="text-[10px] text-zinc-500 uppercase tracking-widest">TEMAS ORO</p>
-							<p className="text-xs font-black text-zinc-200">24K / OLED / Neón</p>
+							<p className="text-[10px] text-zinc-500 uppercase tracking-widest">{t("home.specs_themes_label", "TEMAS ORO")}</p>
+							<p className="text-xs font-black text-zinc-200">{t("home.specs_themes_val", "24K / OLED / Neón")}</p>
 						</div>
 					</div>
 				</div>
@@ -205,13 +197,13 @@ export default function Home() {
 				<div className="text-center mb-14 space-y-3">
 					<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-mono font-bold tracking-widest uppercase">
 						<Radio className="w-3.5 h-3.5 animate-pulse" />
-						Centro de Control Pit-Wall
+						{t("home.deck_badge", "Centro de Control Pit-Wall")}
 					</div>
 					<h2 className="text-3xl sm:text-5xl font-black uppercase text-white tracking-tight">
-						Tres Módulos de Comando
+						{t("home.deck_title", "Tres Módulos de Comando")}
 					</h2>
 					<p className="text-zinc-400 text-sm sm:text-base max-w-xl mx-auto">
-						Toda la tecnología de la pared de ingenieros de boxes disponible en tu segunda pantalla.
+						{t("home.deck_subtitle", "Toda la tecnología de la pared de ingenieros de boxes disponible en tu segunda pantalla.")}
 					</p>
 				</div>
 
@@ -234,10 +226,10 @@ export default function Home() {
 							</div>
 
 							<h3 className="text-xl font-black uppercase tracking-wide text-white mb-2 group-hover:text-amber-200 transition-colors">
-								Telemetría y Tiempos
+								{t("home.deck_m1_title", "Telemetría y Tiempos")}
 							</h3>
 							<p className="text-sm text-zinc-400 leading-relaxed font-medium mb-6">
-								Monitoreo en vivo sector a sector, mejores marcas de vuelta personales y absolutas, velocidad punta y diferencias directas entre autos.
+								{t("home.deck_m1_desc", "Monitoreo en vivo sector a sector, mejores marcas de vuelta personales y absolutas, velocidad punta y diferencias directas entre autos.")}
 							</p>
 						</div>
 

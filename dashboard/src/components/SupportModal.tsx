@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, CheckSquare, Square, Heart, Coffee, ChevronDown, Copy, Check } from "lucide-react";
 import { useSupportModalStore } from "@/stores/useSupportModalStore";
+import { useTranslation } from "@/hooks/useTranslation";
 import { triggerHaptic } from "@/lib/haptics";
 
 function PayPalIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -15,6 +16,7 @@ function PayPalIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export default function SupportModal() {
+	const { t } = useTranslation();
 	const isStoreOpen = useSupportModalStore((state) => state.isOpen);
 	const openStore = useSupportModalStore((state) => state.open);
 	const closeStore = useSupportModalStore((state) => state.close);
@@ -105,15 +107,15 @@ export default function SupportModal() {
 
 							<div className="space-y-1">
 								<span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-widest">
-									BlackBox F1 · Pit-Wall
+									{t("modals.support_badge", "BlackBox F1 · Pit-Wall")}
 								</span>
 								<h3 className="text-xl font-black uppercase text-zinc-100 tracking-tight">
-									Apoyá el Proyecto
+									{t("modals.support_title", "Apoyá el Proyecto")}
 								</h3>
 							</div>
 
 							<p className="text-xs text-zinc-400 leading-relaxed font-sans max-w-xs">
-								Desarrollamos esta plataforma en vivo de forma independiente y sin publicidad invasiva. Si disfrutás de la telemetría y las transmisiones durante los Grandes Premios, tu colaboración nos ayuda a mantener los servidores activos.
+								{t("modals.support_desc", "Desarrollamos esta plataforma en vivo de forma independiente y sin publicidad invasiva. Si disfrutás de la telemetría y las transmisiones durante los Grandes Premios, tu colaboración nos ayuda a mantener los servidores activos.")}
 							</p>
 
 							{/* Botones de Donación */}
@@ -127,7 +129,7 @@ export default function SupportModal() {
 										className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-mono font-black uppercase tracking-wider text-[11px] shadow-md hover:shadow-amber-500/20 transition-all duration-200 cursor-pointer active:scale-95"
 									>
 										<Coffee className="w-4 h-4" />
-										<span>Cafecito</span>
+										<span>{t("modals.support_coffee", "Cafecito")}</span>
 									</a>
 
 									{/* PayPal con link directo */}
@@ -151,7 +153,7 @@ export default function SupportModal() {
 									>
 										<div className="flex items-center gap-2">
 											<span className="text-sm">🇦🇷</span>
-											<span className="font-bold">¿Sos de Argentina? Transferí por Alias</span>
+											<span className="font-bold">{t("modals.support_arg_alias", "¿Sos de Argentina? Transferí por Alias")}</span>
 										</div>
 										<ChevronDown
 											className={`w-4 h-4 transition-transform duration-200 text-sky-400 ${
@@ -171,8 +173,8 @@ export default function SupportModal() {
 											>
 												<div className="mt-2 p-3 rounded-xl bg-zinc-900/90 border border-sky-500/20 text-left font-mono">
 													<div className="flex items-center justify-between text-[10px] text-zinc-400 font-bold uppercase tracking-wider mb-1.5">
-														<span>Alias Mercado Pago / Banco</span>
-														<span className="text-sky-400 font-bold">0% COMISIÓN</span>
+														<span>{t("modals.support_alias_title", "Alias Mercado Pago / Banco")}</span>
+														<span className="text-sky-400 font-bold">{t("modals.support_zero_fee", "0% COMISIÓN")}</span>
 													</div>
 
 													<div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-zinc-950 border border-zinc-800">
@@ -192,12 +194,12 @@ export default function SupportModal() {
 															{copiedAlias ? (
 																<>
 																	<Check className="w-3.5 h-3.5 stroke-[3]" />
-																	<span>¡Copiado!</span>
+																	<span>{t("modals.support_copied", "¡Copiado!")}</span>
 																</>
 															) : (
 																<>
 																	<Copy className="w-3.5 h-3.5" />
-																	<span>Copiar</span>
+																	<span>{t("modals.support_copy", "Copiar")}</span>
 																</>
 															)}
 														</button>

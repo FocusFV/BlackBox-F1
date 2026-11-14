@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useDataStore } from "@/stores/useDataStore";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useSidebarStore } from "@/stores/useSidebarStore";
 import { Lock, Unlock, Radio, RefreshCw, ShieldCheck } from "lucide-react";
 
@@ -100,6 +101,7 @@ function formatRemainingTime(ms: number): string {
 }
 
 export default function StreamsPage() {
+	const { t, language } = useTranslation();
 	const [bypass, setBypass] = useState<boolean>(false);
 	const clickTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 	const clickCountRef = React.useRef<number>(0);
@@ -427,7 +429,7 @@ export default function StreamsPage() {
 
 			{/* CONTENIDO PRINCIPAL */}
 			<div className="flex h-full w-full flex-1 flex-col overflow-auto no-scrollbar md:gap-2">
-				{/* 🛑 CASO 1: MOTORES APAGADOS (CANDADO CERRADO) */}
+				{/* 🛑 CASO 1: {t("streams_page.engines_off_title", "MOTORES APAGADOS")} (CANDADO CERRADO) */}
 				{!isLive && !bypass ? (
 					<div className="pt-4 w-full mx-auto px-4 sm:px-6 h-full flex flex-col items-center justify-center relative">
 						<div className="absolute top-4 left-4 z-20">
@@ -473,21 +475,21 @@ export default function StreamsPage() {
 									isUnlocking ? "text-emerald-400 animate-pulse" : "text-zinc-500"
 								}`}
 							>
-								{isUnlocking ? "ACCESO SATELITAL CONCEDIDO" : "FEED SATELITAL EN ESPERA"}
+								{isUnlocking ? t("streams_page.connecting_badge", "ACCESO SATELITAL CONCEDIDO") : t("streams_page.engines_off_badge", "FEED SATELITAL EN ESPERA")}
 							</span>
 							<h2
 								className={`text-xl font-black uppercase tracking-tight transition-colors duration-300 ${
 									isUnlocking ? "text-emerald-300 animate-pulse" : "text-zinc-100"
 								}`}
 							>
-								{isUnlocking ? "CONECTANDO CON EL PIT-WALL..." : "MOTORES APAGADOS"}
+								{isUnlocking ? t("streams_page.connecting_title", "CONECTANDO CON EL PIT-WALL...") : t("streams_page.engines_off_title", "MOTORES APAGADOS")}
 							</h2>
 
 							{isUnlocking ? (
 								<div className="my-5 w-full px-5 py-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/50 flex flex-col items-center gap-2 shadow-[0_0_25px_rgba(16,185,129,0.2)]">
 									<span className="text-[11px] text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-2">
 										<span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-										Sincronizando señal en vivo
+										{t("streams_page.syncing_signal", "Sincronizando señal en vivo")}
 									</span>
 									<div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden mt-1">
 										<div className="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full w-full animate-pulse" />
@@ -505,7 +507,7 @@ export default function StreamsPage() {
 										{countdownText}
 									</span>
 									<span className="text-[9px] text-zinc-500 mt-1">
-										El candado se abre automáticamente 15 minutos antes
+										{t("streams_page.lock_notice", "El candado se abre automáticamente 15 minutos antes")}
 									</span>
 								</div>
 							) : (
@@ -535,7 +537,7 @@ export default function StreamsPage() {
 								<div>
 									<div className="flex items-center gap-2.5">
 										<h1 className="text-2xl sm:text-3xl font-extrabold uppercase tracking-wider text-zinc-100 border-l-4 border-emerald-500 pl-3">
-											Transmisiones en Vivo
+											{t("streams_page.live_streams_title", "Transmisiones en Vivo")}
 										</h1>
 										{activeSessionName && (
 											<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-wider animate-pulse">
@@ -546,7 +548,7 @@ export default function StreamsPage() {
 									</div>
 									<p className="text-zinc-500 text-xs mt-1">
 										{bypass
-											? "Acceso manual de prueba"
+											? t("streams_page.test_access", "Acceso manual de prueba")
 											: `Señal satelital activa: ${activeRace}`}
 									</p>
 								</div>

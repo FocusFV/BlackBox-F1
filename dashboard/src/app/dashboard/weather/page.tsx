@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Map from "@/components/dashboard/Map";
 import { useDataStore } from "@/stores/useDataStore";
+import { useTranslation } from "@/hooks/useTranslation";
 import { simulator } from "@/lib/simulatorFeed";
 
 const WeatherMap = dynamic(
@@ -20,6 +21,7 @@ const WeatherMap = dynamic(
 );
 
 export default function WeatherPage() {
+	const { t, language } = useTranslation();
 	// 📡 Feed oficial en vivo
 	const weatherData = useDataStore((state) => state?.state?.WeatherData);
 	const trackStatus = useDataStore((state) => state?.state?.TrackStatus);
@@ -175,7 +177,7 @@ export default function WeatherPage() {
 				<WeatherMap />
 				<div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10 bg-black/90 border border-[#00A19B]/30 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded text-[10px] sm:text-xs text-[#00A19B] tracking-wider sm:tracking-widest font-bold max-w-[calc(100%-20px)] truncate shadow-lg backdrop-blur-md">
 					<span className="sm:hidden">🛰️ RADAR DOPPLER · NUBOSIDAD</span>
-					<span className="hidden sm:inline">🛰️ RADAR_SATELITAL_DOPPLER // CAPA_NUBOSA</span>
+					<span className="hidden sm:inline">🛰️ {t("weather.radar_title", "RADAR SATELITAL DOPPLER // CAPA NUBOSA")}</span>
 				</div>
 			</div>
 
@@ -189,7 +191,7 @@ export default function WeatherPage() {
 
 				<div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10 bg-black/90 border border-zinc-800 px-2 py-1 sm:px-3 sm:py-1.5 rounded text-[8.5px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs text-zinc-300 tracking-normal sm:tracking-widest font-bold shadow-lg backdrop-blur-md whitespace-nowrap">
 					<span className="sm:hidden">🏎️ TRAZADA REAL · {circuitoNombre} (17 CURVAS)</span>
-					<span className="hidden sm:inline">🏎️ TRAZADA_DIGITAL_REAL // {circuitoNombre} (17 CURVAS)</span>
+					<span className="hidden sm:inline">🏎️ {t("weather.track_layout_title", "TRAZADA REAL")} // {circuitoNombre} (17 CURVAS)</span>
 				</div>
 			</div>
 
@@ -197,7 +199,7 @@ export default function WeatherPage() {
 			<div className="md:col-span-4 md:row-span-4 bg-[#07080a] border border-zinc-900 rounded-xl p-3.5 sm:p-4 flex flex-col justify-between shadow-2xl overflow-y-auto no-scrollbar">
 				<div className="space-y-3 sm:space-y-4">
 					<div className="border-b border-zinc-900 pb-2.5 flex flex-wrap items-center justify-between gap-2">
-						<span className="text-[#00A19B] font-bold tracking-wider text-xs shrink-0">// CONTROL_METEOROLOGICO</span>
+						<span className="text-[#00A19B] font-bold tracking-wider text-xs shrink-0">{t("weather.weather_control", "// CONTROL METEOROLÓGICO")}</span>
 						<span className="text-[10px] sm:text-[11px] text-zinc-400 font-bold px-2 py-0.5 rounded bg-zinc-900/90 border border-zinc-800 shrink-0">
 							{isLiveSessionRunning ? "● EN VIVO" : "● PISTA EN PAUSA"}
 						</span>
@@ -206,7 +208,7 @@ export default function WeatherPage() {
 					{/* Bloque de Ubicación y Evento Real */}
 					<div className="bg-black/60 border border-zinc-900 p-3 rounded-lg border-l-4 border-l-[#00A19B] flex flex-col gap-1.5">
 						<div className="flex items-center justify-between gap-2">
-							<p className="text-[10px] text-zinc-500 tracking-wider uppercase font-bold">EVENTO OFICIAL FIA</p>
+							<p className="text-[10px] text-zinc-500 tracking-wider uppercase font-bold">{t("weather.fia_event", "EVENTO OFICIAL FIA")}</p>
 							<span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#00A19B]/10 text-[#00A19B] border border-[#00A19B]/20 shrink-0">
 								{sesionNombre}
 							</span>

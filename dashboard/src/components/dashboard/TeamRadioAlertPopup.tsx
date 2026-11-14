@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useTranslation } from "@/hooks/useTranslation";
 import { isFavoriteDriver } from "@/lib/favoriteDriver";
 import { Radio, Play, Pause, X, Volume2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import type { Driver, RadioCapture } from "@/types/state.type";
 
 export function TeamRadioAlertPopup() {
+	const { t } = useTranslation();
 	const teamRadio = useDataStore((state) => state.state?.TeamRadio);
 	const drivers = useDataStore((state) => state.state?.DriverList);
 	const sessionPath = useDataStore((state) => state.state?.SessionInfo?.Path);
@@ -169,7 +171,7 @@ export function TeamRadioAlertPopup() {
 						</span>
 						<span className="flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-zinc-300">
 							<Radio className="h-3 w-3 text-red-500" />
-							Team Radio en Vivo
+							{t("modals.radio_live_badge", "Team Radio en Vivo")}
 						</span>
 					</div>
 
@@ -207,7 +209,7 @@ export function TeamRadioAlertPopup() {
 						type="button"
 						onClick={togglePlayPause}
 						className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-black shadow-md hover:bg-zinc-200 transition-transform active:scale-95"
-						title={isPlaying ? "Pausar" : "Reproducir"}
+						title={isPlaying ? t("modals.radio_pause", "Pausar") : t("modals.radio_play", "Reproducir")}
 					>
 						{isPlaying ? <Pause className="h-4 w-4 fill-black" /> : <Play className="h-4 w-4 fill-black translate-x-0.5" />}
 					</button>

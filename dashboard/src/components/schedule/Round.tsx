@@ -20,6 +20,7 @@ import { formatDayRange, formatMonth } from "@/lib/dateFormatter";
 import Flag from "@/components/Flag";
 import ResultsModal from "@/components/schedule/ResultsModal";
 import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type Props = {
 	round: RoundType;
@@ -67,6 +68,7 @@ function formatDayMonthSpanish(m: any): string {
 }
 
 export default function Round({ round, nextName, hideBadge = false }: Props) {
+	const { t, language } = useTranslation();
 	const [mounted, setMounted] = useState(false);
 	const [modalOpen, setModalOpen] = useState(false);
 	const patternId = useId();
@@ -161,7 +163,7 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 
 							{isRoundOver && (
 								<span className="text-[8px] font-bold uppercase tracking-widest text-zinc-500 bg-zinc-900/80 px-2 py-0.5 rounded-full border border-zinc-800 shrink-0">
-									FINALIZADO
+									{t("common.finished", "FINALIZADO")}
 								</span>
 							)}
 						</div>

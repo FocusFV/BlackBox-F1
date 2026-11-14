@@ -7,6 +7,7 @@ import { X, Trophy, Flag, Timer } from "lucide-react";
 import clsx from "clsx";
 import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
 import { translateGpName, translateStatus } from "@/lib/f1Translations";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type Props = {
 	meetingKey?: number;
@@ -82,6 +83,7 @@ const TeamLogo = ({ teamName }: { teamName: string }) => {
 };
 
 export default function ResultsModal({ meetingKey, roundNumber, raceName, countryName, onClose }: Props) {
+	const { t, language } = useTranslation();
 	const [results, setResults] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 
@@ -346,10 +348,10 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 					<div>
 						<span className="text-[10px] font-black text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
 							<span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-							RESULTADOS OFICIALES FIA · CLASIFICACIÓN FINAL
+							{t("schedule_page.official_results_title", "RESULTADOS OFICIALES FIA · CLASIFICACIÓN FINAL")}
 						</span>
 						<h2 className="text-base font-black text-white uppercase tracking-wide mt-1">
-							{translateGpName(raceName)} {countryName ? `· ${countryTranslation[countryName] || countryName}` : ""}
+							{translateGpName(raceName, language)} {countryName ? `· ${countryTranslation[countryName] || countryName}` : ""}
 						</h2>
 					</div>
 					<button
@@ -375,10 +377,10 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 						<div className="flex flex-col h-48 items-center justify-center text-zinc-500 text-xs text-center p-6 space-y-2">
 							<Flag className="w-8 h-8 text-zinc-600 mb-1" />
 							<p className="font-bold uppercase tracking-wider text-zinc-400">
-								Aguardando publicación oficial de carrera
+								{t("schedule_page.awaiting_official", "Aguardando publicación oficial de carrera")}
 							</p>
 							<p className="text-[11px] text-zinc-600">
-								Los resultados y tiempos finales se sincronizarán en cuanto la FIA homologue el Gran Premio.
+								{t("schedule_page.awaiting_official_desc", "Los resultados y tiempos finales se sincronizarán en cuanto la FIA homologue el Gran Premio.")}
 							</p>
 						</div>
 					) : (

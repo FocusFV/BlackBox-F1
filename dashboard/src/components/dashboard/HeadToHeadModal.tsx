@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useDataStore } from "@/stores/useDataStore";
+import { useTranslation } from "@/hooks/useTranslation";
 import { X, Swords, Gauge, Flag, Timer, Zap } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import type { Driver, TimingDataDriver } from "@/types/state.type";
@@ -63,6 +64,7 @@ export function HeadToHeadModal({
 	initialDriver1 = "43",
 	initialDriver2 = "23",
 }: Props) {
+	const { t } = useTranslation();
 	const drivers = useDataStore((state) => state.state?.DriverList);
 	const timingData = useDataStore((state) => state.state?.TimingData?.Lines);
 	const appTiming = useDataStore((state) => state.state?.TimingAppData?.Lines);
@@ -197,7 +199,7 @@ export function HeadToHeadModal({
 							style={{ borderColor: `${c1Color}66` }}
 						>
 							<label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-								Piloto 1
+								{t("modals.h2h_driver_1", "Piloto 1")}
 							</label>
 							<select
 								value={driver1Num}
@@ -223,7 +225,7 @@ export function HeadToHeadModal({
 										<h4 className="text-sm font-black text-white">{d1.BroadcastName || d1.FullName}</h4>
 										<span className="text-xs text-zinc-400">{d1.TeamName}</span>
 										<div className="text-[11px] font-bold text-amber-400">
-											Posición: P{t1?.Position || "-"}
+											{t("modals.h2h_pos", "Posición")}: P{t1?.Position || "-"}
 										</div>
 									</div>
 								</div>
@@ -236,7 +238,7 @@ export function HeadToHeadModal({
 							style={{ borderColor: `${c2Color}66` }}
 						>
 							<label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-								Piloto 2
+								{t("modals.h2h_driver_2", "Piloto 2")}
 							</label>
 							<select
 								value={driver2Num}

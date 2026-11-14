@@ -1,4 +1,6 @@
+"use client";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useTranslation } from "@/hooks/useTranslation";
 
 import type { CarDataChannels } from "@/types/state.type";
 
@@ -13,6 +15,7 @@ function convertKmhToMph(kmhValue: number) {
 }
 
 export default function DriverCarMetrics({ carData }: Props) {
+	const { t } = useTranslation();
 	const speedUnit = useSettingsStore((state) => state.speedUnit);
 
 	return (
@@ -22,7 +25,7 @@ export default function DriverCarMetrics({ carData }: Props) {
 				className="flex h-7 w-8 items-center justify-center rounded-md border border-amber-500/40 bg-zinc-900/90 text-xs font-black text-amber-400 shadow-inner"
 				title="Marcha actual"
 			>
-				M{carData[3] || "N"}
+				{t("modals.car_gear", "M")}{carData[3] || "N"}
 			</div>
 
 			{/* Velocidad */}
@@ -38,15 +41,15 @@ export default function DriverCarMetrics({ carData }: Props) {
 			{/* Barras con etiquetas en español: FRE (freno), ACEL (acelerador), RPM (tacómetro) */}
 			<div className="flex flex-col gap-0.5 text-[8px] font-bold">
 				<div className="flex items-center gap-1">
-					<span className="w-4 text-right text-[7px] text-red-400 font-bold leading-none">FRE</span>
+					<span className="w-4 text-right text-[7px] text-red-400 font-bold leading-none">{t("modals.car_brake", "FRE")}</span>
 					<DriverPedals className="bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.5)]" value={carData[5]} maxValue={1} />
 				</div>
 				<div className="flex items-center gap-1">
-					<span className="w-4 text-right text-[7px] text-emerald-400 font-bold leading-none">ACE</span>
+					<span className="w-4 text-right text-[7px] text-emerald-400 font-bold leading-none">{t("modals.car_throttle", "ACE")}</span>
 					<DriverPedals className="bg-emerald-400 shadow-[0_0_5px_rgba(52,211,153,0.5)]" value={carData[4]} maxValue={100} />
 				</div>
 				<div className="flex items-center gap-1">
-					<span className="w-4 text-right text-[7px] text-cyan-400 font-bold leading-none">RPM</span>
+					<span className="w-4 text-right text-[7px] text-cyan-400 font-bold leading-none">{t("modals.car_rpm", "RPM")}</span>
 					<DriverPedals className="bg-cyan-400 shadow-[0_0_5px_rgba(34,211,238,0.5)]" value={carData[0]} maxValue={15000} />
 				</div>
 			</div>

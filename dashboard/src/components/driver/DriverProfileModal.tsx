@@ -8,6 +8,7 @@ import { utc } from "moment";
 import clsx from "clsx";
 
 import { useDataStore } from "@/stores/useDataStore";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useDriverModalStore } from "@/stores/useDriverModalStore";
 import { useHeadToHeadStore } from "@/stores/useHeadToHeadStore";
 import { translateGpName } from "@/lib/f1Translations";
@@ -179,6 +180,7 @@ const TeamLogo = ({ teamName }: { teamName: string }) => {
 };
 
 export default function DriverProfileModal() {
+	const { t, language } = useTranslation();
 	const isOpen = useDriverModalStore((s) => s.isOpen);
 	const driver = useDriverModalStore((s) => s.driver);
 	const close = useDriverModalStore((s) => s.close);
@@ -562,7 +564,7 @@ export default function DriverProfileModal() {
 								<div className="flex items-center justify-between p-2.5 px-3 mb-2 rounded-xl bg-amber-500/10 border border-amber-500/30 font-mono text-xs shadow-xs">
 									<div className="flex items-center gap-2">
 										<span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-widest">
-											PUNTOS SPRINT
+											{t("standings_page.driver_modal_sprint_points", "PUNTOS SPRINT")}
 										</span>
 										<span className="text-zinc-300 text-[11px] font-medium">
 											Carreras Sprint oficiales de la temporada

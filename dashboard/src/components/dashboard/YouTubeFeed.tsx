@@ -2,12 +2,14 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useDataStore } from "@/stores/useDataStore";
+import { useTranslation } from "@/hooks/useTranslation";
 import { VideoCard } from "./VideoCard";
 import type { YouTubeSessionVideo } from "@/app/api/youtube/route";
 import { translateGpName } from "@/lib/f1Translations";
 import { getSmartGpContext } from "@/lib/sessionSchedule";
 
 export function YouTubeFeed() {
+	const { t } = useTranslation();
 	const rawGpName = useDataStore((state) => state.state?.SessionInfo?.Meeting?.Name);
 
 	const [videos, setVideos] = useState<YouTubeSessionVideo[]>([]);
@@ -105,10 +107,10 @@ export function YouTubeFeed() {
 					{videos.length === 0 ? (
 						<div className="flex-1 min-h-[140px] rounded-xl bg-zinc-950/60 border border-zinc-900/80 flex flex-col items-center justify-center p-6 text-center">
 							<span className="text-zinc-300 text-xs font-mono font-medium mb-1">
-								Los resúmenes oficiales se actualizarán aquí progresivamente a medida que la F1 los publique en YouTube durante este fin de semana.
+								{t("modals.youtube_summaries_note", "Los resúmenes oficiales se actualizarán aquí progresivamente a medida que la F1 los publique en YouTube durante este fin de semana.")}
 							</span>
 							<span className="text-zinc-500 text-[11px] font-sans">
-								Viernes (Libres) • Sábado (Qualy / Sprint) • Domingo (Carrera)
+								{t("modals.youtube_days_note", "Viernes (Libres) • Sábado (Qualy / Sprint) • Domingo (Carrera)")}
 							</span>
 						</div>
 					) : (
@@ -125,7 +127,7 @@ export function YouTubeFeed() {
 							➕
 						</div>
 						<span className="text-xs font-bold text-zinc-300 group-hover:text-amber-200 transition font-sans">
-							Explorar archivo completo
+							{t("modals.youtube_full_archive", "Explorar archivo completo")}
 						</span>
 						<span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">
 							youtube.com/@f1 ↗

@@ -1,4 +1,6 @@
+"use client";
 import Link from "next/link";
+import { useTranslation } from "@/hooks/useTranslation";
 import Image from "next/image";
 import { VisitorCounter } from "@/components/VisitorCounter";
 
@@ -6,6 +8,7 @@ import { VisitorCounter } from "@/components/VisitorCounter";
 import logoFocus from "public/FocusFVLogo.png"; 
 
 export default function Footer() {
+	const { t } = useTranslation();
 	return (
 		// bg-transparent asegura que la fibra de carbono y el mosaico de la home pasen de largo sin hachazos negros
 		<footer className="mt-12 mb-8 border-t border-zinc-900/40 pt-8 text-sm text-zinc-500 tracking-wide font-medium relative z-10 w-full flex flex-col items-center bg-transparent">
@@ -17,22 +20,19 @@ export default function Footer() {
 				<div className="mb-4 flex flex-col items-center gap-3 border-b border-zinc-900/30 pb-4 w-full">
 					<div className="flex flex-wrap justify-center items-center text-center gap-x-6 gap-y-2">
 						<p className="text-zinc-400">
-							Evolución Open Source basada en el proyecto original de <TextLink website="https://slowly.dev">Slowly</TextLink>.
+							{t("footer.open_source_note", "Evolución Open Source basada en el proyecto original de")} <TextLink website="https://slowly.dev">Slowly</TextLink>.
 						</p>
 						
 						<p>
-							Código y refactorización en <TextLink website="https://github.com/FocusFV/Blackbox-F1">GitHub</TextLink>.
+							{t("footer.github_code", "Código y refactorización en")} <TextLink website="https://github.com/FocusFV/Blackbox-F1">GitHub</TextLink>.
 						</p>
 
 						<p>
-							¿Te copa el proyecto? <TextLink website="https://buymeacoffee.com/focusfv">Invitame un café</TextLink>.
+							{t("footer.coffee_invite", "¿Te copa el proyecto?")} <TextLink website="https://buymeacoffee.com/focusfv">Buy Me a Coffee</TextLink>.
 						</p>
 
 						<p>
-							¿Necesitás una mano? {" "}
-							<Link className="text-amber-500/80 hover:text-amber-400 transition font-semibold" href="/help">
-								Soporte y Ayuda
-							</Link>.
+							{t("footer.help_support", "¿Necesitás una mano? Soporte y Ayuda")}: <Link className="text-amber-500/80 hover:text-amber-400 transition font-semibold" href="/help">/help</Link>.
 						</p>
 					</div>
 
@@ -49,7 +49,7 @@ export default function Footer() {
 				{/* DESCLÁIMER OFICIAL DE F1 (Centrado y sutil) */}
 				<div className="text-xs text-zinc-600 leading-relaxed max-w-4xl text-center px-4 mb-2">
 					<p>
-						Este sitio web es de carácter independiente, no oficial y no se encuentra vinculado, asociado ni patrocinado de ninguna forma por las empresas del grupo Formula 1. F1, FORMULA ONE, FORMULA 1, FIA FORMULA ONE WORLD CHAMPIONSHIP, GRAND PRIX y sus logotipos relacionados son marcas comerciales registradas propiedad de Formula One Licensing B.V.
+						{t("footer.disclaimer", "Este sitio web es de carácter independiente, no oficial y no se encuentra vinculado, asociado ni patrocinado de ninguna forma por las empresas del grupo Formula 1. F1, FORMULA ONE, FORMULA 1, FIA FORMULA ONE WORLD CHAMPIONSHIP, GRAND PRIX y sus logotipos relacionados son marcas comerciales registradas propiedad de Formula One Licensing B.V.")}
 					</p>
 				</div>
 			</div>
@@ -57,7 +57,7 @@ export default function Footer() {
 			{/* FIRMA DEL DESARROLLADOR: FULL COLOR, DESTACADA Y CON RESPLANDOR */}
 			<div className="mt-6 pt-6 border-t border-zinc-900/40 flex flex-col items-center justify-center gap-3 w-full">
 				<span className="text-[11px] tracking-[0.3em] uppercase text-zinc-600 font-black">
-					Desarrollado y Optimizado por
+					{t("footer.developed_by", "Desarrollado y Optimizado por")}
 				</span>
 				
 				<Link 

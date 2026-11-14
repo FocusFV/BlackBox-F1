@@ -3,11 +3,13 @@
 import { useEffect, useState, useRef } from "react";
 import { RefreshCw, Sparkles, X } from "lucide-react";
 import { triggerHaptic } from "@/lib/haptics";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const CHECK_INTERVAL_MS = 180000; // Consultar cada 3 minutos (ahorro del 85% de requests en Vercel)
 const COUNTDOWN_SECONDS = 60; // 60 segundos de pre-aviso si no está en streaming
 
 export default function VersionGuard() {
+	const { t } = useTranslation();
 	const initialVersionRef = useRef<string | null>(null);
 	const latestVersionRef = useRef<string | null>(null);
 	const [hasNewVersion, setHasNewVersion] = useState(false);
@@ -128,7 +130,7 @@ export default function VersionGuard() {
 						</span>
 						<span className="text-[10px] font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 rounded-lg flex items-center gap-1.5">
 							<Sparkles className="w-3 h-3 text-amber-400" />
-							MEJORA DISPONIBLE
+							{t("modals.version_badge", "MEJORA DISPONIBLE")}
 						</span>
 					</div>
 
@@ -144,12 +146,12 @@ export default function VersionGuard() {
 				{/* Título y Mensaje amigable */}
 				<div>
 					<h4 className="text-sm font-black uppercase tracking-wide text-white">
-						Actualización del Pit-Wall
+						{t("modals.version_title", "Actualización del Pit-Wall")}
 					</h4>
 					<p className="text-xs text-zinc-300 font-sans mt-1 leading-relaxed">
 						{isStreamPage
-							? "Hay una nueva versión del sistema disponible. Podés seguir mirando la transmisión sin interrupciones y actualizar cuando quieras."
-							: "Aplicamos mejoras en vivo en la telemetría y el sistema. Podés actualizar ahora o continuar normalmente."}
+							? t("modals.version_msg_stream", "Hay una nueva versión del sistema disponible. Podés seguir mirando la transmisión sin interrupciones y actualizar cuando quieras.")
+							: t("modals.version_msg_normal", "Aplicamos mejoras en vivo en la telemetría y el sistema. Podés actualizar ahora o continuar normalmente.")}
 					</p>
 				</div>
 
@@ -157,7 +159,7 @@ export default function VersionGuard() {
 				{!isStreamPage && (
 					<div className="px-3.5 py-2.5 rounded-xl bg-zinc-950/90 border border-zinc-800/90 flex items-center justify-between">
 						<span className="text-[11px] text-zinc-400 font-bold uppercase tracking-wider">
-							Recarga automática en:
+							{t("modals.version_reload_in", "Recarga automática en:")}
 						</span>
 						<span className="text-base font-black text-amber-400 tabular-nums">
 							00:{secondsRemaining.toString().padStart(2, "0")}
@@ -172,7 +174,7 @@ export default function VersionGuard() {
 						className="flex-1 py-2.5 px-3 bg-amber-500 hover:bg-amber-400 text-black text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 active:scale-95 shadow-md flex items-center justify-center gap-2 cursor-pointer"
 					>
 						<RefreshCw className="w-3.5 h-3.5" />
-						<span>Actualizar ahora</span>
+						<span>{t("modals.version_reload_btn", "Actualizar ahora")}</span>
 					</button>
 
 					<button
