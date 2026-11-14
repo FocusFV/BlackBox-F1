@@ -163,6 +163,7 @@ export interface TranslationDictionary {
 		rain_risk_high: string;
 		rain_risk_low: string;
 		connecting_radar: string;
+		between_sessions: string;
 	};
 	settings: {
 		title: string;
@@ -252,6 +253,14 @@ export interface TranslationDictionary {
 		faq_a3: string;
 		faq_q4: string;
 		faq_a4: string;
+		module_1_badge: string;
+		module_2_badge: string;
+		module_3_badge: string;
+		faq_subtitle: string;
+		cta_title_1: string;
+		cta_title_2: string;
+		cta_desc: string;
+		footer_platform_banner: string;
 	};
 	footer: {
 		open_source_note: string;
@@ -321,6 +330,22 @@ export interface TranslationDictionary {
 		team_points_contribution: string;
 		team_track_performance: string;
 		total_points: string;
+		wcc_tap_hint: string;
+		wcc_prior_1958_title: string;
+		wcc_prior_1958_desc: string;
+		team_drivers_title: string;
+		team_contribution_title: string;
+		team_calculating: string;
+		team_no_results: string;
+		races_label: string;
+		wins_label_sing: string;
+		wins_label_plur: string;
+		podiums_label: string;
+		of_the_team: string;
+		races_disputed: string;
+		position_and_points: string;
+		upcoming_2026_races: string;
+		pending_dispute: string;
 	};
 	streams_page: {
 		engines_off_title: string;
@@ -417,6 +442,12 @@ export interface TranslationDictionary {
 	};
 	trivia: {
 		prev_gp: string;
+		maneuver: string;
+		strategy: string;
+		tech_record: string;
+		color_data: string;
+		controversy: string;
+		telemetry_label: string;
 	};
 	help_page: {
 		guide_badge: string;
@@ -461,5 +492,43 @@ export interface TranslationDictionary {
 		drs_desc: string;
 		tv_sync_title: string;
 		tv_sync_desc: string;
+		fastest_lap_badge: string;
+		fastest_lap_desc: string;
+		dnf_badge: string;
+		dnf_desc: string;
+		danger_zone_badge: string;
+		danger_zone_desc: string;
+		boost_off_title: string;
+		boost_off_desc: string;
+		boost_ready_title: string;
+		boost_ready_desc: string;
+		boost_active_title: string;
+		boost_active_desc: string;
+		in_pit_title: string;
+		in_pit_desc: string;
+		tyre_history_example: string;
+		tyre_history_desc: string;
+		tyre_unknown: string;
+		pedals_brake_title: string;
+		pedals_brake_desc: string;
+		pedals_throttle_title: string;
+		pedals_throttle_desc: string;
+		pedals_rpm_title: string;
+		pedals_rpm_desc: string;
+		weather_section_title: string;
+		weather_section_desc: string;
+		weather_track: string;
+		weather_track_desc: string;
+		weather_air: string;
+		weather_air_desc: string;
+		weather_rain: string;
+		weather_rain_desc: string;
+		weather_wind: string;
+		weather_wind_desc: string;
+		tv_sync_section_desc: string;
+		tv_sync_ref_points: string;
+		tv_sync_ref_1: string;
+		tv_sync_ref_2: string;
+		tv_sync_ref_3: string;
 	};
 }

@@ -121,7 +121,7 @@ export default function WeatherPage() {
 		? "CARRERA"
 		: isLiveSessionRunning && infoSesionMilitar?.Name
 		? (infoSesionMilitar.Name === "Race" ? "CARRERA" : infoSesionMilitar.Name.toUpperCase())
-		: "ENTRE SESIONES · PISTA EN PAUSA";
+		: t("weather.between_sessions", "ENTRE SESIONES · PISTA EN PAUSA");
 
 	const circuitoNombre = isSimActive
 		? "AUTÓDROMO HERMANOS RODRÍGUEZ"
@@ -149,14 +149,14 @@ export default function WeatherPage() {
 		const g = Number(grados);
 		if (isNaN(g)) return "NORESTE (NE) ↗";
 		const direcciones = [
-			"NORTE (N) ↑", 
-			"NORESTE (NE) ↗", 
-			"ESTE (E) →", 
-			"SURESTE (SE) ↘", 
-			"SUR (S) ↓", 
-			"SUROESTE (SO) ↙", 
-			"OESTE (O) ←", 
-			"NOROESTE (NO) ↖"
+			t("weather.wind_n", "NORTE (N) ↑"),
+			t("weather.wind_ne", "NORESTE (NE) ↗"),
+			t("weather.wind_e", "ESTE (E) →"),
+			t("weather.wind_se", "SURESTE (SE) ↘"),
+			t("weather.wind_s", "SUR (S) ↓"),
+			t("weather.wind_sw", "SUROESTE (SO) ↙"),
+			t("weather.wind_w", "OESTE (O) ←"),
+			t("weather.wind_nw", "NOROESTE (NO) ↖")
 		];
 		const indice = Math.round(((g % 360) / 45)) % 8;
 		return direcciones[indice];

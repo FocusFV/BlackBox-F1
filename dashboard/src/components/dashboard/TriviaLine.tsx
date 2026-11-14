@@ -92,7 +92,17 @@ export function TriviaLine() {
 					{/* Contenedor con animación de transición para el texto que rota */}
 					<div key={currentIndex} className="animate-pulse flex flex-col md:flex-row md:items-center gap-1.5 transition-all duration-500">
 						<span className="text-zinc-500 font-bold uppercase text-[10px] tracking-wide border-b border-zinc-800 md:border-none pb-0.5 md:pb-0">
-							[{activeItem.label}]
+							[{(() => {
+							switch (activeItem.label) {
+								case "Maniobra del GP": return t("trivia.maneuver", "Maniobra del GP");
+								case "Estrategia": return t("trivia.strategy", "Estrategia");
+								case "Récord Técnico": return t("trivia.tech_record", "Récord Técnico");
+								case "Polémica en pista": return t("trivia.controversy", "Polémica en pista");
+								case "Telemetría": return t("trivia.telemetry_label", "Telemetría");
+								case "Dato de Color": return t("trivia.color_data", "Dato de Color");
+								default: return activeItem.label;
+							}
+						})()}]
 						</span>
 						<p className="text-zinc-300 leading-relaxed">
 							{activeItem.text}

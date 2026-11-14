@@ -92,7 +92,7 @@ export default function HelpPage() {
 				</div>
 
 				<Note className="border-amber-500/30 bg-amber-500/5 text-amber-200/90">
-					<strong>Atención:</strong> Solo los mini sectores utilizan el color amarillo. Esto evita sobrecargar la pantalla con texto cuando la mayoría de los pilotos no están mejorando sus tiempos.
+					<strong>Atención:</strong> {t("help_page.minisectors_note", "Solo los mini sectores utilizan el color amarillo. Esto evita sobrecargar la pantalla con texto cuando la mayoría de los pilotos no están mejorando sus tiempos.")}
 				</Note>
 			</section>
 
@@ -103,33 +103,33 @@ export default function HelpPage() {
 						<span className="text-red-500">#</span> {t("help_page.leaderboard_title", "Clasificación y Tabla de Posiciones")}
 					</h2>
 					<p className="text-sm text-zinc-400 mt-1">
-						Estados especiales destacados en el leaderboard según el transcurso de la sesión.
+						{t("help_page.leaderboard_desc", "Estados especiales destacados en el leaderboard según el transcurso de la sesión.")}
 					</p>
 				</div>
 
 				<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 					<div className="rounded-xl border border-violet-500/30 bg-violet-950/20 p-5 backdrop-blur-sm">
 						<div className="inline-block rounded-md bg-violet-800/40 px-3 py-1 font-semibold text-violet-300 text-xs border border-violet-500/30 mb-3">
-							Vuelta Rápida
+							{t("help_page.fastest_lap_badge", "Vuelta Rápida")}
 						</div>
 						<h3 className="font-bold text-white text-base">Fondo Violeta</h3>
-						<p className="mt-1 text-xs text-zinc-400">El piloto posee el tiempo récord de vuelta en toda la sesión.</p>
+						<p className="mt-1 text-xs text-zinc-400">{t("help_page.fastest_lap_desc", "El piloto posee el tiempo récord de vuelta en toda la sesión.")}</p>
 					</div>
 
 					<div className="rounded-xl border border-zinc-700/50 bg-zinc-900/30 p-5 opacity-70 backdrop-blur-sm">
 						<div className="inline-block rounded-md border border-zinc-600 bg-zinc-800/50 px-3 py-1 font-semibold text-zinc-300 text-xs mb-3">
-							Retirado / DNF
+							{t("help_page.dnf_badge", "Retirado / DNF")}
 						</div>
 						<h3 className="font-bold text-white text-base">Transparente</h3>
-						<p className="mt-1 text-xs text-zinc-400">El auto sufrió una avería, chocó o quedó eliminado de la tanda.</p>
+						<p className="mt-1 text-xs text-zinc-400">{t("help_page.dnf_desc", "El auto sufrió una avería, chocó o quedó eliminado de la tanda.")}</p>
 					</div>
 
 					<div className="rounded-xl border border-red-500/30 bg-red-950/20 p-5 backdrop-blur-sm">
 						<div className="inline-block rounded-md bg-red-800/40 px-3 py-1 font-semibold text-red-300 text-xs border border-red-500/30 mb-3">
-							Zona de Peligro
+							{t("help_page.danger_zone_badge", "Zona de Peligro")}
 						</div>
 						<h3 className="font-bold text-white text-base">Fondo Rojo</h3>
-						<p className="mt-1 text-xs text-zinc-400">Piloto dentro de la zona de eliminación instantánea durante Qualy.</p>
+						<p className="mt-1 text-xs text-zinc-400">{t("help_page.danger_zone_desc", "Piloto dentro de la zona de eliminación instantánea durante Qualy.")}</p>
 					</div>
 				</div>
 			</section>
@@ -138,18 +138,18 @@ export default function HelpPage() {
 			<section className="space-y-6">
 				<div className="border-b border-zinc-800/80 pb-4">
 					<h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-						<span className="text-red-500">#</span> Estados de BOOST / DRS y Boxes (PIT)
+						<span className="text-red-500">#</span> {t("help_page.drs_title", "Estados de BOOST / DRS y Boxes (PIT)")}
 					</h2>
 					<p className="text-sm text-zinc-400 mt-1">
-						Saber al instante si un auto tiene oportunidad de sobrepaso o si perderá tiempo en boxes.
+						{t("help_page.drs_desc", "Saber al instante si un auto tiene oportunidad de sobrepaso o si perderá tiempo en boxes.")}
 					</p>
 				</div>
 
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<div className="flex items-center justify-between rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
 						<div>
-							<h3 className="font-bold text-zinc-300">BOOST Apagado</h3>
-							<p className="text-xs text-zinc-400">Fuera de rango (&gt;1.0s) respecto al monoplaza de adelante.</p>
+							<h3 className="font-bold text-zinc-300">{t("help_page.boost_off_title", "BOOST Apagado")}</h3>
+							<p className="text-xs text-zinc-400">{t("help_page.boost_off_desc", "Fuera de rango (>1.0s) respecto al monoplaza de adelante.")}</p>
 						</div>
 						<div className="w-16">
 							<DriverDRS on={false} possible={false} inPit={false} pitOut={false} />
@@ -158,8 +158,8 @@ export default function HelpPage() {
 
 					<div className="flex items-center justify-between rounded-xl border border-amber-500/30 bg-amber-950/20 p-4">
 						<div>
-							<h3 className="font-bold text-amber-400">BOOST Disponible (Listo)</h3>
-							<p className="text-xs text-zinc-400">A menos de 1.0s de persecución. Modo Manual Override habilitado.</p>
+							<h3 className="font-bold text-amber-400">{t("help_page.boost_ready_title", "BOOST Disponible (Listo)")}</h3>
+							<p className="text-xs text-zinc-400">{t("help_page.boost_ready_desc", "A menos de 1.0s de persecución. Modo Manual Override habilitado.")}</p>
 						</div>
 						<div className="w-16">
 							<DriverDRS on={false} possible={true} inPit={false} pitOut={false} />
@@ -168,8 +168,8 @@ export default function HelpPage() {
 
 					<div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4">
 						<div>
-							<h3 className="font-bold text-emerald-400">BOOST Activo (Desplegando)</h3>
-							<p className="text-xs text-zinc-400">Despliegue máximo de potencia eléctrica y alerón abierto en recta.</p>
+							<h3 className="font-bold text-emerald-400">{t("help_page.boost_active_title", "BOOST Activo (Desplegando)")}</h3>
+							<p className="text-xs text-zinc-400">{t("help_page.boost_active_desc", "Despliegue máximo de potencia eléctrica y alerón abierto en recta.")}</p>
 						</div>
 						<div className="w-16">
 							<DriverDRS on={true} possible={false} inPit={false} pitOut={false} />
@@ -178,8 +178,8 @@ export default function HelpPage() {
 
 					<div className="flex items-center justify-between rounded-xl border border-blue-500/30 bg-blue-950/20 p-4">
 						<div>
-							<h3 className="font-bold text-blue-400">En PIT / Pit Out</h3>
-							<p className="text-xs text-zinc-400">El monoplaza se desplaza por la calle de boxes realizando parada o salida a pista.</p>
+							<h3 className="font-bold text-blue-400">{t("help_page.in_pit_title", "En PIT / Pit Out")}</h3>
+							<p className="text-xs text-zinc-400">{t("help_page.in_pit_desc", "El monoplaza se desplaza por la calle de boxes realizando parada o salida a pista.")}</p>
 						</div>
 						<div className="w-16 flex justify-end">
 							<span className="inline-flex h-7 px-3 items-center justify-center rounded-md border border-blue-500/60 bg-blue-950/60 font-mono text-xs font-black text-blue-300 shadow-[0_0_12px_rgba(59,130,246,0.35)] select-none">
@@ -194,18 +194,18 @@ export default function HelpPage() {
 			<section className="space-y-6">
 				<div className="border-b border-zinc-800/80 pb-4">
 					<h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-						<span className="text-red-500">#</span> Neumáticos y Estrategia de Stints
+						<span className="text-red-500">#</span> {t("help_page.tyre_system_title", "Neumáticos y Estrategia de Stints")}
 					</h2>
 					<p className="text-sm text-zinc-400 mt-1">
-						Muestra el tipo de goma colocado y la cantidad de vueltas acumuladas de uso.
+						{t("help_page.tyre_system_desc", "Muestra el tipo de goma colocado y la cantidad de vueltas acumuladas de uso.")}
 					</p>
 				</div>
 
 				<div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-6 flex flex-col md:flex-row items-center gap-6 justify-between">
 					<div className="space-y-1 text-center md:text-left">
-						<h3 className="font-bold text-white text-lg">Ejemplo de Historial de Paradas</h3>
+						<h3 className="font-bold text-white text-lg">{t("help_page.tyre_history_example", "Ejemplo de Historial de Paradas")}</h3>
 						<p className="text-sm text-zinc-400">
-							Acá se observa un piloto que realizó 1 parada y lleva neumáticos blandos con 12 vueltas.
+							{t("help_page.tyre_history_desc", "Acá se observa un piloto que realizó 1 parada y lleva neumáticos blandos con 12 vueltas.")}
 						</p>
 					</div>
 					<div className="bg-black/60 p-4 rounded-lg border border-zinc-800">
@@ -221,27 +221,27 @@ export default function HelpPage() {
 				<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
 					<div className="flex flex-col items-center justify-center p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center gap-2">
 						<Image src={softTireIcon} alt="blando" className="size-10" />
-						<span className="text-xs font-bold text-red-400">Blando (Soft)</span>
+						<span className="text-xs font-bold text-red-400">{t("help_page.soft_title", "Blando (Soft)")}</span>
 					</div>
 					<div className="flex flex-col items-center justify-center p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center gap-2">
 						<Image src={mediumTireIcon} alt="medio" className="size-10" />
-						<span className="text-xs font-bold text-yellow-400">Medio (Medium)</span>
+						<span className="text-xs font-bold text-yellow-400">{t("help_page.medium_title", "Medio (Medium)")}</span>
 					</div>
 					<div className="flex flex-col items-center justify-center p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center gap-2">
 						<Image src={hardTireIcon} alt="duro" className="size-10" />
-						<span className="text-xs font-bold text-white">Duro (Hard)</span>
+						<span className="text-xs font-bold text-white">{t("help_page.hard_title", "Duro (Hard)")}</span>
 					</div>
 					<div className="flex flex-col items-center justify-center p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center gap-2">
 						<Image src={interTireIcon} alt="intermedio" className="size-10" />
-						<span className="text-xs font-bold text-emerald-400">Intermedio</span>
+						<span className="text-xs font-bold text-emerald-400">{t("help_page.inter_title", "Intermedio")}</span>
 					</div>
 					<div className="flex flex-col items-center justify-center p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center gap-2">
 						<Image src={wetTireIcon} alt="lluvia" className="size-10" />
-						<span className="text-xs font-bold text-blue-400">Lluvia Extrema (Wet)</span>
+						<span className="text-xs font-bold text-blue-400">{t("help_page.wet_title", "Lluvia Extrema (Wet)")}</span>
 					</div>
 					<div className="flex flex-col items-center justify-center p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center gap-2">
 						<Image src={unknownTireIcon} alt="desconocido" className="size-10 opacity-60" />
-						<span className="text-xs font-bold text-zinc-500">Desconocido</span>
+						<span className="text-xs font-bold text-zinc-500">{t("help_page.tyre_unknown", "Desconocido")}</span>
 					</div>
 				</div>
 			</section>
@@ -250,10 +250,10 @@ export default function HelpPage() {
 			<section className="space-y-6">
 				<div className="border-b border-zinc-800/80 pb-4">
 					<h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-						<span className="text-red-500">#</span> Telemetría de Pedales y Motor
+						<span className="text-red-500">#</span> {t("help_page.pedals_title", "Telemetría de Pedales y Motor")}
 					</h2>
 					<p className="text-sm text-zinc-400 mt-1">
-						Medidores en tiempo real del esfuerzo de aceleración, frenado y revoluciones.
+						{t("help_page.pedals_desc", "Medidores en tiempo real del esfuerzo de aceleración, frenado y revoluciones.")}
 					</p>
 				</div>
 
@@ -263,8 +263,8 @@ export default function HelpPage() {
 							<DriverPedals className="bg-red-500" value={1} maxValue={3} />
 						</div>
 						<div>
-							<h3 className="font-bold text-red-400">Freno</h3>
-							<p className="text-xs text-zinc-400 mt-1">Presión aplicada en pedal de freno (On / Off).</p>
+							<h3 className="font-bold text-red-400">{t("help_page.pedals_brake_title", "Freno")}</h3>
+							<p className="text-xs text-zinc-400 mt-1">{t("help_page.pedals_brake_desc", "Presión aplicada en pedal de freno (On / Off).")}</p>
 						</div>
 					</div>
 
@@ -273,8 +273,8 @@ export default function HelpPage() {
 							<DriverPedals className="bg-emerald-500" value={3} maxValue={4} />
 						</div>
 						<div>
-							<h3 className="font-bold text-emerald-400">Acelerador</h3>
-							<p className="text-xs text-zinc-400 mt-1">Porcentaje de apertura de mariposa (0 - 100%).</p>
+							<h3 className="font-bold text-emerald-400">{t("help_page.pedals_throttle_title", "Acelerador")}</h3>
+							<p className="text-xs text-zinc-400 mt-1">{t("help_page.pedals_throttle_desc", "Porcentaje de apertura de mariposa (0 - 100%).")}</p>
 						</div>
 					</div>
 
@@ -283,8 +283,8 @@ export default function HelpPage() {
 							<DriverPedals className="bg-blue-500" value={2} maxValue={3} />
 						</div>
 						<div>
-							<h3 className="font-bold text-blue-400">Motor (RPM)</h3>
-							<p className="text-xs text-zinc-400 mt-1">Revoluciones por minuto actuales (0 - 15.000 RPM).</p>
+							<h3 className="font-bold text-blue-400">{t("help_page.pedals_rpm_title", "Motor (RPM)")}</h3>
+							<p className="text-xs text-zinc-400 mt-1">{t("help_page.pedals_rpm_desc", "Revoluciones por minuto actuales (0 - 15.000 RPM).")}</p>
 						</div>
 					</div>
 				</div>
@@ -294,10 +294,10 @@ export default function HelpPage() {
 			<section className="space-y-6">
 				<div className="border-b border-zinc-800/80 pb-4">
 					<h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-						<span className="text-red-500">#</span> Condiciones Meteorológicas (Weather)
+						<span className="text-red-500">#</span> {t("help_page.weather_section_title", "Condiciones Meteorológicas (Weather)")}
 					</h2>
 					<p className="text-sm text-zinc-400 mt-1">
-						Variables ambientales que alteran directamente el desgaste de neumáticos y la adherencia.
+						{t("help_page.weather_section_desc", "Variables ambientales que alteran directamente el desgaste de neumáticos y la adherencia.")}
 					</p>
 				</div>
 
@@ -305,32 +305,32 @@ export default function HelpPage() {
 					<div className="flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
 						<TemperatureComplication value={39} label="TRC" />
 						<div>
-							<h3 className="font-bold text-white text-sm">Pista (TRC)</h3>
-							<p className="text-xs text-zinc-400">Temp. del asfalto.</p>
+							<h3 className="font-bold text-white text-sm">{t("help_page.weather_track", "Pista (TRC)")}</h3>
+							<p className="text-xs text-zinc-400">{t("help_page.weather_track_desc", "Temp. del asfalto.")}</p>
 						</div>
 					</div>
 
 					<div className="flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
 						<TemperatureComplication value={26} label="AIR" />
 						<div>
-							<h3 className="font-bold text-white text-sm">Ambiente (AIR)</h3>
-							<p className="text-xs text-zinc-400">Temp. del aire.</p>
+							<h3 className="font-bold text-white text-sm">{t("help_page.weather_air", "Ambiente (AIR)")}</h3>
+							<p className="text-xs text-zinc-400">{t("help_page.weather_air_desc", "Temp. del aire.")}</p>
 						</div>
 					</div>
 
 					<div className="flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
 						<RainComplication rain={true} />
 						<div>
-							<h3 className="font-bold text-white text-sm">Lluvia</h3>
-							<p className="text-xs text-zinc-400">Precipitación detectada.</p>
+							<h3 className="font-bold text-white text-sm">{t("help_page.weather_rain", "Lluvia")}</h3>
+							<p className="text-xs text-zinc-400">{t("help_page.weather_rain_desc", "Precipitación detectada.")}</p>
 						</div>
 					</div>
 
 					<div className="flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
 						<WindSpeedComplication speed={2.9} directionDeg={250} />
 						<div>
-							<h3 className="font-bold text-white text-sm">Viento</h3>
-							<p className="text-xs text-zinc-400">Velocidad y rumbo en m/s.</p>
+							<h3 className="font-bold text-white text-sm">{t("help_page.weather_wind", "Viento")}</h3>
+							<p className="text-xs text-zinc-400">{t("help_page.weather_wind_desc", "Velocidad y rumbo en m/s.")}</p>
 						</div>
 					</div>
 				</div>
@@ -340,24 +340,24 @@ export default function HelpPage() {
 			<section className="space-y-6">
 				<div className="border-b border-zinc-800/80 pb-4">
 					<h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-						<span className="text-red-500">#</span> Sincronización y Control de Retraso
+						<span className="text-red-500">#</span> {t("help_page.tv_sync_title", "Sincronización y Control de Retraso")}
 					</h2>
 					<p className="text-sm text-zinc-400 mt-1">
-						Ajustá la telemetría para que coincida exactamente con tu señal de TV o F1TV.
+						{t("help_page.tv_sync_desc", "Ajustá la telemetría para que coincida exactamente con tu señal de TV o F1TV.")}
 					</p>
 				</div>
 
 				<div className="rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900/60 to-black p-6 space-y-4">
 					<p className="text-sm text-zinc-300 leading-relaxed">
-						Dado que la API directa de boxes se actualiza milisegundos antes que la transmisión de TV, podés configurar un retraso (delay) en segundos. Así la plataforma pausará la llegada de datos y la reproducirá a la par de tus imágenes sin spoilearte los sobrepasos.
+						{t("help_page.tv_sync_section_desc", "Dado que la API directa de boxes se actualiza milisegundos antes que la transmisión de TV, podés configurar un retraso (delay) en segundos. Así la plataforma pausará la llegada de datos y la reproducirá a la par de tus imágenes sin spoilearte los sobrepasos.")}
 					</p>
 
 					<div className="rounded-xl border border-zinc-800 bg-zinc-950/80 p-4 space-y-2">
-						<h3 className="text-xs font-bold uppercase tracking-wider text-red-400">Puntos de Referencia para Sincronizar:</h3>
+						<h3 className="text-xs font-bold uppercase tracking-wider text-red-400">{t("help_page.tv_sync_ref_points", "Puntos de Referencia para Sincronizar:")}</h3>
 						<ul className="text-sm text-zinc-400 space-y-1 list-disc pl-5">
-							<li>El paso por la línea de meta al iniciar nueva vuelta (en carrera).</li>
-							<li>El segundero del reloj principal de sesión (en FP1, FP2, FP3 y Qualy).</li>
-							<li>Los cambios de color en los sectores de los pilotos en pantalla.</li>
+							<li>{t("help_page.tv_sync_ref_1", "El paso por la línea de meta al iniciar nueva vuelta (en carrera).")}</li>
+							<li>{t("help_page.tv_sync_ref_2", "El segundero del reloj principal de sesión (en FP1, FP2, FP3 y Qualy).")}</li>
+							<li>{t("help_page.tv_sync_ref_3", "Los cambios de color en los sectores de los pilotos en pantalla.")}</li>
 						</ul>
 					</div>
 				</div>

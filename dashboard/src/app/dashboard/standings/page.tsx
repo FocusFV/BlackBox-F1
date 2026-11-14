@@ -1128,7 +1128,7 @@ export default function Standings() {
 								<h2 className="text-xs sm:text-sm font-black uppercase tracking-wider text-white">
 									{t("standings_page.constructors_title", "Campeonato de Constructores")}
 								</h2>
-								<p className="text-[10px] text-zinc-400 font-medium">Toca un equipo para ver sus pilotos</p>
+								<p className="text-[10px] text-zinc-400 font-medium">{t("standings_page.wcc_tap_hint", "Toca un equipo para ver sus pilotos")}</p>
 							</div>
 						</div>
 						
@@ -1143,9 +1143,9 @@ export default function Standings() {
 						{year < 1958 ? (
 							<div className="h-64 flex flex-col items-center justify-center p-6 text-center rounded-xl bg-zinc-900/20 border border-zinc-800">
 								<Wrench className="w-8 h-8 text-zinc-500 mb-2" />
-								<p className="text-sm font-bold text-zinc-300">Sin Campeonato de Constructores</p>
+								<p className="text-sm font-bold text-zinc-300">{t("standings_page.wcc_prior_1958_title", "Sin Campeonato de Constructores")}</p>
 								<p className="text-xs text-zinc-500 max-w-xs mt-1">
-									El Campeonato Mundial de Constructores de la FIA fue instaurado oficialmente a partir de la temporada 1958.
+									{t("standings_page.wcc_prior_1958_desc", "El Campeonato Mundial de Constructores de la FIA fue instaurado oficialmente a partir de la temporada 1958.")}
 								</p>
 							</div>
 						) : (
@@ -1334,8 +1334,8 @@ export default function Standings() {
 								{/* Tabla de carreras disputadas (Desglose oficial de la temporada) */}
 								<div className="flex flex-col flex-1 overflow-hidden mt-4">
 									<div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-900 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-										<span>Carreras Disputadas en {year} ({driverSeasonResults.length})</span>
-										<span>Posición & Puntos</span>
+										<span>{t("standings_page.races_disputed", "Carreras Disputadas en {year} ({count})").replace("{year}", String(year)).replace("{count}", String(driverSeasonResults.length))}</span>
+										<span>{t("standings_page.position_and_points", "Posición & Puntos")}</span>
 									</div>
 
 									{/* 🏁 Puntos Sprint oficiales FIA de respaldo si la suma de GPs es menor al total oficial */}
@@ -1460,7 +1460,7 @@ export default function Standings() {
 												<div className="mt-4 pt-3 border-t border-zinc-800/80">
 													<p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
 														<Calendar className="w-3 h-3 text-amber-500" />
-														<span>Próximas carreras de la temporada 2026 (Aún no disputadas)</span>
+														<span>{t("standings_page.upcoming_2026_races", "Próximas carreras de la temporada 2026 (Aún no disputadas)")}</span>
 													</p>
 													<div className="flex flex-col gap-1.5 opacity-65">
 														{upcoming2026Races.map((ur: any, idx: number) => (
@@ -1477,7 +1477,7 @@ export default function Standings() {
 																	</p>
 																</div>
 																<span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-zinc-800/80 text-amber-400/90 border border-zinc-700/60 shrink-0">
-																	{formatUpcomingRaceDate(ur.round, ur.date)} · POR DISPUTAR
+																	{formatUpcomingRaceDate(ur.round, ur.date)} · {t("standings_page.pending_dispute", "POR DISPUTAR")}
 																</span>
 															</div>
 														))}
@@ -1539,7 +1539,7 @@ export default function Standings() {
 											</h3>
 
 											<p className="text-xs text-zinc-400 font-medium">
-												Aporte oficial de los pilotos a la escudería
+												{t("standings_page.team_points_contribution", "Aporte oficial de los pilotos a la escudería")}
 											</p>
 										</div>
 									</div>
@@ -1571,17 +1571,17 @@ export default function Standings() {
 								{/* Desglose de los pilotos que sumaron esos puntos con animación en barritas y súper velocidad */}
 								<div className="flex flex-col flex-1 overflow-hidden mt-4">
 									<div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-900 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-										<span>Pilotos de la Escudería en {year}</span>
-										<span>Aporte al Equipo</span>
+										<span>{t("standings_page.team_drivers_title", "Pilotos de la Escudería en {year}").replace("{year}", String(year))}</span>
+										<span>{t("standings_page.team_contribution_title", "Aporte al Equipo")}</span>
 									</div>
 
 									{loadingConstructorModal ? (
 										<div className="h-48 flex items-center justify-center text-zinc-500 text-xs font-mono uppercase tracking-widest animate-pulse">
-											Calculando aporte de los pilotos de la escudería...
+											{t("standings_page.team_calculating", "Calculando aporte de los pilotos de la escudería...")}
 										</div>
 									) : teamDriverBreakdown.length === 0 ? (
 										<div className="h-48 flex items-center justify-center text-zinc-500 text-xs text-center p-4">
-											Sin resultados registrados para esta escudería en este año.
+											{t("standings_page.team_no_results", "Sin resultados registrados para esta escudería en este año.")}
 										</div>
 									) : (
 										<div className="flex flex-col gap-3 overflow-y-auto pr-1 no-scrollbar flex-1">
@@ -1622,7 +1622,7 @@ export default function Standings() {
 																		{driver.name}
 																	</p>
 																	<p className="text-[10px] text-zinc-400 font-medium">
-																		{driver.races} Carreras · {driver.wins} {driver.wins === 1 ? "Victoria" : "Victorias"} · {driver.podiums} Podios
+																		{driver.races} {t("standings_page.races_label", "Carreras")} · {driver.wins} {driver.wins === 1 ? t("standings_page.wins_label_sing", "Victoria") : t("standings_page.wins_label_plur", "Victorias")} · {driver.podiums} {t("standings_page.podiums_label", "Podios")}
 																	</p>
 																</div>
 															</div>
@@ -1642,7 +1642,7 @@ export default function Standings() {
 																	className="text-[10px] block font-bold"
 																	style={{ color: cTheme.primary }}
 																>
-																	<AnimatedCounter value={pct} duration={700} />% del equipo
+																	<AnimatedCounter value={pct} duration={700} />% {t("standings_page.of_the_team", "del equipo")}
 																</span>
 															</div>
 														</div>

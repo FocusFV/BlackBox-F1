@@ -221,7 +221,7 @@ export default function Home() {
 									<Gauge className="w-7 h-7" />
 								</div>
 								<span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400">
-									MÓDULO 01
+									{t("home.module_1_badge", "MÓDULO 01")}
 								</span>
 							</div>
 
@@ -259,15 +259,15 @@ export default function Home() {
 									<Trophy className="w-7 h-7" />
 								</div>
 								<span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400">
-									MÓDULO 02
+									{t("home.module_2_badge", "MÓDULO 02")}
 								</span>
 							</div>
 
 							<h3 className="text-xl font-black uppercase tracking-wide text-white mb-2 group-hover:text-amber-200 transition-colors">
-								Campeonato Mundial
+								{t("home.deck_m2_title", "Campeonato Mundial")}
 							</h3>
 							<p className="text-sm text-zinc-400 leading-relaxed font-medium mb-6">
-								Tablas oficiales de puntos de Pilotos y Constructores. Modales inmersivos con colores oficiales de escudería, biografías, victorias y podios.
+								{t("home.deck_m2_desc", "Tablas oficiales de puntos de Pilotos y Constructores. Modales inmersivos con colores oficiales de escudería, biografías, victorias y podios.")}
 							</p>
 						</div>
 
@@ -300,7 +300,7 @@ export default function Home() {
 									<Tv2 className="w-7 h-7" />
 								</div>
 								<span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400">
-									MÓDULO 03
+									{t("home.module_3_badge", "MÓDULO 03")}
 								</span>
 							</div>
 
@@ -308,7 +308,7 @@ export default function Home() {
 								TV Sync & Anti-Spoilers
 							</h3>
 							<p className="text-sm text-zinc-400 leading-relaxed font-medium mb-6">
-								Ajustá el retraso en segundos para sincronizar el panel con la transmisión de tu tele o streaming y vivir la carrera en sincronía perfecta.
+								{t("home.deck_m3_desc", "Ajustá el retraso en segundos para sincronizar el panel con la transmisión de tu tele o streaming y vivir la carrera en sincronía perfecta.")}
 							</p>
 						</div>
 
@@ -334,7 +334,7 @@ export default function Home() {
 						PREGUNTAS DEL SISTEMA
 					</span>
 					<h2 className="text-2xl sm:text-4xl font-black uppercase text-white">
-						Todo lo que Necesitás Saber
+						{t("home.faq_subtitle", "Todo lo que Necesitás Saber")}
 					</h2>
 				</div>
 
@@ -387,14 +387,14 @@ export default function Home() {
 
 						{/* Título Principal */}
 						<h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white leading-tight">
-							Encendé tus Motores <br />
+							{t("home.cta_title_1", "Encendé tus Motores")} <br />
 							<span className="bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 bg-clip-text text-transparent">
-								Y Viví la F1 Como Nunca
+								{t("home.cta_title_2", "Y Viví la F1 Como Nunca")}
 							</span>
 						</h2>
 
 						<p className="text-zinc-300 text-sm sm:text-base font-medium leading-relaxed max-w-xl mx-auto">
-							Conectate en vivo al Gran Premio, calibrá tu sincronización y disfrutá de una experiencia sin spoilers, con diseño de puro oro y carbono.
+							{t("home.cta_desc", "Conectate en vivo al Gran Premio, calibrá tu sincronización y disfrutá de una experiencia sin spoilers, con diseño de puro oro y carbono.")}
 						</p>
 
 						{/* Botón Dorado Imponente */}
@@ -412,7 +412,7 @@ export default function Home() {
 
 			{/* FOOTER */}
 			<footer className="relative z-10 border-t border-zinc-900 bg-black/90 py-8 text-center text-xs font-mono text-zinc-600">
-				<p>BLACKBOX-F1 · COCKPIT Y TELEMETRÍA OFICIAL EN ESPAÑOL</p>
+				<p>{t("home.footer_platform_banner", "BLACKBOX-F1 · COCKPIT Y TELEMETRÍA OFICIAL")}</p>
 			</footer>
 		</div>
 	);
