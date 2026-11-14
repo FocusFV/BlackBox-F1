@@ -143,4 +143,11 @@ export interface TranslationDictionary {
 		yes: string;
 		no: string;
 	};
+	home: {
+		hero_title_1: string;
+		hero_title_2: string;
+		hero_subtitle: string;
+		enter_telemetry: string;
+		donate_coffee: string;
+	};
 }

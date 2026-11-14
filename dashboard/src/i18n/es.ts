@@ -143,4 +143,11 @@ export const es: TranslationDictionary = {
 		yes: "Sí",
 		no: "No",
 	},
+	home: {
+		hero_title_1: "Cockpit de Telemetría",
+		hero_title_2: "En Tiempo Real",
+		hero_subtitle: "Tiempos sector a sector en milésimas, diferencias en pista, compuestos de neumáticos, control de retraso sin spoilers y Wake Lock permanente.",
+		enter_telemetry: "Ingresar a la Telemetría",
+		donate_coffee: "Doname un Café",
+	},
 };

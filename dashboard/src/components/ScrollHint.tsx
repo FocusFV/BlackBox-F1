@@ -16,7 +16,7 @@ export default function ScrollHint() {
 					ease: "backInOut",
 				},
 			}}
-			className="absolute bottom-20 mx-auto"
+			className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 pointer-events-none opacity-60"
 		>
 			<Image alt="down icon" src={downIcon} width={20} height={20} />
 		</motion.div>

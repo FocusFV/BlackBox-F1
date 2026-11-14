@@ -20,6 +20,7 @@ import {
 import Button from "@/components/ui/Button";
 import ScrollHint from "@/components/ScrollHint";
 import { useSupportModalStore } from "@/stores/useSupportModalStore";
+import { useTranslation } from "@/hooks/useTranslation";
 
 import icon from "public/logoprincipal.png";
 import mosaicoEquipos from "public/equiposf1.png";
@@ -47,6 +48,7 @@ const faqs = [
 export default function Home() {
 	const [activeFaq, setActiveFaq] = useState<number | null>(null);
 	const openSupportModal = useSupportModalStore((s) => s.open);
+	const { t } = useTranslation();
 
 	const toggleFaq = (idx: number) => {
 		setActiveFaq(activeFaq === idx ? null : idx);
@@ -88,20 +90,20 @@ export default function Home() {
 			{/* DESTELLO DORADO PRINCIPAL */}
 			<div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[850px] bg-amber-500/[0.07] blur-[170px] rounded-full pointer-events-none z-0" />
 
-			{/* HERO PRINCIPAL */}
-			<section className="relative z-10 flex min-h-screen w-full flex-col items-center justify-center max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-16 sm:py-20 text-center">
+			{/* HERO PRINCIPAL OPTIMIZADO ABOVE-THE-FOLD */}
+			<section className="relative z-10 flex min-h-[100dvh] w-full flex-col items-center justify-center max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-6 pb-12 sm:pt-8 sm:pb-14 text-center">
 
-				{/* LOGO GIGANTE DESTACADO */}
+				{/* LOGO GIGANTE DESTACADO (MÁS COMPACTO Y CERCA DEL TÍTULO) */}
 				<motion.div 
 					initial={{ opacity: 0, scale: 0.88 }}
 					animate={{ opacity: 1, scale: 1 }}
 					transition={{ duration: 0.8 }}
-					className="w-full max-w-[560px] drop-shadow-[0_0_55px_rgba(245,158,11,0.35)] hover:scale-105 hover:drop-shadow-[0_0_75px_rgba(245,158,11,0.5)] transition duration-500 flex justify-center select-none mb-8 cursor-pointer"
+					className="w-full max-w-[280px] sm:max-w-[380px] md:max-w-[440px] drop-shadow-[0_0_50px_rgba(245,158,11,0.35)] hover:scale-105 hover:drop-shadow-[0_0_75px_rgba(245,158,11,0.5)] transition duration-500 flex justify-center select-none mb-2 sm:mb-3 cursor-pointer"
 				>
 					<Image 
 						src={icon} 
 						alt="Blackbox-F1 Logo" 
-						className="w-full h-auto object-contain" 
+						className="w-full h-auto object-contain max-h-[160px] sm:max-h-[200px]" 
 						priority 
 					/>
 				</motion.div>
@@ -111,11 +113,11 @@ export default function Home() {
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.8, delay: 0.2 }}
-					className="text-center text-4xl sm:text-6xl md:text-7xl font-black uppercase tracking-tight text-zinc-100 leading-[1.05] mb-5"
+					className="text-center text-3xl sm:text-5xl md:text-6xl font-black uppercase tracking-tight text-zinc-100 leading-[1.08] mb-3 sm:mb-3.5"
 				>
-					Cockpit de Telemetría <br />
+					{t("home.hero_title_1", "Cockpit de Telemetría")} <br />
 					<span className="bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 bg-clip-text text-transparent drop-shadow-[0_2px_15px_rgba(245,158,11,0.35)]">
-						En Tiempo Real
+						{t("home.hero_title_2", "En Tiempo Real")}
 					</span>
 				</motion.h1>
 				
@@ -124,29 +126,29 @@ export default function Home() {
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.8, delay: 0.3 }}
-					className="text-center text-zinc-400 text-sm sm:text-base md:text-lg max-w-2xl font-medium leading-relaxed mb-8"
+					className="text-center text-zinc-400 text-xs sm:text-sm md:text-base max-w-2xl font-medium leading-relaxed mb-6 sm:mb-7"
 				>
-					Tiempos sector a sector en milésimas, diferencias en pista, compuestos de neumáticos, control de retraso sin spoilers y Wake Lock permanente.
+					{t("home.hero_subtitle", "Tiempos sector a sector en milésimas, diferencias en pista, compuestos de neumáticos, control de retraso sin spoilers y Wake Lock permanente.")}
 				</motion.p>
 					
-				{/* BOTONES PRINCIPALES DE ACCESO DIRECTO */}
+				{/* BOTONES PRINCIPALES DE ACCESO DIRECTO (100% VISIBLES SIN SCROLL) */}
 				<motion.div 
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.8, delay: 0.4 }}
-					className="flex flex-wrap justify-center gap-4 z-20 mb-12"
+					className="flex flex-wrap justify-center gap-3 sm:gap-4 z-20 mb-6 sm:mb-8"
 				>
 					<Link href="/dashboard" prefetch={false}>
-						<Button className="rounded-2xl border border-amber-300/60 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 px-9 py-4 font-black uppercase tracking-widest text-xs shadow-[0_0_35px_rgba(245,158,11,0.45)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_rgba(245,158,11,0.65)] flex items-center gap-3 cursor-pointer">
-							<Gauge className="w-5 h-5 text-black" /> Ingresar a la Telemetría
+						<Button className="rounded-2xl border border-amber-300/60 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 px-8 sm:px-9 py-3.5 sm:py-4 font-black uppercase tracking-widest text-xs shadow-[0_0_35px_rgba(245,158,11,0.45)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_rgba(245,158,11,0.65)] flex items-center gap-3 cursor-pointer">
+							<Gauge className="w-5 h-5 text-black" /> {t("home.enter_telemetry", "Ingresar a la Telemetría")}
 						</Button>
 					</Link>
 
 					<Button 
 						onClick={openSupportModal}
-						className="rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-400 px-6 py-4 font-mono font-bold uppercase tracking-wider text-xs backdrop-blur-xl transition duration-300 hover:bg-amber-500/20 hover:border-amber-400 hover:scale-105 flex items-center gap-2 cursor-pointer"
+						className="rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-400 px-5 sm:px-6 py-3.5 sm:py-4 font-mono font-bold uppercase tracking-wider text-xs backdrop-blur-xl transition duration-300 hover:bg-amber-500/20 hover:border-amber-400 hover:scale-105 flex items-center gap-2 cursor-pointer"
 					>
-						<Coffee className="w-4 h-4 text-amber-400" /> Doname un Café
+						<Coffee className="w-4 h-4 text-amber-400" /> {t("home.donate_coffee", "Doname un Café")}
 					</Button>
 				</motion.div>
 

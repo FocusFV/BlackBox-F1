@@ -41,8 +41,20 @@ export default function Navbar() {
 
 
 
+	const isHome = pathname === "/" || pathname === "";
 	const isDashboard = pathname?.startsWith("/dashboard");
 	const shouldBeVisible = isDashboard ? true : isVisible;
+
+	// 🌐 EN LA HOME: Solo mostramos el selector de idioma flotante en la esquina superior derecha
+	if (isHome) {
+		return (
+			<header className="fixed top-4 right-4 sm:top-5 sm:right-6 z-50">
+				<div className="bg-zinc-950/75 hover:bg-zinc-900/90 border border-zinc-800/80 hover:border-amber-500/40 backdrop-blur-xl rounded-xl shadow-[0_4px_25px_rgba(0,0,0,0.7)] transition-all">
+					<LanguageSelector variant="navbar" />
+				</div>
+			</header>
+		);
+	}
 
 	const navLinks = [
 		{ name: t("nav.dashboard", "Panel"), href: "/dashboard" },
