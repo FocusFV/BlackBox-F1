@@ -1,3 +1,4 @@
+import { useTranslation } from "@/hooks/useTranslation";
 import type { Driver } from "@/types/state.type";
 
 import { useDataStore } from "@/stores/useDataStore";
@@ -20,6 +21,7 @@ const sortViolations = (driverA: Driver, driverB: Driver, violations: Violations
 };
 
 export default function TrackViolations() {
+	const { t } = useTranslation();
 	const messages = useDataStore((state) => state.state?.RaceControlMessages);
 	const drivers = useDataStore((state) => state.state?.DriverList);
 	const driversTiming = useDataStore((state) => state.state?.TimingData);
@@ -49,7 +51,7 @@ export default function TrackViolations() {
 		<div className="flex flex-col gap-0.5">
 			{violationDrivers && violationDrivers.length < 1 && (
 				<div className="flex h-96 w-full flex-col items-center justify-center">
-					<p className="text-gray-500">Sin infracciones por ahora</p>
+					<p className="text-gray-500">{t("track_limits.no_violations", "Sin infracciones por ahora")}</p>
 				</div>
 			)}
 

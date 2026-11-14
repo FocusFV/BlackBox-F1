@@ -75,10 +75,10 @@ export default function Settings() {
 				{/* HEADER PRINCIPAL */}
 				<div className="border-b border-zinc-800 pb-4 text-center">
 					<h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white flex items-center justify-center gap-2">
-						<span className="text-amber-500">⚙️</span> Centro de Control & Ajustes
+						<span className="text-amber-500">⚙️</span> {t("settings.title", "Centro de Control & Ajustes")}
 					</h1>
 					<p className="text-xs text-zinc-400 mt-1 max-w-lg mx-auto">
-						Personalizá el comportamiento visual, la paleta de oro, las alertas de radio y las unidades de la telemetría en vivo.
+						{t("settings.subtitle", "Personalizá el comportamiento visual, la paleta de oro, las alertas de radio y las unidades de la telemetría en vivo.")}
 					</p>
 
 					{/* Badge Wake Lock siempre activo */}
@@ -192,7 +192,7 @@ export default function Settings() {
 								<div className="flex flex-col">
 									<span className="text-xs font-bold text-zinc-200 uppercase">{t("settings.haptic_feedback", "Respuesta Háptica Táctil")}</span>
 									<span className="text-[11px] text-zinc-400 font-sans mt-0.5 leading-snug">
-										Emite una micro-vibración física estilo volante F1 al tocar botones, pestañas de sesión y pilotos (en celulares compatibles).
+										{t("settings.haptic_feedback_desc", "Emite una micro-vibración física estilo volante F1 al tocar botones, pestañas de sesión y pilotos (en celulares compatibles).")}
 									</span>
 								</div>
 							</div>
@@ -202,7 +202,7 @@ export default function Settings() {
 									onClick={() => triggerHaptic("heavy")}
 									className="px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-bold uppercase tracking-wider hover:bg-amber-500/20 transition-all shrink-0 cursor-pointer self-start sm:self-center"
 								>
-									📳 Probar Vibración
+									📳 {t("settings.test_vibration", "Probar Vibración")}
 								</button>
 							)}
 						</div>
@@ -214,9 +214,9 @@ export default function Settings() {
 									<Layers className="w-4 h-4" />
 								</div>
 								<div className="flex flex-col">
-									<span className="text-xs font-bold text-zinc-200 uppercase">Densidad de Grilla de Pilotos</span>
+									<span className="text-xs font-bold text-zinc-200 uppercase">{t("settings.grid_density", "Densidad de Grilla de Pilotos")}</span>
 									<span className="text-[11px] text-zinc-400 font-sans mt-0.5 leading-snug">
-										Confort muestra fotos y filas holgadas. Pit-Wall compacta las filas para ver los 20 autos sin scrollear.
+										{t("settings.grid_density_desc", "Confort muestra fotos y filas holgadas. Pit-Wall compacta las filas para ver los 20 autos sin scrollear.")}
 									</span>
 								</div>
 							</div>
@@ -229,7 +229,7 @@ export default function Settings() {
 										triggerHaptic("light");
 									}}
 									options={[
-										{ label: "Confort", value: "comfort" },
+										{ label: t("settings.comfort", "Confort"), value: "comfort" },
 										{ label: "Pit-Wall", value: "compact" },
 									]}
 								/>
@@ -243,9 +243,9 @@ export default function Settings() {
 									<Clock3 className="w-4 h-4" />
 								</div>
 								<div className="flex flex-col">
-									<span className="text-xs font-bold text-zinc-200 uppercase">Visualización de Tiempos</span>
+									<span className="text-xs font-bold text-zinc-200 uppercase">{t("settings.time_format", "Visualización de Tiempos")}</span>
 									<span className="text-[11px] text-zinc-400 font-sans mt-0.5 leading-snug">
-										Elegí si preferís ver por defecto el intervalo con el auto de adelante o la diferencia acumulada respecto al líder (P1).
+										{t("settings.time_format_desc", "Elegí si preferís ver por defecto el intervalo con el auto de adelante o la diferencia acumulada respecto al líder (P1).")}
 									</span>
 								</div>
 							</div>
@@ -258,8 +258,8 @@ export default function Settings() {
 										triggerHaptic("light");
 									}}
 									options={[
-										{ label: "Intervalo (+0.4s)", value: "interval" },
-										{ label: "Diferencia P1", value: "leader" },
+										{ label: t("settings.interval_opt", "Intervalo (+0.4s)"), value: "interval" },
+										{ label: t("settings.leader_opt", "Diferencia P1"), value: "leader" },
 									]}
 								/>
 							</div>
@@ -273,10 +273,10 @@ export default function Settings() {
 						<Monitor className="w-4 h-4 text-amber-400" />
 						<div>
 							<h2 className="text-sm font-bold text-amber-400 uppercase tracking-widest">
-								Visualización & Telemetría en Pantalla
+								{t("settings.display_hud_title", "Visualización & Telemetría en Pantalla")}
 							</h2>
 							<p className="text-[11px] text-zinc-400 font-sans">
-								Ajustá qué capas de datos querés ver superpuestas durante las carreras.
+								{t("settings.display_hud_desc", "Ajustá qué capas de datos querés ver superpuestas durante las carreras.")}
 							</p>
 						</div>
 					</div>
@@ -286,9 +286,9 @@ export default function Settings() {
 						<div className="flex items-start gap-3 bg-zinc-900/30 p-3.5 rounded-xl border border-zinc-900">
 							<Toggle enabled={settings.carMetrics} setEnabled={(v) => settings.setCarMetrics(v)} />
 							<div className="flex flex-col">
-								<span className="text-xs font-bold text-zinc-200 uppercase">Métricas de Auto (RPM / Marcha / Vel)</span>
+								<span className="text-xs font-bold text-zinc-200 uppercase">{t("settings.car_metrics", "Métricas de Auto (RPM / Marcha / Vel)")}</span>
 								<span className="text-[11px] text-zinc-400 font-sans mt-0.5 leading-snug">
-									Muestra el cambio actual, tacómetro de revoluciones por minuto y velocidad en vivo de cada monoplaza.
+									{t("settings.car_metrics_desc", "Muestra el cambio actual, tacómetro de revoluciones por minuto y velocidad en vivo de cada monoplaza.")}
 								</span>
 							</div>
 						</div>
@@ -297,9 +297,9 @@ export default function Settings() {
 						<div className="flex items-start gap-3 bg-zinc-900/30 p-3.5 rounded-xl border border-zinc-900">
 							<Toggle enabled={settings.showCornerNumbers} setEnabled={(v) => settings.setShowCornerNumbers(v)} />
 							<div className="flex flex-col">
-								<span className="text-xs font-bold text-zinc-200 uppercase">Números de Curva en el Mapa</span>
+								<span className="text-xs font-bold text-zinc-200 uppercase">{t("settings.corner_numbers", "Números de Curva en el Mapa")}</span>
 								<span className="text-[11px] text-zinc-400 font-sans mt-0.5 leading-snug">
-									Etiqueta cada curva del circuito (T1, T2, etc.) en el mapa satelital para seguir los sobrepasos con precisión.
+									{t("settings.corner_numbers_desc", "Etiqueta cada curva del circuito (T1, T2, etc.) en el mapa satelital para seguir los sobrepasos con precisión.")}
 								</span>
 							</div>
 						</div>
@@ -308,9 +308,9 @@ export default function Settings() {
 						<div className="flex items-start gap-3 bg-zinc-900/30 p-3.5 rounded-xl border border-zinc-900">
 							<Toggle enabled={settings.tableHeaders} setEnabled={(v) => settings.setTableHeaders(v)} />
 							<div className="flex flex-col">
-								<span className="text-xs font-bold text-zinc-200 uppercase">Encabezados de Grilla</span>
+								<span className="text-xs font-bold text-zinc-200 uppercase">{t("settings.table_headers", "Encabezados de Grilla")}</span>
 								<span className="text-[11px] text-zinc-400 font-sans mt-0.5 leading-snug">
-									Muestra las columnas superiores fijas (POS, PILOTO, INTERVALO, S1, S2, S3, NEUMÁTICOS).
+									{t("settings.table_headers_desc", "Muestra las columnas superiores fijas (POS, PILOTO, INTERVALO, S1, S2, S3, NEUMÁTICOS).")}
 								</span>
 							</div>
 						</div>
@@ -319,9 +319,9 @@ export default function Settings() {
 						<div className="flex items-start gap-3 bg-zinc-900/30 p-3.5 rounded-xl border border-zinc-900">
 							<Toggle enabled={settings.showBestSectors} setEnabled={(v) => settings.setShowBestSectors(v)} />
 							<div className="flex flex-col">
-								<span className="text-xs font-bold text-zinc-200 uppercase">Mejores Sectores (Púrpura / Verde)</span>
+								<span className="text-xs font-bold text-zinc-200 uppercase">{t("settings.best_sectors", "Mejores Sectores (Púrpura / Verde)")}</span>
 								<span className="text-[11px] text-zinc-400 font-sans mt-0.5 leading-snug">
-									Destaca en púrpura el récord absoluto de pista y en verde el récord personal del piloto en esa vuelta.
+									{t("settings.best_sectors_desc", "Destaca en púrpura el récord absoluto de pista y en verde el récord personal del piloto en esa vuelta.")}
 								</span>
 							</div>
 						</div>
@@ -330,9 +330,9 @@ export default function Settings() {
 						<div className="flex items-start gap-3 bg-zinc-900/30 p-3.5 rounded-xl border border-zinc-900">
 							<Toggle enabled={settings.showMiniSectors} setEnabled={(v) => settings.setShowMiniSectors(v)} />
 							<div className="flex flex-col">
-								<span className="text-xs font-bold text-zinc-200 uppercase">Minisectores en Tiempo Real</span>
+								<span className="text-xs font-bold text-zinc-200 uppercase">{t("settings.minisectors", "Minisectores en Tiempo Real")}</span>
 								<span className="text-[11px] text-zinc-400 font-sans mt-0.5 leading-snug">
-									Desglosa cada uno de los 20+ microsectores del circuito para ver aceleración y frenada curva por curva.
+									{t("settings.minisectors_desc", "Desglosa cada uno de los 20+ microsectores del circuito para ver aceleración y frenada curva por curva.")}
 								</span>
 							</div>
 						</div>
@@ -341,9 +341,9 @@ export default function Settings() {
 						<div className="flex items-start gap-3 bg-zinc-900/30 p-3.5 rounded-xl border border-zinc-900">
 							<Toggle enabled={settings.useSafetyCarColors} setEnabled={(v) => settings.setUseSafetyCarColors(v)} />
 							<div className="flex flex-col">
-								<span className="text-xs font-bold text-zinc-200 uppercase">Alertas de Safety Car (SC / VSC)</span>
+								<span className="text-xs font-bold text-zinc-200 uppercase">{t("settings.safety_car_colors", "Alertas de Safety Car (SC / VSC)")}</span>
 								<span className="text-[11px] text-zinc-400 font-sans mt-0.5 leading-snug">
-									Tiñe la cabecera en amarillo parpadeante durante Auto de Seguridad o amarillo virtual en incidentes.
+									{t("settings.safety_car_colors_desc", "Tiñe la cabecera en amarillo parpadeante durante Auto de Seguridad o amarillo virtual en incidentes.")}
 								</span>
 							</div>
 						</div>
@@ -384,9 +384,9 @@ export default function Settings() {
 						<div className="flex items-start gap-3 bg-zinc-900/30 p-3.5 rounded-xl border border-zinc-900">
 							<Toggle enabled={settings.raceControlChime} setEnabled={(v) => settings.setRaceControlChime(v)} />
 							<div className="flex flex-col">
-								<span className="text-xs font-bold text-zinc-200 uppercase">Chime de Alerta de FIA / Race Control</span>
+								<span className="text-xs font-bold text-zinc-200 uppercase">{t("settings.race_control_chime", "Chime de Alerta de FIA / Race Control")}</span>
 								<span className="text-[11px] text-zinc-400 font-sans mt-0.5 leading-snug">
-									Emite un aviso sonoro sutil cada vez que Dirección de Carrera publica una sanción, bandera amarilla o bandera roja.
+									{t("settings.race_control_chime_desc", "Emite un aviso sonoro sutil cada vez que Dirección de Carrera publica una sanción, bandera amarilla o bandera roja.")}
 								</span>
 							</div>
 						</div>
@@ -394,9 +394,9 @@ export default function Settings() {
 						<div className="flex items-start gap-3 bg-zinc-900/30 p-3.5 rounded-xl border border-zinc-900">
 							<Toggle enabled={settings.autoPlayFavoriteRadios} setEnabled={(v) => settings.setAutoPlayFavoriteRadios(v)} />
 							<div className="flex flex-col">
-								<span className="text-xs font-bold text-zinc-200 uppercase">Auto-reproducir Radios de Favoritos</span>
+								<span className="text-xs font-bold text-zinc-200 uppercase">{t("settings.auto_play_radios", "Auto-reproducir Radios de Favoritos")}</span>
 								<span className="text-[11px] text-zinc-400 font-sans mt-0.5 leading-snug">
-									Reproduce automáticamente el mensaje de voz entre ingeniero y piloto apenas se emite en la transmisión oficial.
+									{t("settings.auto_play_radios_desc", "Reproduce automáticamente el mensaje de voz entre ingeniero y piloto apenas se emite en la transmisión oficial.")}
 								</span>
 							</div>
 						</div>
@@ -419,7 +419,7 @@ export default function Settings() {
 										setValue={(v) => settings.setRaceControlChimeVolume(v)}
 									/>
 								</div>
-								<span className="text-xs text-zinc-400 font-mono">Volumen del chime de alerta ({settings.raceControlChimeVolume}%)</span>
+								<span className="text-xs text-zinc-400 font-mono">{t("settings.chime_volume", "Volumen del chime de alerta ({vol}%)").replace("{vol}", String(settings.raceControlChimeVolume))}</span>
 							</div>
 						)}
 					</div>
@@ -430,11 +430,9 @@ export default function Settings() {
 					<div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
 						<Sliders className="w-4 h-4 text-amber-400" />
 						<div>
-							<h2 className="text-sm font-bold text-amber-400 uppercase tracking-widest">
-								Escalas & Unidades
-							</h2>
+							<h2 className="text-sm font-bold text-amber-400 uppercase tracking-widest">{t("settings.units_title", "Escalas & Unidades")}</h2>
 							<p className="text-[11px] text-zinc-400 font-sans">
-								Configurá la unidad métrica para velocímetro, velocidad en trampa y telemetría de rectas.
+								{t("settings.units_desc", "Configurá la unidad métrica para velocímetro, velocidad en trampa y telemetría de rectas.")}
 							</p>
 						</div>
 					</div>
@@ -445,12 +443,12 @@ export default function Settings() {
 							selected={settings.speedUnit}
 							onSelect={settings.setSpeedUnit}
 							options={[
-								{ label: "Kilómetros por hora (km/h)", value: "metric" },
-								{ label: "Millas por hora (mph)", value: "imperial" },
+								{ label: t("settings.kmh_unit", "Kilómetros por hora (km/h)"), value: "metric" },
+								{ label: t("settings.mph_unit", "Millas por hora (mph)"), value: "imperial" },
 							]}
 						/>
 						<p className="text-[11px] text-zinc-500 font-sans mt-1">
-							Estándar internacional FIA: km/h para telemetría oficial de monoplazas y sensores de Speed Trap.
+							{t("settings.units_fia_note", "Estándar internacional FIA: km/h para telemetría oficial de monoplazas y sensores de Speed Trap.")}
 						</p>
 					</div>
 				</section>

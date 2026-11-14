@@ -1,4 +1,6 @@
 "use client";
+
+import { useTranslation } from "@/hooks/useTranslation";
 import { useHeadToHeadStore } from "@/stores/useHeadToHeadStore";
 
 import { useEffect, useState, useRef } from "react";
@@ -42,6 +44,7 @@ import {
 } from "@/lib/sessionSchedule";
 
 export default function Page() {
+	const { t } = useTranslation();
 	const dataStore = useDataStore();
 
 	const session = dataStore.state?.SessionInfo;
@@ -310,12 +313,10 @@ export default function Page() {
 
 						<span className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2 mb-2">
 							<span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-							ENLACE PIT-WALL EN TIEMPO REAL
+							{t("dashboard.pitwall_link_realtime", "ENLACE PIT-WALL EN TIEMPO REAL")}
 						</span>
 
-						<h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white mb-2">
-							SINCRONIZANDO TELEMETRÍA EN VIVO
-						</h2>
+						<h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white mb-2">{t("dashboard.syncing_live_telemetry", "SINCRONIZANDO TELEMETRÍA EN VIVO")}</h2>
 
 						<p className="text-xs text-zinc-400 mb-6 font-sans">
 							{translateSessionName(scheduleStatus.activeSessionName || session?.Name || "Sesión Oficial")} • {session?.Meeting?.Country?.Name || "FÓRMULA 1"}
@@ -337,11 +338,9 @@ export default function Page() {
 									🏁
 								</span>
 								<div className="flex flex-col">
-									<span className="text-[10px] font-black uppercase tracking-widest text-amber-400 font-mono">
-										SESIÓN FINALIZADA
-									</span>
+									<span className="text-[10px] font-black uppercase tracking-widest text-amber-400 font-mono">{t("dashboard.session_finished", "SESIÓN FINALIZADA")}</span>
 									<span className="text-xs sm:text-sm font-black uppercase tracking-wider text-white font-mono">
-										RESULTADOS FINALES DE {session?.Name ? translateSessionName(session.Name) : "SESIÓN"} {session?.Meeting?.Country?.Name || "MÉXICO"}
+										{t("dashboard.final_results_of", "RESULTADOS FINALES DE {session} {country}").replace("{session}", session?.Name ? translateSessionName(session.Name) : t("dashboard.session_word", "SESIÓN")).replace("{country}", session?.Meeting?.Country?.Name || "MÉXICO")}
 									</span>
 								</div>
 							</div>
@@ -351,7 +350,7 @@ export default function Page() {
 									type="button"
 									onClick={() => openH2H()}
 									className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/90 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 hover:border-red-500/50 hover:bg-zinc-800 hover:text-white transition-all cursor-pointer"
-									title="Abrir comparador Cara a Cara entre dos pilotos"
+									title={t("modals.h2h_open_tooltip", "Abrir comparador Cara a Cara entre dos pilotos")}
 								>
 									<Swords className="h-3.5 w-3.5 text-red-500" />
 									<span>Cara a Cara</span>
@@ -458,15 +457,11 @@ export default function Page() {
 										<Flag className="h-3.5 w-3.5" />
 									</div>
 									<div>
-										<h3 className="text-xs font-black uppercase tracking-wider text-zinc-100">
-											Dirección de Carrera
-										</h3>
-										<p className="text-[10px] text-zinc-500 font-sans">Avisos y banderas FIA</p>
+										<h3 className="text-xs font-black uppercase tracking-wider text-zinc-100">{t("dashboard.panel_race_control", "Dirección de Carrera")}</h3>
+										<p className="text-[10px] text-zinc-500 font-sans">{t("dashboard.panel_race_control_desc", "Avisos y banderas FIA")}</p>
 									</div>
 								</div>
-								<span className="rounded bg-zinc-900 border border-zinc-800 px-2 py-0.5 text-[9px] font-bold text-zinc-400">
-									OFICIAL
-								</span>
+								<span className="rounded bg-zinc-900 border border-zinc-800 px-2 py-0.5 text-[9px] font-bold text-zinc-400">{t("dashboard.badge_official", "OFICIAL")}</span>
 							</div>
 							<div className="flex-1 overflow-y-auto max-h-[30rem] no-scrollbar">
 								<RaceControl />
@@ -481,15 +476,13 @@ export default function Page() {
 										<Radio className="h-3.5 w-3.5" />
 									</div>
 									<div>
-										<h3 className="text-xs font-black uppercase tracking-wider text-zinc-100">
-											Radios de Equipo
-										</h3>
-										<p className="text-[10px] text-zinc-500 font-sans">Comunicaciones de boxes</p>
+										<h3 className="text-xs font-black uppercase tracking-wider text-zinc-100">{t("dashboard.panel_team_radios", "Radios de Equipo")}</h3>
+										<p className="text-[10px] text-zinc-500 font-sans">{t("dashboard.panel_team_radios_desc", "Comunicaciones de boxes")}</p>
 									</div>
 								</div>
 								<span className="flex items-center gap-1.5 rounded bg-emerald-950/40 border border-emerald-500/30 px-2 py-0.5 text-[9px] font-black text-emerald-400">
 									<span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-									EN VIVO
+									{t("dashboard.badge_live", "EN VIVO")}
 								</span>
 							</div>
 							<div className="flex-1 overflow-y-auto max-h-[30rem] no-scrollbar">
@@ -505,15 +498,11 @@ export default function Page() {
 										<AlertTriangle className="h-3.5 w-3.5" />
 									</div>
 									<div>
-										<h3 className="text-xs font-black uppercase tracking-wider text-zinc-100">
-											Límites de Pista
-										</h3>
-										<p className="text-[10px] text-zinc-500 font-sans">Infracciones y sanciones</p>
+										<h3 className="text-xs font-black uppercase tracking-wider text-zinc-100">{t("dashboard.panel_track_limits", "Límites de Pista")}</h3>
+										<p className="text-[10px] text-zinc-500 font-sans">{t("dashboard.panel_track_limits_desc", "Infracciones y sanciones")}</p>
 									</div>
 								</div>
-								<span className="rounded bg-zinc-900 border border-zinc-800 px-2 py-0.5 text-[9px] font-bold text-zinc-400">
-									TABLA
-								</span>
+								<span className="rounded bg-zinc-900 border border-zinc-800 px-2 py-0.5 text-[9px] font-bold text-zinc-400">{t("dashboard.badge_table", "TABLA")}</span>
 							</div>
 							<div className="flex-1 overflow-y-auto max-h-[30rem] no-scrollbar">
 								<TrackViolations />

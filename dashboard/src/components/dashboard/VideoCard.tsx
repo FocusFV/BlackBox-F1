@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/hooks/useTranslation";
+
 import type { YouTubeSessionVideo } from "@/app/api/youtube/route";
 
 type VideoProps = {
@@ -15,6 +17,7 @@ const badgeStyles: Record<string, { bg: string; text: string; border: string }> 
 };
 
 export function VideoCard({ video }: VideoProps) {
+	const { t } = useTranslation();
 	const watchUrl = `https://www.youtube.com/watch?v=${video.id}`;
 	const style = badgeStyles[video.badgeType || "practice"] || badgeStyles.practice;
 
@@ -87,8 +90,8 @@ export function VideoCard({ video }: VideoProps) {
 					{video.title}
 				</h3>
 				<p className="text-[10px] text-zinc-400 font-mono mt-1 uppercase tracking-wider flex items-center justify-between">
-					<span>Fórmula 1 Oficial</span>
-					<span className="text-amber-400 font-semibold group-hover:underline">Ver en YouTube ↗</span>
+					<span>{t("youtube.official_badge", "Fórmula 1 Oficial")}</span>
+					<span className="text-amber-400 font-semibold group-hover:underline">{t("youtube.watch_on_yt", "Ver en YouTube ↗")}</span>
 				</p>
 			</div>
 		</a>

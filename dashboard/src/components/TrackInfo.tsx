@@ -10,7 +10,7 @@ import { getTrackStatusMessage } from "@/lib/getTrackStatusMessage";
 import { parseUtcMs, parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
 
 export default function TrackInfo() {
-	const { t } = useTranslation();
+	const { t, language } = useTranslation();
 	const lapCount = useDataStore((state) => state.state?.LapCount);
 	const track = useDataStore((state) => state.state?.TrackStatus);
 	const session = useDataStore((state) => state.state?.SessionInfo);
@@ -120,7 +120,7 @@ export default function TrackInfo() {
 					)}
 					<div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-400 text-sm font-black tracking-wider shadow-[0_0_15px_rgba(245,158,11,0.2)]">
 						<span>🏁</span>
-						<span>FINALIZADA</span>
+						<span>{t("sessions.finished", "FINALIZADA")}</span>
 					</div>
 				</div>
 			);
@@ -264,9 +264,9 @@ export default function TrackInfo() {
 		}
 	}
 
-	let currentTrackStatus = getTrackStatusMessage(track?.Status ? parseInt(track?.Status) : undefined);
+	let currentTrackStatus = getTrackStatusMessage(track?.Status ? parseInt(track?.Status) : undefined, language);
 	if (isRedFlag) {
-		currentTrackStatus = getTrackStatusMessage(5);
+		currentTrackStatus = getTrackStatusMessage(5, language);
 	}
 
 	return (
@@ -301,9 +301,7 @@ export default function TrackInfo() {
 			) : (
 				<div className="flex items-center gap-2 font-mono">
 					<span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
-					<span className="text-xs sm:text-sm font-black text-emerald-400 uppercase tracking-widest">
-						EN VIVO
-					</span>
+					<span className="text-xs sm:text-sm font-black text-emerald-400 uppercase tracking-widest">{t("telemetry.live", "EN VIVO")}</span>
 				</div>
 			)}
 

@@ -1,3 +1,4 @@
+import { useTranslation } from "@/hooks/useTranslation";
 import { useRef, useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { utc } from "moment";
@@ -22,7 +23,8 @@ type Props = {
 	gmtOffset: string;
 };
 
-export default function RadioMessage({ driver, capture, basePath, gmtOffset }: Props) {
+export default function RadioMessage({
+ driver, capture, basePath, gmtOffset }: Props) {
 	const audioRef = useRef<HTMLAudioElement | null>(null);
 	const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -78,11 +80,11 @@ export default function RadioMessage({ driver, capture, basePath, gmtOffset }: P
 				setSubError(json.message);
 				setShowSub(true);
 			} else {
-				setSubError("Traducción no disponible temporalmente.");
+				setSubError(t("radio.trans_unavailable", "Traducción no disponible temporalmente."));
 				setShowSub(true);
 			}
 		} catch {
-			setSubError("Error de conexión al traducir.");
+			setSubError(t("radio.trans_error", "Error de conexión al traducir."));
 			setShowSub(true);
 		} finally {
 			setSubLoading(false);
@@ -133,6 +135,7 @@ export default function RadioMessage({ driver, capture, basePath, gmtOffset }: P
 		});
 	};
 
+	const { t } = useTranslation();
 	const favoriteDriver = useSettingsStore((state) => isFavoriteDriver(driver, state.favoriteDrivers));
 
 	const localTime = utc(capture.Utc).local().format("HH:mm:ss");
@@ -149,7 +152,7 @@ export default function RadioMessage({ driver, capture, basePath, gmtOffset }: P
 					<span className="text-[10px] text-zinc-500 font-bold shrink-0">[{localTime}]</span>
 					<DriverTag className="!w-fit !text-[9px] shrink-0" teamColor={driver.TeamColour} short={driver.Tla} />
 					<span className="text-zinc-400 text-xs italic truncate font-sans">
-						&ldquo;{subtitle || simulatedTranscript || "Comunicación de boxes"}&rdquo;
+						&ldquo;{subtitle || simulatedTranscript || t("radio.pit_communication", "Comunicación de boxes")}&rdquo;
 					</span>
 				</div>
 				<button
@@ -157,7 +160,7 @@ export default function RadioMessage({ driver, capture, basePath, gmtOffset }: P
 					onClick={() => setManualState("open")}
 					className="text-[10px] text-amber-400 hover:text-amber-300 font-bold uppercase tracking-wider underline cursor-pointer shrink-0 ml-1"
 				>
-					Abrir
+					{t("radio.open_player", "Abrir")}
 				</button>
 			</motion.li>
 		);
@@ -189,17 +192,17 @@ export default function RadioMessage({ driver, capture, basePath, gmtOffset }: P
 						onClick={fetchSubtitle}
 						disabled={subLoading}
 						className="flex items-center gap-1 rounded border border-zinc-800 bg-zinc-900/80 px-1.5 py-0.5 text-[10px] font-mono text-zinc-400 hover:border-amber-500/40 hover:bg-zinc-800 hover:text-amber-400 transition-all cursor-pointer"
-						title="Traducir o subtitular radio con IA"
+						title={t("radio.ai_translate_tooltip", "Traducir o subtitular radio con IA")}
 					>
 						{subLoading ? (
 							<>
 								<Loader2 className="h-2.5 w-2.5 animate-spin text-amber-400" />
-								<span>Traduciendo...</span>
+								<span>{t("radio.translating", "Traduciendo...")}</span>
 							</>
 						) : (
 							<>
 								<Languages className="h-2.5 w-2.5 text-amber-400" />
-								<span>{subtitle ? (showSub ? "Ocultar" : "Ver Sub") : "Traducir"}</span>
+								<span>{subtitle ? (showSub ? t("radio.hide_sub", "Ocultar") : t("radio.show_sub", "Ver Sub")) : t("radio.translate_action", "Traducir")}</span>
 							</>
 						)}
 					</button>
@@ -209,7 +212,7 @@ export default function RadioMessage({ driver, capture, basePath, gmtOffset }: P
 							type="button"
 							onClick={() => setManualState("closed")}
 							className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
-							title="Cerrar reproductor"
+							title={t("radio.close_player", "Cerrar reproductor")}
 						>
 							<X className="w-3.5 h-3.5" />
 						</button>
@@ -235,7 +238,7 @@ export default function RadioMessage({ driver, capture, basePath, gmtOffset }: P
 			{(showSub && subtitle) || simulatedTranscript ? (
 				<div className="mt-1 flex items-start gap-1.5 rounded-lg bg-zinc-900/90 border border-amber-500/30 p-2 text-xs font-sans text-zinc-200 shadow-sm">
 					<span className="font-mono text-[9px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 shrink-0">
-						TRANSCRIPCIÓN
+						{t("radio.transcription", "TRANSCRIPCIÓN")}
 					</span>
 					<p className="italic leading-snug">&ldquo;{subtitle || simulatedTranscript}&rdquo;</p>
 				</div>

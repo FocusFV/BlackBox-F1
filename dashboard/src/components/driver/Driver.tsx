@@ -1,4 +1,6 @@
 "use client";
+
+import { useTranslation } from "@/hooks/useTranslation";
 import { useHeadToHeadStore } from "@/stores/useHeadToHeadStore";
 import { useDriverModalStore } from "@/stores/useDriverModalStore";
 
@@ -47,7 +49,9 @@ const inDangerZone = (position: number, sessionPart: number) => {
 	}
 };
 
-export default function Driver({ driver, timingDriver, position, teamColor, cumulativeGap, intervalGap }: Props) {
+export default function Driver({
+ driver, timingDriver, position, teamColor, cumulativeGap, intervalGap }: Props) {
+	const { t } = useTranslation();
 	const session = useDataStore((state) => state.state?.SessionInfo);
 	const lapCount = useDataStore((state) => state.state?.LapCount);
 	const sessionPart = useDataStore((state) => state.state?.TimingData?.SessionPart);
@@ -294,14 +298,14 @@ export default function Driver({ driver, timingDriver, position, teamColor, cumu
 							</div>
 							<div 
 								className="flex flex-col gap-1 text-[8px] font-bold opacity-50 cursor-help"
-								title="Telemetría de pedales y RPM: Señal de ECU en espera (requiere transmisión oficial F1 TV Pro)"
+								title={t("pedals.tooltip_ecu_waiting", "Telemetría de pedales y RPM: Señal de ECU en espera (requiere transmisión oficial F1 TV Pro)")}
 							>
 								<div className="flex items-center gap-1">
-									<span className="w-4 text-right text-[7px] text-zinc-500 font-bold leading-none">FRE</span>
+									<span className="w-4 text-right text-[7px] text-zinc-500 font-bold leading-none">{t("pedals.brake_abbr", "FRE")}</span>
 									<div className="h-1.5 w-14 rounded-full bg-zinc-900 border border-zinc-800/80" />
 								</div>
 								<div className="flex items-center gap-1">
-									<span className="w-4 text-right text-[7px] text-zinc-500 font-bold leading-none">ACE</span>
+									<span className="w-4 text-right text-[7px] text-zinc-500 font-bold leading-none">{t("pedals.throttle_abbr", "ACE")}</span>
 									<div className="h-1.5 w-14 rounded-full bg-zinc-900 border border-zinc-800/80" />
 								</div>
 								<div className="flex items-center gap-1">

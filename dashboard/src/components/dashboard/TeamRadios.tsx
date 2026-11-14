@@ -1,3 +1,4 @@
+import { useTranslation } from "@/hooks/useTranslation";
 import { AnimatePresence } from "motion/react";
 import clsx from "clsx";
 
@@ -8,6 +9,7 @@ import { sortUtc } from "@/lib/sorting";
 import RadioMessage from "@/components/dashboard/RadioMessage";
 
 export default function TeamRadios() {
+	const { t } = useTranslation();
 	const drivers = useDataStore((state) => state.state?.DriverList);
 	const teamRadios = useDataStore((state) => state.state?.TeamRadio);
 	const sessionPath = useDataStore((state) => state.state?.SessionInfo?.Path);
@@ -22,8 +24,8 @@ export default function TeamRadios() {
 
 			{teamRadios && drivers && teamRadios.Captures && teamRadios.Captures.length === 0 && (
 				<li className="flex flex-col items-center justify-center p-6 text-center text-zinc-500 font-mono text-xs bg-zinc-950/40 rounded-xl border border-zinc-900/60">
-					<span className="text-[10px] uppercase tracking-widest text-zinc-600 mb-1">CANAL DE RADIO DISPONIBLE</span>
-					<p className="text-zinc-400">Sin mensajes en este momento. Pulsa <strong className="text-amber-400">[Radio]</strong> en el HUD para emitir.</p>
+					<span className="text-[10px] uppercase tracking-widest text-zinc-600 mb-1">{t("radio.channel_available", "CANAL DE RADIO DISPONIBLE")}</span>
+					<p className="text-zinc-400">{t("radio.no_messages", "Sin mensajes en este momento. Pulsa [Radio] en el HUD para emitir.")}</p>
 				</li>
 			)}
 

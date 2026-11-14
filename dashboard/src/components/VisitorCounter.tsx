@@ -1,10 +1,13 @@
 "use client";
 
+import { useTranslation } from "@/hooks/useTranslation";
+
 import { useEffect, useState } from "react";
 
 const INITIAL_BASE = "6.123";
 
 export function VisitorCounter() {
+	const { t } = useTranslation();
 	const [countStr, setCountStr] = useState<string>(INITIAL_BASE);
 
 	useEffect(() => {
@@ -41,14 +44,14 @@ export function VisitorCounter() {
 	return (
 		<div
 			className="inline-flex items-center gap-1.5 text-xs text-zinc-400 font-mono bg-zinc-900/40 px-2.5 py-0.5 rounded-full border border-zinc-800/60 shadow-xs hover:border-zinc-700/80 transition-colors select-none"
-			title="Total de espectadores acumulados en el Pit-Wall"
+			title={t("counter.total_tooltip", "Total de espectadores acumulados en el Pit-Wall")}
 		>
 			<span className="relative flex h-1.5 w-1.5">
 				<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
 				<span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
 			</span>
 			<span className="text-zinc-300 font-bold tracking-tight">{countStr}</span>
-			<span className="text-zinc-500 font-sans text-[11px]">espectadores</span>
+			<span className="text-zinc-500 font-sans text-[11px]">{t("counter.spectators", "espectadores")}</span>
 		</div>
 	);
 }

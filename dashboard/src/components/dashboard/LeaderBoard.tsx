@@ -12,6 +12,7 @@ import { sortPos } from "@/lib/sorting";
 import Driver from "@/components/driver/Driver";
 
 export default function LeaderBoard() {
+    const { t, language } = useTranslation();
     const drivers = useDataStore(({ state }) => state?.DriverList);
     const driversTiming = useDataStore(({ state }) => state?.TimingData);
 
@@ -74,13 +75,13 @@ export default function LeaderBoard() {
                                 if (isDNF) {
                                     cumulativeGap = "RET";
                                 } else if (pos === 1) {
-                                    cumulativeGap = "LÍDER";
+                                    cumulativeGap = t("telemetry.leader", "LÍDER");
                                 } else {
                                     const lapMatch = rawGtl.match(/^(\d+)\s*L/i) || rawGtl.match(/^\+(\d+)\s*L/i);
                                     if (lapMatch) {
                                         const laps = parseInt(lapMatch[1], 10);
                                         lastLapsDown = Math.max(lastLapsDown, laps);
-                                        cumulativeGap = laps === 1 ? "+1 VTA" : `+${laps} VTAS`;
+                                        cumulativeGap = laps === 1 ? (language === "en" ? "+1 LAP" : "+1 VTA") : (language === "en" ? `+${laps} LAPS` : `+${laps} VTAS`);
                                     } else if (rawGtl.includes(":")) {
                                         cumulativeGap = rawGtl.startsWith("+") ? rawGtl : `+${rawGtl}`;
                                     } else if (rawGtl) {
@@ -90,7 +91,7 @@ export default function LeaderBoard() {
                                                 lastValidGapSec = numSec;
                                                 cumulativeGap = `+${numSec.toFixed(3)}`;
                                             } else if (lastLapsDown > 0) {
-                                                cumulativeGap = lastLapsDown === 1 ? "+1 VTA" : `+${lastLapsDown} VTAS`;
+                                                cumulativeGap = lastLapsDown === 1 ? (language === "en" ? "+1 LAP" : "+1 VTA") : (language === "en" ? `+${lastLapsDown} LAPS` : `+${lastLapsDown} VTAS`);
                                             } else {
                                                 const intrNum = parseFloat(rawInterval.replace("+", ""));
                                                 lastValidGapSec += (!isNaN(intrNum) && intrNum > 0 ? intrNum : 0.8);

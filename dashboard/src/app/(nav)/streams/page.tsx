@@ -438,7 +438,7 @@ export default function StreamsPage() {
 									triggerHaptic("light");
 									toggleSidebar();
 								}}
-								title={pinnedSidebar ? "Ocultar menú lateral" : "Fijar menú lateral"}
+								title={pinnedSidebar ? t("sidebar.hide_sidebar", "Ocultar menú lateral") : t("sidebar.pin_sidebar", "Fijar menú lateral")}
 							/>
 						</div>
 
@@ -498,7 +498,7 @@ export default function StreamsPage() {
 							) : nextSessionName && countdownText ? (
 								<div className="my-5 w-full px-4 py-3 rounded-2xl bg-zinc-950/80 border border-zinc-800/80 flex flex-col items-center">
 									<span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
-										Próxima Sesión:{" "}
+										{t("streams_page.next_session_label", "Próxima Sesión:")}{" "}
 										<span className="text-amber-400 font-black">
 											{translateSessionName(nextSessionName)}
 										</span>
@@ -511,13 +511,7 @@ export default function StreamsPage() {
 									</span>
 								</div>
 							) : (
-								<p className="text-zinc-400 text-xs font-sans mt-3 leading-relaxed">
-									La señal de video en vivo se habilita automáticamente{" "}
-									<span className="text-zinc-200 font-bold">
-										15 minutos antes
-									</span>{" "}
-									de cada sesión oficial (FP1, FP2, FP3, Qualy, Sprint o Carrera).
-								</p>
+								<p className="text-zinc-400 text-xs font-sans mt-3 leading-relaxed">{t("streams_page.signal_auto_info", "La señal de video en vivo se habilita automáticamente 15 minutos antes de cada sesión oficial (FP1, FP2, FP3, Qualy, Sprint o Carrera).")}</p>
 							)}
 						</div>
 					</div>
@@ -532,7 +526,7 @@ export default function StreamsPage() {
 										triggerHaptic("light");
 										toggleSidebar();
 									}}
-									title={pinnedSidebar ? "Ocultar menú lateral" : "Fijar menú lateral"}
+									title={pinnedSidebar ? t("sidebar.hide_sidebar", "Ocultar menú lateral") : t("sidebar.pin_sidebar", "Fijar menú lateral")}
 								/>
 								<div>
 									<div className="flex items-center gap-2.5">
@@ -549,7 +543,7 @@ export default function StreamsPage() {
 									<p className="text-zinc-500 text-xs mt-1">
 										{bypass
 											? t("streams_page.test_access", "Acceso manual de prueba")
-											: `Señal satelital activa: ${activeRace}`}
+											: t("streams_page.satellite_signal_active", "Señal satelital activa: {race}").replace("{race}", activeRace)}
 									</p>
 								</div>
 							</div>

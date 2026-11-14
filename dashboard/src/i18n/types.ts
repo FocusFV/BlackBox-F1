@@ -200,6 +200,37 @@ export interface TranslationDictionary {
 		fav_drivers: string;
 		fav_drivers_desc: string;
 		no_fav_drivers: string;
+		test_vibration: string;
+		haptic_feedback_desc: string;
+		grid_density: string;
+		grid_density_desc: string;
+		comfort: string;
+		interval_opt: string;
+		leader_opt: string;
+		display_hud_title: string;
+		display_hud_desc: string;
+		car_metrics: string;
+		car_metrics_desc: string;
+		corner_numbers: string;
+		corner_numbers_desc: string;
+		table_headers: string;
+		table_headers_desc: string;
+		best_sectors: string;
+		best_sectors_desc: string;
+		minisectors: string;
+		minisectors_desc: string;
+		safety_car_colors: string;
+		safety_car_colors_desc: string;
+		race_control_chime: string;
+		race_control_chime_desc: string;
+		auto_play_radios: string;
+		auto_play_radios_desc: string;
+		chime_volume: string;
+		units_title: string;
+		units_desc: string;
+		kmh_unit: string;
+		mph_unit: string;
+		units_fia_note: string;
 	};
 	common: {
 		loading: string;
@@ -368,6 +399,8 @@ export interface TranslationDictionary {
 		auto_switch_active: string;
 		recommendation_title: string;
 		recommendation_desc: string;
+		signal_auto_info: string;
+		satellite_signal_active: string;
 	};
 	modals: {
 		support_badge: string;
@@ -419,6 +452,9 @@ export interface TranslationDictionary {
 		circuit_distance_total: string;
 		support_note_community: string;
 		h2h_instant_datalink: string;
+		laps_abbr: string;
+		close_modal: string;
+		h2h_open_tooltip: string;
 	};
 	tv_sync: {
 		title: string;
@@ -530,5 +566,78 @@ export interface TranslationDictionary {
 		tv_sync_ref_1: string;
 		tv_sync_ref_2: string;
 		tv_sync_ref_3: string;
+	};
+	dashboard: {
+		pitwall_link_realtime: string;
+		syncing_live_telemetry: string;
+		session_finished: string;
+		final_results_of: string;
+		session_word: string;
+		panel_race_control: string;
+		panel_race_control_desc: string;
+		panel_team_radios: string;
+		panel_team_radios_desc: string;
+		panel_track_limits: string;
+		panel_track_limits_desc: string;
+		badge_official: string;
+		badge_live: string;
+		badge_table: string;
+	};
+	radio: {
+		channel_available: string;
+		no_messages: string;
+		pit_communication: string;
+		transcription: string;
+		ai_translate_tooltip: string;
+		translating: string;
+		hide_sub: string;
+		show_sub: string;
+		translate_action: string;
+		close_player: string;
+		open_player: string;
+		trans_unavailable: string;
+		trans_error: string;
+	};
+	track_limits: {
+		no_violations: string;
+		infraction: string;
+		infractions: string;
+		penalty_seconds: string;
+		pos_after_penalty: string;
+	};
+	map: {
+		f1_qualy: string;
+		official: string;
+		starts_in: string;
+		red_flag_pits: string;
+		cars_in_pits: string;
+		session_stopped: string;
+		no_cars_on_track: string;
+		official_track_live: string;
+		gps_waiting: string;
+	};
+	pedals: {
+		tooltip_ecu_waiting: string;
+		brake_abbr: string;
+		throttle_abbr: string;
+		rpm_abbr: string;
+	};
+	counter: {
+		total_tooltip: string;
+		spectators: string;
+	};
+	youtube: {
+		official_badge: string;
+		watch_on_yt: string;
+		loading: string;
+	};
+	track_status: {
+		track_clear: string;
+		yellow_flag: string;
+		flag: string;
+		safety_car: string;
+		red_flag: string;
+		vsc_deployed: string;
+		vsc_ending: string;
 	};
 }

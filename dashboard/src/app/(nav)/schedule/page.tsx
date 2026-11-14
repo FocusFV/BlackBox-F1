@@ -75,9 +75,7 @@ export default function SchedulePage() {
 				<>
 					{/* Sección {t("schedule_page.next_event_title", "Próximo Evento")} */}
 					<div className="my-6">
-						<h1 className="text-3xl font-extrabold uppercase tracking-wider text-zinc-100 border-l-4 border-amber-500 pl-3">
-							Próximo Evento
-						</h1>
+						<h1 className="text-3xl font-extrabold uppercase tracking-wider text-zinc-100 border-l-4 border-amber-500 pl-3">{t("schedule_page.next_event_title", "Próximo Evento")}</h1>
 						<p className="text-zinc-500 text-sm mt-1">{t("schedule_page.local_time_note", "Todos los horarios corresponden a tu hora local")}</p>
 					</div>
 

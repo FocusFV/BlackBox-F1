@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/hooks/useTranslation";
+
 /* eslint-disable react-hooks/refs */
 import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
@@ -78,6 +80,7 @@ function smoothAngle(prevAngle: number, newAngle: number): number {
 }
 
 export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: string[]; circuitKey?: number }) {
+	const { t, language } = useTranslation();
 	const showCornerNumbers = useSettingsStore((state) => state.showCornerNumbers);
 	const favoriteDrivers = useSettingsStore((state) => state.favoriteDrivers);
 
@@ -292,7 +295,7 @@ export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: s
 	const yellowSectors = useMemo(() => findYellowSectors(raceControlMessages), [raceControlMessages]);
 
 	const renderedSectors = useMemo(() => {
-		const status = isRedFlag ? getTrackStatusMessage(5) : getTrackStatusMessage(trackStatus?.Status ? parseInt(trackStatus.Status) : undefined);
+		const status = isRedFlag ? getTrackStatusMessage(5, language) : getTrackStatusMessage(trackStatus?.Status ? parseInt(trackStatus.Status) : undefined, language);
 		return sectors.map((sector) => {
 			const color = getSectorColor(sector, status?.bySector, status?.trackColor, yellowSectors);
 			return {
@@ -482,12 +485,12 @@ export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: s
 					<div className="flex items-center justify-between border-b border-zinc-800/80 pb-1.5 mb-2">
 						<span className="text-[10px] font-black tracking-widest text-red-500 uppercase flex items-center gap-1.5">
 							<span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
-							F1 CLASIFICACIÓN
+							{t("map.f1_qualy", "F1 CLASIFICACIÓN")}
 						</span>
-						<span className="text-[9px] font-bold text-zinc-500 uppercase">OFICIAL</span>
+						<span className="text-[9px] font-bold text-zinc-500 uppercase">{t("map.official", "OFICIAL")}</span>
 					</div>
 					<p className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">
-						{nextPartName} EMPIEZA EN
+						{nextPartName} {t("map.starts_in", "EMPIEZA EN")}
 					</p>
 					<p className="text-3xl font-black text-white font-mono tracking-wider tabular-nums mt-0.5">
 						{breakTimeFormatted || "02:00"}
@@ -499,11 +502,11 @@ export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: s
 				<div className={clsx("flex items-center gap-2 rounded-lg px-3.5 py-2 shadow-2xl backdrop-blur-md", isRedFlag ? "bg-red-950/95 border border-red-500/60" : "bg-zinc-950/95 border border-amber-500/40")}>
 					<span className={clsx("h-2 w-2 rounded-full animate-ping", isRedFlag ? "bg-red-500" : "bg-amber-400")} />
 					<span className={clsx("text-xs font-black uppercase tracking-wider", isRedFlag ? "text-red-400" : "text-amber-400")}>
-						{isRedFlag ? "Bandera Roja - En Boxes" : "Monoplazas en Boxes"}
+						{isRedFlag ? t("map.red_flag_pits", "Bandera Roja - En Boxes") : t("map.cars_in_pits", "Monoplazas en Boxes")}
 					</span>
 				</div>
 				<span className="text-[10px] font-semibold text-zinc-400 bg-zinc-900/90 px-2.5 py-1 rounded-md border border-zinc-800 shadow-sm backdrop-blur-sm">
-					{isRedFlag ? "Sesión detenida por dirección de carrera" : "Sin monoplazas rodando en circuito"}
+					{isRedFlag ? t("map.session_stopped", "Sesión detenida por dirección de carrera") : t("map.no_cars_on_track", "Sin monoplazas rodando en circuito")}
 				</span>
 			</div>
 		)}
@@ -516,8 +519,8 @@ export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: s
 					<span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
 				</span>
 				<div className="flex flex-col">
-					<span className="text-[10px] font-mono font-bold text-zinc-300 tracking-wide uppercase">TRAZADO OFICIAL EN VIVO</span>
-					<span className="text-[8px] font-mono text-zinc-500">Monoplazas: señal satelital en espera de coordenadas GPS oficiales</span>
+					<span className="text-[10px] font-mono font-bold text-zinc-300 tracking-wide uppercase">{t("map.official_track_live", "TRAZADO OFICIAL EN VIVO")}</span>
+					<span className="text-[8px] font-mono text-zinc-500">{t("map.gps_waiting", "Monoplazas: señal satelital en espera de coordenadas GPS oficiales")}</span>
 				</div>
 			</div>
 		)}

@@ -161,7 +161,7 @@ export function HeadToHeadModal({
 						type="button"
 						onClick={onClose}
 						className="absolute top-4 right-4 rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors"
-						title="Cerrar modal"
+						title={t("modals.close_modal", "Cerrar modal")}
 					>
 						<X className="h-5 w-5" />
 					</button>
@@ -170,7 +170,7 @@ export function HeadToHeadModal({
 					<div className="flex items-center gap-2 mb-4">
 						<Swords className="h-5 w-5 text-red-500" />
 						<h3 className="text-base font-black uppercase tracking-wider text-white">
-							Cara a Cara Telemetría (Head-to-Head)
+							{t("modals.h2h_title", "Cara a Cara Telemetría (Head-to-Head)")}
 						</h3>
 					</div>
 
@@ -358,14 +358,14 @@ export function HeadToHeadModal({
 						{/* Neumáticos y Stint */}
 						<div className="flex items-center justify-between rounded-lg bg-zinc-900/30 p-2.5 text-xs">
 							<span className="font-semibold text-zinc-300">
-								{stint1?.Compound || "N/A"} ({stint1?.TotalLaps || 0} vtas)
+								{stint1?.Compound || "N/A"} ({stint1?.TotalLaps || 0} {t("modals.laps_abbr", "vtas")})
 							</span>
 							<div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-zinc-400 text-[11px]">
 								<Zap className="h-3.5 w-3.5 text-amber-400" />
 								{t("modals.h2h_tyre", "Compuesto / Stint")}
 							</div>
 							<span className="font-semibold text-zinc-300">
-								{stint2?.Compound || "N/A"} ({stint2?.TotalLaps || 0} vtas)
+								{stint2?.Compound || "N/A"} ({stint2?.TotalLaps || 0} {t("modals.laps_abbr", "vtas")})
 							</span>
 						</div>
 
