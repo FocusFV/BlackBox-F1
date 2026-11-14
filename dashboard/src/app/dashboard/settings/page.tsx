@@ -8,7 +8,10 @@ import Input from "@/components/ui/Input";
 import SegmentedControls from "@/components/ui/SegmentedControls";
 import FavoriteDrivers from "@/components/settings/FavoriteDrivers";
 import Footer from "@/components/Footer";
+import { useTranslation } from "@/hooks/useTranslation";
+import LanguageSelector from "@/components/LanguageSelector";
 import { 
+	Globe,
 	Volume2, 
 	Monitor, 
 	Sliders, 
@@ -21,6 +24,7 @@ import {
 
 export default function Settings() {
 	const settings = useSettingsStore();
+	const { t } = useTranslation();
 
 	const themeOptions: {
 		value: GoldTheme;
@@ -83,6 +87,23 @@ export default function Settings() {
 						<span>Modo Segunda Pantalla: Wake Lock permanente activo (pantalla encendida)</span>
 					</div>
 				</div>
+
+				{/* SECCIÓN: IDIOMA OFICIAL / SYSTEM LANGUAGE */}
+				<section className="bg-zinc-950/60 border border-amber-500/20 rounded-2xl p-6 backdrop-blur-xl space-y-4 shadow-2xl relative overflow-hidden">
+					<div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
+						<Globe className="w-4 h-4 text-amber-400" />
+						<div>
+							<h2 className="text-sm font-bold text-amber-400 uppercase tracking-widest">
+								{t("settings.language", "Idioma del Sistema / System Language")}
+							</h2>
+							<p className="text-[11px] text-zinc-400 font-sans">
+								{t("settings.language_desc", "Seleccioná el idioma oficial para la interfaz, modales y avisos de pista.")}
+							</p>
+						</div>
+					</div>
+
+					<LanguageSelector variant="settings" />
+				</section>
 
 				{/* SECCIÓN 1: PALETA DE ORO & ESTÉTICA DE LA APP */}
 				<section className="bg-zinc-950/60 border border-amber-500/20 rounded-2xl p-6 backdrop-blur-xl space-y-5 shadow-2xl relative overflow-hidden">

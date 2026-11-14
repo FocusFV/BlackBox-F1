@@ -8,10 +8,13 @@ import { usePathname } from "next/navigation";
 import githubIcon from "public/icons/github.svg";
 import coffeeIcon from "public/icons/bmc-logo.svg";
 import { useSupportModalStore } from "@/stores/useSupportModalStore";
+import { useTranslation } from "@/hooks/useTranslation";
+import LanguageSelector from "@/components/LanguageSelector";
 
 export default function Navbar() {
 	const [isOpen, setIsOpen] = useState(false);
 	const pathname = usePathname();
+	const { t } = useTranslation();
 
 	// 🕵️ LÓGICA DE SCROLL REFORZADA
 	const [isVisible, setIsVisible] = useState(true);
@@ -42,9 +45,9 @@ export default function Navbar() {
 	const shouldBeVisible = isDashboard ? true : isVisible;
 
 	const navLinks = [
-		{ name: "Panel", href: "/dashboard" },
-		{ name: "Calendario", href: "/schedule" },
-		{ name: "Ayuda", href: "/help" },
+		{ name: t("nav.dashboard", "Panel"), href: "/dashboard" },
+		{ name: t("nav.schedule", "Calendario"), href: "/schedule" },
+		{ name: t("nav.help", "Ayuda"), href: "/help" },
 	];
 
 	return (
@@ -126,7 +129,7 @@ export default function Navbar() {
 						}}
 					>
 						<Image src={coffeeIcon} alt="Café" width={20} height={20} className="opacity-70 brightness-0 invert transition-all group-hover:opacity-100 group-hover:text-amber-400 group-hover:scale-105 duration-200" />
-						<span>Doname un café</span>
+						<span>{t("nav.coffee", "Doname un café")}</span>
 					</Link>
 
 					{/* Botón GitHub (Solo Icono, transparente) */}
@@ -138,6 +141,9 @@ export default function Navbar() {
 					>
 						<Image src={githubIcon} alt="GitHub" width={18} height={18} className="opacity-70 brightness-0 invert transition-transform group-hover:scale-105 duration-200" />
 					</Link>
+
+					{/* 🌐 SELECTOR DE IDIOMA */}
+					<LanguageSelector variant="navbar" />
 				</div>
 
 				{/* DISPOSITIVOS MÓVILES */}
@@ -170,6 +176,9 @@ export default function Navbar() {
 						</Link>
 					))}
 					<div className="h-[1px] bg-zinc-900 my-2" />
+					<div className="py-1">
+						<LanguageSelector variant="drawer" />
+					</div>
 					<div className="flex justify-between items-center gap-4">
 						<Link className="flex flex-1 items-center justify-center gap-2 px-4 py-2 rounded-xl bg-transparent border border-zinc-800 text-xs text-zinc-400 cursor-pointer" href="https://buymeacoffee.com/focusfv" onClick={(e) => { e.preventDefault(); setIsOpen(false); useSupportModalStore.getState().open(); }}>
 							<Image src={coffeeIcon} alt="Café" width={18} height={18} className="brightness-0 invert opacity-60" />

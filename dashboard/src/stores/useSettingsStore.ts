@@ -3,8 +3,12 @@ import { create } from "zustand";
 
 type SpeedUnit = "metric" | "imperial";
 export type GoldTheme = "classic" | "neon" | "rose" | "oled";
+export type Language = "es" | "en" | "pt";
 
 type SettingsStore = {
+	language: Language;
+	setLanguage: (language: Language) => void;
+
 	delay: number;
 	setDelay: (delay: number) => void;
 
@@ -65,6 +69,9 @@ export const useSettingsStore = create<SettingsStore>()(
 	subscribeWithSelector(
 		persist(
 			(set) => ({
+				language: "es",
+				setLanguage: (language: Language) => set({ language }),
+
 				delay: 0,
 				setDelay: (delay: number) => set({ delay }),
 
