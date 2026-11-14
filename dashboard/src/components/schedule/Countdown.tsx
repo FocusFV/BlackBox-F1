@@ -27,7 +27,7 @@ const countryTranslation: Record<string, string> = {
 };
 
 export default function Countdown({ next, type, countryName, eventName }: Props) {
-	const { t } = useTranslation();
+	const { t, language } = useTranslation();
 	const [[days, hours, minutes, seconds], setDuration] = useState<
 		[number | null, number | null, number | null, number | null]
 	>([null, null, null, null]);
@@ -86,40 +86,40 @@ export default function Countdown({ next, type, countryName, eventName }: Props)
 		let isPlural = false;
 		if (raw === "race") {
 			if (eventName && eventName.toLowerCase().includes("vegas")) {
-				title = "EL GRAN PREMIO DE LAS VEGAS";
+				title = language === "en" ? "THE LAS VEGAS GRAND PRIX" : language === "pt" ? "O GRANDE PRÊMIO DE LAS VEGAS" : "EL GRAN PREMIO DE LAS VEGAS";
 			} else if (eventName) {
-				title = `EL ${translateGpName(eventName).toUpperCase()}`;
+				title = language === "en" ? `THE ${translateGpName(eventName, "en").toUpperCase()}` : language === "pt" ? `O ${translateGpName(eventName, "pt").toUpperCase()}` : `EL ${translateGpName(eventName, "es").toUpperCase()}`;
 			} else {
 				const translatedCountry = countryName ? (countryTranslation[countryName] || countryName) : "";
 				if (translatedCountry.toLowerCase().includes("estados unidos")) {
 					title = "EL GRAN PREMIO DE LAS VEGAS";
 				} else {
-					title = translatedCountry ? `LA CARRERA DE ${translatedCountry.toUpperCase()}` : "LA CARRERA";
+					title = language === "en" ? (translatedCountry ? `THE ${translatedCountry.toUpperCase()} RACE` : "THE RACE") : language === "pt" ? (translatedCountry ? `A CORRIDA DE ${translatedCountry.toUpperCase()}` : "A CORRIDA") : (translatedCountry ? `LA CARRERA DE ${translatedCountry.toUpperCase()}` : "LA CARRERA");
 				}
 			}
 		} else if (raw === "qualifying" || raw === "qualy") {
-			title = "LA CLASIFICACIÓN";
+			title = t("schedule_page.action_qualy", "LA CLASIFICACIÓN");
 		} else if (raw === "sprint" || raw === "sprintrace") {
-			title = "LA CARRERA SPRINT";
+			title = t("schedule_page.action_sprint", "LA CARRERA SPRINT");
 		} else if (raw.includes("sprint") && (raw.includes("shootout") || raw.includes("qualif"))) {
-			title = "LA CLASIF. SPRINT";
+			title = t("schedule_page.action_sprint_qualy", "LA CLASIF. SPRINT");
 		} else if (raw === "practice1" || raw === "fp1") {
-			title = "LOS LIBRES 1";
+			title = t("schedule_page.action_fp1", "LOS LIBRES 1");
 			isPlural = true;
 		} else if (raw === "practice2" || raw === "fp2") {
-			title = "LOS LIBRES 2";
+			title = t("schedule_page.action_fp2", "LOS LIBRES 2");
 			isPlural = true;
 		} else if (raw === "practice3" || raw === "fp3") {
-			title = "LOS LIBRES 3";
+			title = t("schedule_page.action_fp3", "LOS LIBRES 3");
 			isPlural = true;
 		} else {
 			title = (next.kind || "").toUpperCase();
 		}
 
 		if (isLiveNow) {
-			return `${title} EN CURSO`;
+			return language === "en" ? `${title} IN PROGRESS` : language === "pt" ? `${title} EM ANDAMENTO` : `${title} EN CURSO`;
 		}
-		return isPlural ? `COMIENZAN ${title} EN` : `COMIENZA ${title} EN`;
+		return language === "en" ? `${title} STARTS IN` : language === "pt" ? (isPlural ? `COMEÇAM ${title} EM` : `COMEÇA ${title} EM`) : (isPlural ? `COMIENZAN ${title} EN` : `COMIENZA ${title} EN`);
 	})();
 
 	return (

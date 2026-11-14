@@ -10,6 +10,7 @@ import DriverGap from "@/components/driver/DriverGap";
 import DriverLapTime from "@/components/driver/DriverLapTime";
 
 import { sortPos } from "@/lib/sorting";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useDataStore } from "@/stores/useDataStore";
 import type { Driver, TimingDataDriver } from "@/types/state.type";
 import { useEffect } from "react";
@@ -30,6 +31,7 @@ const driverTeamColorMap: { [key: string]: string } = {
 };
 
 export default function TrackMap() {
+	const { t } = useTranslation();
 	useEffect(() => {
 		if (typeof window !== "undefined") {
 			const isSimActive = sessionStorage.getItem("f1_pitwall_sim") === "active";
@@ -52,17 +54,17 @@ export default function TrackMap() {
 				<div className="flex items-center gap-3">
 					<span className="text-xl">📍</span>
 					<div className="flex flex-col">
-						<span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">// MAPA DE PISTA EN VIVO</span>
+						<span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{t("telemetry.track_map_live", "// MAPA DE PISTA EN VIVO")}</span>
 						<span className="text-xs font-black text-zinc-200 uppercase tracking-tight">{activeTrackName}</span>
 					</div>
 				</div>
 				<div className="flex items-center gap-4 text-[10px] font-bold text-zinc-400">
 					<div className="flex items-center gap-1.5">
 						<span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-						<span>TRAZADA ÓPTIMA ACTIVA</span>
+						<span>{t("telemetry.optimal_line", "TRAZADA ÓPTIMA ACTIVA")}</span>
 					</div>
 					<div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 bg-zinc-900 text-amber-500 rounded border border-zinc-800">
-						REGULACIÓN PU 2026
+						{t("telemetry.pu_regulation", "REGULACIÓN PU 2026")}
 					</div>
 				</div>
 			</div>
@@ -115,11 +117,11 @@ export default function TrackMap() {
 				{/* PISTA DERECHA */}
 				<div className="md:col-span-7 lg:col-span-8 relative flex flex-col justify-center items-center border border-zinc-900 bg-zinc-950/30 backdrop-blur-sm rounded-xl h-full p-4 overflow-hidden">
 					<div className="absolute top-4 left-4 z-10 bg-zinc-950/90 p-3 rounded-xl border border-zinc-900 shadow-2xl max-w-[240px]">
-						<p className="text-[9px] font-black tracking-widest text-zinc-500 uppercase border-b border-zinc-900 pb-1.5 mb-1.5">// DATOS DE TELEMETRÍA EN PISTA</p>
+						<p className="text-[9px] font-black tracking-widest text-zinc-500 uppercase border-b border-zinc-900 pb-1.5 mb-1.5">{t("telemetry.track_telemetry_data", "// DATOS DE TELEMETRÍA EN PISTA")}</p>
 						<ul className="space-y-1 text-[10px] text-zinc-400">
-							<li className="flex justify-between"><span className="font-bold text-zinc-500">Trazado Ideal:</span> <span className="text-emerald-500 font-black">Proyectado</span></li>
-							<li className="flex justify-between"><span className="font-bold text-zinc-500">Vértices y Curvas:</span> <span className="text-zinc-200 font-black">Modo HUD Activo</span></li>
-							<li className="flex justify-between"><span className="font-bold text-zinc-500">Boost PU 2026:</span> <span className="text-amber-500 font-black">Manual Override Activo</span></li>
+							<li className="flex justify-between"><span className="font-bold text-zinc-500">{t("telemetry.ideal_racing_line", "Trazado Ideal: Proyectado")}</span></li>
+							<li className="flex justify-between"><span className="font-bold text-zinc-500">{t("telemetry.corners_vertices", "Vértices y Curvas: Modo HUD Activo")}</span></li>
+							<li className="flex justify-between"><span className="font-bold text-zinc-500">{t("telemetry.boost_pu_2026", "Boost PU 2026: Manual Override Activo")}</span></li>
 						</ul>
 					</div>
 					<div className="w-full h-full flex items-center justify-center relative">

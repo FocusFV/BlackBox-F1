@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import maplibregl, { Map } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -8,6 +9,7 @@ import { fetchCoords } from "@/lib/geocode";
 import { useDataStore } from "@/stores/useDataStore";
 
 export function WeatherMap() {
+	const { t } = useTranslation();
 	const meeting = useDataStore((state) => state.state?.SessionInfo?.Meeting);
 	const mapContainerRef = useRef<HTMLDivElement>(null);
 	const mapRef = useRef<Map | null>(null);
@@ -149,7 +151,7 @@ export function WeatherMap() {
 			<div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,161,155,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,161,155,0.04)_1px,transparent_1px)] bg-[size:2rem_2rem] pointer-events-none" />
 			{loading && (
 				<div className="absolute inset-0 flex items-center justify-center bg-black/80 z-20 font-mono text-xs text-[#00A19B] animate-pulse">
-					🛰️ Conectando radar satelital...
+					{t("weather.connecting_radar", "🛰️ Conectando radar satelital...")}
 				</div>
 			)}
 		</div>

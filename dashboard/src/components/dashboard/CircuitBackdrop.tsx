@@ -426,14 +426,14 @@ export function CircuitBackdrop({
 									{circuit.raceLaps > 0 && (
 										<span className="font-mono text-[11px] font-bold text-zinc-200 flex items-center gap-1.5 bg-black/65 px-2.5 py-0.5 rounded-full border border-zinc-800/80 backdrop-blur-md">
 											<RotateCcw className="w-3.5 h-3.5 text-amber-400" />
-											<span>Número de Vueltas: <strong className="text-amber-300">{circuit.raceLaps}</strong></span>
+											<span>{t("modals.circuit_laps_count", "Número de Vueltas:")} <strong className="text-amber-300">{circuit.raceLaps}</strong></span>
 										</span>
 									)}
 
 									{circuit.raceDistance && (
 										<span className="font-mono text-[11px] font-bold text-zinc-200 flex items-center gap-1.5 bg-black/65 px-2.5 py-0.5 rounded-full border border-zinc-800/80 backdrop-blur-md">
 											<Gauge className="w-3.5 h-3.5 text-emerald-400" />
-											<span>Distancia de Carrera: <strong className="text-emerald-300">{circuit.raceDistance}</strong></span>
+											<span>{t("modals.circuit_distance_total", "Distancia de Carrera:")} <strong className="text-emerald-300">{circuit.raceDistance}</strong></span>
 										</span>
 									)}
 

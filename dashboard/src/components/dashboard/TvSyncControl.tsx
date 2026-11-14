@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { Tv, Zap, ChevronDown, ChevronUp, Plus, Minus } from "lucide-react";
 
 export function TvSyncControl() {
+	const { t } = useTranslation();
 	const delay = useSettingsStore((s) => s.delay);
 	const setDelay = useSettingsStore((s) => s.setDelay);
 	const isPaused = useSettingsStore((s) => s.delayIsPaused);
@@ -18,9 +20,9 @@ export function TvSyncControl() {
 	};
 
 	const PRESETS = [
-		{ label: "En Vivo", seconds: 0, icon: Zap, desc: "Telemetría pura sin retraso" },
-		{ label: "Disney+ / F1TV", seconds: 35, icon: Tv, desc: "~35 seg de retraso de transmisión" },
-		{ label: "Fox Sports / TV", seconds: 45, icon: Tv, desc: "~45 seg de retraso en cable" },
+		{ label: t("tv_sync.preset_live", "En Vivo"), seconds: 0, icon: Zap, desc: t("tv_sync.preset_live_desc", "Telemetría pura sin retraso") },
+		{ label: t("tv_sync.preset_disney", "Disney+ / F1TV"), seconds: 35, icon: Tv, desc: t("tv_sync.preset_disney_desc", "~35 seg de retraso de transmisión") },
+		{ label: t("tv_sync.preset_fox", "Fox Sports / TV"), seconds: 45, icon: Tv, desc: t("tv_sync.preset_fox_desc", "~45 seg de retraso en cable") },
 	];
 
 	return (
@@ -31,11 +33,11 @@ export function TvSyncControl() {
 					type="button"
 					onClick={() => setIsExpanded(!isExpanded)}
 					className="flex items-center gap-1.5 px-2 py-1 text-zinc-300 hover:text-white transition-colors"
-					title="Sincronizar telemetría con transmisión de TV"
+					title={t("tv_sync.title", "Sincronizar con la TV")}
 				>
 					<Tv className="h-3.5 w-3.5 text-amber-400" />
 					<span className="font-semibold">
-						{delay === 0 ? "En Vivo (0s)" : `TV Sync: +${delay}s`}
+						{delay === 0 ? t("tv_sync.live_zero", "En Vivo (0s)") : `TV Sync: +${delay}s`}
 					</span>
 					{isExpanded ? (
 						<ChevronUp className="h-3 w-3 text-zinc-500" />
@@ -74,11 +76,11 @@ export function TvSyncControl() {
 						<span className="text-xs font-bold uppercase tracking-wider text-amber-400">
 							Sincronizar con la TV
 						</span>
-						<span className="text-[10px] text-zinc-500">Anti-spoiler</span>
+						<span className="text-[10px] text-zinc-500">{t("tv_sync.anti_spoiler", "Anti-spoiler")}</span>
 					</div>
 
 					<p className="mb-3 text-[11px] text-zinc-400 leading-relaxed">
-						La telemetría llega antes que la señal de TV. Elegí tu plataforma para sincronizar los tiempos con tu pantalla:
+						{t("tv_sync.desc", "La telemetría llega antes que la señal de TV. Elegí tu plataforma para sincronizar los tiempos con tu pantalla:")}
 					</p>
 
 					{/* Presets */}
@@ -118,7 +120,7 @@ export function TvSyncControl() {
 					{/* Ajuste fino (+/- 5s, +/- 1s) */}
 					<div className="border-t border-zinc-800/80 pt-2">
 						<div className="mb-1 text-[10px] font-semibold text-zinc-400 uppercase">
-							Ajuste fino de segundos:
+							{t("tv_sync.fine_tune", "Ajuste fino de segundos:")}
 						</div>
 						<div className="grid grid-cols-4 gap-1 text-center font-mono text-xs">
 							<button
@@ -157,8 +159,8 @@ export function TvSyncControl() {
 					{/* ✍️ Entrada manual exacta en segundos */}
 					<div className="border-t border-zinc-800/80 pt-2.5 mt-2.5">
 						<div className="mb-1.5 flex items-center justify-between text-[10px] font-semibold text-zinc-400 uppercase">
-							<span>Ingreso manual:</span>
-							<span className="text-zinc-500 font-mono">Actual: +{delay}s</span>
+							<span>{t("tv_sync.manual_entry", "Ingreso manual:")}</span>
+							<span className="text-zinc-500 font-mono">{t("tv_sync.current", "Actual: +{s}s").replace("{s}", String(delay))}</span>
 						</div>
 						<form
 							onSubmit={(e) => {

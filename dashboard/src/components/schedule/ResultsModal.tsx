@@ -143,11 +143,11 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 
 									let gapTime = "";
 									if (item.position === "1") {
-										gapTime = item.Time?.time || "GANADOR";
+										gapTime = item.Time?.time || t("schedule_page.winner", "GANADOR");
 									} else if (isDNF) {
 										gapTime = `DNF · ${translateStatus(item.status) || "RETIRADO"}`;
 									} else if (isLapped) {
-										gapTime = lapsDiff <= 1 ? "+1 VUELTA" : `+${lapsDiff} VUELTAS`;
+										gapTime = lapsDiff <= 1 ? t("schedule_page.plus_one_lap", "+1 VUELTA") : t("schedule_page.plus_laps", `+${lapsDiff} VUELTAS`).replace("{n}", String(lapsDiff));
 									} else {
 										gapTime = item.Time?.time || "INTERVAL";
 									}

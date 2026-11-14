@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { now, utc } from "moment";
 import clsx from "clsx";
 
+import { useTranslation } from "@/hooks/useTranslation";
+import { translateSessionName } from "@/lib/f1Translations";
 import { groupSessionByDay } from "@/lib/groupSessionByDay";
 import type { Session } from "@/types/schedule.type";
 
@@ -22,6 +24,7 @@ const dayTranslation: Record<string, string> = {
 };
 
 export default function WeekendSchedule({ sessions }: Props) {
+	const { t, language } = useTranslation();
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
@@ -37,7 +40,7 @@ export default function WeekendSchedule({ sessions }: Props) {
 					<div className="flex flex-col border-r border-zinc-900/60 last:border-0 pr-2 last:pr-0" key={`next.round.day.${i}`}>
 						{/* Nombre del Día */}
 						<p className="text-xs font-black uppercase tracking-widest text-zinc-500">
-							{mounted ? (dayTranslation[dayNameEnglish] || dayNameEnglish) : "..."}
+							{mounted ? t(`schedule_page.days_${dayNameEnglish}` as any, dayTranslation[dayNameEnglish] || dayNameEnglish) : "..."}
 						</p>
 
 						{/* Lista de Sesiones */}
@@ -53,15 +56,7 @@ export default function WeekendSchedule({ sessions }: Props) {
 										{/* Tipo de Sesión */}
 										<p className="w-28 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-bold text-neutral-300 sm:w-auto uppercase tracking-wide">
 											{(() => {
-												const kind = session.kind.toLowerCase();
-												if (kind === "race") return "Carrera";
-												if (kind === "qualifying") return "Clasificación";
-												if (kind === "sprint" || kind === "sprint race") return "Carrera Sprint";
-												if (kind === "sprint qualification" || kind === "sprint shootout") return "Clasif. Sprint";
-												if (kind === "practice 1") return "Libres 1";
-												if (kind === "practice 2") return "Libres 2";
-												if (kind === "practice 3") return "Libres 3";
-												return session.kind;
+												return translateSessionName(session.kind, language);
 											})()}
 										</p>
 

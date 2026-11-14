@@ -8,6 +8,7 @@ import xIcon from "public/icons/xmark.svg";
 
 import { env } from "@/env";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useTranslation } from "@/hooks/useTranslation";
 
 import DriverTag from "@/components/driver/DriverTag";
 import SelectMultiple from "@/components/ui/SelectMultiple";
@@ -40,6 +41,7 @@ const FALLBACK_DRIVERS = [
 ];
 
 export default function FavoriteDrivers() {
+	const { t } = useTranslation();
 	const [drivers, setDrivers] = useState<any[]>(FALLBACK_DRIVERS);
 
 	const { favoriteDrivers, setFavoriteDrivers, removeFavoriteDriver } = useSettingsStore();
@@ -94,7 +96,7 @@ export default function FavoriteDrivers() {
 			{/* Pilotos seleccionados */}
 			<div className="flex flex-wrap gap-2 justify-center min-h-[36px] items-center">
 				{favoriteDrivers.length === 0 && (
-					<p className="text-xs text-zinc-500 font-mono italic">No hay pilotos favoritos seleccionados.</p>
+					<p className="text-xs text-zinc-500 font-mono italic">{t("settings.no_fav_drivers", "No hay pilotos favoritos seleccionados.")}</p>
 				)}
 
 				{favoriteDrivers.map((driverNumber) => {

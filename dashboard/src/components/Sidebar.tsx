@@ -260,7 +260,7 @@ export default function Sidebar({ connected }: Props) {
 										triggerHaptic("light");
 										togglePin();
 									}} 
-									title={pinned ? "Ocultar menú lateral" : "Fijar menú lateral"}
+									title={pinned ? t("sidebar.hide_sidebar", "Ocultar menú lateral") : t("sidebar.pin_sidebar", "Fijar menú lateral")}
 								/>
 								<SidenavButton 
 									className="md:hidden" 
@@ -268,7 +268,7 @@ export default function Sidebar({ connected }: Props) {
 										triggerHaptic("light");
 										close();
 									}} 
-									title="Cerrar menú"
+									title={t("sidebar.close_sidebar", "Cerrar menú")}
 								/>
 							</div>
 						</div>

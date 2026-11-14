@@ -683,13 +683,13 @@ export default function StreamsPage() {
 												title="Saltar al siguiente servidor de respaldo"
 											>
 												<RefreshCw className="w-3 h-3" />
-												<span>¿No carga? Probar siguiente</span>
+												<span>{t("streams_page.try_next_server", "¿No carga? Probar siguiente")}</span>
 											</button>
 
 											{/* Indicador de Failover Automático */}
 											<div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-bold">
 												<ShieldCheck className="w-3 h-3 text-emerald-400" />
-												<span>Auto-Failover Activo</span>
+												<span>{t("streams_page.auto_failover", "Auto-Failover Activo")}</span>
 											</div>
 										</div>
 
@@ -708,10 +708,10 @@ export default function StreamsPage() {
 											<div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950 text-zinc-400 z-10 pointer-events-none gap-2">
 												<div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
 												<p className="text-[11px] font-mono font-bold text-zinc-300 uppercase tracking-widest">
-													Conectando con {currentSource?.label}...
+													{t("streams_page.connecting_with", "Conectando con")} {currentSource?.label}...
 												</p>
 												<p className="text-[9px] text-zinc-500">
-													Conmutación automática de respaldo activa (7.5s)
+													{t("streams_page.auto_switch_active", "Conmutación automática de respaldo activa (7.5s)")}
 												</p>
 											</div>
 										)}
@@ -741,8 +741,8 @@ export default function StreamsPage() {
 						{/* RECOMENDACIÓN DE REPRODUCCIÓN */}
 						<div className="w-full mx-auto p-4 border border-zinc-900 bg-zinc-950/40 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 font-sans text-xs mt-6 mb-6">
 							<div className="space-y-1">
-								<p className="font-mono font-black text-zinc-300 uppercase tracking-wider">Recomendación para la transmisión</p>
-								<p className="text-zinc-500">Para una experiencia limpia y sin ventanas emergentes de los reproductores, se sugiere utilizar un bloqueador de anuncios.</p>
+								<p className="font-mono font-black text-zinc-300 uppercase tracking-wider">{t("streams_page.recommendation_title", "Recomendación para la transmisión")}</p>
+								<p className="text-zinc-500">{t("streams_page.recommendation_desc", "Para una experiencia limpia y sin ventanas emergentes de los reproductores, se sugiere utilizar un bloqueador de anuncios.")}</p>
 							</div>
 							<div className="flex flex-wrap gap-2 shrink-0">
 								<a href="https://ublockorigin.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-mono font-bold text-[11px] uppercase tracking-wide transition-all">uBlock Origin</a>

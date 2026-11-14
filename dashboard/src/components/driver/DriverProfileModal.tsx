@@ -357,7 +357,7 @@ export default function DriverProfileModal() {
 						</span>
 						<span className="text-[9px] sm:text-[10px] text-zinc-400 block font-bold uppercase whitespace-nowrap">
 							<span className="sm:hidden">PTS</span>
-							<span className="hidden sm:inline">Puntos Totales</span>
+							<span className="hidden sm:inline">{t("standings_page.total_points", "Puntos Totales")}</span>
 						</span>
 					</div>
 				</div>
@@ -400,15 +400,15 @@ export default function DriverProfileModal() {
 						{/* POSICIÓN Y BRECHAS EN PISTA */}
 						<div className="grid grid-cols-3 gap-2 text-center font-mono">
 							<div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
-								<span className="text-[10px] text-zinc-500 font-bold uppercase block">Posición Actual</span>
+								<span className="text-[10px] text-zinc-500 font-bold uppercase block">{t("telemetry.current_position", "Posición Actual")}</span>
 								<span className="text-xl font-black text-amber-400">P{timingDriver?.Position || "-"}</span>
 							</div>
 							<div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
-								<span className="text-[10px] text-zinc-500 font-bold uppercase block">Brecha Líder</span>
+								<span className="text-[10px] text-zinc-500 font-bold uppercase block">{t("telemetry.gap_to_leader", "Brecha Líder")}</span>
 								<span className="text-sm font-black text-white">{timingDriver?.GapToLeader || "LÍDER"}</span>
 							</div>
 							<div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
-								<span className="text-[10px] text-zinc-500 font-bold uppercase block">Intervalo Auto Del.</span>
+								<span className="text-[10px] text-zinc-500 font-bold uppercase block">{t("telemetry.interval_ahead", "Intervalo Auto Del.")}</span>
 								<span className="text-sm font-black text-emerald-400">{timingDriver?.IntervalToPositionAhead?.Value || "-"}</span>
 							</div>
 						</div>
@@ -419,24 +419,24 @@ export default function DriverProfileModal() {
 								<div className="flex items-center justify-between border-b border-zinc-800/60 pb-1.5">
 									<span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
 										<Activity className="w-3 h-3 text-emerald-400" />
-										TELEMETRÍA ECU EN VIVO
+										{t("telemetry.live_ecu_telemetry", "TELEMETRÍA ECU EN VIVO")}
 									</span>
 									<span className="text-[10px] font-bold text-amber-400 font-mono">
-										PU REGULACIÓN 2026
+										{t("telemetry.pu_reg_2026", "PU REGULACIÓN 2026")}
 									</span>
 								</div>
 
 								<div className="grid grid-cols-3 gap-2 text-center font-mono">
 									<div className="p-2 rounded-xl bg-zinc-950/80 border border-zinc-900">
-										<span className="text-[9px] text-zinc-500 font-bold uppercase block">Velocidad</span>
+										<span className="text-[9px] text-zinc-500 font-bold uppercase block">{t("telemetry.speed", "Velocidad")}</span>
 										<span className="text-lg font-black text-white">{carChannels[2] || 0} <span className="text-xs text-zinc-500">km/h</span></span>
 									</div>
 									<div className="p-2 rounded-xl bg-zinc-950/80 border border-zinc-900">
-										<span className="text-[9px] text-zinc-500 font-bold uppercase block">Marcha</span>
+										<span className="text-[9px] text-zinc-500 font-bold uppercase block">{t("telemetry.gear", "Marcha")}</span>
 										<span className="text-lg font-black text-amber-400">M{carChannels[3] || "N"}</span>
 									</div>
 									<div className="p-2 rounded-xl bg-zinc-950/80 border border-zinc-900">
-										<span className="text-[9px] text-zinc-500 font-bold uppercase block">Régimen RPM</span>
+										<span className="text-[9px] text-zinc-500 font-bold uppercase block">{t("telemetry.rpm_regime", "Régimen RPM")}</span>
 										<span className="text-lg font-black text-cyan-400">{carChannels[0] || 0}</span>
 									</div>
 								</div>
@@ -445,7 +445,7 @@ export default function DriverProfileModal() {
 								<div className="grid grid-cols-2 gap-3 pt-1">
 									<div className="flex flex-col gap-1">
 										<div className="flex justify-between text-[10px] font-mono">
-											<span className="text-emerald-400 font-bold">ACELERADOR</span>
+											<span className="text-emerald-400 font-bold">{t("modals.car_throttle", "ACELERADOR")}</span>
 											<span className="text-white font-black">{carChannels[4] || 0}%</span>
 										</div>
 										<div className="h-2 rounded-full bg-zinc-800 overflow-hidden">
@@ -454,7 +454,7 @@ export default function DriverProfileModal() {
 									</div>
 									<div className="flex flex-col gap-1">
 										<div className="flex justify-between text-[10px] font-mono">
-											<span className="text-red-400 font-bold">FRENO</span>
+											<span className="text-red-400 font-bold">{t("modals.car_brake", "FRENO")}</span>
 											<span className="text-white font-black">{carChannels[5] ? "100%" : "0%"}</span>
 										</div>
 										<div className="h-2 rounded-full bg-zinc-800 overflow-hidden">

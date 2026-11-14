@@ -3,12 +3,14 @@
 import clsx from "clsx";
 import { useState, useEffect } from "react";
 import { utc, duration } from "moment";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { getTrackStatusMessage } from "@/lib/getTrackStatusMessage";
 import { parseUtcMs, parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
 
 export default function TrackInfo() {
+	const { t } = useTranslation();
 	const lapCount = useDataStore((state) => state.state?.LapCount);
 	const track = useDataStore((state) => state.state?.TrackStatus);
 	const session = useDataStore((state) => state.state?.SessionInfo);
@@ -278,11 +280,11 @@ export default function TrackInfo() {
 				<div className="flex flex-col items-end justify-center rounded-xl border border-red-500/40 bg-zinc-950/95 px-3.5 py-1.5 shadow-2xl backdrop-blur-md font-mono">
 					<div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-400">
 						<span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
-						<span>F1 CLASIFICACIÓN</span>
+						<span>{t("telemetry.f1_qualifying", "F1 CLASIFICACIÓN")}</span>
 					</div>
 					<div className="flex items-baseline gap-2 mt-0.5">
 						<span className="text-[10px] font-black uppercase tracking-wider text-amber-400">
-							{nextPartName} EMPIEZA EN
+							{nextPartName} {t("telemetry.starts_in", "EMPIEZA EN")}
 						</span>
 						<span className="text-xl sm:text-2xl font-black text-white tracking-widest tabular-nums">
 							{formattedTime}
@@ -291,9 +293,7 @@ export default function TrackInfo() {
 				</div>
 			) : formattedTime ? (
 				<div className="flex items-center gap-2 font-mono">
-					<span className="text-[10px] font-bold uppercase tracking-widest hidden sm:inline text-zinc-400">
-						TIEMPO
-					</span>
+					<span className="text-[10px] font-bold uppercase tracking-widest hidden sm:inline text-zinc-400">{t("telemetry.time_label", "TIEMPO")}</span>
 					<p className="text-2xl sm:text-3xl font-black whitespace-nowrap tracking-wider text-emerald-400">
 						{formattedTime}
 					</p>

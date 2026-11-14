@@ -90,7 +90,7 @@ export default function DashboardLayout({ children }: Props) {
 								{Math.max(delay - maxDelay, 0)}s
 							</span>
 							<span className="text-[10px] text-zinc-500 mt-1">
-								{language === "en" ? "Target delay:" : language === "pt" ? "Atraso desejado:" : "Retraso deseado:"} <span className="text-zinc-300 font-semibold">{delay}s</span> • {language === "en" ? "Buffer loaded:" : language === "pt" ? "Buffer carregado:" : "Búfer cargado:"} <span className="text-zinc-300 font-semibold">{maxDelay}s</span>
+								{t("tv_sync.target_delay", "Retraso deseado:")} <span className="text-zinc-300 font-semibold">{delay}s</span> • {t("tv_sync.buffer_loaded", "Búfer cargado:")} <span className="text-zinc-300 font-semibold">{maxDelay}s</span>
 							</span>
 						</div>
 
@@ -107,7 +107,7 @@ export default function DashboardLayout({ children }: Props) {
 									onClick={() => setDelay(maxDelay)}
 									className="text-zinc-500 hover:text-zinc-300 text-[11px] font-sans underline transition-colors cursor-pointer py-1"
 								>
-									Usar retraso disponible de {maxDelay}s sin esperar
+									{t("tv_sync.use_available_buffer", "Usar retraso disponible de {maxDelay}s sin esperar").replace("{maxDelay}", String(maxDelay))}
 								</button>
 							)}
 						</div>

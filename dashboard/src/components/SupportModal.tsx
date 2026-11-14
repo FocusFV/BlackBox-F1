@@ -206,7 +206,7 @@ export default function SupportModal() {
 													</div>
 
 													<p className="text-[10px] text-zinc-400 font-sans mt-2 text-center leading-normal">
-														Cualquier aporte de $500, $1.000 o lo que puedas ayuda directamente a mantener los servidores activos durante las carreras 🧉
+														{t("modals.support_note_community", "Cualquier aporte de $500, $1.000 o lo que puedas ayuda directamente a mantener los servidores activos durante las carreras 🧉")}
 													</p>
 												</div>
 											</motion.div>

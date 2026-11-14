@@ -102,7 +102,7 @@ export default function DriverInfo({ timingDriver, gridPos }: Props) {
 				) : status === "BOX" ? (
 					<span
 						className="inline-flex items-center gap-1 rounded border border-amber-400/70 bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-black text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.25)] select-none tracking-wider"
-						title="Monoplaza detenido en boxes (Pit Lane)"
+						title={t("telemetry.pit_lane_stopped", "Monoplaza detenido en boxes (Pit Lane)")}
 					>
 						<span className="relative flex h-1.5 w-1.5">
 							<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-80" />
@@ -114,7 +114,7 @@ export default function DriverInfo({ timingDriver, gridPos }: Props) {
 				) : status === "SALIDA" ? (
 					<span
 						className="inline-flex items-center gap-1 rounded border border-cyan-400/60 bg-cyan-500/20 px-1.5 py-0.5 text-[9px] font-black text-cyan-300 shadow-[0_0_8px_rgba(6,182,212,0.2)] select-none tracking-wider"
-						title="Saliendo de boxes a pista (Pit Exit)"
+						title={t("telemetry.pit_exit_running", "Saliendo de boxes a pista (Pit Exit)")}
 					>
 						<span className="relative flex h-1.5 w-1.5">
 							<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-80" />

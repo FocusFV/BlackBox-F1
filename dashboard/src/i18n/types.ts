@@ -25,6 +25,9 @@ export interface TranslationDictionary {
 		help: string;
 		donate: string;
 		sponsor: string;
+		hide_sidebar: string;
+		pin_sidebar: string;
+		close_sidebar: string;
 	};
 	sessions: {
 		fp1: string;
@@ -72,6 +75,26 @@ export interface TranslationDictionary {
 		syncing_desc: string;
 		time_remaining: string;
 		live_direct: string;
+		f1_qualifying: string;
+		time_label: string;
+		starts_in: string;
+		current_position: string;
+		gap_to_leader: string;
+		interval_ahead: string;
+		live_ecu_telemetry: string;
+		pu_reg_2026: string;
+		speed: string;
+		gear: string;
+		rpm_regime: string;
+		track_map_live: string;
+		optimal_line: string;
+		pu_regulation: string;
+		track_telemetry_data: string;
+		ideal_racing_line: string;
+		corners_vertices: string;
+		boost_pu_2026: string;
+		pit_lane_stopped: string;
+		pit_exit_running: string;
 	};
 	parc_ferme: {
 		last_official_round: string;
@@ -139,6 +162,7 @@ export interface TranslationDictionary {
 		track_paused: string;
 		rain_risk_high: string;
 		rain_risk_low: string;
+		connecting_radar: string;
 	};
 	settings: {
 		title: string;
@@ -174,6 +198,7 @@ export interface TranslationDictionary {
 		delay_desc: string;
 		fav_drivers: string;
 		fav_drivers_desc: string;
+		no_fav_drivers: string;
 	};
 	common: {
 		loading: string;
@@ -254,6 +279,27 @@ export interface TranslationDictionary {
 		awaiting_official_desc: string;
 		official_results_title: string;
 		retired: string;
+		winner: string;
+		plus_one_lap: string;
+		plus_laps: string;
+		no_upcoming_sessions: string;
+		action_race: string;
+		action_qualy: string;
+		action_sprint: string;
+		action_sprint_qualy: string;
+		action_fp1: string;
+		action_fp2: string;
+		action_fp3: string;
+		action_in_progress: string;
+		action_starts_in: string;
+		action_starts_in_plural: string;
+		days_monday: string;
+		days_tuesday: string;
+		days_wednesday: string;
+		days_thursday: string;
+		days_friday: string;
+		days_saturday: string;
+		days_sunday: string;
 	};
 	standings_page: {
 		drivers_title: string;
@@ -274,6 +320,7 @@ export interface TranslationDictionary {
 		driver_modal_awaiting_race: string;
 		team_points_contribution: string;
 		team_track_performance: string;
+		total_points: string;
 	};
 	streams_page: {
 		engines_off_title: string;
@@ -290,6 +337,12 @@ export interface TranslationDictionary {
 		main_feed: string;
 		onboard_cameras: string;
 		failover_notice: string;
+		try_next_server: string;
+		auto_failover: string;
+		connecting_with: string;
+		auto_switch_active: string;
+		recommendation_title: string;
+		recommendation_desc: string;
 	};
 	modals: {
 		support_badge: string;
@@ -337,6 +390,33 @@ export interface TranslationDictionary {
 		youtube_summaries_note: string;
 		youtube_days_note: string;
 		youtube_full_archive: string;
+		circuit_laps_count: string;
+		circuit_distance_total: string;
+		support_note_community: string;
+		h2h_instant_datalink: string;
+	};
+	tv_sync: {
+		title: string;
+		compact_title: string;
+		live_zero: string;
+		anti_spoiler: string;
+		desc: string;
+		preset_live: string;
+		preset_live_desc: string;
+		preset_disney: string;
+		preset_disney_desc: string;
+		preset_fox: string;
+		preset_fox_desc: string;
+		fine_tune: string;
+		manual_entry: string;
+		current: string;
+		apply: string;
+		use_available_buffer: string;
+		target_delay: string;
+		buffer_loaded: string;
+	};
+	trivia: {
+		prev_gp: string;
 	};
 	help_page: {
 		guide_badge: string;

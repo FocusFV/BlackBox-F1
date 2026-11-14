@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useDataStore } from "@/stores/useDataStore";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface TriviaPackage {
 	lastGpName: string;
@@ -49,6 +50,7 @@ const triviaArchive: Record<string, TriviaPackage> = {
 };
 
 export function TriviaLine() {
+	const { t } = useTranslation();
 	const session = useDataStore((state) => state.state?.SessionInfo);
 	const rawGpName = session?.Meeting?.Name || "Austria";
 	const gpName = rawGpName.replace(/grand prix/gi, "").trim().toLowerCase();
@@ -84,7 +86,7 @@ export function TriviaLine() {
 				<div className="flex items-center gap-3 flex-1">
 					{/* Badge del GP Anterior */}
 					<span className="bg-red-500/10 text-red-500 border border-red-500/20 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
-						GP Anterior: {packageData.lastGpName}
+						{t("trivia.prev_gp", "GP Anterior:")} {packageData.lastGpName}
 					</span>
 					
 					{/* Contenedor con animación de transición para el texto que rota */}

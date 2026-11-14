@@ -30,7 +30,7 @@ export default async function NextRound() {
 	if (!next) {
 		return (
 			<div className="flex h-44 flex-col items-center justify-center border border-dashed border-zinc-800 rounded-2xl bg-zinc-950/30">
-				<p className="text-zinc-500 font-medium tracking-wide">No se encontraron próximas sesiones</p>
+				<p className="text-zinc-500 font-medium tracking-wide">No upcoming sessions · Sin próximas sesiones</p>
 			</div>
 		);
 	}
@@ -57,7 +57,7 @@ export default async function NextRound() {
 				</div>
 			) : (
 				<div className="flex flex-col items-center justify-center bg-gradient-to-b from-zinc-900 to-black p-6 rounded-2xl border border-zinc-800/60">
-					<p className="text-zinc-500 font-medium tracking-wide">No se encontraron próximas sesiones</p>
+					<p className="text-zinc-500 font-medium tracking-wide">No upcoming sessions · Sin próximas sesiones</p>
 				</div>
 			)}
 

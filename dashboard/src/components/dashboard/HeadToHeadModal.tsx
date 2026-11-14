@@ -264,7 +264,7 @@ export function HeadToHeadModal({
 										<h4 className="text-sm font-black text-white">{d2.BroadcastName || d2.FullName}</h4>
 										<span className="text-xs text-zinc-400">{d2.TeamName}</span>
 										<div className="text-[11px] font-bold text-amber-400">
-											Posición: P{t2?.Position || "-"}
+											{t("modals.h2h_pos", "Posición")}: P{t2?.Position || "-"}
 										</div>
 									</div>
 								</div>
@@ -293,7 +293,7 @@ export function HeadToHeadModal({
 							</span>
 						</div>
 
-						{/* Última Vuelta */}
+						{/* {t("modals.h2h_last_lap", "Última Vuelta")} */}
 						<div className="flex items-center justify-between rounded-lg bg-zinc-900/30 p-2.5 text-xs">
 							<span className="font-mono text-zinc-300">{t1?.LastLapTime?.Value || "-"}</span>
 							<span className="font-bold uppercase tracking-wider text-zinc-400 text-[11px]">
@@ -348,7 +348,7 @@ export function HeadToHeadModal({
 							</span>
 							<div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-zinc-400 text-[11px]">
 								<Gauge className="h-3.5 w-3.5 text-zinc-500" />
-								Speed Trap (Vel. Punta)
+								{t("modals.h2h_top_speed", "Speed Trap (Vel. Punta)")}
 							</div>
 							<span className="font-mono text-zinc-300">
 								{t2?.Speeds?.St?.Value ? `${t2.Speeds.St.Value} km/h` : "-"}
@@ -362,7 +362,7 @@ export function HeadToHeadModal({
 							</span>
 							<div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-zinc-400 text-[11px]">
 								<Zap className="h-3.5 w-3.5 text-amber-400" />
-								Compuesto / Stint
+								{t("modals.h2h_tyre", "Compuesto / Stint")}
 							</div>
 							<span className="font-semibold text-zinc-300">
 								{stint2?.Compound || "N/A"} ({stint2?.TotalLaps || 0} vtas)
@@ -376,7 +376,7 @@ export function HeadToHeadModal({
 									{car1 ? `${car1[2]} km/h (M${car1[3]})` : "-"}
 								</span>
 								<span className="font-bold uppercase tracking-wider text-emerald-300 text-[11px]">
-									Datalink Instantáneo (Vel / Marcha)
+									{t("modals.h2h_instant_datalink", "Datalink Instantáneo (Vel / Marcha)")}
 								</span>
 								<span className="font-mono font-bold text-emerald-400">
 									{car2 ? `${car2[2]} km/h (M${car2[3]})` : "-"}
