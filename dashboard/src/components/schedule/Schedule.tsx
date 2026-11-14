@@ -1,11 +1,8 @@
-import { connection } from "next/server";
 import { utc } from "moment";
 
 import RoundListClient from "@/components/schedule/RoundListClient";
 import type { Round as RoundType, Session as SessionType } from "@/types/schedule.type";
 import localCalendar from "@/data/calendar2026.json";
-
-export const dynamic = "force-dynamic";
 
 // Mapeo auxiliar para normalizar los nombres de los países a tu formato
 const countryNameMap: Record<string, string> = {
@@ -85,16 +82,14 @@ function adaptJolpicaRaces(races: any[]): RoundType[] {
 	}).sort((a, b) => utc(a.start).diff(utc(b.start)));
 }
 
-export const getSchedule = async (): Promise<RoundType[]> => {
-	await connection();
-
+export const getSchedule = (): RoundType[] => {
 	// 🏁 Calendario oficial definitivo de la temporada 2026: 23 Grandes Premios homologados
 	// R1 a R20 completadas (incluye Sepang R16 e Interlagos R20) · 3 por disputar (Las Vegas R21, Qatar R22, Abu Dabi R23)
 	return adaptJolpicaRaces(localCalendar as any[]);
 };
 
-export default async function Schedule() {
-	const schedule = await getSchedule();
+export default function Schedule() {
+	const schedule = getSchedule();
 
 	// 🧠 Buscamos la ronda activa comparando con el endMoment corregido (+6 horas)
 	const next = schedule.find((round) => {

@@ -1,21 +1,23 @@
-import { connection } from "next/server";
+"use client";
+
 import { utc } from "moment";
 
 import Countdown from "@/components/schedule/Countdown";
 import Round from "@/components/schedule/Round";
 import { getSchedule } from "@/components/schedule/Schedule";
 import type { Round as RoundType } from "@/types/schedule.type";
+import { useTranslation } from "@/hooks/useTranslation";
 
-export const dynamic = "force-dynamic";
-
-export default async function NextRound() {
-	await connection();
-	const schedule = await getSchedule();
+export default function NextRound() {
+	const { t } = useTranslation();
+	const schedule = getSchedule();
 
 	if (!schedule || schedule.length === 0) {
 		return (
 			<div className="flex h-44 flex-col items-center justify-center border border-dashed border-zinc-800 rounded-2xl bg-zinc-950/30">
-				<p className="text-zinc-500 font-medium tracking-wide">No upcoming F1 event found · No se encontró ningún próximo evento de F1</p>
+				<p className="text-zinc-500 font-medium tracking-wide">
+					{t("schedule_page.no_upcoming_sessions", "Sin próximas sesiones")}
+				</p>
 			</div>
 		);
 	}
@@ -30,7 +32,9 @@ export default async function NextRound() {
 	if (!next) {
 		return (
 			<div className="flex h-44 flex-col items-center justify-center border border-dashed border-zinc-800 rounded-2xl bg-zinc-950/30">
-				<p className="text-zinc-500 font-medium tracking-wide">No upcoming sessions · Sin próximas sesiones</p>
+				<p className="text-zinc-500 font-medium tracking-wide">
+					{t("schedule_page.no_upcoming_sessions", "Sin próximas sesiones")}
+				</p>
 			</div>
 		);
 	}
@@ -57,7 +61,9 @@ export default async function NextRound() {
 				</div>
 			) : (
 				<div className="flex flex-col items-center justify-center bg-gradient-to-b from-zinc-900 to-black p-6 rounded-2xl border border-zinc-800/60">
-					<p className="text-zinc-500 font-medium tracking-wide">No upcoming sessions · Sin próximas sesiones</p>
+					<p className="text-zinc-500 font-medium tracking-wide">
+						{t("schedule_page.no_upcoming_sessions", "Sin próximas sesiones")}
+					</p>
 				</div>
 			)}
 
