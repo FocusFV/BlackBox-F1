@@ -1,5 +1,6 @@
 import { persist, createJSONStorage, subscribeWithSelector } from "zustand/middleware";
 import { create } from "zustand";
+import { detectBrowserLanguage } from "@/i18n";
 
 type SpeedUnit = "metric" | "imperial";
 export type GoldTheme = "classic" | "neon" | "rose" | "oled";
@@ -7,7 +8,8 @@ export type Language = "es" | "en" | "pt";
 
 type SettingsStore = {
 	language: Language;
-	setLanguage: (language: Language) => void;
+	hasCustomLanguage: boolean;
+	setLanguage: (language: Language, isCustom?: boolean) => void;
 
 	delay: number;
 	setDelay: (delay: number) => void;
@@ -70,7 +72,9 @@ export const useSettingsStore = create<SettingsStore>()(
 		persist(
 			(set) => ({
 				language: "es",
-				setLanguage: (language: Language) => set({ language }),
+				hasCustomLanguage: false,
+				setLanguage: (language: Language, isCustom: boolean = true) =>
+					set({ language, ...(isCustom ? { hasCustomLanguage: true } : {}) }),
 
 				delay: 0,
 				setDelay: (delay: number) => set({ delay }),
@@ -139,6 +143,13 @@ export const useSettingsStore = create<SettingsStore>()(
 					return (state) => {
 						if (state) {
 							state.setDelayIsPaused(false);
+							// 🌐 Detección inteligente por idioma de dispositivo/navegador en primera visita
+							if (!state.hasCustomLanguage) {
+								const detected = detectBrowserLanguage();
+								if (detected !== state.language) {
+									state.setLanguage(detected, false);
+								}
+							}
 						}
 					};
 				},
