@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import { X, Trophy, Flag, Timer } from "lucide-react";
 import clsx from "clsx";
 import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
-import { translateGpName, translateStatus } from "@/lib/f1Translations";
+import { translateGpName, translateStatus, translateCountry } from "@/lib/f1Translations";
 import { useTranslation } from "@/hooks/useTranslation";
 
 type Props = {
@@ -50,16 +50,6 @@ const driverNationalityMap: Record<string, string> = {
 	IWA: "jp", MAL: "bb", HAU: "no", FIT: "br", MAR: "es", VES: "dk",
 	SCH: "de", MSC: "de", SHW: "il", SAR: "us", DEV: "nl", LAT: "ca",
 	GIO: "it", KUB: "pl", KVY: "ru", MAZ: "ru", RAI: "fi", VET: "de"
-};
-
-const countryTranslation: Record<string, string> = {
-	Australia: "Australia", Austria: "Austria", Azerbaijan: "Azerbaiyán", Bahrain: "Bahréin",
-	Belgium: "Bélgica", Brazil: "Brasil", Canada: "Canadá", China: "China", Spain: "España",
-	France: "Francia", "Great Britain": "Gran Bretaña", "United Kingdom": "Reino Unido",
-	Germany: "Alemania", Hungary: "Hungría", Italy: "Italia", Japan: "Japón",
-	"Saudi Arabia": "Arabia Saudita", Mexico: "México", Monaco: "Mónaco", Netherlands: "Países Bajos",
-	Portugal: "Portugal", Qatar: "Catar", Singapore: "Singapur", "United Arab Emirates": "Emiratos Árabes Unidos",
-	"United States": "Estados Unidos", USA: "Estados Unidos", UK: "Reino Unido", Malaysia: "Malasia",
 };
 
 // 🏎️ Componente Logo integrado
@@ -351,7 +341,7 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 							{t("schedule_page.official_results_title", "RESULTADOS OFICIALES FIA · CLASIFICACIÓN FINAL")}
 						</span>
 						<h2 className="text-base font-black text-white uppercase tracking-wide mt-1">
-							{translateGpName(raceName, language)} {countryName ? `· ${countryTranslation[countryName] || countryName}` : ""}
+							{translateGpName(raceName, language)} {countryName ? `· ${translateCountry(countryName, language)}` : ""}
 						</h2>
 					</div>
 					<button
@@ -371,7 +361,7 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 					{loading ? (
 						<div className="flex flex-col h-48 items-center justify-center text-amber-400 text-xs uppercase font-black gap-2">
 							<span className="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
-							// CARGANDO TELEMETRÍA OFICIAL...
+							// {t("schedule_page.loading_telemetry", "CARGANDO TELEMETRÍA OFICIAL...")}
 						</div>
 					) : results.length === 0 ? (
 						<div className="flex flex-col h-48 items-center justify-center text-zinc-500 text-xs text-center p-6 space-y-2">
@@ -453,7 +443,7 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 									<div className="flex items-center gap-2 shrink-0 font-mono text-right">
 										{row.isFastestLap && (
 											<span className="text-purple-400 text-[9px] font-black px-1.5 py-0.5 rounded bg-purple-500/10 border border-purple-500/30">
-												🟣 VR
+												🟣 {t("schedule_page.fastest_lap_abbr", "VR")}
 											</span>
 										)}
 

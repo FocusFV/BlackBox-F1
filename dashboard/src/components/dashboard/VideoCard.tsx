@@ -46,7 +46,7 @@ export function VideoCard({ video }: VideoProps) {
 					className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-mono font-bold tracking-wider uppercase border backdrop-blur-md shadow-sm ${style.bg} ${style.text} ${style.border}`}
 				>
 					<span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-					{video.sessionType || video.sessionBadge || "Resumen Oficial"}
+					{video.sessionType || video.sessionBadge || t("youtube.official_recap", "Resumen Oficial")}
 				</span>
 
 				{video.publishedAt && (

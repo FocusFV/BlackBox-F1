@@ -6,7 +6,7 @@ import { duration, utc } from "moment";
 import clsx from "clsx";
 
 import type { Session } from "@/types/schedule.type";
-import { translateGpName } from "@/lib/f1Translations";
+import { translateGpName, translateCountry } from "@/lib/f1Translations";
 import { useTranslation } from "@/hooks/useTranslation";
 
 type Props = {
@@ -14,16 +14,6 @@ type Props = {
 	type: "race" | "other";
 	countryName?: string;
 	eventName?: string;
-};
-
-const countryTranslation: Record<string, string> = {
-	Australia: "Australia", Austria: "Austria", Azerbaijan: "Azerbaiyán", Bahrain: "Bahréin",
-	Belgium: "Bélgica", Brazil: "Brasil", Canada: "Canadá", China: "China", Spain: "España",
-	France: "Francia", "Great Britain": "Gran Bretaña", "United Kingdom": "Reino Unido",
-	Germany: "Alemania", Hungary: "Hungría", Italy: "Italia", Japan: "Japón",
-	"Saudi Arabia": "Arabia Saudita", Mexico: "México", Monaco: "Mónaco", Netherlands: "Países Bajos",
-	Portugal: "Portugal", Qatar: "Catar", Singapore: "Singapur", "United Arab Emirates": "Emiratos Árabes Unidos",
-	"United States": "Estados Unidos",
 };
 
 export default function Countdown({ next, type, countryName, eventName }: Props) {
@@ -90,9 +80,9 @@ export default function Countdown({ next, type, countryName, eventName }: Props)
 			} else if (eventName) {
 				title = language === "en" ? `THE ${translateGpName(eventName, "en").toUpperCase()}` : language === "pt" ? `O ${translateGpName(eventName, "pt").toUpperCase()}` : `EL ${translateGpName(eventName, "es").toUpperCase()}`;
 			} else {
-				const translatedCountry = countryName ? (countryTranslation[countryName] || countryName) : "";
-				if (translatedCountry.toLowerCase().includes("estados unidos")) {
-					title = "EL GRAN PREMIO DE LAS VEGAS";
+				const translatedCountry = countryName ? translateCountry(countryName, language) : "";
+				if (translatedCountry.toLowerCase().includes("estados unidos") || translatedCountry.toLowerCase().includes("united states")) {
+					title = language === "en" ? "THE LAS VEGAS GRAND PRIX" : language === "pt" ? "O GRANDE PRÊMIO DE LAS VEGAS" : "EL GRAN PREMIO DE LAS VEGAS";
 				} else {
 					title = language === "en" ? (translatedCountry ? `THE ${translatedCountry.toUpperCase()} RACE` : "THE RACE") : language === "pt" ? (translatedCountry ? `A CORRIDA DE ${translatedCountry.toUpperCase()}` : "A CORRIDA") : (translatedCountry ? `LA CARRERA DE ${translatedCountry.toUpperCase()}` : "LA CARRERA");
 				}

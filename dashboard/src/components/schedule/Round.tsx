@@ -5,7 +5,6 @@ import { utc } from "moment";
 import clsx from "clsx";
 import { AnimatePresence } from "motion/react";
 import {
-	LayoutDashboard,
 	Radio,
 	Activity,
 	Gauge,
@@ -16,10 +15,10 @@ import {
 
 import type { Round as RoundType } from "@/types/schedule.type";
 import { groupSessionByDay } from "@/lib/groupSessionByDay";
-import { formatDayRange, formatMonth } from "@/lib/dateFormatter";
+import { formatDayRange, formatMonth, formatDayMonthShort } from "@/lib/dateFormatter";
 import Flag from "@/components/Flag";
 import ResultsModal from "@/components/schedule/ResultsModal";
-import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
+import { translateGpName, getCountryCodeForGp, translateCountry, translateSessionName } from "@/lib/f1Translations";
 import { useTranslation } from "@/hooks/useTranslation";
 
 type Props = {
@@ -40,33 +39,6 @@ const countryCodeMap: Record<string, string> = {
 	Malaysia: "mys", Malasia: "mys", Sepang: "mys"
 };
 
-const countryTranslation: Record<string, string> = {
-	Australia: "Australia", Austria: "Austria", Azerbaijan: "Azerbaiyán", Bahrain: "Bahréin",
-	Belgium: "Bélgica", Brazil: "Brasil", Canada: "Canadá", China: "China", Spain: "España",
-	France: "Francia", "Great Britain": "Gran Bretaña", "United Kingdom": "Reino Unido", UK: "Reino Unido",
-	Germany: "Alemania", Hungary: "Hungría", Italy: "Italia", Japan: "Japón",
-	"Saudi Arabia": "Arabia Saudita", Mexico: "México", Monaco: "Mónaco", Netherlands: "Países Bajos",
-	Portugal: "Portugal", Qatar: "Catar", Singapore: "Singapur", "United Arab Emirates": "Emiratos Árabes Unidos",
-	"United States": "Estados Unidos", USA: "Estados Unidos", UAE: "Emiratos Árabes Unidos", "Emiratos Árabes": "Emiratos Árabes Unidos",
-	Malaysia: "Malasia", Malasia: "Malasia", Sepang: "Malasia",
-};
-
-const dayTranslation: Record<string, string> = {
-	monday: "LUNES", tuesday: "MARTES", wednesday: "MIÉRCOLES", thursday: "JUEVES",
-	friday: "VIERNES", saturday: "SÁBADO", sunday: "DOMINGO",
-};
-
-const SPANISH_MONTH_SHORT: Record<number, string> = {
-	0: "ENE", 1: "FEB", 2: "MAR", 3: "ABR", 4: "MAY", 5: "JUN",
-	6: "JUL", 7: "AGO", 8: "SEP", 9: "OCT", 10: "NOV", 11: "DIC"
-};
-
-function formatDayMonthSpanish(m: any): string {
-	const day = m.format("DD");
-	const month = SPANISH_MONTH_SHORT[m.month()] || m.format("MMM").toUpperCase();
-	return `${day} · ${month}`;
-}
-
 export default function Round({ round, nextName, hideBadge = false }: Props) {
 	const { t, language } = useTranslation();
 	const [mounted, setMounted] = useState(false);
@@ -74,7 +46,7 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 	const patternId = useId();
 
 	const countryCode = countryCodeMap[round.countryName] || getCountryCodeForGp(round.name, round.countryName) || "usa";
-	const translatedCountry = countryTranslation[round.countryName] || round.countryName;
+	const translatedCountry = translateCountry(round.countryName, language);
 
 	useEffect(() => {
 		setMounted(true);
@@ -93,8 +65,6 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 	const upcomingSession = isTargetRound
 		? round.sessions.filter((s) => utc(s.start) > utc())[0]
 		: undefined;
-
-	const hasSprint = round.sessions.some((s) => s.kind.toLowerCase().includes("sprint"));
 
 	return (
 		<div
@@ -144,18 +114,18 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 					<div className="flex flex-col min-w-0 flex-1">
 						<div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
 							<h3 className="text-sm sm:text-base font-black tracking-tight text-white uppercase font-sans leading-snug">
-								{translateGpName(round.name)}
+								{translateGpName(round.name, language)}
 							</h3>
 
 							{round.name === nextName && !hideBadge && (
 								<>
 									{isLiveNow ? (
 										<span className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/40 animate-pulse shrink-0">
-											<Radio className="w-2.5 h-2.5" /> LIVE
+											<Radio className="w-2.5 h-2.5" /> {t("common.live", "EN VIVO")}
 										</span>
 									) : (
 										<span className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-amber-300 bg-amber-950/70 px-2 py-0.5 rounded-full border border-amber-500/40 shadow-[0_0_10px_rgba(245,158,11,0.2)] shrink-0">
-											<Flame className="w-2.5 h-2.5 text-amber-400 animate-bounce" /> PRÓXIMO
+											<Flame className="w-2.5 h-2.5 text-amber-400 animate-bounce" /> {t("schedule_page.next_badge", "PRÓXIMO")}
 										</span>
 									)}
 								</>
@@ -170,11 +140,11 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 
 						<div className="flex items-center justify-between sm:justify-start gap-2 mt-1 sm:mt-0.5">
 							<span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
-								{translatedCountry} · {round.roundNumber ? `Ronda ${round.roundNumber}` : ""}
+								{translatedCountry} · {round.roundNumber ? `${t("schedule_page.round_label", "Ronda")} ${round.roundNumber}` : ""}
 							</span>
 							{/* Fecha móvil visible y completa sin competir con el título */}
 							<span className="sm:hidden text-[11px] font-black uppercase tracking-wider text-amber-400 font-mono shrink-0">
-								{mounted ? `${formatMonth(round.start, round.end)} ${formatDayRange(round.start, round.end)}` : "..."}
+								{mounted ? `${formatMonth(round.start, round.end, language)} ${formatDayRange(round.start, round.end, language)}` : "..."}
 							</span>
 						</div>
 					</div>
@@ -183,10 +153,10 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 				{/* Fecha en desktop (columna derecha clásica) */}
 				<div className="hidden sm:flex text-right flex-col items-end shrink-0 whitespace-nowrap pl-2">
 					<span className="text-xs font-black uppercase tracking-wider text-amber-400">
-						{mounted ? formatMonth(round.start, round.end) : "..."}
+						{mounted ? formatMonth(round.start, round.end, language) : "..."}
 					</span>
 					<span className="text-[10px] font-bold text-zinc-400 tracking-wider">
-						{mounted ? formatDayRange(round.start, round.end) : "..."}
+						{mounted ? formatDayRange(round.start, round.end, language) : "..."}
 					</span>
 				</div>
 			</div>
@@ -198,7 +168,6 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 						{groupSessionByDay(round.sessions).map((day, i) => {
 							const localMoment = mounted ? utc(day.date).local() : utc(day.date);
 							const dayNameEnglish = localMoment.format("dddd").toLowerCase();
-							const isFridayOrThursday = dayNameEnglish === "friday" || dayNameEnglish === "thursday";
 
 							return (
 								<div
@@ -208,10 +177,10 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 									{/* ENCABEZADO DEL DÍA */}
 									<div className="flex items-center justify-center gap-2 mb-3 pb-2 border-b border-zinc-900/80 text-center">
 										<span className="text-xs font-black tracking-widest uppercase text-white font-sans">
-											{mounted ? (dayTranslation[dayNameEnglish] || dayNameEnglish) : "..."}
+											{mounted ? t(`schedule_page.days_${dayNameEnglish}` as any, dayNameEnglish).toUpperCase() : "..."}
 										</span>
 										<span className="text-[11px] font-mono font-bold text-amber-400/90 tracking-wide bg-zinc-900/90 px-2 py-0.5 rounded-md border border-zinc-800">
-											{mounted ? formatDayMonthSpanish(localMoment) : "-- · ---"}
+											{mounted ? formatDayMonthShort(localMoment, language) : "-- · ---"}
 										</span>
 									</div>
 
@@ -244,11 +213,11 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 													{/* Badge de En Vivo o Próximo */}
 													{isCurrentLive ? (
 														<span className="absolute top-1.5 right-1.5 flex items-center gap-1 text-[7px] font-black uppercase tracking-wider text-emerald-300 bg-emerald-950/90 border border-emerald-500/40 px-1.5 py-0.2 rounded shadow-sm animate-pulse">
-															<Radio className="w-2 h-2" /> EN VIVO
+															<Radio className="w-2 h-2" /> {t("common.live", "EN VIVO")}
 														</span>
 													) : isNextTarget ? (
 														<span className="absolute top-1.5 right-1.5 flex items-center gap-1 text-[7px] font-black uppercase tracking-wider text-black bg-gradient-to-r from-amber-300 to-amber-500 px-1.5 py-0.2 rounded shadow-sm">
-															<Activity className="w-2 h-2 animate-spin" /> PRÓX
+															<Activity className="w-2 h-2 animate-spin" /> {t("schedule_page.next_short_badge", "PRÓX")}
 														</span>
 													) : null}
 
@@ -265,22 +234,7 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 																		: "text-[11px] font-bold text-zinc-200"
 														)}
 													>
-														{(() => {
-															const kind = session.kind.toLowerCase();
-															if (kind === "race") return "Carrera";
-															if (kind === "sprint" || kind === "sprint race" || kind === "carrera sprint") return "Sprint";
-															if (kind.includes("shootout") || kind.includes("sprint qualifying") || kind.includes("sprint qualification") || kind.includes("clasif. sprint")) {
-																return "Clasif. Sprint";
-															}
-															if (kind.includes("qualifying") || kind.includes("clasificacion") || kind.includes("clasificación")) {
-																if (hasSprint && isFridayOrThursday) return "Clasif. Sprint";
-																return "Clasificación";
-															}
-															if (kind.includes("practice 1") || kind === "fp1") return "Libres 1";
-															if (kind.includes("practice 2") || kind === "fp2") return "Libres 2";
-															if (kind.includes("practice 3") || kind === "fp3") return "Libres 3";
-															return session.kind;
-														})()}
+														{translateSessionName(session.kind, language, true)}
 													</span>
 
 													{/* Horario completo perfectamente centrado */}
@@ -311,7 +265,7 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 					<div className="py-2">
 						<button
 							onClick={() => setModalOpen(true)}
-							className="w-full flex items-center justify-between p-4 rounded-2xl border border-amber-500/20 bg-gradient-to-r from-zinc-950 via-zinc-900 to-black hover:border-amber-500/40 hover:from-amber-950/20 hover:to-zinc-950 transition-all duration-300 group/btn shadow-lg"
+							className="w-full flex items-center justify-between p-4 rounded-2xl border border-amber-500/20 bg-gradient-to-r from-zinc-950 via-zinc-900 to-black hover:border-amber-500/40 hover:from-amber-950/20 hover:to-zinc-950 transition-all duration-300 group/btn shadow-lg cursor-pointer"
 						>
 							<div className="flex items-center gap-3">
 								<div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover/btn:scale-110 transition-transform">
@@ -319,10 +273,10 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 								</div>
 								<div className="flex flex-col text-left">
 									<span className="text-xs font-black uppercase tracking-widest text-zinc-100 group-hover/btn:text-amber-300 transition-colors">
-										Telemetría & Resultados
+										{t("schedule_page.telemetry_and_results", "Telemetría & Resultados")}
 									</span>
 									<span className="text-[9px] text-zinc-500 font-mono">
-										Tiempos por sector, vueltas y podio
+										{t("schedule_page.telemetry_results_sub", "Tiempos por sector, vueltas y podio")}
 									</span>
 								</div>
 							</div>
@@ -337,7 +291,7 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 			<div className="relative z-10 flex items-center justify-between pt-3 border-t border-zinc-900/90 text-[9px] text-zinc-600 font-mono">
 				<span className="flex items-center gap-1.5">
 					<Timer className="w-3 h-3 text-zinc-500" />
-					ZONA HORARIA LOCAL
+					{t("schedule_page.local_time_zone", "ZONA HORARIA LOCAL")}
 				</span>
 				<span className="text-zinc-500 font-bold uppercase tracking-wider">
 					BLACKBOX // F1
@@ -350,7 +304,7 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 						meetingKey={round.meetingKey}
 						roundNumber={round.roundNumber || (round.meetingKey > 100 ? ((round.name || "").toLowerCase().includes("brazil") || (round.name || "").toLowerCase().includes("paulo") ? 20 : undefined) : round.meetingKey)}
 						raceName={round.name}
-						countryName={translatedCountry}
+						countryName={round.countryName}
 						onClose={() => setModalOpen(false)}
 					/>
 				)}

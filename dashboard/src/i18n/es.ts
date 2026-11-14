@@ -268,6 +268,7 @@ export const es: TranslationDictionary = {
 		results: "Resultados",
 		schedule: "Horarios",
 		meta: "🏁 META",
+		attention: "Atención",
 	},
 	home: {
 		hero_title_1: "Cockpit de Telemetría",
@@ -309,6 +310,9 @@ export const es: TranslationDictionary = {
 		cta_desc: "Conectate en vivo al Gran Premio, calibrá tu sincronización y disfrutá de una experiencia sin spoilers, con diseño de puro oro y carbono.",
 		footer_platform_banner: "BLACKBOX-F1 · COCKPIT Y TELEMETRÍA OFICIAL",
 		faq_a4: "Sí. En el menú de Ajustes podés elegir entre cuatro acabados: Oro 24K Clásico, Oro Neón Ultra-Glow, Oro Rosa Champagne y Modo OLED de contraste puro para ahorrar batería.",
+		offset_delay: "OFFSET DE RETRASO",
+		faq_tag: "PREGUNTAS DEL SISTEMA",
+		cta_go_cockpit: "Ir al Cockpit En Vivo",
 	},
 	footer: {
 		open_source_note: "Evolución Open Source basada en el proyecto original de Slowly.",
@@ -357,6 +361,16 @@ export const es: TranslationDictionary = {
 		days_saturday: "Sábado",
 		days_sunday: "Domingo",
 		retired: "ABANDONO",
+		next_badge: "PRÓXIMO",
+		next_short_badge: "PRÓX",
+		round_label: "Ronda",
+		tab_upcoming: "Próximas",
+		tab_completed: "Completadas",
+		telemetry_and_results: "Telemetría & Resultados",
+		telemetry_results_sub: "Tiempos por sector, vueltas y podio",
+		local_time_zone: "ZONA HORARIA LOCAL",
+		fastest_lap_abbr: "VR",
+		loading_telemetry: "CARGANDO TELEMETRÍA OFICIAL...",
 	},
 	standings_page: {
 		drivers_title: "Campeonato de Pilotos",
@@ -592,6 +606,9 @@ export const es: TranslationDictionary = {
 		tv_sync_ref_2: "El segundero del reloj principal de sesión (en FP1, FP2, FP3 y Qualy).",
 		tv_sync_ref_3: "Los cambios de color en los sectores de los pilotos en pantalla.",
 		tv_sync_desc: "Calibración del offset de retardo en segundos para emparejar la telemetría con tu transmisión sin spoilers.",
+		violet_bg: "Fondo Violeta",
+		transparent_bg: "Transparente",
+		red_bg: "Fondo Rojo",
 	},
 	dashboard: {
 		pitwall_link_realtime: "ENLACE PIT-WALL EN TIEMPO REAL",
@@ -656,6 +673,7 @@ export const es: TranslationDictionary = {
 		official_badge: "Fórmula 1 Oficial",
 		watch_on_yt: "Ver en YouTube ↗",
 		loading: "Cargando resúmenes oficiales de YouTube...",
+		official_recap: "Resumen Oficial",
 	},
 	track_status: {
 		track_clear: "Pista Libre",

@@ -305,7 +305,7 @@ export default function Home() {
 							</div>
 
 							<h3 className="text-xl font-black uppercase tracking-wide text-white mb-2 group-hover:text-amber-200 transition-colors">
-								TV Sync & Anti-Spoilers
+								{t("home.deck_m2_title", "TV Sync & Anti-Spoilers")}
 							</h3>
 							<p className="text-sm text-zinc-400 leading-relaxed font-medium mb-6">
 								{t("home.deck_m3_desc", "Ajustá el retraso en segundos para sincronizar el panel con la transmisión de tu tele o streaming y vivir la carrera en sincronía perfecta.")}
@@ -315,7 +315,7 @@ export default function Home() {
 						{/* Mini Preview de Sincronización */}
 						<div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80 font-mono text-[11px] space-y-1.5">
 							<div className="flex justify-between items-center text-zinc-400">
-								<span>OFFSET DE RETRASO</span>
+								<span>{t("home.offset_delay", "OFFSET DE RETRASO")}</span>
 								<span className="text-amber-400 font-bold">+18.0s</span>
 							</div>
 							<div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
@@ -331,7 +331,7 @@ export default function Home() {
 			<section className="relative z-10 py-16 max-w-4xl mx-auto px-4 sm:px-6 md:px-12">
 				<div className="text-center mb-10 space-y-2">
 					<span className="text-[10px] font-mono font-extrabold text-amber-500 uppercase tracking-[0.3em]">
-						PREGUNTAS DEL SISTEMA
+						{t("home.faq_tag", "PREGUNTAS DEL SISTEMA")}
 					</span>
 					<h2 className="text-2xl sm:text-4xl font-black uppercase text-white">
 						{t("home.faq_subtitle", "Todo lo que Necesitás Saber")}
@@ -401,7 +401,7 @@ export default function Home() {
 						<div className="pt-2 flex justify-center">
 							<Link href="/dashboard">
 								<Button className="rounded-2xl border border-amber-400/80 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-black px-10 py-4.5 font-black uppercase tracking-widest text-xs shadow-[0_0_35px_rgba(245,158,11,0.45)] hover:shadow-[0_0_55px_rgba(245,158,11,0.7)] hover:scale-105 transition-all duration-300 flex items-center gap-3 cursor-pointer">
-									<Gauge className="w-5 h-5 text-black" /> Ir al Cockpit En Vivo
+									<Gauge className="w-5 h-5 text-black" /> {t("home.cta_go_cockpit", "Ir al Cockpit En Vivo")}
 								</Button>
 							</Link>
 						</div>

@@ -281,7 +281,7 @@ export function HeadToHeadModal({
 							</span>
 							<div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-zinc-400 text-[11px]">
 								<Timer className="h-3.5 w-3.5 text-zinc-500" />
-								Mejor Vuelta
+								{t("modals.h2h_best_lap", "Mejor Vuelta")}
 								{bestDelta && (
 									<span className="text-[10px] text-amber-400 font-mono">
 										(Δ {Math.abs(parseFloat(bestDelta))}s)

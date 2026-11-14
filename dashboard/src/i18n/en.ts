@@ -268,6 +268,7 @@ export const en: TranslationDictionary = {
 		results: "Results",
 		schedule: "Schedule",
 		meta: "🏁 FINISH",
+		attention: "Attention",
 	},
 	home: {
 		hero_title_1: "Telemetry Cockpit",
@@ -309,6 +310,9 @@ export const en: TranslationDictionary = {
 		cta_desc: "Connect live to the Grand Prix, calibrate your sync, and enjoy a spoiler-free experience crafted in pure gold and carbon.",
 		footer_platform_banner: "BLACKBOX-F1 · OFFICIAL COCKPIT & LIVE TELEMETRY",
 		faq_a4: "Yes. From Settings you can choose among four luxury finishes: 24K Classic Gold, Ultra-Glow Neon Gold, Champagne Rose Gold, and Pure Black OLED Mode to save battery.",
+		offset_delay: "DELAY OFFSET",
+		faq_tag: "SYSTEM FAQ",
+		cta_go_cockpit: "Go to Live Cockpit",
 	},
 	footer: {
 		open_source_note: "Open Source evolution based on the original project by Slowly.",
@@ -357,6 +361,16 @@ export const en: TranslationDictionary = {
 		days_saturday: "Saturday",
 		days_sunday: "Sunday",
 		retired: "RETIRED",
+		next_badge: "NEXT",
+		next_short_badge: "NEXT",
+		round_label: "Round",
+		tab_upcoming: "Upcoming",
+		tab_completed: "Completed",
+		telemetry_and_results: "Telemetry & Results",
+		telemetry_results_sub: "Sector times, laps, and podium",
+		local_time_zone: "LOCAL TIME ZONE",
+		fastest_lap_abbr: "FL",
+		loading_telemetry: "LOADING OFFICIAL TELEMETRY...",
 	},
 	standings_page: {
 		drivers_title: "Drivers' Championship",
@@ -592,6 +606,9 @@ export const en: TranslationDictionary = {
 		tv_sync_ref_2: "Session master countdown clock seconds (in FP1, FP2, FP3 and Qualy).",
 		tv_sync_ref_3: "Sector color changes on timing screens as cars clear mini-sectors.",
 		tv_sync_desc: "Calibrate the second offset delay to pair telemetry with your television feed spoiler-free.",
+		violet_bg: "Violet Background",
+		transparent_bg: "Transparent",
+		red_bg: "Red Background",
 	},
 	dashboard: {
 		pitwall_link_realtime: "REAL-TIME PIT-WALL LINK",
@@ -656,6 +673,7 @@ export const en: TranslationDictionary = {
 		official_badge: "Official Formula 1",
 		watch_on_yt: "Watch on YouTube ↗",
 		loading: "Loading official YouTube highlights...",
+		official_recap: "Official Highlights",
 	},
 	track_status: {
 		track_clear: "Track Clear",

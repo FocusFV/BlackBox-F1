@@ -268,6 +268,7 @@ export interface TranslationDictionary {
 		results: string;
 		schedule: string;
 		meta: string;
+		attention: string;
 	};
 	home: {
 		hero_title_1: string;
@@ -309,6 +310,9 @@ export interface TranslationDictionary {
 		cta_title_2: string;
 		cta_desc: string;
 		footer_platform_banner: string;
+		offset_delay: string;
+		faq_tag: string;
+		cta_go_cockpit: string;
 	};
 	footer: {
 		open_source_note: string;
@@ -357,6 +361,16 @@ export interface TranslationDictionary {
 		days_friday: string;
 		days_saturday: string;
 		days_sunday: string;
+		next_badge: string;
+		next_short_badge: string;
+		round_label: string;
+		tab_upcoming: string;
+		tab_completed: string;
+		telemetry_and_results: string;
+		telemetry_results_sub: string;
+		local_time_zone: string;
+		fastest_lap_abbr: string;
+		loading_telemetry: string;
 	};
 	standings_page: {
 		drivers_title: string;
@@ -592,6 +606,9 @@ export interface TranslationDictionary {
 		tv_sync_ref_1: string;
 		tv_sync_ref_2: string;
 		tv_sync_ref_3: string;
+		violet_bg: string;
+		transparent_bg: string;
+		red_bg: string;
 	};
 	dashboard: {
 		pitwall_link_realtime: string;
@@ -656,6 +673,7 @@ export interface TranslationDictionary {
 		official_badge: string;
 		watch_on_yt: string;
 		loading: string;
+		official_recap: string;
 	};
 	track_status: {
 		track_clear: string;

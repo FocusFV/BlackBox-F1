@@ -92,7 +92,7 @@ export default function HelpPage() {
 				</div>
 
 				<Note className="border-amber-500/30 bg-amber-500/5 text-amber-200/90">
-					<strong>Atención:</strong> {t("help_page.minisectors_note", "Solo los mini sectores utilizan el color amarillo. Esto evita sobrecargar la pantalla con texto cuando la mayoría de los pilotos no están mejorando sus tiempos.")}
+					<strong>{t("common.attention", "Atención")}:</strong> {t("help_page.minisectors_note", "Solo los mini sectores utilizan el color amarillo. Esto evita sobrecargar la pantalla con texto cuando la mayoría de los pilotos no están mejorando sus tiempos.")}
 				</Note>
 			</section>
 
@@ -112,7 +112,7 @@ export default function HelpPage() {
 						<div className="inline-block rounded-md bg-violet-800/40 px-3 py-1 font-semibold text-violet-300 text-xs border border-violet-500/30 mb-3">
 							{t("help_page.fastest_lap_badge", "Vuelta Rápida")}
 						</div>
-						<h3 className="font-bold text-white text-base">Fondo Violeta</h3>
+						<h3 className="font-bold text-white text-base">{t("help_page.violet_bg", "Fondo Violeta")}</h3>
 						<p className="mt-1 text-xs text-zinc-400">{t("help_page.fastest_lap_desc", "El piloto posee el tiempo récord de vuelta en toda la sesión.")}</p>
 					</div>
 
@@ -120,7 +120,7 @@ export default function HelpPage() {
 						<div className="inline-block rounded-md border border-zinc-600 bg-zinc-800/50 px-3 py-1 font-semibold text-zinc-300 text-xs mb-3">
 							{t("help_page.dnf_badge", "Retirado / DNF")}
 						</div>
-						<h3 className="font-bold text-white text-base">Transparente</h3>
+						<h3 className="font-bold text-white text-base">{t("help_page.transparent_bg", "Transparente")}</h3>
 						<p className="mt-1 text-xs text-zinc-400">{t("help_page.dnf_desc", "El auto sufrió una avería, chocó o quedó eliminado de la tanda.")}</p>
 					</div>
 
@@ -128,7 +128,7 @@ export default function HelpPage() {
 						<div className="inline-block rounded-md bg-red-800/40 px-3 py-1 font-semibold text-red-300 text-xs border border-red-500/30 mb-3">
 							{t("help_page.danger_zone_badge", "Zona de Peligro")}
 						</div>
-						<h3 className="font-bold text-white text-base">Fondo Rojo</h3>
+						<h3 className="font-bold text-white text-base">{t("help_page.red_bg", "Fondo Rojo")}</h3>
 						<p className="mt-1 text-xs text-zinc-400">{t("help_page.danger_zone_desc", "Piloto dentro de la zona de eliminación instantánea durante Qualy.")}</p>
 					</div>
 				</div>

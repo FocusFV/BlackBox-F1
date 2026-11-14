@@ -481,7 +481,7 @@ export default function SessionInfo() {
 
 			<div className="flex flex-col justify-center">
 				<h1 className="truncate text-xs md:text-sm leading-none font-bold text-white font-mono uppercase tracking-wide">
-					{effectiveSimActive ? "Gran Premio de la Ciudad de México 2026" : (session?.Meeting?.Name || "Gran Premio")}: {effectiveSimActive ? (language === "en" ? "Race" : language === "pt" ? "Corrida" : "Carrera") : translateSessionName(session?.Name, language)}
+					{effectiveSimActive ? `${translateGpName("Mexico City Grand Prix", language)} 2026` : translateGpName(session?.Meeting?.Name, language)}: {effectiveSimActive ? (language === "en" ? "Race" : language === "pt" ? "Corrida" : "Carrera") : translateSessionName(session?.Name, language)}
 					{timingData?.SessionPart && session?.Name
 						? ` ${sessionPartPrefix(session.Name)}${timingData.SessionPart}`
 						: (isQualy ? ` Q${sessionPart}` : "")}
@@ -491,7 +491,7 @@ export default function SessionInfo() {
 						</span>
 					) : isQualyBreak ? (
 						<span className="text-amber-400 font-black ml-1.5 animate-pulse">
-							• PAUSA Q{sessionPart} ➔ Q{sessionPart + 1}
+							• {language === "en" ? "BREAK" : language === "pt" ? "INTERVALO" : "PAUSA"} Q{sessionPart} ➔ Q{sessionPart + 1}
 						</span>
 					) : null}
 				</h1>
@@ -500,7 +500,7 @@ export default function SessionInfo() {
 					<div className="flex items-center gap-1.5 mt-1">
 						{isQualyBreak && (
 							<span className="text-[10px] font-black uppercase tracking-wider text-amber-400 font-mono">
-								{nextPartName} EMPIEZA EN:
+								{nextPartName} {language === "en" ? "STARTS IN:" : language === "pt" ? "COMEÇA EM:" : "EMPIEZA EN:"}
 							</span>
 						)}
 						<p className={clsx("text-xl md:text-2xl leading-none font-black font-mono", isQualyBreak ? "text-amber-400" : "text-white")}>

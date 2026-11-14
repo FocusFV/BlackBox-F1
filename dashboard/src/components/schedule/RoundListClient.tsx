@@ -8,6 +8,7 @@ import { utc } from "moment";
 
 import Round from "@/components/schedule/Round";
 import type { Round as RoundType } from "@/types/schedule.type";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type Props = {
 	schedule: RoundType[];
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export default function RoundListClient({ schedule, nextName }: Props) {
+	const { t, language } = useTranslation();
 	const [filtro, setFiltro] = useState<"proximas" | "completadas">("proximas");
 
 	const completedCount = schedule.filter((round) => {
@@ -50,7 +52,7 @@ export default function RoundListClient({ schedule, nextName }: Props) {
 						)}
 					>
 						<Timer className="w-3.5 h-3.5" />
-						Próximas ({pendingCount})
+						{t("schedule_page.tab_upcoming", "Próximas")} ({pendingCount})
 						{filtro === "proximas" && (
 							<motion.div 
 								layoutId="activeScheduleTab"
@@ -68,7 +70,7 @@ export default function RoundListClient({ schedule, nextName }: Props) {
 						)}
 					>
 						<CheckCircle2 className="w-3.5 h-3.5" />
-						Completadas ({completedCount})
+						{t("schedule_page.tab_completed", "Completadas")} ({completedCount})
 						{filtro === "completadas" && (
 							<motion.div 
 								layoutId="activeScheduleTab"
@@ -80,7 +82,13 @@ export default function RoundListClient({ schedule, nextName }: Props) {
 				</div>
 
 				<div className="text-xs text-zinc-400 font-bold uppercase tracking-wider">
-					Temporada 2026 · <span className="text-amber-400">{schedule.length} Grandes Premios</span> ({completedCount} completados · {pendingCount} por disputar)
+					{language === "en" ? (
+						<>2026 Season · <span className="text-amber-400">{schedule.length} Grands Prix</span> ({completedCount} completed · {pendingCount} to go)</>
+					) : language === "pt" ? (
+						<>Temporada 2026 · <span className="text-amber-400">{schedule.length} Grandes Prêmios</span> ({completedCount} concluídos · {pendingCount} a disputar)</>
+					) : (
+						<>Temporada 2026 · <span className="text-amber-400">{schedule.length} Grandes Premios</span> ({completedCount} completados · {pendingCount} por disputar)</>
+					)}
 				</div>
 			</div>
 
