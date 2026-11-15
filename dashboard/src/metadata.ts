@@ -4,7 +4,7 @@ const title = "Blackbox F1 · FocusFV";
 const description =
 	"Centro de comando y telemetría de Fórmula 1 en tiempo real con tiempos oficiales, radio, telemetría y transmisiones.";
 
-const url = "https://blackboxf1.vercel.app";
+const url = "https://blackboxf1.com";
 
 export const metadata: Metadata = {
 	generator: "Next.js",
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
 
 	creator: "FocusFV",
 	publisher: "FocusFV",
-	authors: [{ name: "FocusFV", url: "https://blackboxf1.vercel.app" }],
+	authors: [{ name: "FocusFV", url }],
 
 	appleWebApp: {
 		capable: true,
