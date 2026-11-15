@@ -10,7 +10,7 @@ interface LanguageSelectorProps {
 }
 
 export default function LanguageSelector({ variant = "navbar" }: LanguageSelectorProps) {
-	const { language, setLanguage, languages } = useTranslation();
+	const { language, setLanguage, languages, t } = useTranslation();
 	const [isOpen, setIsOpen] = useState(false);
 	const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -111,7 +111,7 @@ export default function LanguageSelector({ variant = "navbar" }: LanguageSelecto
 				type="button"
 				onClick={() => setIsOpen((prev) => !prev)}
 				className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-transparent border border-transparent hover:border-zinc-800 hover:bg-zinc-900/40 text-xs font-mono font-bold text-zinc-300 hover:text-amber-400 transition-all cursor-pointer active:scale-95"
-				title="Cambiar idioma / Switch language"
+				title={t("settings.language", "Cambiar idioma")}
 			>
 				<img
 					src={`/country-flags/${currentLang.countryCode || "esp"}.svg`}

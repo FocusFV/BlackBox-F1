@@ -137,7 +137,7 @@ export default function VersionGuard() {
 					<button
 						onClick={handleDismissPermanently}
 						className="text-zinc-500 hover:text-zinc-300 p-1 rounded-lg hover:bg-zinc-900 transition-colors cursor-pointer"
-						title="Por ahora no"
+						title={t("modals.version_dismiss_btn", "Por ahora no")}
 					>
 						<X className="w-4 h-4" />
 					</button>

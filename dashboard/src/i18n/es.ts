@@ -98,6 +98,7 @@ export const es: TranslationDictionary = {
 		pit_exit_running: "Saliendo de boxes a pista (Pit Exit)",
 		current_stint: "Stint Actual: {laps} Vueltas",
 		live_direct: "Ver en vivo directo (0s de espera)",
+		current_gear: "Marcha actual",
 	},
 	parc_ferme: {
 		last_official_round: "Última Ronda Oficial",
@@ -145,6 +146,8 @@ export const es: TranslationDictionary = {
 		green_flag_sub: "Pista habilitada · ¡Aceleran a fondo!",
 		restart_green_title: "PISTA HABILITADA · BANDERA VERDE",
 		restart_green_sub: "Pista despejada · Fin de neutralización",
+		hide_banner: "Ocultar banner",
+		chequered_flag_title: "Bandera a cuadros (Finalizado)",
 	},
 	weather: {
 		title: "Meteorología Oficial",
@@ -181,6 +184,8 @@ export const es: TranslationDictionary = {
 		monitoring_active_vegas: "Monitoreo meteorológico oficial FIA activo para el Gran Premio de Las Vegas. Sin incidentes en pista.",
 		connecting_radar: "🛰️ Conectando radar satelital...",
 		rain_risk_low: "PISTA SECA",
+		radar_compact: "RADAR DOPPLER · NUBOSIDAD",
+		track_layout_compact: "TRAZADA REAL",
 	},
 	settings: {
 		title: "Centro de Control & Ajustes",
@@ -270,6 +275,11 @@ export const es: TranslationDictionary = {
 		schedule: "Horarios",
 		meta: "🏁 META",
 		attention: "Atención",
+		stop: "Detener",
+		note: "Nota",
+		scroll_left: "Scroll izquierdo",
+		scroll_right: "Scroll derecho",
+		seconds_short: "s",
 	},
 	home: {
 		hero_title_1: "Cockpit de Telemetría",
@@ -414,6 +424,9 @@ export const es: TranslationDictionary = {
 		total_points: "Puntos Totales",
 		team_points: "Puntos del Equipo",
 		team_track_performance: "Rendimiento en Pista",
+		select_season: "Seleccionar temporada del campeonato",
+		red_bull_transfer_note: "* Incluye 14 PTS de Liam Lawson obtenidos con Red Bull Racing antes de intercambiar butacas con RB.",
+		rb_transfer_note: "* Lawson sumó 75 PTS con RB y 14 con Red Bull = 89 PTS totales en el campeonato oficial de pilotos.",
 	},
 	streams_page: {
 		engines_off_title: "MOTORES APAGADOS",
@@ -438,6 +451,9 @@ export const es: TranslationDictionary = {
 		signal_auto_info: "La señal de video en vivo se habilita automáticamente 15 minutos antes de cada sesión oficial (FP1, FP2, FP3, Qualy, Sprint o Carrera).",
 		satellite_signal_active: "Señal satelital activa: {race}",
 		failover_notice: "⚠️ El servidor actual no respondió a tiempo. Conmutando automáticamente a:",
+		back_to_dashboard: "Volver al Dashboard",
+		server_label: "SERVIDOR:",
+		next_server_tooltip: "Saltar al siguiente servidor de respaldo",
 	},
 	modals: {
 		support_badge: "BlackBox F1 · Pit-Wall",
@@ -507,6 +523,15 @@ export const es: TranslationDictionary = {
 		sim_radio: "Radio",
 		sim_plus_one_lap: "+1 Vta",
 		sim_minimize: "Minimizar barra",
+		circuit_clean_photo: "Solo Foto Limpia",
+		circuit_view_data: "Ver Datos",
+		circuit_debut: "Debut F1",
+		circuit_turns_label: "CURVAS",
+		circuit_straight: "Recta",
+		sim_overtake_tooltip: "Simular un sobrepaso en pista y cartel de Dirección de Carrera",
+		sim_flag_tooltip: "Alternar entre Bandera Verde y Virtual Safety Car (VSC)",
+		sim_radio_tooltip: "Simular entrada de radio de equipo (Colapinto, Hamilton, Verstappen)",
+		sim_next_lap_tooltip: "Avanzar 1 vuelta de carrera",
 		youtube_full_archive: "Explorar archivo completo",
 	},
 		tv_sync: {
@@ -528,6 +553,9 @@ export const es: TranslationDictionary = {
 		use_available_buffer: "Usar retraso disponible de {maxDelay}s sin esperar",
 		target_delay: "Retraso deseado:",
 		buffer_loaded: "Búfer cargado:",
+		minus_one_sec: "-1 segundo",
+		plus_one_sec: "+1 segundo",
+		example_delay: "Ej: 100",
 	},
 	trivia: {
 		maneuver: "Maniobra del GP",

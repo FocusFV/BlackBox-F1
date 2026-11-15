@@ -6,6 +6,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { fetchMap } from "@/lib/fetchMap";
 import { rotate, rad } from "@/lib/map";
 import { getCircuitDetails, type CircuitDetails, DEFAULT_CIRCUIT } from "@/lib/circuitBackdrops";
+import { translateCountry, translateGpName, translateCircuitDirection, translateTurns } from "@/lib/f1Translations";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Flag from "@/components/Flag";
 import { motion, AnimatePresence } from "motion/react";
@@ -168,7 +169,7 @@ export function CircuitBackdrop({
 	isCinematic = false,
 	onToggleCinematic,
 }: Props) {
-	const { t } = useTranslation();
+	const { t, language } = useTranslation();
 	const oledMode = useSettingsStore((state) => state.oledMode);
 	const liveCircuitKey = useDataStore(
 		(state) =>
@@ -414,7 +415,7 @@ export function CircuitBackdrop({
 									<div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-black/65 px-3 py-0.8 backdrop-blur-md">
 										<Flag countryCode={circuit.countryCode} className="h-3.5 w-5 rounded object-cover" />
 										<span className="font-mono text-[10px] font-black uppercase tracking-wider text-amber-400">
-											{circuit.country}
+											{translateCountry(circuit.country, language)}
 										</span>
 									</div>
 
@@ -447,7 +448,7 @@ export function CircuitBackdrop({
 										className="inline-flex items-center gap-1.5 px-3 py-0.8 rounded-full bg-zinc-900/85 border border-zinc-700/80 hover:border-amber-400/80 text-[10px] text-zinc-200 font-mono font-bold uppercase tracking-wider backdrop-blur-md transition-all cursor-pointer shadow-lg"
 									>
 										{showHud ? <EyeOff className="w-3.5 h-3.5 text-amber-400" /> : <Eye className="w-3.5 h-3.5 text-emerald-400" />}
-										<span>{showHud ? "Solo Foto Limpia" : "Ver Datos"}</span>
+										<span>{showHud ? t("modals.circuit_clean_photo", "Solo Foto Limpia") : t("modals.circuit_view_data", "Ver Datos")}</span>
 									</button>
 								</div>
 
@@ -456,9 +457,9 @@ export function CircuitBackdrop({
 								</h1>
 
 								<p className="font-mono text-xs sm:text-sm font-bold text-zinc-200 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] flex items-center gap-2 flex-wrap">
-									<span className="text-amber-400 font-black">{circuit.gpName}</span>
+									<span className="text-amber-400 font-black">{translateGpName(circuit.gpName, language)}</span>
 									<span className="text-zinc-500">·</span>
-									<span className="text-zinc-300">Debut F1: {circuit.firstGp}</span>
+									<span className="text-zinc-300">{t("modals.circuit_debut", "Debut F1")}: {circuit.firstGp}</span>
 									<span className="text-zinc-500">·</span>
 									<span className="text-zinc-300">{t("modals.circuit_designed_by", "Diseñado por {designer}").replace("{designer}", circuit.designer)}</span>
 								</p>
@@ -491,11 +492,11 @@ export function CircuitBackdrop({
 									>
 										<div className="w-full flex items-center justify-between border-b border-white/10 pb-2 mb-2 font-mono text-xs">
 											<div className="flex items-center gap-1.5 text-amber-400 font-black uppercase tracking-wider">
-												<span>Sentido de Giro: {circuit.direction}</span>
+												<span>{t("modals.circuit_direction", "Sentido de Giro")}: {translateCircuitDirection(circuit.direction, language)}</span>
 											</div>
 											{mapGeometry && (
 												<span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 font-mono font-bold tracking-wider">
-													{mapGeometry.corners.length} CURVAS
+													{mapGeometry.corners.length} {t("modals.circuit_turns_label", "CURVAS")}
 												</span>
 											)}
 										</div>
@@ -813,7 +814,7 @@ export function CircuitBackdrop({
 												{circuit.length}
 											</span>
 											<span className="text-[10px] text-zinc-300 font-medium">
-												{circuit.turns} · Recta {circuit.longestStraight}
+												{translateTurns(circuit.turns, language)} · {t("modals.circuit_straight", "Recta")} {circuit.longestStraight}
 											</span>
 										</div>
 

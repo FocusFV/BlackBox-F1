@@ -552,7 +552,7 @@ export default function StreamsPage() {
 								href="/dashboard"
 								className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-bold rounded-xl border border-zinc-800 transition-all active:scale-95 self-start sm:self-auto"
 							>
-								<span>Volver al Dashboard</span>
+								<span>{t("streams_page.back_to_dashboard", "Volver al Dashboard")}</span>
 							</Link>
 						</div>
 
@@ -646,7 +646,7 @@ export default function StreamsPage() {
 								<>
 									<div className="flex items-center justify-between flex-wrap gap-2 mb-3 bg-zinc-950/80 p-2.5 rounded-xl border border-zinc-900">
 										<div className="flex items-center gap-2 flex-wrap">
-											<span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">SERVIDOR:</span>
+											<span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t("streams_page.server_label", "SERVIDOR:")}</span>
 											<div className="flex items-center gap-1.5 flex-wrap">
 												{sources.map((source, idx) => (
 													<button
@@ -674,7 +674,7 @@ export default function StreamsPage() {
 											<button
 												onClick={() => handleNextServer(false)}
 												className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-[10px] font-bold text-amber-400 border border-zinc-800 transition-all cursor-pointer"
-												title="Saltar al siguiente servidor de respaldo"
+												title={t("streams_page.next_server_tooltip", "Saltar al siguiente servidor de respaldo")}
 											>
 												<RefreshCw className="w-3 h-3" />
 												<span>{t("streams_page.try_next_server", "¿No carga? Probar siguiente")}</span>

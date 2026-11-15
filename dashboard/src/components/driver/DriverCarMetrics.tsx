@@ -23,7 +23,7 @@ export default function DriverCarMetrics({ carData }: Props) {
 			{/* Marcha actual */}
 			<div
 				className="flex h-7 w-8 items-center justify-center rounded-md border border-amber-500/40 bg-zinc-900/90 text-xs font-black text-amber-400 shadow-inner"
-				title="Marcha actual"
+				title={t("telemetry.current_gear", "Marcha actual")}
 			>
 				{t("modals.car_gear", "M")}{carData[3] || "N"}
 			</div>

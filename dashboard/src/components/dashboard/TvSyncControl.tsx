@@ -53,7 +53,7 @@ export function TvSyncControl() {
 						onClick={() => adjustDelay(-1)}
 						disabled={delay <= 0 || isPaused}
 						className="rounded p-1 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 disabled:opacity-30 disabled:hover:bg-transparent"
-						title="-1 segundo"
+						title={t("tv_sync.minus_one_sec", "-1 segundo")}
 					>
 						<Minus className="h-3 w-3" />
 					</button>
@@ -62,7 +62,7 @@ export function TvSyncControl() {
 						onClick={() => adjustDelay(1)}
 						disabled={isPaused}
 						className="rounded p-1 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 disabled:opacity-30 disabled:hover:bg-transparent"
-						title="+1 segundo"
+						title={t("tv_sync.plus_one_sec", "+1 segundo")}
 					>
 						<Plus className="h-3 w-3" />
 					</button>
@@ -179,7 +179,7 @@ export function TvSyncControl() {
 									type="text"
 									inputMode="numeric"
 									pattern="[0-9]*"
-									placeholder="Ej: 100"
+									placeholder={t("tv_sync.example_delay", "Ej: 100")}
 									value={manualVal}
 									onChange={(e) => {
 										const sanitized = e.target.value.replace(/[^0-9]/g, "");
@@ -188,7 +188,7 @@ export function TvSyncControl() {
 									className="w-full rounded-lg border border-zinc-800 bg-zinc-900/90 pl-2.5 pr-8 py-1.5 text-xs font-mono text-white placeholder-zinc-500 focus:border-amber-500 focus:outline-none"
 								/>
 								<span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-mono text-zinc-500 pointer-events-none">
-									seg
+									{t("common.seconds_short", "s")}
 								</span>
 							</div>
 							<button

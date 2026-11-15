@@ -353,7 +353,7 @@ export default function Page() {
 									title={t("modals.h2h_open_tooltip", "Abrir comparador Cara a Cara entre dos pilotos")}
 								>
 									<Swords className="h-3.5 w-3.5 text-red-500" />
-									<span>Cara a Cara</span>
+									<span>{t("modals.h2h_title", "Cara a Cara")}</span>
 								</button>
 							</div>
 						</div>

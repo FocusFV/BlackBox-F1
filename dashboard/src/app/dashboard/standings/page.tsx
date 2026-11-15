@@ -978,7 +978,7 @@ export default function Standings() {
 							<select 
 								value={year} 
 								onChange={(e) => setYear(Number(e.target.value))}
-								aria-label="Seleccionar temporada del campeonato"
+								aria-label={t("standings_page.select_season", "Seleccionar temporada del campeonato")}
 								className="appearance-none bg-zinc-900 border border-zinc-700 hover:border-amber-500/60 rounded-xl py-1.5 pl-3 pr-8 text-[11px] font-black uppercase tracking-widest text-amber-400 shadow-md transition-all outline-none cursor-pointer"
 							>
 								{availableYears.map((y) => (
@@ -1673,7 +1673,7 @@ export default function Standings() {
 													<span className="text-amber-400 font-bold">💡 Red Bull Racing: </span>
 													Verstappen (279) + Hadjar (122) + Lawson (14) = 415 PTS.
 													<span className="text-zinc-500 block text-[10px] mt-0.5">
-														* Incluye 14 PTS de Liam Lawson obtenidos con Red Bull Racing antes de intercambiar butacas con RB.
+														{t("standings_page.red_bull_transfer_note", "* Incluye 14 PTS de Liam Lawson obtenidos con Red Bull Racing antes de intercambiar butacas con RB.")}
 													</span>
 												</div>
 											)}
@@ -1682,7 +1682,7 @@ export default function Standings() {
 													<span className="text-amber-400 font-bold">💡 RB F1 Team: </span>
 													Lawson (75) + Lindblad (38) + Tsunoda (1) = 114 PTS.
 													<span className="text-zinc-500 block text-[10px] mt-0.5">
-														* Lawson sumó 75 PTS con RB y 14 con Red Bull = 89 PTS totales en el campeonato oficial de pilotos.
+														{t("standings_page.rb_transfer_note", "* Lawson sumó 75 PTS con RB y 14 con Red Bull = 89 PTS totales en el campeonato oficial de pilotos.")}
 													</span>
 												</div>
 											)}

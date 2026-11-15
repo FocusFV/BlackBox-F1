@@ -2,13 +2,17 @@
 
 import { motion } from "motion/react";
 import clsx from "clsx";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type Props = {
 	className?: string;
 	title?: string;
 };
 
-export default function ChequeredFlagStrip({ className = "", title = "Bandera a cuadros (Finalizado)" }: Props) {
+export default function ChequeredFlagStrip({ className = "", title }: Props) {
+	const { t } = useTranslation();
+	const displayTitle = title || t("race_control.chequered_flag_title", "Bandera a cuadros (Finalizado)");
+
 	return (
 		<motion.div
 			initial={{ opacity: 0, scale: 0.75, x: 4 }}
@@ -19,7 +23,7 @@ export default function ChequeredFlagStrip({ className = "", title = "Bandera a 
 				className
 			)}
 			style={{ width: "16px", height: "28px" }}
-			title={title}
+			title={displayTitle}
 		>
 			<style jsx>{`
 				@keyframes flagSheen {

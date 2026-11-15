@@ -98,6 +98,7 @@ export interface TranslationDictionary {
 		pit_lane_stopped: string;
 		pit_exit_running: string;
 		current_stint: string;
+		current_gear: string;
 	};
 	parc_ferme: {
 		last_official_round: string;
@@ -145,6 +146,8 @@ export interface TranslationDictionary {
 		green_flag_sub: string;
 		restart_green_title: string;
 		restart_green_sub: string;
+		hide_banner: string;
+		chequered_flag_title: string;
 	};
 	weather: {
 		title: string;
@@ -181,6 +184,8 @@ export interface TranslationDictionary {
 		category_label: string;
 		monitoring_active_mexico: string;
 		monitoring_active_vegas: string;
+		radar_compact: string;
+		track_layout_compact: string;
 	};
 	settings: {
 		title: string;
@@ -270,6 +275,11 @@ export interface TranslationDictionary {
 		schedule: string;
 		meta: string;
 		attention: string;
+		stop: string;
+		note: string;
+		scroll_left: string;
+		scroll_right: string;
+		seconds_short: string;
 	};
 	home: {
 		hero_title_1: string;
@@ -414,6 +424,9 @@ export interface TranslationDictionary {
 		loading_telemetry: string;
 		season_results_2026: string;
 		upcoming_gps_pending: string;
+		select_season: string;
+		red_bull_transfer_note: string;
+		rb_transfer_note: string;
 	};
 	streams_page: {
 		engines_off_title: string;
@@ -438,6 +451,9 @@ export interface TranslationDictionary {
 		recommendation_desc: string;
 		signal_auto_info: string;
 		satellite_signal_active: string;
+		back_to_dashboard: string;
+		server_label: string;
+		next_server_tooltip: string;
 	};
 	modals: {
 		support_badge: string;
@@ -508,6 +524,15 @@ export interface TranslationDictionary {
 		sim_radio: string;
 		sim_plus_one_lap: string;
 		sim_minimize: string;
+		circuit_clean_photo: string;
+		circuit_view_data: string;
+		circuit_debut: string;
+		circuit_turns_label: string;
+		circuit_straight: string;
+		sim_overtake_tooltip: string;
+		sim_flag_tooltip: string;
+		sim_radio_tooltip: string;
+		sim_next_lap_tooltip: string;
 	};
 	tv_sync: {
 		title: string;
@@ -528,6 +553,9 @@ export interface TranslationDictionary {
 		use_available_buffer: string;
 		target_delay: string;
 		buffer_loaded: string;
+		minus_one_sec: string;
+		plus_one_sec: string;
+		example_delay: string;
 	};
 	trivia: {
 		prev_gp: string;

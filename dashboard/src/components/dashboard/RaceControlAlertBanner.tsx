@@ -345,7 +345,7 @@ export function RaceControlAlertBanner() {
 							type="button"
 							onClick={() => setDismissedId(activeAlert.id)}
 							className="rounded-lg border border-zinc-800 bg-zinc-900/80 p-1.5 text-zinc-400 hover:text-white transition-colors"
-							title="Ocultar banner"
+							title={t("race_control.hide_banner", "Ocultar banner")}
 						>
 							<X className="h-4 w-4" />
 						</button>

@@ -176,7 +176,7 @@ export default function WeatherPage() {
 			<div className="md:col-span-5 md:row-span-4 relative border border-zinc-900 rounded-xl overflow-hidden bg-black shadow-2xl min-h-[300px] md:min-h-0">
 				<WeatherMap />
 				<div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10 bg-black/90 border border-[#00A19B]/30 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded text-[10px] sm:text-xs text-[#00A19B] tracking-wider sm:tracking-widest font-bold max-w-[calc(100%-20px)] truncate shadow-lg backdrop-blur-md">
-					<span className="sm:hidden">🛰️ RADAR DOPPLER · NUBOSIDAD</span>
+					<span className="sm:hidden">🛰️ {t("weather.radar_compact", "RADAR DOPPLER · NUBOSIDAD")}</span>
 					<span className="hidden sm:inline">🛰️ {t("weather.radar_title", "RADAR SATELITAL DOPPLER // CAPA NUBOSA")}</span>
 				</div>
 			</div>
@@ -190,8 +190,8 @@ export default function WeatherPage() {
 				</div>
 
 				<div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10 bg-black/90 border border-zinc-800 px-2 py-1 sm:px-3 sm:py-1.5 rounded text-[8.5px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs text-zinc-300 tracking-normal sm:tracking-widest font-bold shadow-lg backdrop-blur-md whitespace-nowrap">
-					<span className="sm:hidden">🏎️ TRAZADA REAL · {circuitoNombre} (17 CURVAS)</span>
-					<span className="hidden sm:inline">🏎️ {t("weather.track_layout_title", "TRAZADA REAL")} // {circuitoNombre} (17 CURVAS)</span>
+					<span className="sm:hidden">🏎️ {t("weather.track_layout_compact", "TRAZADA REAL")} · {circuitoNombre}</span>
+					<span className="hidden sm:inline">🏎️ {t("weather.track_layout_title", "TRAZADA REAL")} // {circuitoNombre}</span>
 				</div>
 			</div>
 

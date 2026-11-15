@@ -94,7 +94,7 @@ export function YouTubeFeed() {
 					<button
 						onClick={() => scroll("left")}
 						className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-11 h-16 flex items-center justify-center opacity-0 group-hover/feed:opacity-100 transition-all duration-300 hover:-translate-x-1 active:scale-95 pointer-events-auto rounded-lg bg-zinc-950/80 border border-zinc-800 shadow-xl backdrop-blur-md"
-						aria-label="Scroll izquierdo"
+						aria-label={t("common.scroll_left", "Scroll izquierdo")}
 					>
 						<span className="text-amber-400 text-lg font-bold">‹</span>
 					</button>
@@ -139,7 +139,7 @@ export function YouTubeFeed() {
 					<button
 						onClick={() => scroll("right")}
 						className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-11 h-16 flex items-center justify-center opacity-0 group-hover/feed:opacity-100 transition-all duration-300 hover:translate-x-1 active:scale-95 pointer-events-auto rounded-lg bg-zinc-950/80 border border-zinc-800 shadow-xl backdrop-blur-md"
-						aria-label="Scroll derecho"
+						aria-label={t("common.scroll_right", "Scroll derecho")}
 					>
 						<span className="text-amber-400 text-lg font-bold">›</span>
 					</button>

@@ -330,3 +330,43 @@ export function translateStatus(status?: string, lang: F1Lang = "es"): string {
 	}
 	return status.toUpperCase();
 }
+
+export function translateCircuitDirection(direction?: string, lang: F1Lang = "es"): string {
+	if (!direction) return "";
+	const clean = direction.toLowerCase().trim();
+	if (clean.includes("antihorario") || clean.includes("anti-clockwise") || clean.includes("counter-clockwise")) {
+		return lang === "en" ? "Anti-clockwise" : lang === "pt" ? "Anti-horário" : "Antihorario";
+	}
+	if (clean.includes("mixto") || clean.includes("figure 8") || clean.includes("cruce en 8") || clean.includes("8")) {
+		return lang === "en" ? "Figure-8 (Mixed)" : lang === "pt" ? "Misto (Cruzamento em 8)" : "Mixto (Cruce en 8)";
+	}
+	if (clean.includes("horario") || clean.includes("clockwise")) {
+		return lang === "en" ? "Clockwise" : lang === "pt" ? "Horário" : "Horario";
+	}
+	return direction;
+}
+
+export function translateTurns(turns?: string, lang: F1Lang = "es"): string {
+	if (!turns) return "";
+	if (lang === "en") {
+		return turns
+			.replace(/\bDer\b/g, "R")
+			.replace(/\bIzq\b/g, "L")
+			.replace(/Figura 8/g, "Figure-8")
+			.replace(/Peraltes 18°/g, "18° Banking")
+			.replace(/Subida Curva 1 a 40m/g, "Turn 1 40m climb")
+			.replace(/Foro Sol Stadium/g, "Foro Sol Stadium")
+			.replace(/'S' de Senna/g, "Senna 'S'")
+			.replace(/Curvas/g, "Turns");
+	}
+	if (lang === "pt") {
+		return turns
+			.replace(/\bDer\b/g, "Dir")
+			.replace(/\bIzq\b/g, "Esq")
+			.replace(/Figura 8/g, "Figura em 8")
+			.replace(/Peraltes 18°/g, "Inclinação 18°")
+			.replace(/Subida Curva 1 a 40m/g, "Subida Curva 1 a 40m")
+			.replace(/'S' de Senna/g, "'S' do Senna");
+	}
+	return turns;
+}

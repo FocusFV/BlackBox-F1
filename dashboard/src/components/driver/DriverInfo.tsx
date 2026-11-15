@@ -94,10 +94,10 @@ export default function DriverInfo({ timingDriver, gridPos }: Props) {
 				{status === "META" ? (
 					<span
 						className="inline-flex items-center gap-1 rounded border border-amber-500/40 bg-zinc-900/90 px-1 py-0.5 text-[9px] font-black text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.2)] select-none"
-						title="Bandera a cuadros (Finalizado)"
+						title={t("race_control.chequered_flag_title", "Bandera a cuadros (Finalizado)")}
 					>
 						<WavingFlag type="chequered" size="xs" />
-						<span className="leading-none">META</span>
+						<span className="leading-none">{t("common.meta", "META")}</span>
 					</span>
 				) : status === "BOX" ? (
 					<span
