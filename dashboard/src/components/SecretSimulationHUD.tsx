@@ -6,6 +6,7 @@ import { simulator } from "@/lib/simulatorFeed";
 import { useDataStore } from "@/stores/useDataStore";
 import { triggerHaptic } from "@/lib/haptics";
 import { useTranslation } from "@/hooks/useTranslation";
+import { translateCountry } from "@/lib/f1Translations";
 import {
 	Radio,
 	Zap,
@@ -20,7 +21,7 @@ import {
 } from "lucide-react";
 
 export default function SecretSimulationHUD() {
-	const { t } = useTranslation();
+	const { t, language } = useTranslation();
 	const pathname = usePathname();
 	const [isActive, setIsActive] = useState(false);
 	const [isCollapsed, setIsCollapsed] = useState(false);
@@ -169,7 +170,7 @@ export default function SecretSimulationHUD() {
 					className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-950/90 border border-red-500/50 text-white shadow-2xl backdrop-blur-md text-[11px] font-black cursor-pointer hover:bg-red-900 transition-all"
 				>
 					<span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-					<span>SIMULACIÓN FIA (V{currentLap})</span>
+					<span>{t("modals.sim_hud_badge", "SIMULACIÓN FIA")} ({language === "en" ? "L" : "V"}{currentLap})</span>
 					<ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
 				</button>
 			</div>
@@ -195,7 +196,7 @@ export default function SecretSimulationHUD() {
 								</span>
 								<span className="hidden sm:inline text-zinc-600">•</span>
 								<span className="text-[10px] sm:text-[11px] font-bold text-zinc-300">
-									{"MÉXICO GP · VUELTA "}{currentLap}/{totalLaps}
+									{translateCountry("Mexico", language).toUpperCase()} GP · {t("telemetry.lap_badge", "VUELTA")} {currentLap}/{totalLaps}
 								</span>
 							</div>
 

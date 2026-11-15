@@ -331,7 +331,7 @@ export default function SessionInfo() {
 				<div className="flex flex-col justify-center min-w-0 flex-1 overflow-hidden pr-2 sm:pr-1">
 					<div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0 max-w-full">
 						<span className="text-[11px] sm:text-xs leading-none font-black text-amber-400 uppercase tracking-tight sm:tracking-widest font-mono drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] whitespace-nowrap">
-							{effectiveSimActive ? "Gran Premio de la Ciudad de México" : nextGpName}
+							{translateGpName(effectiveSimActive ? "mexico city" : nextGpName, language)}
 						</span>
 						<span className="rounded bg-zinc-900/90 border border-zinc-800 px-1.5 py-0.5 text-[9px] font-bold text-zinc-300 uppercase tracking-wider shrink-0 whitespace-nowrap mr-1 sm:mr-0">
 							{effectiveSimActive ? t("sessions.live", "Carrera en Vivo") : translateSessionName(nextSessionName, language)}
@@ -509,7 +509,7 @@ export default function SessionInfo() {
 					</div>
 				) : (
 					<p className="text-xs leading-none font-bold text-zinc-400 font-mono mt-1 uppercase tracking-wider">
-						{effectiveSimActive ? "Autódromo Hermanos Rodríguez" : (session?.Meeting?.Circuit?.ShortName || session?.Meeting?.Location || "Trazado Oficial")}
+						{effectiveSimActive ? "Autódromo Hermanos Rodríguez" : (session?.Meeting?.Circuit?.ShortName || session?.Meeting?.Location || t("common.circuit", "Trazado Oficial"))}
 					</p>
 				)}
 			</div>

@@ -29,6 +29,7 @@ export interface TranslationDictionary {
 		hide_sidebar: string;
 		pin_sidebar: string;
 		close_sidebar: string;
+		show_sidebar: string;
 		side_menu: string;
 	};
 	sessions: {
@@ -148,6 +149,8 @@ export interface TranslationDictionary {
 		restart_green_sub: string;
 		hide_banner: string;
 		chequered_flag_title: string;
+		chequered_finish_title: string;
+		chequered_finish_sub: string;
 	};
 	weather: {
 		title: string;
@@ -280,6 +283,8 @@ export interface TranslationDictionary {
 		scroll_left: string;
 		scroll_right: string;
 		seconds_short: string;
+		buffer: string;
+		simulation: string;
 	};
 	home: {
 		hero_title_1: string;

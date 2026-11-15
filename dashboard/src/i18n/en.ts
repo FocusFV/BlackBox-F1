@@ -28,6 +28,7 @@ export const en: TranslationDictionary = {
 		hide_sidebar: "Hide sidebar",
 		pin_sidebar: "Pin sidebar",
 		close_sidebar: "Close menu",
+		show_sidebar: "Show sidebar",
 		side_menu: "Side menu",
 		sponsor: "Official Sponsor",
 	},
@@ -148,6 +149,8 @@ export const en: TranslationDictionary = {
 		restart_green_sub: "Neutralization ended · Racing resumed",
 		hide_banner: "Hide banner",
 		chequered_flag_title: "Chequered Flag (Finished)",
+		chequered_finish_title: "CHEQUERED FLAG · RACE FINISH",
+		chequered_finish_sub: "Victory and race finish! Cars on cool-down lap heading to Parc Fermé",
 	},
 	weather: {
 		title: "Official Meteorology",
@@ -280,6 +283,8 @@ export const en: TranslationDictionary = {
 		scroll_left: "Scroll left",
 		scroll_right: "Scroll right",
 		seconds_short: "s",
+		buffer: "BUFFER",
+		simulation: "SIMULATION",
 	},
 	home: {
 		hero_title_1: "Telemetry Cockpit",

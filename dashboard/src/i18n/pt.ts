@@ -28,6 +28,7 @@ export const pt: TranslationDictionary = {
 		hide_sidebar: "Ocultar barra lateral",
 		pin_sidebar: "Fixar barra lateral",
 		close_sidebar: "Fechar menu",
+		show_sidebar: "Mostrar barra lateral",
 		side_menu: "Menu lateral",
 		sponsor: "Patrocinador Oficial",
 	},
@@ -148,6 +149,8 @@ export const pt: TranslationDictionary = {
 		restart_green_sub: "Neutralização encerrada · Corrida retomada",
 		hide_banner: "Ocultar banner",
 		chequered_flag_title: "Bandeira quadriculada (Finalizado)",
+		chequered_finish_title: "BANDEIRA QUADRICULADA · FINAL DA CORRIDA",
+		chequered_finish_sub: "Vitória e final de corrida! Carros na volta de honra para o Parque Fechado",
 	},
 	weather: {
 		title: "Meteorologia Oficial",
@@ -280,6 +283,8 @@ export const pt: TranslationDictionary = {
 		scroll_left: "Rolar para esquerda",
 		scroll_right: "Rolar para direita",
 		seconds_short: "s",
+		buffer: "BUFFER",
+		simulation: "SIMULAÇÃO",
 	},
 	home: {
 		hero_title_1: "Cockpit de Telemetria",

@@ -17,7 +17,7 @@ import {
 	evaluateSessionStatus,
 	type ScheduleSession,
 } from "@/lib/sessionSchedule";
-import { translateSessionName } from "@/lib/f1Translations";
+import { translateSessionName, translateGpName } from "@/lib/f1Translations";
 import { simulator } from "@/lib/simulatorFeed";
 
 // 🏎️ DICCIONARIO DE ESTILOS FOCUSFV
@@ -189,8 +189,8 @@ export default function StreamsPage() {
 		setIframeLoaded(false);
 		setSwitchNotice(
 			isAuto
-				? `⚠️ Servidor anterior no respondió. Conmutando a: ${sources[nextIdx]?.label}`
-				: `Conectando con: ${sources[nextIdx]?.label}`
+				? `${t("streams_page.failover_notice", "⚠️ El servidor actual no respondió a tiempo. Conmutando automáticamente a:")} ${sources[nextIdx]?.label}`
+				: `${t("streams_page.connecting_with", "Conectando con")}: ${sources[nextIdx]?.label}`
 		);
 		triggerHaptic("medium");
 	};
@@ -220,7 +220,7 @@ export default function StreamsPage() {
 						const nextIdx = serverIndex + 1;
 						setServerIndex(nextIdx);
 						setSwitchNotice(
-							`⚠️ El servidor actual no respondió a tiempo. Conmutando automáticamente a: ${sources[nextIdx]?.label}`
+							`${t("streams_page.failover_notice", "⚠️ El servidor actual no respondió a tiempo. Conmutando automáticamente a:")} ${sources[nextIdx]?.label}`
 						);
 						triggerHaptic("heavy");
 					}
@@ -258,7 +258,7 @@ export default function StreamsPage() {
 			if (isSimActive) {
 				if (isMounted) {
 					setIsBackendSessionLive(true);
-					setBackendSessionTitle("GRAN PREMIO DE LA CIUDAD DE MÉXICO 2026 · CARRERA (SIMULACIÓN)");
+					setBackendSessionTitle(`${translateGpName("mexico city", language).toUpperCase()} 2026 · ${translateSessionName("race", language).toUpperCase()} (${t("common.simulation", "SIMULACIÓN")})`);
 				}
 				return;
 			}
@@ -352,13 +352,13 @@ export default function StreamsPage() {
 
 			if (shouldBeLive) {
 				const displayTitle = isSimActive
-					? "GRAN PREMIO DE LA CIUDAD DE MÉXICO 2026 · CARRERA (SIMULACIÓN)"
+					? `${translateGpName("mexico city", language).toUpperCase()} 2026 · ${translateSessionName("race", language).toUpperCase()} (${t("common.simulation", "SIMULACIÓN")})`
 					: (backendSessionTitle || status.activeSessionName || sessionInfo?.Name || "Sesión Oficial");
 
 				if (isSimActive || bypassRef.current) {
 					// En modo simulación o bypass manual, desbloquear DE INMEDIATO sin bloquear en pantalla de motores apagados
 					setIsLive(true);
-					setActiveSessionName(translateSessionName(displayTitle));
+					setActiveSessionName(translateSessionName(displayTitle, language));
 					setCountdownText("");
 				} else if (!isLiveRef.current && !isUnlockingRef.current) {
 					// 🚀 Secuencia animada de desbloqueo al llegar a los 15 min antes o por F1 en vivo
@@ -366,14 +366,14 @@ export default function StreamsPage() {
 					triggerHaptic("heavy");
 					setTimeout(() => {
 						setIsLive(true);
-						setActiveSessionName(translateSessionName(displayTitle));
+						setActiveSessionName(translateSessionName(displayTitle, language));
 						setCountdownText("");
 						setTimeout(() => {
 							setIsUnlocking(false);
 						}, 200);
 					}, 950);
 				} else if (isLiveRef.current) {
-					setActiveSessionName(translateSessionName(displayTitle));
+					setActiveSessionName(translateSessionName(displayTitle, language));
 					setCountdownText("");
 				}
 			} else {
@@ -381,7 +381,7 @@ export default function StreamsPage() {
 					setIsLive(false);
 					setActiveSessionName(null);
 					const rawNext = status.nextSessionName;
-					setNextSessionName(rawNext ? translateSessionName(rawNext) : null);
+					setNextSessionName(rawNext ? translateSessionName(rawNext, language) : null);
 					if (status.nextSessionStart) {
 						const diff = Math.max(0, status.nextSessionStart - Date.now());
 						setCountdownText(formatRemainingTime(diff));
@@ -500,7 +500,7 @@ export default function StreamsPage() {
 									<span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
 										{t("streams_page.next_session_label", "Próxima Sesión:")}{" "}
 										<span className="text-amber-400 font-black">
-											{translateSessionName(nextSessionName)}
+											{translateSessionName(nextSessionName, language)}
 										</span>
 									</span>
 									<span className="text-3xl font-black text-white font-mono mt-1 tracking-widest text-emerald-400 tabular-nums">

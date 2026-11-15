@@ -72,7 +72,7 @@ export default function DashboardLayout({ children }: Props) {
 						</div>
 
 						<span className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1.5">
-							{t("telemetry.telemetry_title", "TELEMETRÍA")} BÚFER
+							{t("telemetry.telemetry_title", "TELEMETRÍA")} · {t("common.buffer", "BÚFER")}
 						</span>
 						<h2 className="text-xl font-black uppercase tracking-tight text-zinc-100">
 							{t("telemetry.syncing_tv", "Sincronizando con la TV")}

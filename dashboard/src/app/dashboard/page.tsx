@@ -33,7 +33,7 @@ const DriverProfileModal = dynamic(
 	{ ssr: false }
 );
 import { Swords, Radio, Flag, AlertTriangle } from "lucide-react";
-import { translateSessionName } from "@/lib/f1Translations";
+import { translateSessionName, translateCountry } from "@/lib/f1Translations";
 import { triggerHaptic } from "@/lib/haptics";
 import {
 	getUpcomingSessions,
@@ -44,7 +44,7 @@ import {
 } from "@/lib/sessionSchedule";
 
 export default function Page() {
-	const { t } = useTranslation();
+	const { t, language } = useTranslation();
 	const dataStore = useDataStore();
 
 	const session = dataStore.state?.SessionInfo;
@@ -319,7 +319,7 @@ export default function Page() {
 						<h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white mb-2">{t("dashboard.syncing_live_telemetry", "SINCRONIZANDO TELEMETRÍA EN VIVO")}</h2>
 
 						<p className="text-xs text-zinc-400 mb-6 font-sans">
-							{translateSessionName(scheduleStatus.activeSessionName || session?.Name || "Sesión Oficial")} • {session?.Meeting?.Country?.Name || "FÓRMULA 1"}
+							{translateSessionName(scheduleStatus.activeSessionName || session?.Name || "Sesión Oficial", language)} • {session?.Meeting?.Country?.Name ? translateCountry(session.Meeting.Country.Name, language) : "FÓRMULA 1"}
 						</p>
 
 						<div className="w-full bg-zinc-900 h-2 rounded-full overflow-hidden border border-zinc-800 shadow-inner">
@@ -340,7 +340,7 @@ export default function Page() {
 								<div className="flex flex-col">
 									<span className="text-[10px] font-black uppercase tracking-widest text-amber-400 font-mono">{t("dashboard.session_finished", "SESIÓN FINALIZADA")}</span>
 									<span className="text-xs sm:text-sm font-black uppercase tracking-wider text-white font-mono">
-										{t("dashboard.final_results_of", "RESULTADOS FINALES DE {session} {country}").replace("{session}", session?.Name ? translateSessionName(session.Name) : t("dashboard.session_word", "SESIÓN")).replace("{country}", session?.Meeting?.Country?.Name || "MÉXICO")}
+										{t("dashboard.final_results_of", "RESULTADOS FINALES DE {session} {country}").replace("{session}", session?.Name ? translateSessionName(session.Name, language) : t("dashboard.session_word", "SESIÓN")).replace("{country}", session?.Meeting?.Country?.Name ? translateCountry(session.Meeting.Country.Name, language) : translateCountry("MÉXICO", language))}
 									</span>
 								</div>
 							</div>
@@ -365,7 +365,7 @@ export default function Page() {
 									<span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500"></span>
 								</span>
 								<span className="text-xs font-bold tracking-wider text-emerald-400 uppercase">
-									{translateSessionName(scheduleStatus.activeSessionName || session?.Name || "Telemetría en Vivo")}
+									{translateSessionName(scheduleStatus.activeSessionName || session?.Name || t("common.live_telemetry", "Telemetría en Vivo"), language)}
 								</span>
 							</div>
 

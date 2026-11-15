@@ -207,7 +207,7 @@ export default function Sidebar({ connected }: Props) {
 					onMouseEnter={() => {
 						if (isDesktop) open();
 					}}
-					title={pinned ? "Ocultar menú" : "Mostrar menú lateral"}
+					title={pinned ? t("sidebar.hide_sidebar", "Ocultar menú lateral") : t("sidebar.show_sidebar", "Mostrar menú lateral")}
 				>
 					<div className="h-14 w-2.5 bg-amber-500/25 group-hover:bg-amber-400 group-hover:w-4 rounded-r-xl border-y border-r border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.35)] transition-all duration-300 flex items-center justify-center backdrop-blur-md">
 						<div className="w-0.5 h-6 bg-amber-400 rounded-full group-hover:bg-black transition-colors" />
