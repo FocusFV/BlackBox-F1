@@ -31,15 +31,25 @@ export const useSocket = ({ handleInitial, handleUpdate }: Props) => {
 
 		let isMounted = true;
 
-		// 🚀 Carga inicial instantánea vía HTTP GET para hidratar la grilla en milisegundos
-		fetch(`${env.NEXT_PUBLIC_LIVE_URL}/api/current`)
-			.then((res) => (res.ok ? res.json() : null))
-			.then((data) => {
-				if (isMounted && data && Object.keys(data).length > 0) {
-					handleInitial(data);
+		// 🚀 Carga inicial instantánea vía HTTP GET para hidratar la grilla en milisegundos con fallback a proxy local
+		const hydrateInitial = async () => {
+			const urls = [`${env.NEXT_PUBLIC_LIVE_URL}/api/current`, "/api/current"];
+			for (const url of urls) {
+				try {
+					const res = await fetch(url);
+					if (res.ok) {
+						const data = await res.json();
+						if (isMounted && data && Object.keys(data).length > 0) {
+							handleInitial(data);
+							break;
+						}
+					}
+				} catch (e) {
+					console.warn(`[useSocket] Intento de hidratación falló en ${url}:`, e);
 				}
-			})
-			.catch((e) => console.warn("Error hidratando estado inicial desde /api/current:", e));
+			}
+		};
+		hydrateInitial();
 
 		const sse = new EventSource(`${env.NEXT_PUBLIC_LIVE_URL}/api/realtime`);
 

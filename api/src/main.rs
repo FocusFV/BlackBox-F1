@@ -4,13 +4,12 @@ use anyhow::Error;
 use axum::{
     Json,
     Router,
-    http::{HeaderValue, Method},
     routing::get,
 };
 use serde::Serialize;
 
 use tokio::net::TcpListener;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 use tracing::info;
 
 use shared::tracing_subscriber;
@@ -53,18 +52,5 @@ async fn main() -> Result<(), Error> {
 }
 
 pub fn cors_layer() -> Result<CorsLayer, anyhow::Error> {
-    // Tomamos la variable o usamos defaults en minúsculas
-    let origin_var = env::var("ORIGIN").unwrap_or_else(|_| "http://localhost:3000;https://blackboxf1.vercel.app".to_string());
-
-    let origins: Vec<HeaderValue> = origin_var
-        .split(';')
-        .filter_map(|o| o.trim().to_lowercase().parse::<HeaderValue>().ok())
-        .collect();
-
-    let cors = CorsLayer::new()
-        .allow_origin(origins)
-        .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
-        .allow_headers(Any); // Evita broncas con headers personalizados que mande Vercel o el browser
-
-    Ok(cors)
+    Ok(CorsLayer::permissive())
 }

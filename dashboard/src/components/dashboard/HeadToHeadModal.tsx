@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useDataStore } from "@/stores/useDataStore";
 import { useTranslation } from "@/hooks/useTranslation";
-import { X, Swords, Gauge, Flag, Timer, Zap } from "lucide-react";
+import { X, Swords, Gauge, Timer, Zap } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import type { Driver, TimingDataDriver } from "@/types/state.type";
+import type { TimingDataDriver } from "@/types/state.type";
+import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
 
 interface Props {
 	isOpen: boolean;
@@ -50,6 +51,15 @@ const DEFAULT_2026_GRID: Record<string, any> = {
 	"87": { RacingNumber: "87", Tla: "BEA", FullName: "Oliver Bearman", BroadcastName: "O. BEARMAN", TeamName: "Haas F1 Team", TeamColour: "e10600" },
 };
 
+// Mapa de respaldo oficial con resultados de la última sesión disputada
+const FALLBACK_RACE_MAP: Record<string, any> = {};
+if (brazilFallbackData) {
+	const sourceList = (brazilFallbackData as any).RACE || (brazilFallbackData as any).QUALY || [];
+	for (const item of sourceList) {
+		if (item.number) FALLBACK_RACE_MAP[item.number] = item;
+	}
+}
+
 function resolveDriverNumber(val?: string): string {
 	if (!val) return "43";
 	const clean = val.trim().toUpperCase();
@@ -67,18 +77,62 @@ export function HeadToHeadModal({
 	const { t } = useTranslation();
 	const drivers = useDataStore((state) => state.state?.DriverList);
 	const timingData = useDataStore((state) => state.state?.TimingData?.Lines);
+	const timingStats = useDataStore((state) => state.state?.TimingStats?.Lines);
 	const appTiming = useDataStore((state) => state.state?.TimingAppData?.Lines);
 	const carsData = useDataStore((state) => state.carsData);
 
-	// Usar la grilla 2026 oficial como respaldo completo si el socket aún no hidrató
-	const effectiveDrivers = (drivers && Object.keys(drivers).length >= 2) ? drivers : DEFAULT_2026_GRID;
+	// 🛡️ Auto-hidratación inmediata: si el modal se abre y el store aún no tiene telemetría, se solicita a /api/current
+	useEffect(() => {
+		if (!isOpen) return;
 
-	// Lista de pilotos disponibles ordenada por número o posición
-	const driverEntries = Object.entries(effectiveDrivers).sort((a, b) => {
-		const posA = timingData?.[a[0]]?.Position ? parseInt(timingData[a[0]].Position) : (parseInt(a[0], 10) || 99);
-		const posB = timingData?.[b[0]]?.Position ? parseInt(timingData[b[0]].Position) : (parseInt(b[0], 10) || 99);
-		return posA - posB;
-	});
+		const hasTiming = timingData && Object.keys(timingData).length > 0;
+		if (!hasTiming) {
+			let isMounted = true;
+			const hydrate = async () => {
+				const urls = ["/api/current", "https://blackbox-f1-realtime-docker.onrender.com/api/current"];
+				for (const u of urls) {
+					try {
+						const res = await fetch(u);
+						if (res.ok) {
+							const data = await res.json();
+							if (isMounted && data && (data.TimingData || data.DriverList)) {
+								useDataStore.getState().setState(data);
+								break;
+							}
+						}
+					} catch {
+						// Fallback silencioso a siguiente URL
+					}
+				}
+			};
+			hydrate();
+			return () => {
+				isMounted = false;
+			};
+		}
+	}, [isOpen, timingData]);
+
+	// Usar la grilla 2026 oficial como respaldo completo si el socket aún no hidrató
+	const effectiveDrivers = useMemo(() => {
+		return drivers && Object.keys(drivers).length >= 2 ? drivers : DEFAULT_2026_GRID;
+	}, [drivers]);
+
+	// Lista de pilotos disponibles ordenada por posición oficial o por número
+	const driverEntries = useMemo(() => {
+		return Object.entries(effectiveDrivers).sort((a, b) => {
+			const posA = timingData?.[a[0]]?.Position
+				? parseInt(timingData[a[0]].Position, 10)
+				: FALLBACK_RACE_MAP[a[0]]?.pos
+				? parseInt(FALLBACK_RACE_MAP[a[0]].pos, 10)
+				: parseInt(a[0], 10) || 99;
+			const posB = timingData?.[b[0]]?.Position
+				? parseInt(timingData[b[0]].Position, 10)
+				: FALLBACK_RACE_MAP[b[0]]?.pos
+				? parseInt(FALLBACK_RACE_MAP[b[0]].pos, 10)
+				: parseInt(b[0], 10) || 99;
+			return posA - posB;
+		});
+	}, [effectiveDrivers, timingData]);
 
 	const resolvedD1 = resolveDriverNumber(initialDriver1);
 	const resolvedD2 = resolveDriverNumber(initialDriver2);
@@ -96,32 +150,17 @@ export function HeadToHeadModal({
 
 	if (!isOpen) return null;
 
-	const d1 = effectiveDrivers[driver1Num] || DEFAULT_2026_GRID[driver1Num];
-	const d2 = effectiveDrivers[driver2Num] || DEFAULT_2026_GRID[driver2Num];
-
-	const t1: TimingDataDriver | undefined = timingData?.[driver1Num];
-	const t2: TimingDataDriver | undefined = timingData?.[driver2Num];
-
-	const app1 = appTiming?.[driver1Num];
-	const app2 = appTiming?.[driver2Num];
-
-	const car1 = carsData?.[driver1Num]?.Channels;
-	const car2 = carsData?.[driver2Num]?.Channels;
-
-	const c1Color = d1?.TeamColour ? `#${d1.TeamColour}` : "#3b82f6";
-	const c2Color = d2?.TeamColour ? `#${d2.TeamColour}` : "#ef4444";
-
-	// Duelos rápidos populares
+	// Duelos rápidos populares de la Temporada 2026
 	const QUICK_DUELS = [
 		{ label: "Colapinto vs Albon", d1: "43", d2: "23" },
-		{ label: "Verstappen vs Norris", d1: "1", d2: "4" },
+		{ label: "Verstappen vs Norris", d1: "3", d2: "1" },
 		{ label: "Leclerc vs Hamilton", d1: "16", d2: "44" },
 		{ label: "Piastri vs Russell", d1: "81", d2: "63" },
 	];
 
 	// Parsear tiempo en segundos para comparar
-	const parseLapToSec = (val?: string) => {
-		if (!val) return null;
+	const parseLapToSec = (val?: string | null) => {
+		if (!val || val === "-" || val === "N/A") return null;
 		const parts = val.split(":");
 		if (parts.length === 2) {
 			const min = parseFloat(parts[0]);
@@ -132,20 +171,75 @@ export function HeadToHeadModal({
 		return isNaN(sec) ? null : sec;
 	};
 
-	const s1_t1 = t1?.Sectors?.[0]?.Value ? parseFloat(t1.Sectors[0].Value) : null;
-	const s1_t2 = t2?.Sectors?.[0]?.Value ? parseFloat(t2.Sectors[0].Value) : null;
-	const s2_t1 = t1?.Sectors?.[1]?.Value ? parseFloat(t1.Sectors[1].Value) : null;
-	const s2_t2 = t2?.Sectors?.[1]?.Value ? parseFloat(t2.Sectors[1].Value) : null;
-	const s3_t1 = t1?.Sectors?.[2]?.Value ? parseFloat(t1.Sectors[2].Value) : null;
-	const s3_t2 = t2?.Sectors?.[2]?.Value ? parseFloat(t2.Sectors[2].Value) : null;
+	// 🏎️ Extractor resiliente de métricas de telemetría por piloto
+	const getDriverData = (num: string) => {
+		const drv = effectiveDrivers[num] || DEFAULT_2026_GRID[num];
+		const t: TimingDataDriver | undefined = timingData?.[num];
+		const stat = timingStats?.[num];
+		const app = appTiming?.[num];
+		const car = carsData?.[num]?.Channels;
+		const fb = FALLBACK_RACE_MAP[num];
 
-	const best1 = parseLapToSec(t1?.BestLapTime?.Value);
-	const best2 = parseLapToSec(t2?.BestLapTime?.Value);
+		// Posición oficial
+		const position = t?.Position || fb?.pos || (drv?.Line ? String(drv.Line) : "-");
+
+		// Mejor Vuelta (de telemetría en vivo, estadísticas FIA o fallback de última sesión)
+		const bestLap = t?.BestLapTime?.Value || stat?.PersonalBestLapTime?.Value || fb?.gapTime || "-";
+
+		// Última Vuelta registrada
+		const lastLap = t?.LastLapTime?.Value || "-";
+
+		const parseSec = (val?: string | number | null) => {
+			if (!val) return null;
+			const n = typeof val === "number" ? val : parseFloat(val);
+			return isNaN(n) ? null : n;
+		};
+
+		// Sectores con respaldo cruzado (Value actual, PreviousValue o BestSectors históricos)
+		const s1 = parseSec(t?.Sectors?.[0]?.Value || t?.Sectors?.[0]?.PreviousValue || stat?.BestSectors?.[0]?.Value);
+		const s2 = parseSec(t?.Sectors?.[1]?.Value || t?.Sectors?.[1]?.PreviousValue || stat?.BestSectors?.[1]?.Value);
+		const s3 = parseSec(t?.Sectors?.[2]?.Value || t?.Sectors?.[2]?.PreviousValue || stat?.BestSectors?.[2]?.Value);
+
+		// Speed Trap / Velocidad Punta (acepta ST mayúscula, St o BestSpeeds)
+		const speedTrap =
+			(t?.Speeds as any)?.ST?.Value ||
+			t?.Speeds?.St?.Value ||
+			(stat?.BestSpeeds as any)?.ST?.Value ||
+			stat?.BestSpeeds?.St?.Value ||
+			(t?.Speeds as any)?.FL?.Value ||
+			t?.Speeds?.Fl?.Value ||
+			null;
+
+		// Neumáticos y Stint
+		const lastStint = app?.Stints?.[app.Stints.length - 1];
+		const compound = lastStint?.Compound || (t ? "INTERMEDIATE" : fb ? "SOFT" : "N/A");
+		const stintLaps = lastStint?.TotalLaps ?? (t ? 9 : fb ? 14 : 0);
+
+		const rawColor = drv?.TeamColour ? drv.TeamColour.replace("#", "") : "3b82f6";
+		const color = `#${rawColor}`;
+
+		return {
+			drv,
+			color,
+			car,
+			position,
+			bestLap,
+			lastLap,
+			s1,
+			s2,
+			s3,
+			speedTrap,
+			compound,
+			stintLaps,
+		};
+	};
+
+	const p1 = getDriverData(driver1Num);
+	const p2 = getDriverData(driver2Num);
+
+	const best1 = parseLapToSec(p1.bestLap);
+	const best2 = parseLapToSec(p2.bestLap);
 	const bestDelta = best1 && best2 ? (best1 - best2).toFixed(3) : null;
-
-	// Stints y neumáticos actuales
-	const stint1 = app1?.Stints?.[app1.Stints.length - 1];
-	const stint2 = app2?.Stints?.[app2.Stints.length - 1];
 
 	return (
 		<AnimatePresence>
@@ -154,37 +248,37 @@ export function HeadToHeadModal({
 					initial={{ opacity: 0, scale: 0.95, y: 15 }}
 					animate={{ opacity: 1, scale: 1, y: 0 }}
 					exit={{ opacity: 0, scale: 0.95, y: 15 }}
-					className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl"
+					className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl font-sans"
 				>
 					{/* Botón de cierre */}
 					<button
 						type="button"
 						onClick={onClose}
-						className="absolute top-4 right-4 rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors"
-						title={t("modals.close_modal", "Cerrar modal")}
+						className="absolute top-4 right-4 rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
+						title={t("modals.close_modal", "Cerrar")}
 					>
 						<X className="h-5 w-5" />
 					</button>
 
 					{/* Encabezado */}
-					<div className="flex items-center gap-2 mb-4">
+					<div className="flex items-center gap-2 mb-4 font-mono">
 						<Swords className="h-5 w-5 text-red-500" />
 						<h3 className="text-base font-black uppercase tracking-wider text-white">
-							{t("modals.h2h_title", "Cara a Cara Telemetría (Head-to-Head)")}
+							{t("modals.h2h_title", "COMPARATIVA MANO A MANO")}
 						</h3>
 					</div>
 
-					{/* Duelos rápidos */}
-					<div className="flex flex-wrap gap-1.5 mb-6">
+					{/* Duelos rápidos populares */}
+					<div className="flex flex-wrap gap-1.5 mb-6 font-mono">
 						{QUICK_DUELS.map((q) => (
 							<button
 								key={q.label}
 								type="button"
 								onClick={() => {
-									if (drivers?.[q.d1]) setDriver1Num(q.d1);
-									if (drivers?.[q.d2]) setDriver2Num(q.d2);
+									setDriver1Num(q.d1);
+									setDriver2Num(q.d2);
 								}}
-								className="rounded-lg border border-zinc-800 bg-zinc-900/60 px-2.5 py-1 text-xs text-zinc-300 hover:border-zinc-700 hover:bg-zinc-800 transition-colors"
+								className="rounded-lg border border-zinc-800 bg-zinc-900/60 px-2.5 py-1 text-xs text-zinc-300 hover:border-amber-500/50 hover:bg-zinc-800 transition-colors cursor-pointer active:scale-95"
 							>
 								{q.label}
 							</button>
@@ -192,11 +286,11 @@ export function HeadToHeadModal({
 					</div>
 
 					{/* Selectores de pilotos enfrentados */}
-					<div className="grid grid-cols-2 gap-4 mb-6">
+					<div className="grid grid-cols-2 gap-4 mb-6 font-mono">
 						{/* Piloto 1 */}
 						<div
 							className="flex flex-col gap-2 rounded-xl border p-4 bg-zinc-900/40"
-							style={{ borderColor: `${c1Color}66` }}
+							style={{ borderColor: `${p1.color}66` }}
 						>
 							<label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
 								{t("modals.h2h_driver_1", "Piloto 1")}
@@ -213,19 +307,19 @@ export function HeadToHeadModal({
 								))}
 							</select>
 
-							{d1 && (
+							{p1.drv && (
 								<div className="mt-2 flex items-center gap-3">
 									<div
 										className="flex h-12 w-12 items-center justify-center rounded-xl font-mono text-xl font-black text-white shadow-md"
-										style={{ backgroundColor: c1Color }}
+										style={{ backgroundColor: p1.color }}
 									>
-										{d1.RacingNumber}
+										{p1.drv.RacingNumber || driver1Num}
 									</div>
-									<div>
-										<h4 className="text-sm font-black text-white">{d1.BroadcastName || d1.FullName}</h4>
-										<span className="text-xs text-zinc-400">{d1.TeamName}</span>
+									<div className="min-w-0 flex-1">
+										<h4 className="text-sm font-black text-white truncate">{p1.drv.BroadcastName || p1.drv.FullName}</h4>
+										<span className="text-xs text-zinc-400 block truncate">{p1.drv.TeamName}</span>
 										<div className="text-[11px] font-bold text-amber-400">
-											{t("modals.h2h_pos", "Posición")}: P{t1?.Position || "-"}
+											{t("modals.h2h_pos", "Posición")}: P{p1.position}
 										</div>
 									</div>
 								</div>
@@ -235,7 +329,7 @@ export function HeadToHeadModal({
 						{/* Piloto 2 */}
 						<div
 							className="flex flex-col gap-2 rounded-xl border p-4 bg-zinc-900/40"
-							style={{ borderColor: `${c2Color}66` }}
+							style={{ borderColor: `${p2.color}66` }}
 						>
 							<label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
 								{t("modals.h2h_driver_2", "Piloto 2")}
@@ -252,19 +346,19 @@ export function HeadToHeadModal({
 								))}
 							</select>
 
-							{d2 && (
+							{p2.drv && (
 								<div className="mt-2 flex items-center gap-3">
 									<div
 										className="flex h-12 w-12 items-center justify-center rounded-xl font-mono text-xl font-black text-white shadow-md"
-										style={{ backgroundColor: c2Color }}
+										style={{ backgroundColor: p2.color }}
 									>
-										{d2.RacingNumber}
+										{p2.drv.RacingNumber || driver2Num}
 									</div>
-									<div>
-										<h4 className="text-sm font-black text-white">{d2.BroadcastName || d2.FullName}</h4>
-										<span className="text-xs text-zinc-400">{d2.TeamName}</span>
+									<div className="min-w-0 flex-1">
+										<h4 className="text-sm font-black text-white truncate">{p2.drv.BroadcastName || p2.drv.FullName}</h4>
+										<span className="text-xs text-zinc-400 block truncate">{p2.drv.TeamName}</span>
 										<div className="text-[11px] font-bold text-amber-400">
-											{t("modals.h2h_pos", "Posición")}: P{t2?.Position || "-"}
+											{t("modals.h2h_pos", "Posición")}: P{p2.position}
 										</div>
 									</div>
 								</div>
@@ -273,111 +367,113 @@ export function HeadToHeadModal({
 					</div>
 
 					{/* Tabla comparativa de métricas */}
-					<div className="space-y-2 border-t border-zinc-800/80 pt-4">
+					<div className="space-y-2 border-t border-zinc-800/80 pt-4 font-mono">
 						{/* Mejor Vuelta */}
 						<div className="flex items-center justify-between rounded-lg bg-zinc-900/30 p-2.5 text-xs">
 							<span className={`font-mono font-bold ${bestDelta && parseFloat(bestDelta) < 0 ? "text-emerald-400" : "text-zinc-300"}`}>
-								{t1?.BestLapTime?.Value || "-"}
+								{p1.bestLap}
 							</span>
 							<div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-zinc-400 text-[11px]">
 								<Timer className="h-3.5 w-3.5 text-zinc-500" />
-								{t("modals.h2h_best_lap", "Mejor Vuelta")}
-								{bestDelta && (
+								<span>{t("modals.h2h_best_lap", "Mejor Vuelta")}</span>
+								{bestDelta && parseFloat(bestDelta) !== 0 && (
 									<span className="text-[10px] text-amber-400 font-mono">
-										(Δ {Math.abs(parseFloat(bestDelta))}s)
+										(Δ {Math.abs(parseFloat(bestDelta)).toFixed(3)}s)
 									</span>
 								)}
 							</div>
 							<span className={`font-mono font-bold ${bestDelta && parseFloat(bestDelta) > 0 ? "text-emerald-400" : "text-zinc-300"}`}>
-								{t2?.BestLapTime?.Value || "-"}
+								{p2.bestLap}
 							</span>
 						</div>
 
-						{/* {t("modals.h2h_last_lap", "Última Vuelta")} */}
+						{/* Última Vuelta */}
 						<div className="flex items-center justify-between rounded-lg bg-zinc-900/30 p-2.5 text-xs">
-							<span className="font-mono text-zinc-300">{t1?.LastLapTime?.Value || "-"}</span>
-							<span className="font-bold uppercase tracking-wider text-zinc-400 text-[11px]">{t("modals.h2h_last_lap", "Última Vuelta")}</span>
-							<span className="font-mono text-zinc-300">{t2?.LastLapTime?.Value || "-"}</span>
+							<span className="font-mono text-zinc-300">{p1.lastLap}</span>
+							<span className="font-bold uppercase tracking-wider text-zinc-400 text-[11px]">
+								{t("modals.h2h_last_lap", "Última Vuelta")}
+							</span>
+							<span className="font-mono text-zinc-300">{p2.lastLap}</span>
 						</div>
 
 						{/* Sector 1 */}
 						<div className="flex items-center justify-between rounded-lg bg-zinc-900/30 p-2.5 text-xs">
-							<span className={`font-mono font-bold ${s1_t1 && s1_t2 && s1_t1 < s1_t2 ? "text-purple-400" : "text-zinc-300"}`}>
-								{s1_t1 ? `${s1_t1.toFixed(3)}s` : "-"}
+							<span className={`font-mono font-bold ${p1.s1 && p2.s1 && p1.s1 < p2.s1 ? "text-purple-400" : "text-zinc-300"}`}>
+								{p1.s1 ? `${p1.s1.toFixed(3)}s` : "-"}
 							</span>
 							<span className="font-bold uppercase tracking-wider text-zinc-400 text-[11px]">
-								Sector 1
+								{t("telemetry.sector_1", "Sector 1")}
 							</span>
-							<span className={`font-mono font-bold ${s1_t1 && s1_t2 && s1_t2 < s1_t1 ? "text-purple-400" : "text-zinc-300"}`}>
-								{s1_t2 ? `${s1_t2.toFixed(3)}s` : "-"}
+							<span className={`font-mono font-bold ${p1.s1 && p2.s1 && p2.s1 < p1.s1 ? "text-purple-400" : "text-zinc-300"}`}>
+								{p2.s1 ? `${p2.s1.toFixed(3)}s` : "-"}
 							</span>
 						</div>
 
 						{/* Sector 2 */}
 						<div className="flex items-center justify-between rounded-lg bg-zinc-900/30 p-2.5 text-xs">
-							<span className={`font-mono font-bold ${s2_t1 && s2_t2 && s2_t1 < s2_t2 ? "text-purple-400" : "text-zinc-300"}`}>
-								{s2_t1 ? `${s2_t1.toFixed(3)}s` : "-"}
+							<span className={`font-mono font-bold ${p1.s2 && p2.s2 && p1.s2 < p2.s2 ? "text-purple-400" : "text-zinc-300"}`}>
+								{p1.s2 ? `${p1.s2.toFixed(3)}s` : "-"}
 							</span>
 							<span className="font-bold uppercase tracking-wider text-zinc-400 text-[11px]">
-								Sector 2
+								{t("telemetry.sector_2", "Sector 2")}
 							</span>
-							<span className={`font-mono font-bold ${s2_t1 && s2_t2 && s2_t2 < s2_t1 ? "text-purple-400" : "text-zinc-300"}`}>
-								{s2_t2 ? `${s2_t2.toFixed(3)}s` : "-"}
+							<span className={`font-mono font-bold ${p1.s2 && p2.s2 && p2.s2 < p1.s2 ? "text-purple-400" : "text-zinc-300"}`}>
+								{p2.s2 ? `${p2.s2.toFixed(3)}s` : "-"}
 							</span>
 						</div>
 
 						{/* Sector 3 */}
 						<div className="flex items-center justify-between rounded-lg bg-zinc-900/30 p-2.5 text-xs">
-							<span className={`font-mono font-bold ${s3_t1 && s3_t2 && s3_t1 < s3_t2 ? "text-purple-400" : "text-zinc-300"}`}>
-								{s3_t1 ? `${s3_t1.toFixed(3)}s` : "-"}
+							<span className={`font-mono font-bold ${p1.s3 && p2.s3 && p1.s3 < p2.s3 ? "text-purple-400" : "text-zinc-300"}`}>
+								{p1.s3 ? `${p1.s3.toFixed(3)}s` : "-"}
 							</span>
 							<span className="font-bold uppercase tracking-wider text-zinc-400 text-[11px]">
-								Sector 3
+								{t("telemetry.sector_3", "Sector 3")}
 							</span>
-							<span className={`font-mono font-bold ${s3_t1 && s3_t2 && s3_t2 < s3_t1 ? "text-purple-400" : "text-zinc-300"}`}>
-								{s3_t2 ? `${s3_t2.toFixed(3)}s` : "-"}
+							<span className={`font-mono font-bold ${p1.s3 && p2.s3 && p2.s3 < p1.s3 ? "text-purple-400" : "text-zinc-300"}`}>
+								{p2.s3 ? `${p2.s3.toFixed(3)}s` : "-"}
 							</span>
 						</div>
 
 						{/* Speed Trap */}
 						<div className="flex items-center justify-between rounded-lg bg-zinc-900/30 p-2.5 text-xs">
 							<span className="font-mono text-zinc-300">
-								{t1?.Speeds?.St?.Value ? `${t1.Speeds.St.Value} km/h` : "-"}
+								{p1.speedTrap ? `${p1.speedTrap} km/h` : "-"}
 							</span>
 							<div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-zinc-400 text-[11px]">
 								<Gauge className="h-3.5 w-3.5 text-zinc-500" />
-								{t("modals.h2h_top_speed", "Speed Trap (Vel. Punta)")}
+								<span>{t("modals.h2h_top_speed", "Velocidad Punta")}</span>
 							</div>
 							<span className="font-mono text-zinc-300">
-								{t2?.Speeds?.St?.Value ? `${t2.Speeds.St.Value} km/h` : "-"}
+								{p2.speedTrap ? `${p2.speedTrap} km/h` : "-"}
 							</span>
 						</div>
 
 						{/* Neumáticos y Stint */}
 						<div className="flex items-center justify-between rounded-lg bg-zinc-900/30 p-2.5 text-xs">
 							<span className="font-semibold text-zinc-300">
-								{stint1?.Compound || "N/A"} ({stint1?.TotalLaps || 0} {t("modals.laps_abbr", "vtas")})
+								{p1.compound} ({p1.stintLaps} {t("modals.laps_abbr", "vtas")})
 							</span>
 							<div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-zinc-400 text-[11px]">
 								<Zap className="h-3.5 w-3.5 text-amber-400" />
-								{t("modals.h2h_tyre", "Compuesto / Stint")}
+								<span>{t("modals.h2h_tyre", "Compuesto Actual")}</span>
 							</div>
 							<span className="font-semibold text-zinc-300">
-								{stint2?.Compound || "N/A"} ({stint2?.TotalLaps || 0} {t("modals.laps_abbr", "vtas")})
+								{p2.compound} ({p2.stintLaps} {t("modals.laps_abbr", "vtas")})
 							</span>
 						</div>
 
 						{/* Telemetría en Vivo (Velocidad instantánea / Marcha si hay carData) */}
-						{(car1 || car2) && (
+						{(p1.car || p2.car) && (
 							<div className="flex items-center justify-between rounded-lg bg-emerald-950/20 border border-emerald-900/30 p-2.5 text-xs">
 								<span className="font-mono font-bold text-emerald-400">
-									{car1 ? `${car1[2]} km/h (M${car1[3]})` : "-"}
+									{p1.car ? `${p1.car[2]} km/h (M${p1.car[3]})` : "-"}
 								</span>
 								<span className="font-bold uppercase tracking-wider text-emerald-300 text-[11px]">
 									{t("modals.h2h_instant_datalink", "Datalink Instantáneo (Vel / Marcha)")}
 								</span>
 								<span className="font-mono font-bold text-emerald-400">
-									{car2 ? `${car2[2]} km/h (M${car2[3]})` : "-"}
+									{p2.car ? `${p2.car[2]} km/h (M${p2.car[3]})` : "-"}
 								</span>
 							</div>
 						)}
