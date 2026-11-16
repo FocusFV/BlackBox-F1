@@ -1,8 +1,6 @@
 import { type ReactNode } from "react";
 import Script from "next/script";
 
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import "@/styles/globals.css";
 
 import { env } from "@/env";
@@ -58,8 +56,12 @@ export default function RootLayout({ children }: Props) {
 					<SupportModal />
 				</OledModeProvider>
 
-				<Analytics />
-				<SpeedInsights />
+				{/* 📊 Cloudflare Web Analytics (Cookieless, 100% Ilimitado y Preciso para SPA) */}
+				<Script
+					strategy="afterInteractive"
+					src="https://static.cloudflareinsights.com/beacon.min.js"
+					data-cf-beacon={JSON.stringify({ token: "1719a9cfc7d848418fbb58f3bbc4f7f3" })}
+				/>
 				<PwaRegister />
 			</body>
 		</html>
