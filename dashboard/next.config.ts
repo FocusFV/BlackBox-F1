@@ -65,6 +65,17 @@ const config: NextConfig = {
 	headers: async () => securityAndRobotsHeaders,
 	redirects: async () => [
 		{
+			source: "/:path*",
+			has: [
+				{
+					type: "host",
+					value: "(?<subdomain>.*)vercel\\.app",
+				},
+			],
+			destination: "https://blackboxf1.com/:path*",
+			permanent: true,
+		},
+		{
 			source: "/panel",
 			destination: "/dashboard",
 			permanent: true,
