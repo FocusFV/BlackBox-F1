@@ -46,6 +46,7 @@ export interface TranslationDictionary {
 		on_track: string;
 		next_gp: string;
 		last_gp: string;
+		circuit_info: string;
 	};
 	telemetry: {
 		interval: string;

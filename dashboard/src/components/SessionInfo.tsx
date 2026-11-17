@@ -10,6 +10,7 @@ import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
 import { parseUtcMs, parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
 import { simulator } from "@/lib/simulatorFeed";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useCircuitStore } from "@/stores/useCircuitStore";
 
 const translateSessionName = (name?: string, lang: string = "es") => {
 	if (!name) {
@@ -68,6 +69,7 @@ export default function SessionInfo() {
 
 	const delay = useSettingsStore((state) => state.delay);
 	const { t, language } = useTranslation();
+	const openCircuit = useCircuitStore((state) => state.openCircuit);
 
 	// Actualización fluida cada segundo para el reloj de Qualy / Prácticas
 	const [currentTime, setCurrentTime] = useState<number>(0);
@@ -336,6 +338,22 @@ export default function SessionInfo() {
 						<span className="rounded bg-zinc-900/90 border border-zinc-800 px-1.5 py-0.5 text-[9px] font-bold text-zinc-300 uppercase tracking-wider shrink-0 whitespace-nowrap mr-1 sm:mr-0">
 							{effectiveSimActive ? t("sessions.live", "Carrera en Vivo") : translateSessionName(nextSessionName, language)}
 						</span>
+
+						{/* 🏁 BOTÓN INTELIGENTE: INFO CIRCUITO */}
+						<button
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								const targetGp = effectiveSimActive ? "Gran Premio de la Ciudad de México" : nextGpName;
+								const targetCountry = effectiveSimActive ? "mex" : countryCode;
+								openCircuit(targetGp, targetCountry);
+							}}
+							className="inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded bg-zinc-900/90 border border-zinc-800 text-zinc-300 hover:border-amber-500/50 hover:text-amber-300 hover:bg-zinc-800 transition-all font-mono font-bold uppercase shrink-0 shadow-sm active:scale-95 cursor-pointer"
+							title={t("parc_ferme.tap_to_view_circuit", "Toca para ver el circuito completo en alta resolución")}
+						>
+							<span>{t("sessions.circuit_info", "INFO CIRCUITO")}</span>
+							<span className="text-[9px]">🏁</span>
+						</button>
 					</div>
 					<p className="text-xl md:text-2xl leading-none font-black text-white font-mono tracking-wider mt-1 sm:mt-1.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] truncate">
 						{effectiveSimActive ? t("sessions.on_track", "EN PISTA") : countdown === "EN PISTA" ? t("sessions.on_track", "EN PISTA") : countdown}
@@ -480,21 +498,39 @@ export default function SessionInfo() {
 			<Flag countryCode={effectiveSimActive ? "mex" : session?.Meeting?.Country?.Code} />
 
 			<div className="flex flex-col justify-center">
-				<h1 className="truncate text-xs md:text-sm leading-none font-bold text-white font-mono uppercase tracking-wide">
-					{effectiveSimActive ? `${translateGpName("Mexico City Grand Prix", language)} 2026` : translateGpName(session?.Meeting?.Name, language)}: {effectiveSimActive ? (language === "en" ? "Race" : language === "pt" ? "Corrida" : "Carrera") : translateSessionName(session?.Name, language)}
-					{timingData?.SessionPart && session?.Name
-						? ` ${sessionPartPrefix(session.Name)}${timingData.SessionPart}`
-						: (isQualy ? ` Q${sessionPart}` : "")}
-					{isRedFlag ? (
-						<span className="text-red-500 font-black ml-1.5 animate-pulse">
-							• {t("race_control.red_flag", "BANDERA ROJA")}
-						</span>
-					) : isQualyBreak ? (
-						<span className="text-amber-400 font-black ml-1.5 animate-pulse">
-							• {language === "en" ? "BREAK" : language === "pt" ? "INTERVALO" : "PAUSA"} Q{sessionPart} ➔ Q{sessionPart + 1}
-						</span>
-					) : null}
-				</h1>
+				<div className="flex items-center gap-2 flex-wrap">
+					<h1 className="truncate text-xs md:text-sm leading-none font-bold text-white font-mono uppercase tracking-wide">
+						{effectiveSimActive ? `${translateGpName("Mexico City Grand Prix", language)} 2026` : translateGpName(session?.Meeting?.Name, language)}: {effectiveSimActive ? (language === "en" ? "Race" : language === "pt" ? "Corrida" : "Carrera") : translateSessionName(session?.Name, language)}
+						{timingData?.SessionPart && session?.Name
+							? ` ${sessionPartPrefix(session.Name)}${timingData.SessionPart}`
+							: (isQualy ? ` Q${sessionPart}` : "")}
+						{isRedFlag ? (
+							<span className="text-red-500 font-black ml-1.5 animate-pulse">
+								• {t("race_control.red_flag", "BANDERA ROJA")}
+							</span>
+						) : isQualyBreak ? (
+							<span className="text-amber-400 font-black ml-1.5 animate-pulse">
+								• {language === "en" ? "BREAK" : language === "pt" ? "INTERVALO" : "PAUSA"} Q{sessionPart} ➔ Q{sessionPart + 1}
+							</span>
+						) : null}
+					</h1>
+
+					{/* 🏁 BOTÓN INTELIGENTE: INFO CIRCUITO */}
+					<button
+						type="button"
+						onClick={(e) => {
+							e.stopPropagation();
+							const targetGp = effectiveSimActive ? "Gran Premio de la Ciudad de México" : (session?.Meeting?.Name || "Gran Premio");
+							const targetCountry = effectiveSimActive ? "mex" : (session?.Meeting?.Country?.Code || "usa");
+							openCircuit(targetGp, targetCountry);
+						}}
+						className="inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded bg-zinc-900/90 border border-zinc-800 text-zinc-300 hover:border-amber-500/50 hover:text-amber-300 hover:bg-zinc-800 transition-all font-mono font-bold uppercase shrink-0 shadow-sm active:scale-95 cursor-pointer"
+						title={t("parc_ferme.tap_to_view_circuit", "Toca para ver el circuito completo en alta resolución")}
+					>
+						<span>{t("sessions.circuit_info", "INFO CIRCUITO")}</span>
+						<span className="text-[9px]">🏁</span>
+					</button>
+				</div>
 
 				{timeRemaining !== undefined ? (
 					<div className="flex items-center gap-1.5 mt-1">

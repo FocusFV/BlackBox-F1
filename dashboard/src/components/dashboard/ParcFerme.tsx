@@ -910,9 +910,11 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 										: t("sessions.finished", "Gran Premio Finalizado")
 									: t("parc_ferme.last_official_round", "Última Ronda Oficial")}
 							</span>
-							<span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono font-bold uppercase group-hover:border-amber-500/40 group-hover:text-amber-300 transition-colors">
-								{t("parc_ferme.view_circuit", "Ver Circuito")} 🏁
-							</span>
+							{!smartContext?.isWeekendActive && (
+								<span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono font-bold uppercase group-hover:border-amber-500/40 group-hover:text-amber-300 transition-colors">
+									{t("parc_ferme.view_circuit", "Ver Circuito")} 🏁
+								</span>
+							)}
 						</div>
 						<div className="flex items-center gap-2.5 flex-wrap mt-0.5">
 							<h2 className="text-sm md:text-base font-black tracking-wide text-zinc-100 font-sans group-hover:text-amber-100 transition-colors">

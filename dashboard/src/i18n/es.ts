@@ -46,6 +46,7 @@ export const es: TranslationDictionary = {
 		on_track: "En Pista",
 		next_gp: "Próximo GP",
 		last_gp: "Último GP",
+		circuit_info: "INFO CIRCUITO",
 	},
 	telemetry: {
 		interval: "Intervalo",

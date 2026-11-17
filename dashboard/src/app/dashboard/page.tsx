@@ -2,6 +2,7 @@
 
 import { useTranslation } from "@/hooks/useTranslation";
 import { useHeadToHeadStore } from "@/stores/useHeadToHeadStore";
+import { useCircuitStore } from "@/stores/useCircuitStore";
 
 import { useEffect, useState, useRef } from "react";
 import LeaderBoard from "@/components/dashboard/LeaderBoard";
@@ -75,6 +76,25 @@ export default function Page() {
 		gpName: "Gran Premio de São Paulo",
 		country: "bra",
 	});
+
+	// 🛰️ Sincronización inteligente con Zustand Circuit Store (INFO CIRCUITO)
+	const isCircuitOpen = useCircuitStore((state) => state.isOpen);
+	const circuitStoreGpName = useCircuitStore((state) => state.gpName);
+	const circuitStoreCountry = useCircuitStore((state) => state.countryCode);
+	const closeCircuitStore = useCircuitStore((state) => state.closeCircuit);
+
+	useEffect(() => {
+		if (isCircuitOpen && circuitStoreGpName) {
+			setActiveCircuit({ gpName: circuitStoreGpName, country: circuitStoreCountry });
+			setIsCinematicTrackMode(true);
+		}
+	}, [isCircuitOpen, circuitStoreGpName, circuitStoreCountry]);
+
+	useEffect(() => {
+		if (!isCinematicTrackMode && isCircuitOpen) {
+			closeCircuitStore();
+		}
+	}, [isCinematicTrackMode, isCircuitOpen, closeCircuitStore]);
 
 	// 🎬 Transición cinemática de Parque Cerrado a Telemetría en Vivo
 	const [isTransitioningToLive, setIsTransitioningToLive] = useState(false);
