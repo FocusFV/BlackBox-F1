@@ -426,10 +426,26 @@ export default function Page() {
 				>
 					{/* 🏎️ Fondo inteligente del circuito aéreo y Easter Egg de telemetría */}
 					<CircuitBackdrop
-						gpName={activeCircuit?.gpName || session?.Meeting?.Name || "Gran Premio de São Paulo"}
-						country={activeCircuit?.country || session?.Meeting?.Country?.Name || "bra"}
+						gpName={
+							(isCinematicTrackMode && circuitStoreGpName)
+								? circuitStoreGpName
+								: activeCircuit?.gpName || session?.Meeting?.Name || "Gran Premio de Las Vegas"
+						}
+						country={
+							(isCinematicTrackMode && circuitStoreCountry)
+								? circuitStoreCountry
+								: activeCircuit?.country || session?.Meeting?.Country?.Name || "usa"
+						}
 						isCinematic={isCinematicTrackMode}
-						onToggleCinematic={() => setIsCinematicTrackMode((prev) => !prev)}
+						onToggleCinematic={() => {
+							setIsCinematicTrackMode((prev) => {
+								const next = !prev;
+								if (!next) {
+									closeCircuitStore();
+								}
+								return next;
+							});
+						}}
 					/>
 
 					{/* Contenedor de resultados que se oculta suavemente en Modo Cinemático */}
@@ -443,10 +459,18 @@ export default function Page() {
 						{/* Historial y resultados oficiales (100% interactivo y reactivo sin bloqueos) */}
 						<div className="relative w-full z-20 pointer-events-auto">
 							<ParcFerme
-								onGpLoaded={(gp, country) => setActiveCircuit({ gpName: gp, country })}
+								onGpLoaded={(gp, country) => {
+									setActiveCircuit((prev) => {
+										if (isCinematicTrackMode) return prev;
+										return { gpName: gp, country };
+									});
+								}}
 								onOpenCircuit={(gp, country) => {
-									if (gp) setActiveCircuit({ gpName: gp, country });
-									setIsCinematicTrackMode(true);
+									if (gp) {
+										useCircuitStore.getState().openCircuit(gp, country);
+										setActiveCircuit({ gpName: gp, country });
+										setIsCinematicTrackMode(true);
+									}
 								}}
 							/>
 						</div>

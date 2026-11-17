@@ -787,8 +787,8 @@ export const DEFAULT_CIRCUIT: CircuitDetails = {
 export function getCircuitDetails(gpName?: string, countryRaw?: string, circuitId?: string): CircuitDetails {
 	const candidates = [
 		circuitId?.toLowerCase().trim(),
-		countryRaw?.toLowerCase().trim(),
 		gpName?.toLowerCase().trim(),
+		countryRaw?.toLowerCase().trim(),
 	].filter(Boolean) as string[];
 
 	for (const candidate of candidates) {
