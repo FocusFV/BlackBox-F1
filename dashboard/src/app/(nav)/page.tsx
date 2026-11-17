@@ -23,7 +23,7 @@ import { useSupportModalStore } from "@/stores/useSupportModalStore";
 import { useTranslation } from "@/hooks/useTranslation";
 
 import icon from "public/logoprincipal.png";
-import mosaicoEquipos from "public/equiposf1.png";
+import mosaicoEquipos from "public/equiposf1.webp";
 
 // PREGUNTAS FRECUENTES DEL SISTEMA
 // FAQs dinámicas según idioma oficial
@@ -87,9 +87,9 @@ export default function Home() {
 
 				{/* LOGO GIGANTE DESTACADO (TAMAÑO ORIGINAL RESTAURADO Y CERCA DEL TÍTULO) */}
 				<motion.div 
-					initial={{ opacity: 0, scale: 0.88 }}
-					animate={{ opacity: 1, scale: 1 }}
-					transition={{ duration: 0.8 }}
+					initial={{ scale: 0.94 }}
+					animate={{ scale: 1 }}
+					transition={{ duration: 0.6, ease: "easeOut" }}
 					className="w-full max-w-[360px] sm:max-w-[480px] md:max-w-[560px] drop-shadow-[0_0_55px_rgba(245,158,11,0.35)] hover:scale-105 hover:drop-shadow-[0_0_75px_rgba(245,158,11,0.5)] transition duration-500 flex justify-center select-none -mt-4 sm:-mt-8 md:-mt-10 -mb-10 sm:-mb-16 md:-mb-20 cursor-pointer"
 				>
 					<Image 

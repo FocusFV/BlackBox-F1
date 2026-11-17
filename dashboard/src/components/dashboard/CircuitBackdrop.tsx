@@ -360,6 +360,10 @@ export function CircuitBackdrop({
 					key={`bg-${imageUrl}`}
 					src={imageUrl}
 					alt={circuit.name}
+					loading="eager"
+					// @ts-expect-error HTML standard attribute for modern browser preloading
+					fetchpriority="high"
+					decoding="async"
 					onLoad={() => setLoaded(true)}
 					onError={() => {
 						setImageUrl("/circuits/default.webp");

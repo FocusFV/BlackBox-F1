@@ -68,7 +68,7 @@ export default function Navbar() {
 			<style jsx global>{`
 				@keyframes respirarLento {
 					0%, 100% { opacity: 1; transform: scale(1); }
-					50% { opacity: 0.4; transform: scale(0.98); }
+					50% { opacity: 0.85; transform: scale(0.985); }
 				}
 				.animate-respirar-lenta {
 					animation: respirarLento 6s ease-in-out infinite;
