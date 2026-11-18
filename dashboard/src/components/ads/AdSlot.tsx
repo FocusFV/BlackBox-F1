@@ -110,14 +110,17 @@ export default function AdSlot({
 				const status = insRef.current.getAttribute("data-adsbygoogle-status");
 				const isZeroHeight = insRef.current.clientHeight === 0 && insRef.current.clientWidth === 0;
 
-				// Si no hay status de adsbygoogle, o no hay iframe cargado, o el contenedor fue colapsado por AdBlock
-				if (!status || status === "unfilled" || isZeroHeight || (!hasIframe && !status)) {
+				// Si el script de adsbygoogle fue bloqueado por completo por AdBlock/Brave Shields
+				const isScriptBlocked = !window.adsbygoogle || typeof window.adsbygoogle.push !== "function";
+
+				// Si no hay status de adsbygoogle tras el timeout, o está colapsado a 0, o el script no cargó
+				if (isScriptBlocked || isZeroHeight || status === "unfilled") {
 					setIsBlocked(true);
 				}
 			} else {
 				setIsBlocked(true);
 			}
-		}, 1500);
+		}, 3000);
 
 		return () => {
 			if (checkTimer) clearTimeout(checkTimer);
