@@ -15,7 +15,12 @@
 		"NEXT_PUBLIC_API_URL": "https://blackbox-f1.onrender.com",
 		"NEXT_PUBLIC_LIVE_URL": "https://blackbox-f1-realtime-docker.onrender.com",
 		"NEXT_PUBLIC_SIMULATION_TOKEN": "sim_sec_e8d2c4b7a1f930_pitwall2026",
-		"NODE_ENV": "production"
+		"NODE_ENV": "production",
+		"NEXT_PUBLIC_ADS_ENABLED": "true",
+		"NEXT_PUBLIC_ADSENSE_CLIENT_ID": "ca-pub-7156337740602093",
+		"NEXT_PUBLIC_AD_SLOT_LEADERBOARD": "3785242773",
+		"NEXT_PUBLIC_AD_SLOT_SIDEBAR": "1465880392",
+		"NEXT_PUBLIC_AD_SLOT_MOBILE_STICKY": "8845997763"
 	},
 	"observability": {
 		"logs": {
