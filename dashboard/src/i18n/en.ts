@@ -731,4 +731,11 @@ export const en: TranslationDictionary = {
 		vsc_deployed: "VSC Deployed",
 		vsc_ending: "VSC Ending",
 	},
+	ads: {
+		support_project_short: "100% Free Telemetry",
+		sponsor_cta: "Support",
+		patreon_badge: "PITWALL CLUB // SPONSOR",
+		support_desc: "We maintain live telemetry servers and feeds without invasive trackers. Support the project on Patreon or Buy Me a Coffee.",
+		support_cta: "Support on Patreon / Coffee",
+	},
 };

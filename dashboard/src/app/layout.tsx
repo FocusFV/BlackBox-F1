@@ -33,6 +33,16 @@ export default function RootLayout({ children }: Props) {
 						<Script strategy="afterInteractive" data-site-id={env.TRACKING_ID} src={env.TRACKING_URL} />
 					</>
 				)}
+
+				{/* 📢 Google AdSense - Carga asíncrona sin bloquear telemetría/WebSockets */}
+				{env.NEXT_PUBLIC_ADS_ENABLED === "true" && env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (
+					<Script
+						id="google-adsense"
+						strategy="afterInteractive"
+						src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
+						crossOrigin="anonymous"
+					/>
+				)}
 			</head>
 
 			{/* El body queda sobrio y limpio, ya que la Navbar se encarga de su propia estética */}

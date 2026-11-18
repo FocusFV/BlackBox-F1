@@ -19,6 +19,8 @@ import SidenavButton from "@/components/SidenavButton";
 import { triggerHaptic } from "@/lib/haptics";
 import { useSupportModalStore } from "@/stores/useSupportModalStore";
 import { useTranslation } from "@/hooks/useTranslation";
+import AdSlot from "@/components/ads/AdSlot";
+import { env } from "@/env";
 
 import { 
 	LayoutDashboard, 
@@ -300,6 +302,18 @@ export default function Sidebar({ connected }: Props) {
 							</div>
 						))}
 					</div>
+
+					{/* 📢 Banner Publicitario Sidebar Rectangle (300x250) - Solo Desktop Expandido */}
+					{opened && (
+						<div className="hidden lg:flex justify-center items-center my-3 overflow-hidden">
+							<AdSlot
+								key={`sidebar-ad-${pathname}`}
+								slotId={env.NEXT_PUBLIC_AD_SLOT_SIDEBAR}
+								format="rectangle"
+								className="shrink-0"
+							/>
+						</div>
+					)}
 
 					{/* Pie */}
 					<div className="border-t border-zinc-800/80 pt-3 mt-4 flex items-center justify-between text-[10px] font-bold tracking-widest text-zinc-400 font-mono uppercase">

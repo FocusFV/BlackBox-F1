@@ -731,4 +731,11 @@ export interface TranslationDictionary {
 		vsc_deployed: string;
 		vsc_ending: string;
 	};
+	ads: {
+		support_project_short: string;
+		sponsor_cta: string;
+		patreon_badge: string;
+		support_desc: string;
+		support_cta: string;
+	};
 }

@@ -20,6 +20,8 @@ import { TeamRadioAlertPopup } from "@/components/dashboard/TeamRadioAlertPopup"
 import { CircuitBackdrop } from "@/components/dashboard/CircuitBackdrop";
 import { LocalDevSwitch, type DevViewMode } from "@/components/dashboard/LocalDevSwitch";
 import { simulator } from "@/lib/simulatorFeed";
+import AdSlot from "@/components/ads/AdSlot";
+import { env } from "@/env";
 
 const YouTubeFeed = dynamic(
 	() => import("@/components/dashboard/YouTubeFeed").then((mod) => mod.YouTubeFeed),
@@ -564,6 +566,16 @@ export default function Page() {
 
 			{/* 🛠️ Switch de Control exclusivo para Localhost (Nunca se renderiza en producción) */}
 			<LocalDevSwitch mode={devMode} onModeChange={handleDevModeChange} />
+
+			{/* 📢 Desktop Leaderboard Display Ad (728x90) - Zona de descanso visual inferior */}
+			<div className="hidden md:flex justify-center items-center w-full my-6">
+				<AdSlot
+					key={`dashboard-leaderboard-ad-${showTelemetry ? "live" : "parc-ferme"}`}
+					slotId={env.NEXT_PUBLIC_AD_SLOT_LEADERBOARD}
+					format="leaderboard"
+					className="mx-auto"
+				/>
+			</div>
 
 			<Footer />
 		</div>

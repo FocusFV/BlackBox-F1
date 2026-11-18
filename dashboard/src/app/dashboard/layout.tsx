@@ -22,6 +22,8 @@ import DelayTimer from '@/components/DelayTimer';
 import ConnectionStatus from '@/components/ConnectionStatus';
 import SupportModal from '@/components/SupportModal';
 import { useTranslation } from '@/hooks/useTranslation';
+import AdSlot from '@/components/ads/AdSlot';
+import { env } from '@/env';
 import { Radio } from 'lucide-react';
 
 type Props = {
@@ -52,7 +54,7 @@ export default function DashboardLayout({ children }: Props) {
 
 				<div
 					className={
-						!syncing || ended ? 'no-scrollbar w-full flex-1 overflow-auto md:rounded-lg' : 'hidden'
+						!syncing || ended ? 'no-scrollbar w-full flex-1 overflow-auto md:rounded-lg pb-16 md:pb-0' : 'hidden'
 					}
 				>
 					<MobileDynamicBar />
@@ -114,6 +116,18 @@ export default function DashboardLayout({ children }: Props) {
 					</div>
 				</div>
 			</motion.div>
+
+			{/* 📢 Mobile Sticky Bottom Bar (320x50) - Con botón de cierre para no molestar */}
+			<div className="fixed bottom-0 inset-x-0 z-40 flex justify-center items-center md:hidden pb-1 pointer-events-none">
+				<div className="pointer-events-auto shadow-2xl">
+					<AdSlot
+						key="mobile-sticky-ad"
+						slotId={env.NEXT_PUBLIC_AD_SLOT_MOBILE_STICKY}
+						format="mobile-banner"
+						dismissible={true}
+					/>
+				</div>
+			</div>
 
 			{/* Contenedor principal */}
 		</div>

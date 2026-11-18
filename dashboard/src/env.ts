@@ -14,6 +14,11 @@ const server = z.object({
 const client = z.object({
 	NEXT_PUBLIC_LIVE_URL: z.string().min(1).includes("http"),
 	NEXT_PUBLIC_SIMULATION_TOKEN: z.string().optional(),
+	NEXT_PUBLIC_ADS_ENABLED: z.string().optional(),
+	NEXT_PUBLIC_ADSENSE_CLIENT_ID: z.string().optional(),
+	NEXT_PUBLIC_AD_SLOT_LEADERBOARD: z.string().optional(),
+	NEXT_PUBLIC_AD_SLOT_SIDEBAR: z.string().optional(),
+	NEXT_PUBLIC_AD_SLOT_MOBILE_STICKY: z.string().optional(),
 });
 
 const processEnv = {
@@ -28,6 +33,11 @@ const processEnv = {
 
 	NEXT_PUBLIC_LIVE_URL: process.env.NEXT_PUBLIC_LIVE_URL || "https://blackbox-f1-realtime-docker.onrender.com",
 	NEXT_PUBLIC_SIMULATION_TOKEN: process.env.NEXT_PUBLIC_SIMULATION_TOKEN || "sim_sec_e8d2c4b7a1f930_pitwall2026",
+	NEXT_PUBLIC_ADS_ENABLED: process.env.NEXT_PUBLIC_ADS_ENABLED,
+	NEXT_PUBLIC_ADSENSE_CLIENT_ID: process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID,
+	NEXT_PUBLIC_AD_SLOT_LEADERBOARD: process.env.NEXT_PUBLIC_AD_SLOT_LEADERBOARD,
+	NEXT_PUBLIC_AD_SLOT_SIDEBAR: process.env.NEXT_PUBLIC_AD_SLOT_SIDEBAR,
+	NEXT_PUBLIC_AD_SLOT_MOBILE_STICKY: process.env.NEXT_PUBLIC_AD_SLOT_MOBILE_STICKY,
 };
 
 // Don't touch the part below
