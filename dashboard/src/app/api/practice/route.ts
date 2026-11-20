@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
 
-export const revalidate = 1800; // Cache de 30 minutos
+export const dynamic = "force-dynamic";
 
 // 🏎️ Caché en memoria para evitar rate-limits de OpenF1 (3 req/segundo)
 const sessionResultsCache: Record<string, { timestamp: number; data: any }> = {};

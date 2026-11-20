@@ -442,6 +442,10 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					sessionName.includes("sprint") &&
 					!sessionName.includes("shootout") &&
 					!sessionName.includes("qual");
+				const isPracticeSession =
+					sessionName.includes("practice") ||
+					sessionType.includes("practice") ||
+					sessionName.includes("fp");
 
 				const hasLiveLines = Boolean(
 					currentTiming?.Lines && Object.keys(currentTiming.Lines).length > 0
@@ -452,8 +456,16 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 
 				// 1. PRIORIDAD MÁXIMA: Telemetría oficial en vivo o de sesión recién concluida
 				if (hasLiveLines) {
-					// 1.A CLASIFICACIÓN / SHOOTOUT EN VIVO O RECIÉN FINALIZADA
-					if ((activeTab === "QUALY" || activeTab === "SQ") && isQualySession) {
+					// 1.A CLASIFICACIÓN / SHOOTOUT O PRÁCTICAS LIBRES EN VIVO
+					const isMatchingPractice =
+						(activeTab === "FP1" && (sessionName.includes("practice 1") || sessionName === "fp1")) ||
+						(activeTab === "FP2" && (sessionName.includes("practice 2") || sessionName === "fp2")) ||
+						(activeTab === "FP3" && (sessionName.includes("practice 3") || sessionName === "fp3"));
+
+					if (
+						((activeTab === "QUALY" || activeTab === "SQ") && isQualySession) ||
+						(isPracticeSession && isMatchingPractice)
+					) {
 						if (effectiveGpName) {
 							setGpName(translateGpName(effectiveGpName));
 							setCountryCode(getCountryCodeForGp(effectiveGpName, effectiveCountryName) || "bra");
@@ -504,7 +516,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 
 							let gapTime = "";
 							if (posNum === 1) {
-								gapTime = best || "POLE";
+								gapTime = best || (isQualySession ? "POLE" : "1:47.000");
 							} else if (driverMs && p1Ms && driverMs >= p1Ms) {
 								gapTime = `+${((driverMs - p1Ms) / 1000).toFixed(3)}s`;
 							} else if (best) {
