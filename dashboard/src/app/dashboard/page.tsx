@@ -416,6 +416,19 @@ export default function Page() {
 				</>
 			)}
 
+			{/* 🛰️ Overlay Cinemático de Circuito Aéreo (Siempre accesible, incluso en sesión activa) */}
+			{isCinematicTrackMode && (
+				<CircuitBackdrop
+					gpName={circuitStoreGpName || activeCircuit?.gpName || session?.Meeting?.Name || "Gran Premio de Las Vegas"}
+					country={circuitStoreCountry || activeCircuit?.country || session?.Meeting?.Country?.Code || session?.Meeting?.Country?.Name || "usa"}
+					isCinematic={isCinematicTrackMode}
+					onToggleCinematic={() => {
+						setIsCinematicTrackMode(false);
+						closeCircuitStore();
+					}}
+				/>
+			)}
+
 			{/* Contenido principal */}
 			{!showTelemetry ? (
 				<div
@@ -426,29 +439,17 @@ export default function Page() {
 					}}
 					className="flex flex-col gap-6 w-full relative min-h-screen"
 				>
-					{/* 🏎️ Fondo inteligente del circuito aéreo y Easter Egg de telemetría */}
-					<CircuitBackdrop
-						gpName={
-							(isCinematicTrackMode && circuitStoreGpName)
-								? circuitStoreGpName
-								: activeCircuit?.gpName || session?.Meeting?.Name || "Gran Premio de Las Vegas"
-						}
-						country={
-							(isCinematicTrackMode && circuitStoreCountry)
-								? circuitStoreCountry
-								: activeCircuit?.country || session?.Meeting?.Country?.Name || "usa"
-						}
-						isCinematic={isCinematicTrackMode}
-						onToggleCinematic={() => {
-							setIsCinematicTrackMode((prev) => {
-								const next = !prev;
-								if (!next) {
-									closeCircuitStore();
-								}
-								return next;
-							});
-						}}
-					/>
+					{/* 🏎️ Fondo inteligente del circuito aéreo (detrás de Parque Cerrado cuando no está en modo cinemático) */}
+					{!isCinematicTrackMode && (
+						<CircuitBackdrop
+							gpName={activeCircuit?.gpName || session?.Meeting?.Name || "Gran Premio de Las Vegas"}
+							country={activeCircuit?.country || session?.Meeting?.Country?.Name || "usa"}
+							isCinematic={false}
+							onToggleCinematic={() => {
+								setIsCinematicTrackMode(true);
+							}}
+						/>
+					)}
 
 					{/* Contenedor de resultados que se oculta suavemente en Modo Cinemático */}
 					<div
