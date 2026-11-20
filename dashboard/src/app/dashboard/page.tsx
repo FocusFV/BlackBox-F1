@@ -36,7 +36,7 @@ const DriverProfileModal = dynamic(
 	{ ssr: false }
 );
 import { Swords, Radio, Flag, AlertTriangle } from "lucide-react";
-import { translateSessionName, translateCountry } from "@/lib/f1Translations";
+import { translateSessionName, translateCountry, translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
 import { triggerHaptic } from "@/lib/haptics";
 import {
 	getUpcomingSessions,
@@ -75,8 +75,8 @@ export default function Page() {
 	// 🛰️ Modo Cinemático de Circuito Aéreo (pantalla completa sin resultados)
 	const [isCinematicTrackMode, setIsCinematicTrackMode] = useState(false);
 	const [activeCircuit, setActiveCircuit] = useState<{ gpName?: string; country?: string }>({
-		gpName: "Gran Premio de São Paulo",
-		country: "bra",
+		gpName: session?.Meeting?.Name ? translateGpName(session.Meeting.Name) : "Gran Premio de Las Vegas",
+		country: session?.Meeting?.Country?.Name ? (getCountryCodeForGp(session.Meeting.Name, session.Meeting.Country.Name) || "usa") : "usa",
 	});
 
 	// 🛰️ Sincronización inteligente con Zustand Circuit Store (INFO CIRCUITO)

@@ -2,6 +2,7 @@
 import { useHeadToHeadStore } from "@/stores/useHeadToHeadStore";
 import { useDriverModalStore } from "@/stores/useDriverModalStore";
 import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
+import lasVegasFallbackData from "@/lib/lasvegas2026_fallback.json";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "motion/react";
@@ -189,8 +190,8 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 		}
 	}, []);
 	const effectiveSim = isSimActive || isSimMounted;
-	const initialCountry = effectiveSim ? "mex" : ((currentGpName ? getCountryCodeForGp(currentGpName, currentCountryName) : null) || "bra");
-	const initialGpName = effectiveSim ? "Gran Premio de la Ciudad de México" : (currentGpName ? translateGpName(currentGpName) : "Gran Premio de São Paulo");
+	const initialCountry = effectiveSim ? "mex" : ((currentGpName ? getCountryCodeForGp(currentGpName, currentCountryName) : null) || "usa");
+	const initialGpName = effectiveSim ? "Gran Premio de la Ciudad de México" : (currentGpName ? translateGpName(currentGpName) : "Gran Premio de Las Vegas");
 
 	const getInitialTab = (): SessionTab => {
 		if (typeof window !== "undefined") {
@@ -630,6 +631,16 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					} catch (e) {
 						console.error("Error obteniendo prácticas libres:", e);
 					}
+					// 🛡️ En fin de semana activo de Las Vegas, usar fallback específico de Las Vegas si la API externa falla
+					const isLasVegasActive = effectiveGpName?.toLowerCase().includes("vegas") || (!effectiveGpName && smartContext?.isWeekendActive);
+					if (isLasVegasActive && (lasVegasFallbackData as any)[activeTab]?.length > 0) {
+						const fbVegas = (lasVegasFallbackData as any)[activeTab];
+						sessionResultsCache.current[activeTab] = fbVegas;
+						setResults(fbVegas);
+						setLoading(false);
+						return;
+					}
+
 					// 🛡️ Solo recurrir al fallback de Brasil si NO estamos en un GP activo diferente
 					const isDifferentActiveGp = smartContext?.isWeekendActive && !effectiveGpName?.toLowerCase().includes("brazil") && !effectiveGpName?.toLowerCase().includes("são paulo");
 					if (!isDifferentActiveGp) {
@@ -872,6 +883,10 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 				// Si ninguna fuente externa tiene resultados nuevos, verificar fallback oficial de 2026
 				if (sessionResultsCache.current[activeTab] && sessionResultsCache.current[activeTab].length > 0) {
 					setResults(sessionResultsCache.current[activeTab]);
+				} else if (effectiveGpName?.toLowerCase().includes("vegas") && (lasVegasFallbackData as any)[activeTab]?.length > 0) {
+					const fbData = (lasVegasFallbackData as any)[activeTab];
+					sessionResultsCache.current[activeTab] = fbData;
+					setResults(fbData);
 				} else if ((brazilFallbackData as any)[activeTab] && Array.isArray((brazilFallbackData as any)[activeTab])) {
 					const fbData = (brazilFallbackData as any)[activeTab];
 					sessionResultsCache.current[activeTab] = fbData;
