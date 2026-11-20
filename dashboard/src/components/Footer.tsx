@@ -19,14 +19,6 @@ export default function Footer() {
 				{/* FILA DE ENLACES TOTALMENTE CENTRADA */}
 				<div className="mb-4 flex flex-col items-center gap-3 border-b border-zinc-900/30 pb-4 w-full">
 					<div className="flex flex-wrap justify-center items-center text-center gap-x-6 gap-y-2">
-						<p className="text-zinc-400">
-							{t("footer.open_source_note", "Evolución Open Source basada en el proyecto original de")} <TextLink website="https://slowly.dev">Slowly</TextLink>.
-						</p>
-						
-						<p>
-							{t("footer.github_code", "Código y refactorización en")} <TextLink website="https://github.com/FocusFV/Blackbox-F1">GitHub</TextLink>.
-						</p>
-
 						<p>
 							{t("footer.coffee_invite", "¿Te copa el proyecto?")} <TextLink website="https://buymeacoffee.com/focusfv">Buy Me a Coffee</TextLink>.
 						</p>

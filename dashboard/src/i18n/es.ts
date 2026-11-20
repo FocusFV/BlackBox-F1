@@ -332,7 +332,7 @@ export const es: TranslationDictionary = {
 		cta_go_cockpit: "Ir al Cockpit En Vivo",
 	},
 	footer: {
-		open_source_note: "Evolución Open Source basada en el proyecto original de Slowly.",
+		open_source_note: "Plataforma de telemetría y pit-wall en tiempo real Blackbox F1.",
 		github_code: "Código y refactorización en GitHub.",
 		coffee_invite: "¿Te copa el proyecto? Invitame un café.",
 		help_support: "¿Necesitás una mano? Soporte y Ayuda.",

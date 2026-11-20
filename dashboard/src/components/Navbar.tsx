@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import githubIcon from "public/icons/github.svg";
 import coffeeIcon from "public/icons/bmc-logo.svg";
 import { useSupportModalStore } from "@/stores/useSupportModalStore";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -145,16 +144,6 @@ export default function Navbar() {
 						<span>{t("nav.coffee", "Doname un café")}</span>
 					</Link>
 
-					{/* Botón GitHub (Solo Icono, transparente) */}
-					<Link
-						className="flex items-center justify-center p-2 rounded-lg bg-transparent border border-transparent text-zinc-400 transition-all duration-300 hover:text-zinc-100 hover:border-zinc-800 hover:bg-zinc-900/20 active:scale-95 group"
-						href="https://github.com/FocusFV/Blackbox-F1"
-						target="_blank"
-						title="GitHub"
-					>
-						<Image src={githubIcon} alt="GitHub" width={18} height={18} className="opacity-70 brightness-0 invert transition-transform group-hover:scale-105 duration-200" />
-					</Link>
-
 					{/* 🌐 SELECTOR DE IDIOMA */}
 					<LanguageSelector variant="navbar" />
 				</div>
@@ -192,13 +181,10 @@ export default function Navbar() {
 					<div className="py-1">
 						<LanguageSelector variant="drawer" />
 					</div>
-					<div className="flex justify-between items-center gap-4">
-						<Link className="flex flex-1 items-center justify-center gap-2 px-4 py-2 rounded-xl bg-transparent border border-zinc-800 text-xs text-zinc-400 cursor-pointer" href="https://buymeacoffee.com/focusfv" onClick={(e) => { e.preventDefault(); setIsOpen(false); useSupportModalStore.getState().open(); }}>
+					<div className="flex justify-center items-center">
+						<Link className="flex w-full items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-transparent border border-zinc-800 text-xs text-zinc-400 cursor-pointer hover:border-amber-500/30 hover:text-amber-400 transition-colors" href="https://buymeacoffee.com/focusfv" onClick={(e) => { e.preventDefault(); setIsOpen(false); useSupportModalStore.getState().open(); }}>
 							<Image src={coffeeIcon} alt="Café" width={18} height={18} className="brightness-0 invert opacity-60" />
-							<span>{t("nav.coffee", "Café")}</span>
-						</Link>
-						<Link className="flex items-center justify-center p-2.5 rounded-xl bg-transparent border border-zinc-800 text-zinc-400" href="https://github.com/FocusFV/Blackbox-F1" target="_blank">
-							<Image src={githubIcon} alt="GitHub" width={16} height={16} className="brightness-0 invert opacity-60" />
+							<span>{t("nav.coffee", "Doname un café")}</span>
 						</Link>
 					</div>
 				</div>

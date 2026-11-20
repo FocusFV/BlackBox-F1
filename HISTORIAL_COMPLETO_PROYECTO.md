@@ -12,7 +12,7 @@
 El proyecto nació el **5 de junio de 2026** bajo la premisa de crear un centro de comando de Fórmula 1 premium, oscuro, elegante y diseñado específicamente para fanáticos que buscaban algo superador a la interfaz básica oficial.
 
 ### 🌟 Hitos Principales de la Fase 1:
-- **05/Jun/2026 (Commit Inicial `3325db5`):** Creación del repositorio bajo la estética *"F1 Dash Negro y Oro Premium"*. Primeras tarjetas con efecto de desenfoque de fondo (*backdrop-blur*) e identidad FocusFV.
+- **05/Jun/2026 (Commit Inicial `3325db5`):** Creación del repositorio bajo la estética *"Blackbox F1 Negro y Oro Premium"*. Primeras tarjetas con efecto de desenfoque de fondo (*backdrop-blur*) e identidad FocusFV.
 - **13/Jun/2026:**
   - **Traducción Integral al Español:** Toda la terminología técnica de F1, paneles de configuración, Race Control y estados de pista se tradujeron al castellano para el público hispanohablante.
   - **Identidad de Escuderías y Pilotos:** Mapeo de logos vectoriales oficiales en alta resolución y banderas nacionales para los corredores (incorporando las banderas de Colapinto, Lawson, etc.).
@@ -110,7 +110,7 @@ Transformación de Blackbox F1 en una aplicación nativa instalable para Android
 *21 commits · 7 al 8 de Noviembre de 2026*
 
 Perfeccionamiento de la telemetría en vivo durante el Gran Premio de São Paulo (Interlagos):
-- **Descompresión DEFLATE Nativa de Posiciones:** Decodificación en tiempo real de `Position.z` y `CarData.z` con raw DEFLATE en [`inflate.ts`](file:///c:/Users/fvill/Downloads/f1-dash-main/f1-dash-main/dashboard/src/lib/inflate.ts), logrando 60 FPS puros en el mapa 2D.
+- **Descompresión DEFLATE Nativa de Posiciones:** Decodificación en tiempo real de `Position.z` y `CarData.z` con raw DEFLATE en `inflate.ts`, logrando 60 FPS puros en el mapa 2D.
 - **Planimetría Oficial 2D con Curvas Numeradas:** Numeración automática de cada vértice y curva oficial de los 24 circuitos de la FIA.
 - **Backdrops 4K Aéreos Satelitales:** Integración de fotografías satelitales nítidas en alta resolución de Interlagos y Las Vegas Strip Circuit.
 - **Lógica de Banderas y Reloj Maestro:**

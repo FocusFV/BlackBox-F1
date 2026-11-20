@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 		siteName: "Blackbox F1 · FocusFV",
 		images: [
 			{
-				alt: "Blackbox F1 · FocusFV Formula 1 Dashboard",
+				alt: "Blackbox F1 · FocusFV Pit Wall & Telemetría F1",
 				url: `${url}/og-image.png`,
 				width: 1200,
 				height: 630,
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
 		images: [
 			{
 				url: `${url}/og-image.png`,
-				alt: "Blackbox F1 · FocusFV Formula 1 Dashboard",
+				alt: "Blackbox F1 · FocusFV Pit Wall & Telemetría F1",
 				width: 1200,
 				height: 630,
 			},
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
 	keywords: [
 		"Formula 1",
 		"Blackbox F1",
-		"f1 dashboard",
+		"blackbox pitwall",
 		"telemetria en vivo",
 		"tiempos f1",
 		"colapinto alpine",

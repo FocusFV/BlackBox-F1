@@ -31,7 +31,6 @@ import {
 	Calendar, 
 	HelpCircle, 
 	Coffee, 
-	Heart,
 	Cpu,
 	Radio
 } from "lucide-react";
@@ -90,7 +89,6 @@ export default function Sidebar({ connected }: Props) {
 			titulo: t("sidebar.links", "ENLACES"),
 			items: [
 				{ href: "https://buymeacoffee.com/focusfv", name: t("sidebar.donate", "Donar un Cafecito"), icon: Coffee, target: "_blank" },
-				{ href: "https://github.com/sponsors/FocusFV", name: t("sidebar.sponsor", "Sponsor Oficial"), icon: Heart, target: "_blank" },
 			]
 		}
 	], [t]);
