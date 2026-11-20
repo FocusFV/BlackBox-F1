@@ -281,10 +281,47 @@ export async function GET(request: Request) {
 			};
 		});
 
-		const finalResults =
-			results.length > 0
-				? results
-				: brazilFallback[sessionName] || [];
+		let finalResults: any[] = [];
+
+		if (results.length > 0) {
+			finalResults = results;
+		} else if (Array.isArray(drivers) && drivers.length > 0) {
+			// 🌧️ Caso de sesión con lluvia / bandera roja o sin vueltas rápidas cronometradas completas:
+			// Listamos a todos los pilotos oficiales inscritos en la sesión de OpenF1 y cuántas vueltas de instalación registraron
+			const driverOutLaps: Record<string, number> = {};
+			if (Array.isArray(laps)) {
+				for (const l of laps) {
+					if (l?.driver_number) {
+						driverOutLaps[String(l.driver_number)] = (driverOutLaps[String(l.driver_number)] || 0) + 1;
+					}
+				}
+			}
+
+			finalResults = drivers
+				.slice()
+				.sort((a, b) => {
+					const cntA = driverOutLaps[String(a.driver_number)] || 0;
+					const cntB = driverOutLaps[String(b.driver_number)] || 0;
+					if (cntB !== cntA) return cntB - cntA;
+					return Number(a.driver_number) - Number(b.driver_number);
+				})
+				.map((d, idx) => {
+					const cnt = driverOutLaps[String(d.driver_number)] || 0;
+					return {
+						pos: String(idx + 1),
+						number: String(d.driver_number),
+						code: d.name_acronym || `P${d.driver_number}`,
+						name: d.full_name || `Piloto #${d.driver_number}`,
+						team: d.team_name || "Equipo",
+						constructorId: (d.team_name || "").toLowerCase().replaceAll(" ", "-"),
+						gapTime: cnt > 0 ? `${cnt} ${cnt === 1 ? "VTA (INST)" : "VTAS"}` : "S/T · SIN TIEMPO",
+						points: "",
+						isDNF: false,
+					};
+				});
+		} else {
+			finalResults = brazilFallback[sessionName] || [];
+		}
 
 		const payload = {
 			session: sessionName,
