@@ -233,18 +233,8 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 		}
 		return false;
 	});
-	const [results, setResults] = useState<DriverResult[]>(() => {
-		const initTab = getInitialTab();
-		return (brazilFallbackData as any)[initTab] || [];
-	});
-	const sessionResultsCache = useRef<Record<string, DriverResult[]>>({
-		FP1: (brazilFallbackData as any).FP1 || [],
-		FP2: (brazilFallbackData as any).FP2 || [],
-		FP3: (brazilFallbackData as any).FP3 || [],
-		QUALY: (brazilFallbackData as any).QUALY || [],
-		SPRINT: (brazilFallbackData as any).SPRINT || [],
-		RACE: (brazilFallbackData as any).RACE || [],
-	});
+	const [results, setResults] = useState<DriverResult[]>([]);
+	const sessionResultsCache = useRef<Record<string, DriverResult[]>>({});
 	const [gpName, setGpName] = useState(initialGpName);
 	const [countryCode, setCountryCode] = useState<string>(initialCountry);
 	const [raceDate, setRaceDate] = useState<string>(() => (liveSession?.StartDate ? liveSession.StartDate.split("T")[0] : ""));
@@ -457,10 +447,11 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 				// 1. PRIORIDAD MÁXIMA: Telemetría oficial en vivo o de sesión recién concluida
 				if (hasLiveLines) {
 					// 1.A CLASIFICACIÓN / SHOOTOUT O PRÁCTICAS LIBRES EN VIVO
+					const sessionNum = currentSession?.Number;
 					const isMatchingPractice =
-						(activeTab === "FP1" && (sessionName.includes("practice 1") || sessionName === "fp1")) ||
-						(activeTab === "FP2" && (sessionName.includes("practice 2") || sessionName === "fp2")) ||
-						(activeTab === "FP3" && (sessionName.includes("practice 3") || sessionName === "fp3"));
+						(activeTab === "FP1" && (sessionName.includes("practice 1") || sessionName === "fp1" || sessionNum === 1)) ||
+						(activeTab === "FP2" && (sessionName.includes("practice 2") || sessionName === "fp2" || sessionNum === 2)) ||
+						(activeTab === "FP3" && (sessionName.includes("practice 3") || sessionName === "fp3" || sessionNum === 3));
 
 					if (
 						((activeTab === "QUALY" || activeTab === "SQ") && isQualySession) ||
@@ -621,7 +612,8 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 				// 2. Si es práctica libre (FP1, FP2, FP3), consultamos nuestra API de OpenF1
 				if (activeTab === "FP1" || activeTab === "FP2" || activeTab === "FP3") {
 					try {
-						const res = await fetch(`/api/practice?session=${activeTab}${dateParam}`);
+						const meetingParam = currentSession?.Meeting?.Key ? `&meeting_key=${currentSession.Meeting.Key}` : "";
+						const res = await fetch(`/api/practice?session=${activeTab}${dateParam}${meetingParam}`);
 						if (res.ok) {
 							const data = await res.json();
 							if (Array.isArray(data.results) && data.results.length > 0) {
@@ -638,20 +630,22 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					} catch (e) {
 						console.error("Error obteniendo prácticas libres:", e);
 					}
-					// 🛡️ Si la consulta falló, recurrir a los datos oficiales de respaldo de Brasil 2026
-					const fbPractice = (brazilFallbackData as any)[activeTab];
-					if (Array.isArray(fbPractice) && fbPractice.length > 0) {
-						sessionResultsCache.current[activeTab] = fbPractice;
-						setResults(fbPractice);
-						setLoading(false);
-						return;
+					// 🛡️ Solo recurrir al fallback de Brasil si NO estamos en un GP activo diferente
+					const isDifferentActiveGp = smartContext?.isWeekendActive && !effectiveGpName?.toLowerCase().includes("brazil") && !effectiveGpName?.toLowerCase().includes("são paulo");
+					if (!isDifferentActiveGp) {
+						const fbPractice = (brazilFallbackData as any)[activeTab];
+						if (Array.isArray(fbPractice) && fbPractice.length > 0) {
+							sessionResultsCache.current[activeTab] = fbPractice;
+							setResults(fbPractice);
+							setLoading(false);
+							return;
+						}
 					}
 					if (sessionResultsCache.current[activeTab] && sessionResultsCache.current[activeTab].length > 0) {
 						setResults(sessionResultsCache.current[activeTab]);
 						setLoading(false);
 						return;
 					}
-					// 🚫 Si no hay datos nuevos, mantener los existentes en vez de vaciar
 					setLoading(false);
 					return;
 				}
@@ -979,10 +973,12 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 										onClick={() => {
 											setTabManuallySelected(true);
 											setActiveTab(tab.id);
-											const cached = sessionResultsCache.current[tab.id] || (brazilFallbackData as any)[tab.id];
+											const cached = sessionResultsCache.current[tab.id];
 											if (Array.isArray(cached) && cached.length > 0) {
 												setResults(cached);
 												setLoading(false);
+											} else {
+												setLoading(true);
 											}
 											if (typeof window !== "undefined") {
 												sessionStorage.setItem("bb_parc_ferme_tab", tab.id);
