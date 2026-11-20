@@ -4,7 +4,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { useHeadToHeadStore } from "@/stores/useHeadToHeadStore";
 import { useDriverModalStore } from "@/stores/useDriverModalStore";
 
-import { useMemo } from "react";
+import { useMemo, startTransition } from "react";
 import clsx from "clsx";
 import { motion } from "motion/react";
 
@@ -203,12 +203,14 @@ export default function Driver({
 			whileHover={{ x: 3 }}
 			onClick={() => {
 				triggerHaptic("medium");
-				useDriverModalStore.getState().open({
-					driverCode: driver?.Tla,
-					code: driver?.Tla,
-					name: driver?.FullName || driver?.BroadcastName,
-					teamName: driver?.TeamName,
-					driverId: driver?.Tla?.toLowerCase(),
+				startTransition(() => {
+					useDriverModalStore.getState().open({
+						driverCode: driver?.Tla,
+						code: driver?.Tla,
+						name: driver?.FullName || driver?.BroadcastName,
+						teamName: driver?.TeamName,
+						driverId: driver?.Tla?.toLowerCase(),
+					});
 				});
 			}}
 			className={clsx(

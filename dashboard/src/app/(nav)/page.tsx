@@ -22,7 +22,7 @@ import ScrollHint from "@/components/ScrollHint";
 import { useSupportModalStore } from "@/stores/useSupportModalStore";
 import { useTranslation } from "@/hooks/useTranslation";
 
-import icon from "public/logoprincipal.png";
+import icon from "public/logoprincipal.webp";
 import mosaicoEquipos from "public/equiposf1.webp";
 
 // PREGUNTAS FRECUENTES DEL SISTEMA
@@ -85,20 +85,18 @@ export default function Home() {
 			{/* HERO PRINCIPAL OPTIMIZADO ABOVE-THE-FOLD */}
 			<section className="relative z-10 flex min-h-[100dvh] w-full flex-col items-center justify-center max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-4 pb-8 sm:pt-6 sm:pb-10 text-center">
 
-				{/* LOGO GIGANTE DESTACADO (TAMAÑO ORIGINAL RESTAURADO Y CERCA DEL TÍTULO) */}
-				<motion.div 
-					initial={{ scale: 0.94 }}
-					animate={{ scale: 1 }}
-					transition={{ duration: 0.6, ease: "easeOut" }}
-					className="w-full max-w-[360px] sm:max-w-[480px] md:max-w-[560px] drop-shadow-[0_0_55px_rgba(245,158,11,0.35)] hover:scale-105 hover:drop-shadow-[0_0_75px_rgba(245,158,11,0.5)] transition duration-500 flex justify-center select-none -mt-4 sm:-mt-8 md:-mt-10 -mb-10 sm:-mb-16 md:-mb-20 cursor-pointer"
+				{/* LOGO GIGANTE DESTACADO (OPTIMIZADO LCP: FORMATO WEBP CON SIZES PRECISOS) */}
+				<div 
+					className="w-full max-w-[360px] sm:max-w-[480px] md:max-w-[560px] drop-shadow-[0_0_55px_rgba(245,158,11,0.35)] hover:scale-105 hover:drop-shadow-[0_0_75px_rgba(245,158,11,0.5)] transition-transform duration-300 flex justify-center select-none -mt-4 sm:-mt-8 md:-mt-10 -mb-10 sm:-mb-16 md:-mb-20 cursor-pointer"
 				>
 					<Image 
 						src={icon} 
 						alt="Blackbox-F1 Logo" 
 						className="w-full h-auto object-contain" 
 						priority 
+						sizes="(max-width: 640px) 360px, (max-width: 768px) 480px, 560px"
 					/>
-				</motion.div>
+				</div>
 
 				{/* TÍTULO PRINCIPAL (COMPACTO Y PEGADO AL LOGO) */}
 				<motion.h1 
@@ -130,8 +128,8 @@ export default function Home() {
 					transition={{ duration: 0.8, delay: 0.4 }}
 					className="flex flex-wrap justify-center gap-3 sm:gap-4 z-20 mb-4 sm:mb-6"
 				>
-					<Link href="/dashboard" prefetch={false}>
-						<Button className="rounded-2xl border border-amber-300/60 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 px-8 sm:px-9 py-3.5 sm:py-4 font-black uppercase tracking-widest text-xs shadow-[0_0_35px_rgba(245,158,11,0.45)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_rgba(245,158,11,0.65)] flex items-center gap-3 cursor-pointer">
+					<Link href="/dashboard" prefetch={true}>
+						<Button className="rounded-2xl border border-amber-300/60 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 px-8 sm:px-9 py-3.5 sm:py-4 font-black uppercase tracking-widest text-xs shadow-[0_0_35px_rgba(245,158,11,0.45)] transition-transform duration-200 hover:scale-105 active:scale-95 flex items-center gap-3 cursor-pointer will-change-transform">
 							<Gauge className="w-5 h-5 text-black" /> {t("home.enter_telemetry", "Ingresar a la Telemetría")}
 						</Button>
 					</Link>

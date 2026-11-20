@@ -172,7 +172,7 @@ export default function Round({ round, nextName, hideBadge = false }: Props) {
 							return (
 								<div
 									key={`round.day.${i}`}
-									className="relative flex flex-col bg-zinc-950/60 rounded-2xl p-3 border border-zinc-900/80 backdrop-blur-sm group/col hover:border-zinc-800 transition-colors"
+									className="relative flex flex-col bg-zinc-950/80 rounded-2xl p-3 border border-zinc-900/80 md:backdrop-blur-sm group/col hover:border-zinc-800 transition-colors"
 								>
 									{/* ENCABEZADO DEL DÍA */}
 									<div className="flex items-center justify-center gap-2 mb-3 pb-2 border-b border-zinc-900/80 text-center">

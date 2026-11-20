@@ -887,7 +887,13 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 		<div className="flex flex-col gap-4 w-full text-white items-center relative z-20 pointer-events-auto">
 			{/* 🏁 CABECERA UNIFICADA PANORÁMICA (TÁCTIL PARA ACTIVAR MODO CIRCUITO EN MÓVIL Y DESKTOP) */}
 			<div
-				onClick={() => onOpenCircuit ? onOpenCircuit(gpName, countryCode) : undefined}
+				onClick={() => {
+					if (onOpenCircuit) {
+						React.startTransition(() => {
+							onOpenCircuit(gpName, countryCode);
+						});
+					}
+				}}
 				className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-2xl bg-zinc-950/75 border border-zinc-800/80 shadow-[0_4px_25px_rgba(0,0,0,0.5)] backdrop-blur-xl lg:w-8/12 w-full cursor-pointer hover:border-amber-500/50 hover:bg-zinc-900/80 transition-all group"
 				title={t("parc_ferme.tap_to_view_circuit", "Toca para ver el circuito completo en alta resolución")}
 			>

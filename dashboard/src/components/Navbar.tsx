@@ -67,11 +67,12 @@ export default function Navbar() {
 			{/* 🏎️ ESTILOS INYECTADOS EN CALIENTE PARA LA RESPIRACIÓN LENTA */}
 			<style jsx global>{`
 				@keyframes respirarLento {
-					0%, 100% { opacity: 1; transform: scale(1); }
-					50% { opacity: 0.85; transform: scale(0.985); }
+					0%, 100% { transform: scale(1); }
+					50% { transform: scale(0.985); }
 				}
 				.animate-respirar-lenta {
-					animation: respirarLento 6s ease-in-out infinite;
+					animation: respirarLento 6s ease-in-out 1s infinite;
+					will-change: transform;
 				}
 			`}</style>
 
@@ -98,7 +99,7 @@ export default function Navbar() {
 				<div className="flex items-center">
 					<Link href="/" className="flex items-center justify-start bg-transparent transition-transform duration-200 active:scale-95 group">
 						<Image 
-							src="/favicon.png" 
+							src="/favicon.webp" 
 							alt="Inicio" 
 							width={96} 
 							height={24} 
