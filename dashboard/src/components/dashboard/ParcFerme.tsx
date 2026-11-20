@@ -30,6 +30,7 @@ interface DriverResult {
 	qualyPos?: number;
 	delta?: number;
 	penaltyNote?: string | null;
+	laps?: number;
 }
 
 type SessionTab = "RACE" | "QUALY" | "SPRINT" | "FP3" | "FP2" | "FP1" | "SQ";
@@ -530,6 +531,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 								gapTime,
 								isDNF,
 								dnfReason: isDNF ? "DNF" : undefined,
+								laps: line.NumberOfLaps,
 							};
 						});
 
@@ -598,6 +600,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 								gapTime,
 								isDNF,
 								dnfReason: isDNF ? "DNF" : undefined,
+								laps: line.NumberOfLaps,
 							};
 						});
 
@@ -1175,6 +1178,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 													name: row.name,
 													teamName: row.team,
 													driverId: row.code?.toLowerCase(),
+													laps: row.laps,
 												});
 											}}
 											className={`group/row relative flex items-center justify-between p-2.5 rounded-xl border transition-all duration-200 ${
@@ -1261,17 +1265,27 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 														)}
 													</p>
 												) : (
-													<p
-														className={`text-xs font-bold tracking-tight uppercase ${
-															row.isDNF
-																? "text-red-400/80 text-[10px]"
-																: isP1
-																? "text-amber-300"
-																: "text-zinc-300"
-														}`}
-													>
-														{row.gapTime}
-													</p>
+													<div className="flex items-center gap-1.5 sm:gap-2">
+														<p
+															className={`text-xs font-bold tracking-tight uppercase ${
+																row.isDNF
+																	? "text-red-400/80 text-[10px]"
+																	: isP1
+																	? "text-amber-300"
+																	: "text-zinc-300"
+															}`}
+														>
+															{row.gapTime}
+														</p>
+														{typeof row.laps === "number" && row.laps > 0 && (
+															<span
+																className="text-[10px] sm:text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 shrink-0"
+																title={`${row.laps} vueltas completadas`}
+															>
+																{row.laps} <span className="text-[9px] text-zinc-500 font-semibold">VTS</span>
+															</span>
+														)}
+													</div>
 												)}
 												{row.points && (
 													<span className="text-amber-400 font-bold text-xs pl-0.5 sm:pl-1 shrink-0 font-mono">

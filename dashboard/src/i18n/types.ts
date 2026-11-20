@@ -100,6 +100,8 @@ export interface TranslationDictionary {
 		pit_lane_stopped: string;
 		pit_exit_running: string;
 		current_stint: string;
+		total_laps_session: string;
+		laps_unit: string;
 		current_gear: string;
 	};
 	parc_ferme: {

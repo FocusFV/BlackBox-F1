@@ -56,6 +56,14 @@ const DRIVER_STANDINGS_2026: Record<string, { pos: string; points: string; count
 	DOO: { pos: "21", points: "0", countryCode: "au", team: "Alpine F1 Team", name: "Jack Doohan" },
 };
 
+const DRIVER_CODE_TO_RACING_NUM: Record<string, string> = {
+	NOR: "1", VER: "3", BOR: "5", HAD: "6", GAS: "10",
+	PER: "11", ANT: "12", ALO: "14", LEC: "16", STR: "18",
+	TSU: "22", ALB: "23", HUL: "27", HIR: "29", LAW: "30",
+	OCO: "31", LIN: "41", COL: "43", HAM: "44", CAM: "51",
+	SAI: "55", RUS: "63", BOT: "77", PIA: "81", BEA: "87",
+};
+
 // 🗺️ Mapeo estricto del código TLA hacia el ID oficial de la API de Ergast/Jolpica
 const DRIVER_CODE_TO_ERGAST_ID: Record<string, string> = {
 	ANT: "antonelli",
@@ -218,11 +226,19 @@ export default function DriverProfileModal() {
 		return match ? match[0] : null;
 	}, [driversList, driverCode]);
 
+	const racingNumber = resolvedRacingNumber || DRIVER_CODE_TO_RACING_NUM[driverCode] || (driver as any)?.number || null;
+
 	const timingDriver = resolvedRacingNumber && timingLines ? timingLines[resolvedRacingNumber] : null;
 	const appTiming = resolvedRacingNumber && appTimingLines ? appTimingLines[resolvedRacingNumber] : null;
 	const carChannels = resolvedRacingNumber && carsDataStore ? carsDataStore[resolvedRacingNumber]?.Channels : null;
 
-	const hasLiveTelemetry = Boolean(timingDriver || carChannels);
+	const sessionTotalLaps =
+		timingDriver?.NumberOfLaps ||
+		(appTiming?.Stints ? appTiming.Stints.reduce((sum: number, s: any) => sum + (s.TotalLaps || 0), 0) : null) ||
+		driver?.laps ||
+		null;
+
+	const hasLiveTelemetry = Boolean(timingDriver || carChannels || sessionTotalLaps);
 
 	useEffect(() => {
 		if (isOpen) {
@@ -337,7 +353,7 @@ export default function DriverProfileModal() {
 								/>
 							)}
 							<span className="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded uppercase w-fit bg-zinc-900 border border-zinc-800 text-amber-400">
-								2026 · #{standingPos}
+								#{racingNumber || "DRV"} · {standingPos ? `P${standingPos} Mundial` : "2026"}
 							</span>
 						</div>
 
@@ -501,17 +517,37 @@ export default function DriverProfileModal() {
 
 						{/* NEUMÁTICOS Y STINT */}
 						{appTiming?.Stints && (
-							<div className="p-3 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 flex items-center justify-between font-mono text-xs">
-								<div className="flex items-center gap-2">
-									<span className="text-[9px] font-black px-2 py-1 rounded bg-zinc-800 text-amber-400 border border-zinc-700 uppercase">
-										{appTiming.Stints[appTiming.Stints.length - 1]?.Compound || "MEDIO"}
-									</span>
-									<span className="text-zinc-300 text-xs font-bold">
-										{t("telemetry.current_stint", "Stint Actual: {laps} Vueltas").replace("{laps}", String(appTiming.Stints[appTiming.Stints.length - 1]?.TotalLaps || 1))}
+							<div className="flex flex-col gap-2 p-3 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 font-mono text-xs">
+								<div className="flex items-center justify-between">
+									<div className="flex items-center gap-2">
+										<span className="text-[9px] font-black px-2 py-0.5 rounded bg-zinc-800 text-amber-400 border border-zinc-700 uppercase">
+											{appTiming.Stints[appTiming.Stints.length - 1]?.Compound || "MEDIO"}
+										</span>
+										<span className="text-zinc-300 text-xs font-bold">
+											{t("telemetry.current_stint", "Stint Actual: {laps} Vueltas").replace("{laps}", String(appTiming.Stints[appTiming.Stints.length - 1]?.TotalLaps || 1))}
+										</span>
+									</div>
+									<span className="text-[10px] text-zinc-500 font-bold uppercase">
+										{appTiming.Stints.length} {appTiming.Stints.length === 1 ? "STINT" : "STINTS"}
 									</span>
 								</div>
-								<span className="text-[10px] text-zinc-500 font-bold uppercase">
-									{appTiming.Stints.length} {appTiming.Stints.length === 1 ? "STINT" : "STINTS"}
+
+								{sessionTotalLaps && (
+									<div className="flex items-center justify-between pt-1.5 border-t border-zinc-800/60 text-[11px]">
+										<span className="text-zinc-400 font-semibold uppercase">{t("telemetry.total_laps_session", "Vueltas Totales en Sesión")}</span>
+										<span className="font-bold text-amber-400 font-mono">
+											{sessionTotalLaps} {t("telemetry.laps_unit", "Vueltas")}
+										</span>
+									</div>
+								)}
+							</div>
+						)}
+
+						{!appTiming?.Stints && sessionTotalLaps && (
+							<div className="p-3 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 flex items-center justify-between font-mono text-xs">
+								<span className="text-zinc-400 font-semibold uppercase">{t("telemetry.total_laps_session", "Vueltas Totales en Sesión")}</span>
+								<span className="font-bold text-amber-400 font-mono">
+									{sessionTotalLaps} {t("telemetry.laps_unit", "Vueltas")}
 								</span>
 							</div>
 						)}

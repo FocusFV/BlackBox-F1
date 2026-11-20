@@ -241,9 +241,12 @@ export async function GET(request: Request) {
 		}
 
 		const bestLaps: Record<string, number> = {};
+		const totalLapsMap: Record<string, number> = {};
 		for (const l of laps) {
-			if (l.lap_duration && l.lap_duration > 55 && l.lap_duration < 240 && (!bestLaps[l.driver_number] || l.lap_duration < bestLaps[l.driver_number])) {
-				bestLaps[l.driver_number] = l.lap_duration;
+			const drv = String(l.driver_number);
+			totalLapsMap[drv] = (totalLapsMap[drv] || 0) + 1;
+			if (l.lap_duration && l.lap_duration > 55 && l.lap_duration < 240 && (!bestLaps[drv] || l.lap_duration < bestLaps[drv])) {
+				bestLaps[drv] = l.lap_duration;
 			}
 		}
 
@@ -278,6 +281,7 @@ export async function GET(request: Request) {
 				gapTime: gap,
 				points: "",
 				isDNF: false,
+				laps: totalLapsMap[r.number] || 0,
 			};
 		});
 
@@ -335,6 +339,7 @@ export async function GET(request: Request) {
 						gapTime,
 						points: "",
 						isDNF: false,
+						laps: totalLapsMap[String(d.driver_number)] || 0,
 					};
 				});
 		} else {

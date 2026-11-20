@@ -99,6 +99,8 @@ export const pt: TranslationDictionary = {
 		pit_lane_stopped: "Carro parado nos boxes (Pit Lane)",
 		pit_exit_running: "Saindo dos boxes para a pista (Pit Exit)",
 		current_stint: "Stint Atual: {laps} Voltas",
+		total_laps_session: "Voltas Totais na Sessão",
+		laps_unit: "Voltas",
 		live_direct: "Ver ao vivo direto (0s de espera)",
 		current_gear: "Marcha atual",
 	},

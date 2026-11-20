@@ -9,7 +9,8 @@
       "constructorId": "cadillac",
       "gapTime": "P1 · SIN TIEMPO (LLUVIA)",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 3
     },
     {
       "pos": "2",
@@ -20,7 +21,8 @@
       "constructorId": "haas-f1-team",
       "gapTime": "S/T (INSTALACIÓN)",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 2
     },
     {
       "pos": "3",
@@ -31,7 +33,8 @@
       "constructorId": "haas-f1-team",
       "gapTime": "S/T (INSTALACIÓN)",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 2
     },
     {
       "pos": "4",
@@ -42,7 +45,8 @@
       "constructorId": "cadillac",
       "gapTime": "S/T (INSTALACIÓN)",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 2
     },
     {
       "pos": "5",
@@ -53,7 +57,8 @@
       "constructorId": "ferrari",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "6",
@@ -64,7 +69,8 @@
       "constructorId": "aston-martin",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "7",
@@ -75,7 +81,8 @@
       "constructorId": "williams",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "8",
@@ -86,7 +93,8 @@
       "constructorId": "mercedes",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "9",
@@ -97,7 +105,8 @@
       "constructorId": "williams",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "10",
@@ -108,7 +117,8 @@
       "constructorId": "red-bull-racing",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "11",
@@ -119,7 +129,8 @@
       "constructorId": "audi",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "12",
@@ -130,7 +141,8 @@
       "constructorId": "red-bull-racing",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "13",
@@ -141,7 +153,8 @@
       "constructorId": "ferrari",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "14",
@@ -152,7 +165,8 @@
       "constructorId": "audi",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "15",
@@ -163,7 +177,8 @@
       "constructorId": "mercedes",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "16",
@@ -174,7 +189,8 @@
       "constructorId": "alpine",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "17",
@@ -185,7 +201,8 @@
       "constructorId": "alpine",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "18",
@@ -196,7 +213,8 @@
       "constructorId": "mclaren",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "19",
@@ -207,7 +225,8 @@
       "constructorId": "aston-martin",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "20",
@@ -218,7 +237,8 @@
       "constructorId": "racing-bulls",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "21",
@@ -229,7 +249,8 @@
       "constructorId": "racing-bulls",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     },
     {
       "pos": "22",
@@ -240,7 +261,8 @@
       "constructorId": "mclaren",
       "gapTime": "S/T · SIN TIEMPO",
       "points": "",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 0
     }
   ],
   "FP2": [
@@ -253,7 +275,8 @@
       "constructorId": "mercedes",
       "points": "",
       "gapTime": "1:47.272",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 21
     },
     {
       "pos": "2",
@@ -264,7 +287,8 @@
       "constructorId": "alpine",
       "points": "",
       "gapTime": "+0.071s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 14
     },
     {
       "pos": "3",
@@ -275,7 +299,8 @@
       "constructorId": "ferrari",
       "points": "",
       "gapTime": "+0.333s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 26
     },
     {
       "pos": "4",
@@ -286,7 +311,8 @@
       "constructorId": "red-bull-racing",
       "points": "",
       "gapTime": "+1.135s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 18
     },
     {
       "pos": "5",
@@ -297,7 +323,8 @@
       "constructorId": "mclaren",
       "points": "",
       "gapTime": "+1.181s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 22
     },
     {
       "pos": "6",
@@ -308,7 +335,8 @@
       "constructorId": "ferrari",
       "points": "",
       "gapTime": "+1.211s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 24
     },
     {
       "pos": "7",
@@ -319,7 +347,8 @@
       "constructorId": "mclaren",
       "points": "",
       "gapTime": "+1.565s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 20
     },
     {
       "pos": "8",
@@ -330,7 +359,8 @@
       "constructorId": "mercedes",
       "points": "",
       "gapTime": "+1.771s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 21
     },
     {
       "pos": "9",
@@ -341,7 +371,8 @@
       "constructorId": "alpine",
       "points": "",
       "gapTime": "+1.957s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 13
     },
     {
       "pos": "10",
@@ -352,7 +383,8 @@
       "constructorId": "aston-martin",
       "points": "",
       "gapTime": "+1.959s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 20
     },
     {
       "pos": "11",
@@ -363,7 +395,8 @@
       "constructorId": "aston-martin",
       "points": "",
       "gapTime": "+2.510s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 21
     },
     {
       "pos": "12",
@@ -374,7 +407,8 @@
       "constructorId": "williams",
       "points": "",
       "gapTime": "+2.557s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 22
     },
     {
       "pos": "13",
@@ -385,7 +419,8 @@
       "constructorId": "red-bull-racing",
       "points": "",
       "gapTime": "+2.869s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 7
     },
     {
       "pos": "14",
@@ -396,7 +431,8 @@
       "constructorId": "cadillac",
       "points": "",
       "gapTime": "+3.159s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 15
     },
     {
       "pos": "15",
@@ -407,7 +443,8 @@
       "constructorId": "haas-f1-team",
       "points": "",
       "gapTime": "+3.427s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 20
     },
     {
       "pos": "16",
@@ -418,7 +455,8 @@
       "constructorId": "racing-bulls",
       "points": "",
       "gapTime": "+3.737s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 12
     },
     {
       "pos": "17",
@@ -429,7 +467,8 @@
       "constructorId": "racing-bulls",
       "points": "",
       "gapTime": "+3.876s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 13
     },
     {
       "pos": "18",
@@ -440,7 +479,8 @@
       "constructorId": "williams",
       "points": "",
       "gapTime": "+4.299s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 11
     },
     {
       "pos": "19",
@@ -451,7 +491,8 @@
       "constructorId": "audi",
       "points": "",
       "gapTime": "+4.535s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 14
     },
     {
       "pos": "20",
@@ -462,7 +503,8 @@
       "constructorId": "audi",
       "points": "",
       "gapTime": "+5.053s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 15
     },
     {
       "pos": "21",
@@ -473,7 +515,8 @@
       "constructorId": "cadillac",
       "points": "",
       "gapTime": "+5.522s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 12
     },
     {
       "pos": "22",
@@ -484,7 +527,8 @@
       "constructorId": "haas-f1-team",
       "points": "",
       "gapTime": "+6.317s",
-      "isDNF": false
+      "isDNF": false,
+      "laps": 18
     }
   ],
   "FP3": [],

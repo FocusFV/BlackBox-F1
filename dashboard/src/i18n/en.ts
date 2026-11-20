@@ -99,6 +99,8 @@ export const en: TranslationDictionary = {
 		pit_lane_stopped: "Car stationary in pit lane",
 		pit_exit_running: "Exiting pit lane onto track (Pit Exit)",
 		current_stint: "Current Stint: {laps} Laps",
+		total_laps_session: "Total Session Laps",
+		laps_unit: "Laps",
 		live_direct: "Watch direct live (0s buffer)",
 		current_gear: "Current gear",
 	},

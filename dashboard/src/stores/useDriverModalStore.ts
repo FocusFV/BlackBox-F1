@@ -15,6 +15,7 @@ export type DriverModalData = {
 	historicTeamName?: string;
 	Constructors?: any[];
 	Driver?: any;
+	laps?: number;
 };
 
 type DriverModalStore = {
