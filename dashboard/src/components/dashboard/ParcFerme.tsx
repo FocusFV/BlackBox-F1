@@ -460,7 +460,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					) {
 						if (effectiveGpName) {
 							setGpName(translateGpName(effectiveGpName));
-							setCountryCode(getCountryCodeForGp(effectiveGpName, effectiveCountryName) || "bra");
+							setCountryCode(getCountryCodeForGp(effectiveGpName, effectiveCountryName) || initialCountry);
 						}
 						if (currentSession?.StartDate) {
 							setRaceDate(currentSession.StartDate.split("T")[0]);
@@ -548,7 +548,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					) {
 						if (effectiveGpName) {
 							setGpName(translateGpName(effectiveGpName));
-							setCountryCode(getCountryCodeForGp(effectiveGpName, effectiveCountryName) || "bra");
+							setCountryCode(getCountryCodeForGp(effectiveGpName, effectiveCountryName) || initialCountry);
 						}
 						if (currentSession?.StartDate) {
 							setRaceDate(currentSession.StartDate.split("T")[0]);
@@ -620,7 +620,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 							if (Array.isArray(data.results) && data.results.length > 0) {
 								if (currentGpName) {
 									setGpName(translateGpName(currentGpName));
-									setCountryCode(getCountryCodeForGp(currentGpName, currentCountryName) || "bra");
+									setCountryCode(getCountryCodeForGp(currentGpName, currentCountryName) || initialCountry);
 								}
 								sessionResultsCache.current[activeTab] = data.results;
 								setResults(data.results);
@@ -731,9 +731,10 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 						isTimeBased = true;
 					}
 
-					// Si todos los tiempos de clasificación en Jolpica vienen vacíos, usar fallback oficial de clasificación
+					// Si todos los tiempos de clasificación en Jolpica vienen vacíos, usar fallback oficial solo si corresponde al GP
 					const allTimesEmpty = isTimeBased && listSource.length > 0 && listSource.every((r: any) => !r.Q3 && !r.Q2 && !r.Q1);
-					if (allTimesEmpty && (brazilFallbackData as any).QUALY) {
+					const isBrazilGp = effectiveGpName?.toLowerCase().includes("brazil") || effectiveGpName?.toLowerCase().includes("são paulo");
+					if (allTimesEmpty && isBrazilGp && (brazilFallbackData as any).QUALY) {
 						sessionResultsCache.current[activeTab] = (brazilFallbackData as any).QUALY;
 						setResults((brazilFallbackData as any).QUALY);
 						setLoading(false);
@@ -880,14 +881,15 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					}
 				}
 
-				// Si ninguna fuente externa tiene resultados nuevos, verificar fallback oficial de 2026
+				// Si ninguna fuente externa tiene resultados nuevos, verificar fallback oficial correspondiente
+				const isBrazilSession = effectiveGpName?.toLowerCase().includes("brazil") || effectiveGpName?.toLowerCase().includes("são paulo");
 				if (sessionResultsCache.current[activeTab] && sessionResultsCache.current[activeTab].length > 0) {
 					setResults(sessionResultsCache.current[activeTab]);
 				} else if (effectiveGpName?.toLowerCase().includes("vegas") && (lasVegasFallbackData as any)[activeTab]?.length > 0) {
 					const fbData = (lasVegasFallbackData as any)[activeTab];
 					sessionResultsCache.current[activeTab] = fbData;
 					setResults(fbData);
-				} else if ((brazilFallbackData as any)[activeTab] && Array.isArray((brazilFallbackData as any)[activeTab])) {
+				} else if (isBrazilSession && (brazilFallbackData as any)[activeTab] && Array.isArray((brazilFallbackData as any)[activeTab])) {
 					const fbData = (brazilFallbackData as any)[activeTab];
 					sessionResultsCache.current[activeTab] = fbData;
 					setResults(fbData);

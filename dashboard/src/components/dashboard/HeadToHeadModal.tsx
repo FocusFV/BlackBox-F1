@@ -7,6 +7,7 @@ import { X, Swords, Gauge, Timer, Zap } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import type { TimingDataDriver } from "@/types/state.type";
 import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
+import lasVegasFallbackData from "@/lib/lasvegas2026_fallback.json";
 
 interface Props {
 	isOpen: boolean;
@@ -51,13 +52,16 @@ const DEFAULT_2026_GRID: Record<string, any> = {
 	"87": { RacingNumber: "87", Tla: "BEA", FullName: "Oliver Bearman", BroadcastName: "O. BEARMAN", TeamName: "Haas F1 Team", TeamColour: "e10600" },
 };
 
-// Mapa de respaldo oficial con resultados de la última sesión disputada
+// Mapa de respaldo oficial con resultados de la última sesión disputada (priorizando el GP actual de Las Vegas)
 const FALLBACK_RACE_MAP: Record<string, any> = {};
-if (brazilFallbackData) {
-	const sourceList = (brazilFallbackData as any).RACE || (brazilFallbackData as any).QUALY || [];
-	for (const item of sourceList) {
-		if (item.number) FALLBACK_RACE_MAP[item.number] = item;
-	}
+const sourceList =
+	(lasVegasFallbackData as any)?.FP2 ||
+	(lasVegasFallbackData as any)?.FP1 ||
+	(brazilFallbackData as any)?.RACE ||
+	(brazilFallbackData as any)?.QUALY ||
+	[];
+for (const item of sourceList) {
+	if (item.number) FALLBACK_RACE_MAP[item.number] = item;
 }
 
 function resolveDriverNumber(val?: string): string {

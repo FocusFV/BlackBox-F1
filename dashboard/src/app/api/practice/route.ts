@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
+import lasVegasFallbackData from "@/lib/lasvegas2026_fallback.json";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +9,27 @@ const sessionResultsCache: Record<string, { timestamp: number; data: any }> = {}
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hora de validez en memoria
 
 const brazilFallback = brazilFallbackData as Record<string, any[]>;
+const lasVegasFallback = lasVegasFallbackData as Record<string, any[]>;
+
+function getFallbackForSession(sessionName: string, circuitShortName?: string) {
+	if (lasVegasFallback[sessionName] && (!circuitShortName || circuitShortName.toLowerCase().includes("vegas") || circuitShortName === "Interlagos")) {
+		return {
+			session: sessionName,
+			circuit: "Las Vegas Strip Circuit",
+			total: lasVegasFallback[sessionName].length,
+			results: lasVegasFallback[sessionName],
+		};
+	}
+	if (brazilFallback[sessionName]) {
+		return {
+			session: sessionName,
+			circuit: circuitShortName || "Interlagos",
+			total: brazilFallback[sessionName].length,
+			results: brazilFallback[sessionName],
+		};
+	}
+	return null;
+}
 
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
@@ -90,14 +112,8 @@ export async function GET(request: Request) {
 			: null;
 
 		if (!matchingSession) {
-			// Si OpenF1 no tiene la sesión o está rate-limited, recurrir a los datos oficiales de respaldo de Brasil 2026
-			if (brazilFallback[sessionName]) {
-				const fb = {
-					session: sessionName,
-					circuit: "Interlagos",
-					total: brazilFallback[sessionName].length,
-					results: brazilFallback[sessionName],
-				};
+			const fb = getFallbackForSession(sessionName);
+			if (fb) {
 				sessionResultsCache[cacheKey] = { timestamp: Date.now(), data: fb };
 				return NextResponse.json(fb);
 			}
@@ -124,13 +140,8 @@ export async function GET(request: Request) {
 			]);
 
 			if (!driversRes?.ok || !posRes?.ok) {
-				if (brazilFallback[sessionName]) {
-					const fb = {
-						session: sessionName,
-						circuit: matchingSession.circuit_short_name || "Interlagos",
-						total: brazilFallback[sessionName].length,
-						results: brazilFallback[sessionName],
-					};
+				const fb = getFallbackForSession(sessionName, matchingSession.circuit_short_name);
+				if (fb) {
 					sessionResultsCache[cacheKey] = { timestamp: Date.now(), data: fb };
 					return NextResponse.json(fb);
 				}
@@ -210,14 +221,8 @@ export async function GET(request: Request) {
 		]);
 
 		if (!driversRes?.ok || !lapsRes?.ok) {
-			// Si OpenF1 devuelve 429 (Rate limit) o 500, usamos de inmediato el respaldo oficial
-			if (brazilFallback[sessionName]) {
-				const fb = {
-					session: sessionName,
-					circuit: matchingSession.circuit_short_name || "Interlagos",
-					total: brazilFallback[sessionName].length,
-					results: brazilFallback[sessionName],
-				};
+			const fb = getFallbackForSession(sessionName, matchingSession.circuit_short_name);
+			if (fb) {
 				sessionResultsCache[cacheKey] = { timestamp: Date.now(), data: fb };
 				return NextResponse.json(fb);
 			}
@@ -227,13 +232,8 @@ export async function GET(request: Request) {
 		const [drivers, laps] = await Promise.all([driversRes.json(), lapsRes.json()]);
 
 		if (!Array.isArray(drivers) || !Array.isArray(laps)) {
-			if (brazilFallback[sessionName]) {
-				const fb = {
-					session: sessionName,
-					circuit: matchingSession.circuit_short_name || "Interlagos",
-					total: brazilFallback[sessionName].length,
-					results: brazilFallback[sessionName],
-				};
+			const fb = getFallbackForSession(sessionName, matchingSession.circuit_short_name);
+			if (fb) {
 				sessionResultsCache[cacheKey] = { timestamp: Date.now(), data: fb };
 				return NextResponse.json(fb);
 			}
@@ -338,12 +338,12 @@ export async function GET(request: Request) {
 					};
 				});
 		} else {
-			finalResults = brazilFallback[sessionName] || [];
+			finalResults = getFallbackForSession(sessionName, matchingSession.circuit_short_name)?.results || [];
 		}
 
 		const payload = {
 			session: sessionName,
-			circuit: matchingSession.circuit_short_name || "Interlagos",
+			circuit: matchingSession.circuit_short_name || "Las Vegas Strip Circuit",
 			total: finalResults.length,
 			results: finalResults,
 		};
@@ -352,13 +352,8 @@ export async function GET(request: Request) {
 		return NextResponse.json(payload);
 	} catch (error: any) {
 		console.error("Error en API practice/session:", error);
-		if (brazilFallback[sessionName]) {
-			const fb = {
-				session: sessionName,
-				circuit: "Interlagos",
-				total: brazilFallback[sessionName].length,
-				results: brazilFallback[sessionName],
-			};
+		const fb = getFallbackForSession(sessionName);
+		if (fb) {
 			return NextResponse.json(fb);
 		}
 		return NextResponse.json({ error: error.message }, { status: 500 });
