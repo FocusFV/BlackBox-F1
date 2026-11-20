@@ -83,7 +83,7 @@ function getRecordDriverInfo(lapRecord: string): {
 	const team = match && match[3] ? match[3].trim() : "";
 	const year = match && match[4] ? match[4].trim() : "";
 
-	let photoUrl = "/drivers/records/leclerc.jpg";
+	let photoUrl = "/drivers/records/verstappen.jpg";
 	const lower = (driverName + " " + lapRecord).toLowerCase();
 
 	if (lower.includes("schumacher")) {
@@ -106,6 +106,10 @@ function getRecordDriverInfo(lapRecord: string): {
 		photoUrl = "/drivers/records/ricciardo.jpg";
 	} else if (lower.includes("norris")) {
 		photoUrl = "/drivers/records/norris.jpg";
+	} else if (lower.includes("piastri")) {
+		photoUrl = "/drivers/grid/piastri.jpg";
+	} else if (lower.includes("perez")) {
+		photoUrl = "/drivers/grid/perez.jpg";
 	} else if (lower.includes("alonso")) {
 		photoUrl = "/alonso.png";
 	}

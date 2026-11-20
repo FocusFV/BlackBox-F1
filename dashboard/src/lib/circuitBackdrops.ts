@@ -680,7 +680,7 @@ export const CIRCUITS_DATABASE: Record<string, CircuitDetails> = {
 		elevation: "12 m",
 		maxGForce: "4.4 G (Curva 14)",
 		brakeLoad: "Muy Alta (Frenada al final del Strip)",
-		lapRecord: "1:35.490 · O. Piastri (McLaren, 2023)",
+		lapRecord: "1:33.365 · M. Verstappen (Red Bull, 2025)",
 		topSpeed: "350 km/h (The Strip)",
 		fullThrottle: "78%",
 		gearChanges: "~56 por vuelta",
