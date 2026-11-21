@@ -3,6 +3,8 @@ import { useHeadToHeadStore } from "@/stores/useHeadToHeadStore";
 import { useDriverModalStore } from "@/stores/useDriverModalStore";
 import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
 import lasVegasFallbackData from "@/lib/lasvegas2026_fallback.json";
+import StartingGridTrack from "./StartingGridTrack";
+import StartingGridBroadcast from "./StartingGridBroadcast";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "motion/react";
@@ -283,8 +285,10 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 		}
 	}, [sessionTabs, activeTab, smartContext?.defaultTab]);
 
+	const lastNotifiedGp = useRef<string | null>(null);
 	useEffect(() => {
-		if (gpName && onGpLoaded) {
+		if (gpName && onGpLoaded && lastNotifiedGp.current !== `${gpName}_${countryCode}`) {
+			lastNotifiedGp.current = `${gpName}_${countryCode}`;
 			onGpLoaded(gpName, countryCode);
 		}
 	}, [gpName, countryCode, onGpLoaded]);
@@ -944,7 +948,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 						});
 					}
 				}}
-				className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-2xl bg-zinc-950/75 border border-zinc-800/80 shadow-[0_4px_25px_rgba(0,0,0,0.5)] backdrop-blur-xl lg:w-8/12 w-full cursor-pointer hover:border-amber-500/50 hover:bg-zinc-900/80 transition-all group"
+				className={`flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-2xl bg-zinc-950/75 border border-zinc-800/80 shadow-[0_4px_25px_rgba(0,0,0,0.5)] backdrop-blur-xl ${qualyViewMode === "grid" ? "lg:w-10/12" : "lg:w-8/12"} w-full cursor-pointer hover:border-amber-500/50 hover:bg-zinc-900/80 transition-all group`}
 				title={t("parc_ferme.tap_to_view_circuit", "Toca para ver el circuito completo en alta resolución")}
 			>
 				<div className="flex items-center gap-3 w-full sm:w-auto">
@@ -989,7 +993,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 
 			{/* GRILLA DE RESULTADOS PRINCIPAL */}
 			<div className="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full justify-center">
-				<div className="lg:col-start-3 lg:col-span-8 flex flex-col bg-zinc-950/50 border border-zinc-800/80 rounded-2xl p-4 md:p-5 backdrop-blur-xl max-w-full shadow-2xl">
+				<div className={`${qualyViewMode === "grid" ? "lg:col-start-2 lg:col-span-10" : "lg:col-start-3 lg:col-span-8"} flex flex-col bg-zinc-950/50 border border-zinc-800/80 rounded-2xl p-4 md:p-5 backdrop-blur-xl max-w-full shadow-2xl transition-all duration-300`}>
 					{/* SELECTOR PANORÁMICO DE SESIONES ESTILO PIT-WALL (UNIFICADO EN ORO LÍQUIDO) */}
 					<div className="flex flex-col gap-2.5 mb-5 border-b border-zinc-900/80 pb-4">
 						<div className="w-full bg-zinc-950/80 p-1 sm:p-1.5 rounded-2xl border border-zinc-800/80 shadow-[0_8px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl flex flex-nowrap overflow-x-hidden gap-1 sm:gap-1.5 select-none relative max-w-full">
@@ -1045,38 +1049,40 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 
 						<div className="flex flex-wrap items-center justify-between gap-2 px-1">
 							{activeTab === "QUALY" || activeTab === "SQ" ? (
-								<div className="flex items-center gap-1.5 bg-zinc-900/90 p-1 rounded-xl border border-zinc-800">
-									<button
-										type="button"
-										onClick={() => {
-											setQualyViewMode("times");
-											triggerHaptic("light");
-										}}
-										className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold transition-all duration-200 select-none cursor-pointer ${
-											qualyViewMode === "times"
-												? "bg-amber-400 text-black shadow-md font-black"
-												: "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
-										}`}
-									>
-										⏱️ {t("parc_ferme.qualy_times", "Tiempos Clasificación")}
-									</button>
-									<button
-										type="button"
-										onClick={() => {
-											setQualyViewMode("grid");
-											triggerHaptic("light");
-										}}
-										className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold transition-all duration-200 select-none cursor-pointer flex items-center gap-1.5 ${
-											qualyViewMode === "grid"
-												? "bg-amber-400 text-black shadow-md font-black"
-												: "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
-										}`}
-									>
-										<span>🚦 {t("parc_ferme.starting_grid", "Grilla de Salida")}</span>
-										{startingGrid && startingGrid.length > 0 && (
-											<span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-										)}
-									</button>
+								<div className="flex flex-wrap items-center gap-2">
+									<div className="flex items-center gap-1.5 bg-zinc-900/90 p-1 rounded-xl border border-zinc-800">
+										<button
+											type="button"
+											onClick={() => {
+												setQualyViewMode("times");
+												triggerHaptic("light");
+											}}
+											className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold transition-all duration-200 select-none cursor-pointer ${
+												qualyViewMode === "times"
+													? "bg-amber-400 text-black shadow-md font-black"
+													: "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
+											}`}
+										>
+											⏱️ {t("parc_ferme.qualy_times", "Tiempos Clasificación")}
+										</button>
+										<button
+											type="button"
+											onClick={() => {
+												setQualyViewMode("grid");
+												triggerHaptic("light");
+											}}
+											className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold transition-all duration-200 select-none cursor-pointer flex items-center gap-1.5 ${
+												qualyViewMode === "grid"
+													? "bg-amber-400 text-black shadow-md font-black"
+													: "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
+											}`}
+										>
+											<span>🚦 {t("parc_ferme.starting_grid", "Grilla de Salida")}</span>
+											{startingGrid && startingGrid.length > 0 && (
+												<span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+											)}
+										</button>
+									</div>
 								</div>
 							) : (
 								<span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
@@ -1089,7 +1095,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 							)}
 							<span className="text-[10px] font-mono text-amber-400/80 font-bold uppercase tracking-wider hidden sm:inline-block">
 								{activeTab === "QUALY" && qualyViewMode === "grid"
-									? t("parc_ferme.starting_grid", "Parrilla Oficial de Salida FIA")
+									? "Gráfica Oficial F1 TV · F1 Grid"
 									: "Blackbox Timing Console"}
 							</span>
 						</div>
@@ -1122,6 +1128,11 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 							<p className="max-w-md text-zinc-400 text-[11px] leading-relaxed">
 								{t("parc_ferme.times_homologation_desc", "Aguardando la publicación de registros oficiales para esta sesión del {gpName}. Los resultados se actualizarán automáticamente en la consola apenas estén disponibles.").replace("{gpName}", gpName)}
 							</p>
+						</div>
+					) : activeTab === "QUALY" && qualyViewMode === "grid" ? (
+						/* 📺 VISTA OFICIAL F1 TV BROADCAST (COMPACTA, 2 COLUMNAS, SIN SCROLL INTERNO) */
+						<div className="w-full">
+							<StartingGridBroadcast gridResults={displayResults} gpName={gpName} countryCode={countryCode} />
 						</div>
 					) : (
 						/* LISTA UNIFICADA Y COMPACTA (DE P1 A P22 SIN TARJETAS GIGANTES) */

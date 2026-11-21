@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/hooks/useTranslation";
+import F1CarTopDown from "./F1CarTopDown";
 
 /* eslint-disable react-hooks/refs */
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -564,6 +565,8 @@ export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: s
 							<CarObject
 								key={`map.driver.${driver.RacingNumber}`}
 								name={driver.Tla}
+								driverNumber={driver.RacingNumber}
+								teamName={driver.TeamName}
 								colors={colorConfig}
 								x={carX}
 								y={carY}
@@ -681,7 +684,9 @@ export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: s
 	);
 }
 
-const CarObject = ({ x, y, name, colors, angle, favorite, pit, hidden }: any) => {
+const CarObject = ({ x, y, name, driverNumber, teamName, colors, angle, favorite, pit, hidden }: any) => {
+	const constructorId = (teamName || "").toLowerCase().replaceAll(" ", "-");
+
 	return (
 		<g 
 			className={clsx({ "opacity-40": pit }, { "!opacity-0": hidden })}
@@ -726,58 +731,19 @@ const CarObject = ({ x, y, name, colors, angle, favorite, pit, hidden }: any) =>
 				</g>
 			)}
 
-			{/* 🏎️ MONOPLAZA 2026 PREMIUM (Silueta con Curvas Orgánicas Redondeadas) */}
+			{/* 🏎️ MONOPLAZA 2026 TOP-DOWN DE ALTA PRECISIÓN (F1CarTopDown) */}
 			<g transform={`rotate(${angle + 90})`} style={{ transition: "transform 0.3s linear" }}>
-				{/* Ejes de suspensión delantera y trasera estilizados */}
-				<rect x="-120" y="-175" width="240" height="10" fill="#444" rx="2" />
-				<rect x="-130" y="145" width="260" height="12" fill="#444" rx="2" />
-
-				{/* Alerón Trasero Masivo */}
-				<rect x="-140" y="215" width="280" height="50" fill="#222" rx="4" stroke="#111" strokeWidth={8} />
-				<rect x="-110" y="225" width="220" height="22" fill={colors.bg} rx="2" />
-
-				{/* Pontones y Carrocería Base REDONDEADOS */}
-				<path 
-					d="M -45 190 
-					   Q -75 60 -65 -40 
-					   Q -55 -160 -20 -160 
-					   L 20 -160 
-					   Q 55 -160 65 -40 
-					   Q 75 60 45 190 Z" 
-					fill="#222" 
-					stroke="#111" 
-					strokeWidth={10} 
+				<F1CarTopDown
+					x="-125"
+					y="-300"
+					width="250"
+					height="600"
+					className=""
+					constructorId={constructorId}
+					teamName={teamName}
+					driverNumber={driverNumber}
+					showNumber={false}
 				/>
-
-				{/* Chasis Central Afilado (Color oficial de la escudería) */}
-				<path d="M -25 180 L -22 -60 L -10 -270 L 10 -270 L 22 -60 L 25 180 Z" fill={colors.bg} stroke="#111" strokeWidth={12} />
-
-				{/* Alerón Delantero Estilizado en Flecha */}
-				<path d="M -110 -220 L 0 -290 L 110 -220 L 110 -195 L 0 -245 L -110 -195 Z" fill={colors.bg} stroke="#111" strokeWidth={10} />
-
-				{/* Cockpit Redondeado en forma de Gota */}
-				<path 
-					d="M -15 45 
-					   Q -22 15 -20 -20 
-					   Q -18 -55 0 -55 
-					   Q 18 -55 20 -20 
-					   Q 22 15 15 45 Z" 
-					fill="#111" 
-					stroke="#333" 
-					strokeWidth={6} 
-				/>
-				
-				{/* Casco y Protección del Piloto Integrada */}
-				<circle cx="0" cy="-10" r="10" fill="#444" />
-				<rect x="-4" y="10" width="8" height="25" fill="#111" rx="3" />
-
-				{/* Gomas Delanteras con contorno gris claro */}
-				<rect x="-205" y="-220" width="55" height="110" fill="#18181b" rx="18" stroke="#555555" strokeWidth={10} />
-				<rect x="150" y="-220" width="55" height="110" fill="#18181b" rx="18" stroke="#555555" strokeWidth={10} />
-
-				{/* Gomas Traseras de Competición con contorno gris claro */}
-				<rect x="-215" y="95" width="65" height="135" fill="#18181b" rx="20" stroke="#555555" strokeWidth={10} />
-				<rect x="150" y="95" width="65" height="135" fill="#18181b" rx="20" stroke="#555555" strokeWidth={10} />
 			</g>
 
 			{/* 🏷️ PANEL HUD DE PILOTO COMPACTO */}
