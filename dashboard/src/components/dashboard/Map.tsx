@@ -131,12 +131,8 @@ export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: s
 	useEffect(() => {
 		setCurrentTime(Date.now());
 		let animId: number;
-		let lastTick = performance.now();
-		const loop = (now: number) => {
-			if (now - lastTick >= 33) {
-				lastTick = now;
-				setCurrentTime(Date.now());
-			}
+		const loop = () => {
+			setCurrentTime(Date.now());
 			animId = requestAnimationFrame(loop);
 		};
 		animId = requestAnimationFrame(loop);
