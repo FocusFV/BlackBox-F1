@@ -201,13 +201,13 @@ export const useDataEngine = ({ updateState, updatePosition, updateCarData }: Pr
             updateState(newStateFrame);
         }
 
-        const carFrame = carBuffer.delayed(delayedTimestamp);
+        const carFrame = carBuffer.delayed(delayedTimestamp) ?? carBuffer.latest();
         if (carFrame) {
             updateCarData(carFrame);
             setTimeout(() => carBuffer.cleanup(delayedTimestamp), 0);
         }
 
-        const posFrame = posBuffer.delayed(delayedTimestamp);
+        const posFrame = posBuffer.delayed(delayedTimestamp) ?? posBuffer.latest();
         if (posFrame) {
             updatePosition(posFrame);
             setTimeout(() => posBuffer.cleanup(delayedTimestamp), 0);

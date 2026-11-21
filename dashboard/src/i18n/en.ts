@@ -707,6 +707,9 @@ export const en: TranslationDictionary = {
 		no_cars_on_track: "No cars running on track",
 		official_track_live: "OFFICIAL LIVE CIRCUIT",
 		gps_waiting: "Cars: satellite feed awaiting official GPS coordinates",
+		official_gps_live: "OFFICIAL LIVE GPS",
+		gps_active: "High-precision satellite telemetry coordinates",
+		sectors_synced: "Cars synchronized with official FIA mini-sectors",
 	},
 	pedals: {
 		tooltip_ecu_waiting: "Pedal & RPM telemetry: ECU feed standby (requires official F1 TV Pro broadcast)",

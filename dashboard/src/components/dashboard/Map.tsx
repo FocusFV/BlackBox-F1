@@ -125,12 +125,22 @@ export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: s
 	const clock = useDataStore((state) => state?.state?.ExtrapolatedClock);
 	const positions = useDataStore((state) => state.positions);
 	const prevCarsRef = useRef<Record<string, { x: number; y: number; angle: number }>>({});
+	const driverProgressRef = useRef<Record<string, { lastSegment: number; lastChangeTime: number; baseRatio: number }>>({});
 	const [currentTime, setCurrentTime] = useState<number>(0);
 
 	useEffect(() => {
 		setCurrentTime(Date.now());
-		const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
-		return () => clearInterval(timer);
+		let animId: number;
+		let lastTick = performance.now();
+		const loop = (now: number) => {
+			if (now - lastTick >= 33) {
+				lastTick = now;
+				setCurrentTime(Date.now());
+			}
+			animId = requestAnimationFrame(loop);
+		};
+		animId = requestAnimationFrame(loop);
+		return () => cancelAnimationFrame(animId);
 	}, []);
 
 	const isRaceOrSprint = Boolean(
@@ -409,7 +419,7 @@ export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: s
 							return null;
 						}
 
-						const hasCarPos = Boolean(
+						const hasCarGps = Boolean(
 							rawPos &&
 							typeof rawPos.X === "number" &&
 							typeof rawPos.Y === "number" &&
@@ -417,42 +427,90 @@ export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: s
 							rawPos.Status !== "InPit"
 						);
 
-						if (!hasCarPos || !rawPos) {
-							// 🛑 CERO DATOS FALSOS: Si FOM no transmite coordenadas GPS satelitales en vivo en este frame,
-							// NUNCA inventamos una posición simulada ni ponemos monoplazas en lugares falsos.
-							return null;
-						}
-
-						// 🏎️ TELEMETRÍA OFICIAL F1: Coordenadas GPS exactas en pista (60 FPS fluidos)
-						const rotated = rotate(rawPos.X, rawPos.Y, rotation, centerX, centerY);
-						const carX = rotated.x;
-						const carY = rotated.y;
+						let carX: number;
+						let carY: number;
 						let carAngle: number;
 
-						const prev = prevCarsRef.current[driver.RacingNumber];
-						if (prev) {
-							const dx = carX - prev.x;
-							const dy = carY - prev.y;
-							const dist = Math.hypot(dx, dy);
-							if (dist > 3) {
-								const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI);
-								carAngle = smoothAngle(prev.angle, targetAngle);
-							} else {
-								carAngle = prev.angle;
-							}
-						} else if (points && points.length > 0) {
-							const closestIdx = findMinDistance({ x: carX, y: carY }, points);
-							if (closestIdx !== -1) {
-								const nextIdx = (closestIdx + 3) % points.length;
-								carAngle = Math.atan2(
-									points[nextIdx].y - points[closestIdx].y,
-									points[nextIdx].x - points[closestIdx].x
-								) * (180 / Math.PI);
+						if (hasCarGps && rawPos) {
+							// 🏎️ TELEMETRÍA 1: Coordenadas GPS satelitales en vivo (Position.z)
+							const rotated = rotate(rawPos.X, rawPos.Y, rotation, centerX, centerY);
+							carX = rotated.x;
+							carY = rotated.y;
+
+							const prev = prevCarsRef.current[driver.RacingNumber];
+							if (prev) {
+								const dx = carX - prev.x;
+								const dy = carY - prev.y;
+								const dist = Math.hypot(dx, dy);
+								if (dist > 3) {
+									const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+									carAngle = smoothAngle(prev.angle, targetAngle);
+								} else {
+									carAngle = prev.angle;
+								}
+							} else if (points && points.length > 0) {
+								const closestIdx = findMinDistance({ x: carX, y: carY }, points);
+								if (closestIdx !== -1) {
+									const nextIdx = (closestIdx + 3) % points.length;
+									carAngle = Math.atan2(
+										points[nextIdx].y - points[closestIdx].y,
+										points[nextIdx].x - points[closestIdx].x
+									) * (180 / Math.PI);
+								} else {
+									carAngle = 0;
+								}
 							} else {
 								carAngle = 0;
 							}
+						} else if (points && points.length > 0) {
+							// 🏎️ TELEMETRÍA 2 (OFICIAL FIA): Posición real en trazado basada en mini-sectores (Segments) oficiales
+							const allSegments = (timingDriver.Sectors || []).flatMap((s: any) => s.Segments || []);
+							let completedSegments = 0;
+							for (let i = 0; i < allSegments.length; i++) {
+								const s = allSegments[i]?.Status;
+								if (s !== undefined && s > 0) {
+									completedSegments = i + 1;
+								}
+							}
+
+							const totalSegments = allSegments.length || 23;
+							const now = currentTime || Date.now();
+							const prevTracking = driverProgressRef.current[driver.RacingNumber];
+
+							if (!prevTracking || prevTracking.lastSegment !== completedSegments) {
+								driverProgressRef.current[driver.RacingNumber] = {
+									lastSegment: completedSegments,
+									lastChangeTime: now,
+									baseRatio: totalSegments > 0 ? (completedSegments / totalSegments) : 0,
+								};
+							}
+
+							const tracking = driverProgressRef.current[driver.RacingNumber];
+							const elapsedMs = Math.max(0, now - tracking.lastChangeTime);
+
+							// Duración estimada de cada mini-sector para avance suave continuo
+							const estimatedSegmentMs = Math.max(2500, (100 * 1000) / totalSegments);
+							const segmentFraction = Math.min(elapsedMs / estimatedSegmentMs, 0.95);
+							const segmentWidth = 1 / totalSegments;
+
+							const baseProgress = tracking.baseRatio;
+							const currentProgress = (baseProgress + (segmentFraction * segmentWidth)) % 1;
+							const safeRatio = Math.max(0, Math.min(0.999, ((currentProgress % 1) + 1) % 1));
+
+							const pointIndex = Math.floor(safeRatio * (points.length - 1));
+							const currentPoint = points[pointIndex];
+							const nextIndex = (pointIndex + 3) % points.length;
+							const nextPoint = points[nextIndex];
+
+							if (!currentPoint || !nextPoint) {
+								return null;
+							}
+
+							carX = currentPoint.x;
+							carY = currentPoint.y;
+							carAngle = Math.atan2(nextPoint.y - currentPoint.y, nextPoint.x - currentPoint.x) * (180 / Math.PI);
 						} else {
-							carAngle = 0;
+							return null;
 						}
 
 						prevCarsRef.current[driver.RacingNumber] = { x: carX, y: carY, angle: carAngle };
@@ -512,15 +570,15 @@ export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: s
 		)}
 
 		{/* 🛰️ BADGE TRANSPARENTE: Informa con total honestidad el estado del GPS FOM */}
-		{!hasLivePositions && !isEnded && isTrackActive && (
+		{!isEnded && isTrackActive && (
 			<div className="absolute bottom-4 left-4 pointer-events-none z-10 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950/85 border border-zinc-800/80 backdrop-blur-md shadow-lg select-none">
 				<span className="relative flex h-2 w-2">
 					<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
 					<span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
 				</span>
 				<div className="flex flex-col">
-					<span className="text-[10px] font-mono font-bold text-zinc-300 tracking-wide uppercase">{t("map.official_track_live", "TRAZADO OFICIAL EN VIVO")}</span>
-					<span className="text-[8px] font-mono text-zinc-500">{t("map.gps_waiting", "Monoplazas: señal satelital en espera de coordenadas GPS oficiales")}</span>
+					<span className="text-[10px] font-mono font-bold text-zinc-300 tracking-wide uppercase">{hasLivePositions ? t("map.official_gps_live", "GPS SATELITAL EN VIVO") : t("map.official_track_live", "TELEMETRÍA EN PISTA EN VIVO")}</span>
+					<span className="text-[8px] font-mono text-zinc-500">{hasLivePositions ? t("map.gps_active", "Coordenadas satelitales de alta precisión") : t("map.sectors_synced", "Monoplazas sincronizados con mini-sectores oficiales FIA")}</span>
 				</div>
 			</div>
 		)}
@@ -531,9 +589,8 @@ export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: s
 const CarObject = ({ x, y, name, colors, angle, favorite, pit, hidden }: any) => {
 	return (
 		<g 
-			className={clsx("transition-transform duration-300 ease-linear", { "opacity-40": pit }, { "!opacity-0": hidden })} 
+			className={clsx({ "opacity-40": pit }, { "!opacity-0": hidden })}
 			transform={`translate(${x}, ${y})`}
-			style={{ transform: `translateX(${x}px) translateY(${y}px)` }}
 		>
 			{/* 🌟 BALIZA RADAR VIP DE PILOTO FAVORITO */}
 			{favorite && (

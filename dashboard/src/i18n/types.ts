@@ -707,6 +707,9 @@ export interface TranslationDictionary {
 		no_cars_on_track: string;
 		official_track_live: string;
 		gps_waiting: string;
+		official_gps_live: string;
+		gps_active: string;
+		sectors_synced: string;
 	};
 	pedals: {
 		tooltip_ecu_waiting: string;
