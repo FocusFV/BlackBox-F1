@@ -493,18 +493,27 @@ export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: s
 							const currentProgress = (baseProgress + (segmentFraction * segmentWidth)) % 1;
 							const safeRatio = Math.max(0, Math.min(0.999, ((currentProgress % 1) + 1) % 1));
 
-							const pointIndex = Math.floor(safeRatio * (points.length - 1));
-							const currentPoint = points[pointIndex];
-							const nextIndex = (pointIndex + 3) % points.length;
-							const nextPoint = points[nextIndex];
+							const numPts = points.length;
+							const exactFloatIndex = safeRatio * (numPts - 1);
+							const i0 = Math.floor(exactFloatIndex);
+							const i1 = (i0 + 1) % numPts;
+							const frac = exactFloatIndex - i0;
 
-							if (!currentPoint || !nextPoint) {
+							const p0 = points[i0];
+							const p1 = points[i1];
+
+							if (!p0 || !p1) {
 								return null;
 							}
 
-							carX = currentPoint.x;
-							carY = currentPoint.y;
-							carAngle = Math.atan2(nextPoint.y - currentPoint.y, nextPoint.x - currentPoint.x) * (180 / Math.PI);
+							// 🏎️ INTERPOLACIÓN SUB-PÍXEL CONTINUA A 60 FPS REALES (sin escalonamientos de puntos)
+							carX = p0.x + (p1.x - p0.x) * frac;
+							carY = p0.y + (p1.y - p0.y) * frac;
+
+							const nextIdx = (i0 + 3) % numPts;
+							const nextPt = points[nextIdx] || p1;
+							const targetAngle = Math.atan2(nextPt.y - carY, nextPt.x - carX) * (180 / Math.PI);
+							carAngle = smoothAngle(prevCarsRef.current[driver.RacingNumber]?.angle ?? targetAngle, targetAngle);
 						} else {
 							return null;
 						}
