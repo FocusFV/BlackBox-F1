@@ -299,7 +299,15 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 		let isMounted = true;
 		if (activeTab === "QUALY" || activeTab === "SQ") {
 			setGridLoading(true);
-			fetch("/api/starting-grid")
+			const params = new URLSearchParams();
+			if (liveSession?.Meeting?.Key) {
+				params.set("meeting_key", String(liveSession.Meeting.Key));
+			}
+			if (gpName) {
+				params.set("gp_name", gpName);
+			}
+			const queryStr = params.toString() ? `?${params.toString()}` : "";
+			fetch(`/api/starting-grid${queryStr}`)
 				.then((r) => r.json())
 				.then((data) => {
 					if (!isMounted) return;
@@ -321,7 +329,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 		return () => {
 			isMounted = false;
 		};
-	}, [activeTab]);
+	}, [activeTab, liveSession?.Meeting?.Key, gpName]);
 
 	// 🔄 Lista de resultados procesada según el modo seleccionado (Tiempos o Grilla de Salida)
 	const displayResults = useMemo(() => {
@@ -332,11 +340,27 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 			return startingGrid
 				.map((gridItem) => {
 					const match = results.find(
-						(r) => String(r.number) === String(gridItem.driver_number)
+						(r) => String(r.number).trim() === String(gridItem.driver_number).trim()
 					);
-					if (!match) return null;
-					const qualyPos = parseInt(match.pos, 10);
 					const gridPos = gridItem.position;
+					if (!match) {
+						const drv = liveDrivers?.[gridItem.driver_number];
+						return {
+							pos: String(gridPos),
+							number: String(gridItem.driver_number),
+							code: drv?.Tla || `P${gridItem.driver_number}`,
+							name: drv?.FullName || drv?.BroadcastName || `Piloto #${gridItem.driver_number}`,
+							team: drv?.TeamName || "Equipo",
+							constructorId: (drv?.TeamName || "").toLowerCase().replaceAll(" ", "-"),
+							gapTime: gridPos === 1 ? "POLE POSITION" : `FILA ${Math.ceil(gridPos / 2)}`,
+							gridPos,
+							qualyPos: gridPos,
+							delta: 0,
+							penaltyNote: gridItem.penalty,
+							isDNF: false,
+						};
+					}
+					const qualyPos = parseInt(match.pos, 10);
 					const delta = isNaN(qualyPos) ? 0 : qualyPos - gridPos;
 					return {
 						...match,
@@ -351,7 +375,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 				.filter(Boolean) as DriverResult[];
 		}
 		return results;
-	}, [activeTab, qualyViewMode, startingGrid, results]);
+	}, [activeTab, qualyViewMode, startingGrid, results, liveDrivers]);
 
 	// 🧠 Detección inteligente de GP y sesión según calendario y día de la semana
 	useEffect(() => {
