@@ -136,6 +136,16 @@ export default function Driver({
 	const trapSpeed = speeds?.ST?.Value || speeds?.St?.Value || speeds?.FL?.Value || speeds?.Fl?.Value || speeds?.I2?.Value || speeds?.I1?.Value;
 	const trapLabel = (speeds?.ST?.Value || speeds?.St?.Value) ? "ST" : ((speeds?.FL?.Value || speeds?.Fl?.Value) ? "FL" : (speeds?.I2?.Value ? "I2" : ""));
 
+	const speedSt = speeds?.ST?.Value || speeds?.St?.Value;
+	const speedFl = speeds?.FL?.Value || speeds?.Fl?.Value;
+	const isStFastest = Boolean(speeds?.ST?.OverallFastest || speeds?.St?.OverallFastest);
+	const isStPersonal = Boolean(speeds?.ST?.PersonalFastest || speeds?.St?.PersonalFastest);
+	const isFlFastest = Boolean(speeds?.FL?.OverallFastest || speeds?.Fl?.OverallFastest);
+	const isFlPersonal = Boolean(speeds?.FL?.PersonalFastest || speeds?.Fl?.PersonalFastest);
+
+	const speedUnit = useSettingsStore((state) => state.speedUnit);
+	const convertKmhToMph = (kmh: number) => Math.floor(kmh / 1.609344);
+
 	// ⚡ LÓGICA INTELIGENTE DE BOOST / DRS (Manual Override 2026 & FIA Timing)
 	const trackStatusCode = useDataStore((state) => state.state?.TrackStatus?.Status);
 	// DRS / Boost deshabilitado bajo Safety Car (4), Red Flag (5) o VSC (6, 7)
@@ -268,6 +278,7 @@ export default function Driver({
 					isLastPersonalFastest={isLastPersonalFastest}
 					inPit={timingDriver.InPit}
 					pitOut={timingDriver.PitOut}
+					isRaceOrSprint={isRaceOrSprint}
 				/>
 				<div className="flex items-center gap-2">
 					<DriverMiniSectors sectors={timingDriver.Sectors} bestSectors={timingStatsDriver?.BestSectors} />
@@ -278,41 +289,55 @@ export default function Driver({
 					carData ? (
 						<DriverCarMetrics carData={carData} />
 					) : (
-						<div className="flex items-center gap-2 place-self-start font-mono select-none">
+						<div className="flex items-center gap-2 place-self-start font-mono select-none w-full">
 							<div
 								className={clsx(
-									"flex h-7 w-8 items-center justify-center rounded-md border text-[10px] font-black transition-all",
+									"flex h-7 w-8 shrink-0 items-center justify-center rounded-md border text-[10px] font-black transition-all",
 									timingDriver?.InPit
 										? "border-amber-500/50 bg-amber-950/40 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.25)]"
 										: "border-emerald-500/40 bg-emerald-950/30 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
 								)}
-								title={timingDriver?.InPit ? "Monoplaza en Boxes" : "Monoplaza en Pista"}
+								title={timingDriver?.InPit ? t("telemetry.in_pit_title", "Monoplaza en Boxes") : t("telemetry.on_track_title", "Monoplaza en Pista")}
 							>
 								{timingDriver?.InPit ? "BOX" : "PISTA"}
 							</div>
-							<div className="min-w-[3.4rem]">
-								<p className="text-right text-sm font-black text-zinc-300 tabular-nums leading-none tracking-tight">
+							<div className="min-w-[3.2rem] shrink-0 text-right">
+								<p className="text-sm font-black text-white tabular-nums leading-none tracking-tight">
 									{timingDriver?.InPit ? "0" : (trapSpeed || "--")}
 								</p>
-								<p className="text-right text-[8px] font-bold text-zinc-500 uppercase leading-none mt-0.5">
-									{timingDriver?.InPit ? "km/h" : (trapSpeed ? `${trapLabel || ""} km/h`.trim() : "km/h")}
+								<p className="text-[8px] font-bold text-zinc-500 uppercase leading-none mt-0.5">
+									{timingDriver?.InPit ? (speedUnit === "metric" ? "km/h" : "mph") : (trapSpeed ? `${trapLabel || ""} ${speedUnit === "metric" ? "km/h" : "mph"}`.trim() : (speedUnit === "metric" ? "km/h" : "mph"))}
 								</p>
 							</div>
-							<div 
-								className="flex flex-col gap-1 text-[8px] font-bold opacity-50 cursor-help"
-								title={t("pedals.tooltip_ecu_waiting", "Telemetría de pedales y RPM: Señal de ECU en espera (requiere transmisión oficial F1 TV Pro)")}
-							>
+							{/* 🚀 TELEMETRÍA OFICIAL FOM SPEED TRAPS (ST & FL) */}
+							<div className="flex flex-col justify-center gap-0.5 text-[9px] font-mono leading-none border-l border-zinc-800/80 pl-2">
 								<div className="flex items-center gap-1">
-									<span className="w-4 text-right text-[7px] text-zinc-500 font-bold leading-none">{t("pedals.brake_abbr", "FRE")}</span>
-									<div className="h-1.5 w-14 rounded-full bg-zinc-900 border border-zinc-800/80" />
+									<span className="w-5 text-[7px] text-zinc-500 font-bold uppercase leading-none">ST</span>
+									<span
+										className={clsx("text-[9px] font-bold tabular-nums leading-none", {
+											"text-violet-400! font-black": isStFastest,
+											"text-emerald-400!": !isStFastest && isStPersonal,
+											"text-zinc-300": !isStFastest && !isStPersonal && Boolean(speedSt),
+											"text-zinc-600": !speedSt,
+										})}
+										title={t("telemetry.speed_trap_st", "Speed Trap Oficial FIA")}
+									>
+										{speedSt ? (speedUnit === "metric" ? `${speedSt}` : `${convertKmhToMph(Number(speedSt))}`) : "--"}
+									</span>
 								</div>
 								<div className="flex items-center gap-1">
-									<span className="w-4 text-right text-[7px] text-zinc-500 font-bold leading-none">{t("pedals.throttle_abbr", "ACE")}</span>
-									<div className="h-1.5 w-14 rounded-full bg-zinc-900 border border-zinc-800/80" />
-								</div>
-								<div className="flex items-center gap-1">
-									<span className="w-4 text-right text-[7px] text-zinc-500 font-bold leading-none">RPM</span>
-									<div className="h-1.5 w-14 rounded-full bg-zinc-900 border border-zinc-800/80" />
+									<span className="w-5 text-[7px] text-zinc-500 font-bold uppercase leading-none">FL</span>
+									<span
+										className={clsx("text-[9px] font-bold tabular-nums leading-none", {
+											"text-violet-400! font-black": isFlFastest,
+											"text-emerald-400!": !isFlFastest && isFlPersonal,
+											"text-zinc-400": !isFlFastest && !isFlPersonal && Boolean(speedFl),
+											"text-zinc-600": !speedFl,
+										})}
+										title={t("telemetry.finish_line_speed", "Velocidad en Línea de Meta")}
+									>
+										{speedFl ? (speedUnit === "metric" ? `${speedFl}` : `${convertKmhToMph(Number(speedFl))}`) : "--"}
+									</span>
 								</div>
 							</div>
 						</div>
