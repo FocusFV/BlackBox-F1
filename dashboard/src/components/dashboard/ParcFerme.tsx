@@ -933,13 +933,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 								{smartContext?.isWeekendActive
 									? smartContext.stage === "PRE_WEEKEND"
 										? `${t("parc_ferme.next_round", "Próxima Ronda")} · ${t("parc_ferme.track_waiting", "Pista en Espera")}`
-										: smartContext.stage === "FRIDAY"
-										? `${t("sessions.live", "En Vivo")} · ${t("sessions.fp1", "Libres")}`
-										: smartContext.stage === "SATURDAY"
-										? `${t("sessions.live", "En Vivo")} · ${t("sessions.qualy", "Clasificación")}`
-										: smartContext.stage === "SUNDAY"
-										? `${t("sessions.live", "En Vivo")} · ${t("sessions.race", "Gran Premio")}`
-										: t("sessions.finished", "Gran Premio Finalizado")
+										: `${t("parc_ferme.active_weekend", "Fin de Semana Activo")} · ${t("parc_ferme.session_archive", "Resultados")}`
 									: t("parc_ferme.last_official_round", "Última Ronda Oficial")}
 							</span>
 							{!smartContext?.isWeekendActive && (
@@ -957,19 +951,10 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 				</div>
 
 				<div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-900/80 border border-zinc-800/80 w-full sm:w-auto justify-center sm:justify-end">
-					<span className="relative flex h-2 w-2">
-						<span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 animate-ping"></span>
-						<span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-					</span>
+					<span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)] shrink-0" />
 					<div className="text-left font-mono">
 						<p className="text-[11px] font-bold text-zinc-200 uppercase tracking-tight leading-none">
-							{effectiveSim
-								? t("parc_ferme.session_in_progress", "Sesión en Curso")
-								: smartContext?.isWeekendActive
-								? smartContext.stage === "PRE_WEEKEND"
-									? t("parc_ferme.track_waiting", "Pista en Espera")
-									: t("parc_ferme.session_in_progress", "Sesión en Curso")
-								: t("parc_ferme.track_paused", "Pista en Pausa")}
+							{t("parc_ferme.parc_ferme_title", "Parque Cerrado")}
 						</p>
 						<p className="text-[10px] text-zinc-400 font-medium tracking-normal leading-tight mt-0.5">
 							{t("parc_ferme.official_results", "Resultados Oficiales FIA")}

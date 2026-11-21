@@ -248,30 +248,43 @@ export default function SessionInfo() {
 						.filter((s): s is { name: string; dt: Date } => s.dt !== null)
 						.sort((a, b) => a.dt.getTime() - b.dt.getTime());
 
-					// Verificamos si hay alguna sesión oficial en curso solo si no estamos con sesión finalizada
-					const ongoingSession = !isSessionTerminated
-						? validSessions.find(
-								(s) => s.dt.getTime() <= now && now <= s.dt.getTime() + 2 * 3600 * 1000
-						  )
-						: undefined;
+					const sessionDurations: Record<string, number> = {
+						"Práctica 1": 60 * 60 * 1000,
+						"Práctica 2": 60 * 60 * 1000,
+						"Práctica 3": 60 * 60 * 1000,
+						"Sprint Shootout": 45 * 60 * 1000,
+						"Carrera Sprint": 60 * 60 * 1000,
+						"Clasificación": 60 * 60 * 1000,
+						"Gran Premio": 120 * 60 * 1000,
+					};
 
-					if (ongoingSession) {
-						setNextSessionName(ongoingSession.name);
-						setCountdown("EN PISTA");
+					const POST_SESSION_WINDOW = 20 * 60 * 1000; // 20 min post-bandera a cuadros para ver resultados
+
+					// 1. ¿Hay alguna sesión que acaba de terminar hace menos de 20 minutos?
+					const recentlyFinishedSession = validSessions.find((s) => {
+						const dur = sessionDurations[s.name] || 60 * 60 * 1000;
+						const end = s.dt.getTime() + dur;
+						return now >= end && now <= end + POST_SESSION_WINDOW;
+					});
+
+					// 2. Buscamos la siguiente sesión programada en el futuro
+					const upcomingSession = validSessions.find((s) => s.dt.getTime() > now);
+
+					if (recentlyFinishedSession) {
+						// Opción 3: Durante los primeros 20 minutos muestra SESIÓN FINALIZADA
+						setNextSessionName(recentlyFinishedSession.name);
+						setCountdown(t("sessions.finished", "SESIÓN FINALIZADA"));
+					} else if (upcomingSession) {
+						// Luego pasa de inmediato a la cuenta regresiva oficial hacia la siguiente sesión (ej. Clasificación)
+						const displaySessionName =
+							upcomingSession.name === "Gran Premio"
+								? "Gran Premio (Carrera)"
+								: upcomingSession.name;
+						setNextSessionName(displaySessionName);
+						targetDate = upcomingSession.dt;
+						setCountdown(calcCountdown(targetDate));
 					} else {
-						const upcomingSession =
-							validSessions.find((s) => s.dt.getTime() > now) ||
-							validSessions[validSessions.length - 1];
-
-						if (upcomingSession) {
-							const displaySessionName =
-								upcomingSession.name === "Gran Premio"
-									? "Gran Premio (Carrera)"
-									: upcomingSession.name;
-							setNextSessionName(displaySessionName);
-							targetDate = upcomingSession.dt;
-							setCountdown(calcCountdown(targetDate));
-						}
+						setCountdown(t("sessions.finished", "SESIÓN FINALIZADA"));
 					}
 				}
 			} catch {

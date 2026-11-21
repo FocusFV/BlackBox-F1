@@ -111,6 +111,9 @@ export interface TranslationDictionary {
 		track_paused: string;
 		session_in_progress: string;
 		track_waiting: string;
+		parc_ferme_title: string;
+		active_weekend: string;
+		session_archive: string;
 		official_results: string;
 		final_classification: string;
 		best_laps: string;
