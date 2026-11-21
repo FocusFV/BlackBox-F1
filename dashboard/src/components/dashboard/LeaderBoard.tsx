@@ -8,6 +8,7 @@ import { useDataStore } from "@/stores/useDataStore";
 import { useTranslation } from "@/hooks/useTranslation";
 
 import { sortPos } from "@/lib/sorting";
+import { parseLapTimeToMs } from "@/lib/lapTime";
 
 import Driver from "@/components/driver/Driver";
 
@@ -15,6 +16,16 @@ export default function LeaderBoard() {
     const { t, language } = useTranslation();
     const drivers = useDataStore(({ state }) => state?.DriverList);
     const driversTiming = useDataStore(({ state }) => state?.TimingData);
+    const session = useDataStore(({ state }) => state?.SessionInfo);
+    const lapCount = useDataStore(({ state }) => state?.LapCount);
+    const sessionPart = useDataStore(({ state }) => state?.TimingData?.SessionPart);
+
+    const isRaceOrSprint = Boolean(
+        session?.Name === "Race" ||
+        session?.Name === "Sprint" ||
+        session?.Type === "Race" ||
+        (lapCount?.TotalLaps && lapCount.TotalLaps > 0)
+    );
 
     const showTableHeader = useSettingsStore((state) => state.tableHeaders);
 
@@ -62,57 +73,79 @@ export default function LeaderBoard() {
                             let lastValidGapSec = 0;
                             let lastLapsDown = 0;
 
+                            const leaderBestMs = parseLapTimeToMs(finalGrid[0]?.BestLapTime?.Value);
+
                             return finalGrid.map((timingDriver: any, index: number) => {
                                 const driverKey = timingDriver.resolvedNumber;
                                 const pos = index + 1;
                                 const isDNF = Boolean(timingDriver.Retired || timingDriver.Stopped);
 
                                 let cumulativeGap = "";
-                                const rawGtl = (timingDriver.GapToLeader || "").trim();
-                                const rawInterval = (timingDriver.IntervalToPositionAhead?.Value || "").trim();
-                                const intervalGap = rawInterval && !rawInterval.includes("L") ? (rawInterval.startsWith("+") ? rawInterval : `+${rawInterval}`) : rawInterval;
+                                let intervalGap = "";
+
+                                // 🏎️ 1. Extraer brecha oficial de la FOM (en Carrera: GapToLeader, en Prácticas/Qualy: TimeDiffToFastest)
+                                const rawGtl = String(
+                                    timingDriver.GapToLeader ??
+                                    (timingDriver.Stats ? timingDriver.Stats[sessionPart ? sessionPart - 1 : 0]?.TimeDiffToFastest : undefined) ??
+                                    timingDriver.TimeDiffToFastest ??
+                                    ""
+                                ).trim();
+
+                                const rawInterval = String(
+                                    timingDriver.IntervalToPositionAhead?.Value ??
+                                    (timingDriver.Stats ? timingDriver.Stats[sessionPart ? sessionPart - 1 : 0]?.TimeDifftoPositionAhead : undefined) ??
+                                    timingDriver.TimeDiffToPositionAhead ??
+                                    ""
+                                ).trim();
+
+                                // 🏎️ 2. Si no viene en el paquete FOM directo pero ambos tienen tiempos de vuelta válidos (común en FP/Qualy):
+                                const driverBestMs = parseLapTimeToMs(timingDriver?.BestLapTime?.Value);
+                                const prevBestMs = index > 0 ? parseLapTimeToMs(finalGrid[index - 1]?.BestLapTime?.Value) : null;
+
+                                let effectiveGtl = rawGtl;
+                                if (!effectiveGtl && !isRaceOrSprint && pos > 1 && driverBestMs !== null && leaderBestMs !== null && driverBestMs >= leaderBestMs) {
+                                    const diffSec = (driverBestMs - leaderBestMs) / 1000;
+                                    effectiveGtl = `+${diffSec.toFixed(3)}`;
+                                }
+
+                                let effectiveInterval = rawInterval;
+                                if (!effectiveInterval && !isRaceOrSprint && pos > 1 && driverBestMs !== null && prevBestMs !== null && driverBestMs >= prevBestMs) {
+                                    const intSec = (driverBestMs - prevBestMs) / 1000;
+                                    effectiveInterval = `+${intSec.toFixed(3)}`;
+                                }
 
                                 if (isDNF) {
                                     cumulativeGap = "RET";
                                 } else if (pos === 1) {
                                     cumulativeGap = t("telemetry.leader", "LÍDER");
                                 } else {
-                                    const lapMatch = rawGtl.match(/^(\d+)\s*L/i) || rawGtl.match(/^\+(\d+)\s*L/i);
+                                    const lapMatch = effectiveGtl.match(/^(\d+)\s*L/i) || effectiveGtl.match(/^\+(\d+)\s*L/i);
                                     if (lapMatch) {
                                         const laps = parseInt(lapMatch[1], 10);
                                         lastLapsDown = Math.max(lastLapsDown, laps);
                                         cumulativeGap = laps === 1 ? (language === "en" ? "+1 LAP" : "+1 VTA") : (language === "en" ? `+${laps} LAPS` : `+${laps} VTAS`);
-                                    } else if (rawGtl.includes(":")) {
-                                        cumulativeGap = rawGtl.startsWith("+") ? rawGtl : `+${rawGtl}`;
-                                    } else if (rawGtl) {
-                                        const numSec = parseFloat(rawGtl.replace("+", ""));
+                                    } else if (lastLapsDown > 0 && isRaceOrSprint) {
+                                        cumulativeGap = lastLapsDown === 1 ? (language === "en" ? "+1 LAP" : "+1 VTA") : (language === "en" ? `+${lastLapsDown} LAPS` : `+${lastLapsDown} VTAS`);
+                                    } else if (effectiveGtl.includes(":")) {
+                                        cumulativeGap = effectiveGtl.startsWith("+") ? effectiveGtl : `+${effectiveGtl}`;
+                                    } else if (effectiveGtl) {
+                                        const numSec = parseFloat(effectiveGtl.replace("+", ""));
                                         if (!isNaN(numSec) && numSec > 0) {
-                                            if (numSec >= lastValidGapSec && lastLapsDown === 0) {
-                                                lastValidGapSec = numSec;
-                                                cumulativeGap = `+${numSec.toFixed(3)}`;
-                                            } else if (lastLapsDown > 0) {
-                                                cumulativeGap = lastLapsDown === 1 ? (language === "en" ? "+1 LAP" : "+1 VTA") : (language === "en" ? `+${lastLapsDown} LAPS` : `+${lastLapsDown} VTAS`);
-                                            } else {
-                                                const intrNum = parseFloat(rawInterval.replace("+", ""));
-                                                lastValidGapSec += (!isNaN(intrNum) && intrNum > 0 ? intrNum : 0.8);
-                                                cumulativeGap = `+${lastValidGapSec.toFixed(3)}`;
-                                            }
+                                            lastValidGapSec = numSec;
+                                            cumulativeGap = `+${numSec.toFixed(3)}`;
                                         } else {
-                                            cumulativeGap = rawGtl;
+                                            cumulativeGap = effectiveGtl;
                                         }
                                     } else {
-                                        if (lastLapsDown > 0) {
-                                            cumulativeGap = lastLapsDown === 1 ? "+1 VTA" : `+${lastLapsDown} VTAS`;
-                                        } else {
-                                            const intrNum = parseFloat(rawInterval.replace("+", ""));
-                                            if (!isNaN(intrNum) && intrNum > 0) {
-                                                lastValidGapSec += intrNum;
-                                                cumulativeGap = `+${lastValidGapSec.toFixed(3)}`;
-                                            } else {
-                                                cumulativeGap = lastValidGapSec > 0 ? `+${lastValidGapSec.toFixed(3)}` : `+${(pos * 1.5).toFixed(3)}`;
-                                            }
-                                        }
+                                        // Monoplaza sin tiempo marcado en la sesión: queda vacío para que DriverGap muestre --.---
+                                        cumulativeGap = "";
                                     }
+                                }
+
+                                if (effectiveInterval) {
+                                    intervalGap = effectiveInterval.startsWith("+") || effectiveInterval.includes("L") ? effectiveInterval : `+${effectiveInterval}`;
+                                } else {
+                                    intervalGap = "";
                                 }
 
                                 return (
