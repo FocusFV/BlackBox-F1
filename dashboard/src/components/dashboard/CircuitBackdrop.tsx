@@ -365,8 +365,7 @@ export function CircuitBackdrop({
 					src={imageUrl}
 					alt={circuit.name}
 					loading="eager"
-					// @ts-expect-error HTML standard attribute for modern browser preloading
-					fetchpriority="high"
+					fetchPriority="high"
 					decoding="async"
 					onLoad={() => setLoaded(true)}
 					onError={() => {
