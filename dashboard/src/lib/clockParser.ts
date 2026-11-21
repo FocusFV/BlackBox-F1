@@ -2,6 +2,8 @@
 // Evita el bug de Moment.js que interpreta "MM:SS" como "HH:MM" (348 min en lugar de 5m 48s)
 // y procesa formatos "MM:SS:cc" de Qualy (ej: "05:29:14" -> 5m 29s en lugar de 5 horas 29 minutos)
 
+import calendar2026 from "@/data/calendar2026.json";
+
 export function parseUtcMs(utcStr?: string): number | null {
 	if (!utcStr) return null;
 	const clean = utcStr.trim();
@@ -55,3 +57,82 @@ export function formatMsToClock(ms: number, forceNoHours: boolean = false): stri
 
 	return `${hours}:${pad(minutes)}:${pad(seconds)}`;
 }
+
+export function formatMsToCountdownParts(ms: number): {
+	hours: string;
+	minutes: string;
+	seconds: string;
+	totalMinutes: string;
+} {
+	if (ms <= 0) {
+		return { hours: "00", minutes: "00", seconds: "00", totalMinutes: "00" };
+	}
+	const totalSecs = Math.floor(ms / 1000);
+	const hours = Math.floor(totalSecs / 3600);
+	const minutes = Math.floor((totalSecs % 3600) / 60);
+	const seconds = totalSecs % 60;
+	const totalMinutes = Math.floor(totalSecs / 60);
+	const pad = (n: number) => n.toString().padStart(2, "0");
+
+	return {
+		hours: pad(hours),
+		minutes: pad(minutes),
+		seconds: pad(seconds),
+		totalMinutes: pad(totalMinutes),
+	};
+}
+
+export function getScheduledSessionStartMs(session?: any): number | null {
+	if (session?.StartDate) {
+		const ms = parseUtcMs(session.StartDate);
+		if (ms && !isNaN(ms)) return ms;
+	}
+	if (session?.Name) {
+		const sName = session.Name.toLowerCase();
+		const now = Date.now();
+		const races = calendar2026 as any[];
+		const race = races.find((r: any) => {
+			if (session.Meeting?.Name && r.raceName?.toLowerCase().includes(session.Meeting.Name.toLowerCase())) return true;
+			if (session.Meeting?.Country?.Name && r.Circuit?.Location?.country?.toLowerCase() === session.Meeting.Country.Name.toLowerCase()) return true;
+			if (session.Meeting?.Circuit?.ShortName && r.Circuit?.circuitName?.toLowerCase().includes(session.Meeting.Circuit.ShortName.toLowerCase())) return true;
+			if (session.Meeting?.Location && r.Circuit?.Location?.locality?.toLowerCase().includes(session.Meeting.Location.toLowerCase())) return true;
+			const rDate = new Date(`${r.date}T23:59:59Z`).getTime();
+			return Math.abs(now - rDate) < 5 * 24 * 3600 * 1000;
+		});
+
+		if (race) {
+			let sDate: string | undefined;
+			let sTime: string | undefined;
+			if (sName.includes("qual")) {
+				sDate = race.Qualifying?.date;
+				sTime = race.Qualifying?.time;
+			} else if (sName === "practice 1" || sName === "práctica 1") {
+				sDate = race.FirstPractice?.date;
+				sTime = race.FirstPractice?.time;
+			} else if (sName === "practice 2" || sName === "práctica 2") {
+				sDate = race.SecondPractice?.date;
+				sTime = race.SecondPractice?.time;
+			} else if (sName === "practice 3" || sName === "práctica 3") {
+				sDate = race.ThirdPractice?.date;
+				sTime = race.ThirdPractice?.time;
+			} else if (sName.includes("sprint shootout") || sName.includes("sprint qual")) {
+				sDate = race.SprintQualifying?.date;
+				sTime = race.SprintQualifying?.time;
+			} else if (sName === "sprint") {
+				sDate = race.Sprint?.date;
+				sTime = race.Sprint?.time;
+			} else if (sName === "race" || sName === "carrera") {
+				sDate = race.date;
+				sTime = race.time;
+			}
+			if (sDate) {
+				const cleanTime = (sTime || "12:00:00Z").trim();
+				const cleanTimeZ = cleanTime.endsWith("Z") ? cleanTime : `${cleanTime}Z`;
+				const ms = new Date(`${sDate.trim()}T${cleanTimeZ}`).getTime();
+				if (!isNaN(ms)) return ms;
+			}
+		}
+	}
+	return null;
+}
+

@@ -14,7 +14,7 @@ import { fetchMap } from "@/lib/fetchMap";
 import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { getTrackStatusMessage } from "@/lib/getTrackStatusMessage";
-import { parseUtcMs, parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
+import { parseUtcMs, parseFomClockRemaining, formatMsToClock, getScheduledSessionStartMs, formatMsToCountdownParts } from "@/lib/clockParser";
 import { isFavoriteDriver } from "@/lib/favoriteDriver";
 import {
 	createSectors,
@@ -230,8 +230,45 @@ export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: s
 		elapsedSinceChequered <= breakDurationMs + 60_000
 	);
 
+	const scheduledStartMs = getScheduledSessionStartMs(sessionInfo);
+
+	const hasActiveTiming = Boolean(
+		!isSessionTerminated &&
+		rawTiming?.Lines &&
+		Object.values(rawTiming.Lines).some((line: any) =>
+			Boolean(
+				line?.LastLapTime?.Value ||
+				line?.BestLapTime?.Value ||
+				line?.Sectors?.some((s: any) => Boolean(s?.Value))
+			)
+		)
+	);
+
+	const hasCarsOnTrack = Boolean(
+		rawTiming?.Lines &&
+		Object.values(rawTiming.Lines).some((l: any) => !l.InPit && !(isQualy && l.KnockedOut) && !l.Retired && !l.Stopped)
+	);
+
+	const hasPartStarted = Boolean(
+		hasActiveTiming ||
+		hasCarsOnTrack ||
+		(lastGreenMs && (!scheduledStartMs || lastGreenMs >= scheduledStartMs - 10 * 60 * 1000))
+	);
+
 	const isQualyBreak = Boolean(isQualy && sessionPart < 3 && allInPit && !isEnded && !isRedFlag && isChequeredActive);
 	const nextPartName = sessionPart === 1 ? "Q2" : "Q3";
+
+	// ⏳ Previa de Clasificación
+	const isPreQualy = Boolean(
+		isQualy &&
+		sessionPart === 1 &&
+		!isQualyBreak &&
+		!hasPartStarted &&
+		!isEnded
+	);
+
+	const preRemainingMs = scheduledStartMs ? Math.max(0, scheduledStartMs - (currentTime || scheduledStartMs)) : 0;
+	const preParts = formatMsToCountdownParts(preRemainingMs);
 
 	let breakTimeFormatted: string | null = null;
 	if (isQualyBreak) {
@@ -558,6 +595,59 @@ export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: s
 					<p className="text-3xl font-black text-white font-mono tracking-wider tabular-nums mt-0.5">
 						{breakTimeFormatted || "02:00"}
 					</p>
+				</div>
+			</div>
+		) : isPreQualy ? (
+			/* 📺 WIDGET OFICIAL ESTILO F1 TV BROADCAST (Attachment 2): Q1 · LAS VEGAS / CLASIFICACIÓN EMPIEZA EN / 10 MIN 59 SEG */
+			<div className="absolute top-4 right-4 pointer-events-none z-10 flex flex-col font-mono">
+				<div className="rounded-2xl border border-zinc-800/90 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur-md min-w-[14.5rem] text-center">
+					{/* Header: Q1 · LAS VEGAS */}
+					<div className="flex items-center justify-between text-xs font-black tracking-wider text-white uppercase pb-1">
+						<span>Q1 · {sessionInfo?.Meeting?.Location || sessionInfo?.Meeting?.Name?.replace("Grand Prix", "").trim() || "F1"}</span>
+						<span className="flex h-2 w-2 relative">
+							<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+							<span className="relative inline-flex rounded-full h-2 w-2 bg-red-600" />
+						</span>
+					</div>
+					{/* Red horizontal accent bar */}
+					<div className="h-[2px] w-full bg-red-600 my-1.5 rounded-full shadow-[0_0_8px_rgba(220,38,38,0.8)]" />
+
+					{/* CLASIFICACIÓN (Yellow / Gold) */}
+					<div className="text-amber-400 font-black tracking-wider text-base uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+						{language === "en" ? "QUALIFYING" : language === "pt" ? "CLASSIFICAÇÃO" : "CLASIFICACIÓN"}
+					</div>
+
+					{/* EMPIEZA EN: */}
+					<div className="text-[11px] font-extrabold tracking-widest text-zinc-300 uppercase mt-0.5">
+						{preRemainingMs > 0 ? (language === "en" ? "STARTS IN:" : language === "pt" ? "COMEÇA EM:" : "EMPIEZA EN:") : (language === "en" ? "STARTING SHORTLY" : language === "pt" ? "COMEÇANDO EM BREVE" : "INICIANDO EN BREVE")}
+					</div>
+
+					{/* Big Digital Countdown: MIN & SEG underneath */}
+					<div className="flex items-center justify-center gap-3 mt-2.5 bg-zinc-900/70 rounded-xl py-2 px-3 border border-zinc-800/80">
+						<div className="flex flex-col items-center min-w-[2.75rem]">
+							<span className="text-3xl sm:text-4xl font-black text-white font-mono tabular-nums leading-none drop-shadow">
+								{preParts.totalMinutes}
+							</span>
+							<span className="text-[9px] font-bold text-zinc-400 tracking-widest mt-1 uppercase">
+								{language === "en" ? "MIN" : "MIN"}
+							</span>
+						</div>
+						<span className="text-2xl font-black text-zinc-600 pb-3">:</span>
+						<div className="flex flex-col items-center min-w-[2.75rem]">
+							<span className="text-3xl sm:text-4xl font-black text-white font-mono tabular-nums leading-none drop-shadow">
+								{preParts.seconds}
+							</span>
+							<span className="text-[9px] font-bold text-zinc-400 tracking-widest mt-1 uppercase">
+								{language === "en" ? "SEC" : "SEG"}
+							</span>
+						</div>
+					</div>
+
+					{/* Sub-label: Monoplazas en boxes */}
+					<div className="mt-2 flex items-center justify-center gap-1.5 text-[9px] font-bold text-zinc-400 uppercase tracking-wider">
+						<span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+						<span>{t("map.cars_in_pits", "Monoplazas en Boxes")}</span>
+					</div>
 				</div>
 			</div>
 		) : allInPit && !isEnded && (

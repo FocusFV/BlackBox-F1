@@ -7,7 +7,7 @@ import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import Flag from "@/components/Flag";
 import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
-import { parseUtcMs, parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
+import { parseUtcMs, parseFomClockRemaining, formatMsToClock, getScheduledSessionStartMs } from "@/lib/clockParser";
 import { simulator } from "@/lib/simulatorFeed";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useCircuitStore } from "@/stores/useCircuitStore";
@@ -423,18 +423,59 @@ export default function SessionInfo() {
 		elapsedSinceChequered <= breakDurationMs + 60_000
 	);
 
+	const scheduledStartMs = getScheduledSessionStartMs(session);
+
+	const hasCarsOnTrack = Boolean(
+		timingData?.Lines &&
+		Object.values(timingData.Lines).some((l: any) => !l.InPit && !l.Retired && !l.Stopped)
+	);
+
+	const hasPartStarted = Boolean(
+		hasActiveTiming ||
+		hasCarsOnTrack ||
+		(lastGreenMs && (!scheduledStartMs || lastGreenMs >= scheduledStartMs - 10 * 60 * 1000))
+	);
+
+	// 🛑 Pausa entre tandas de clasificación (Q1 a Q2 o Q2 a Q3)
+	// REGLA: Solo ocurre si hubo bandera a cuadros real de la tanda anterior. NUNCA por allInPit antes de comenzar Q1.
 	const isQualyBreak = Boolean(
 		isQualy &&
 		sessionPart < 3 &&
 		!isRedFlag &&
 		session?.ArchiveStatus?.Status !== "Complete" &&
-		(isChequeredActive || sessionStatus === "Finished" || allInPit)
+		isChequeredActive
 	);
 	const nextPartName = sessionPart === 1 ? "Q2" : "Q3";
 
+	// ⏳ Previa de Clasificación o de Sesión Oficial (esperando inicio de tanda)
+	const isPreQualy = Boolean(
+		isQualy &&
+		sessionPart === 1 &&
+		!isQualyBreak &&
+		!hasPartStarted &&
+		!isSessionTerminated
+	);
+
+	const isPreSession = Boolean(
+		!isQualy &&
+		!hasPartStarted &&
+		!isSessionTerminated &&
+		scheduledStartMs &&
+		currentTime > 0 &&
+		currentTime < scheduledStartMs &&
+		!hasCarsOnTrack
+	);
+
 	let timeRemaining: string | undefined;
 
-	if (isQualyBreak) {
+	if (isPreQualy || isPreSession) {
+		const preRemainingMs = scheduledStartMs ? Math.max(0, scheduledStartMs - (currentTime || scheduledStartMs)) : 0;
+		if (preRemainingMs > 0) {
+			timeRemaining = formatMsToClock(preRemainingMs, true);
+		} else {
+			timeRemaining = "00:00";
+		}
+	} else if (isQualyBreak) {
 		// ⏱️ CUENTA REGRESIVA OFICIAL ENTRE SESIONES DE QUALY
 		const breakRemainingMs = Math.min(breakDurationMs, Math.max(0, breakDurationMs - elapsedSinceChequered));
 		timeRemaining = formatMsToClock(breakRemainingMs, true);
@@ -525,6 +566,10 @@ export default function SessionInfo() {
 							<span className="text-amber-400 font-black ml-1.5 animate-pulse">
 								• {language === "en" ? "BREAK" : language === "pt" ? "INTERVALO" : "PAUSA"} Q{sessionPart} ➔ Q{sessionPart + 1}
 							</span>
+						) : isPreQualy || isPreSession ? (
+							<span className="text-amber-400 font-black ml-1.5 animate-pulse">
+								• {language === "en" ? "PRE-SESSION" : language === "pt" ? "PRÉ-SESSÃO" : "PREVIA"}
+							</span>
 						) : null}
 					</h1>
 
@@ -547,12 +592,20 @@ export default function SessionInfo() {
 
 				{timeRemaining !== undefined ? (
 					<div className="flex items-center gap-1.5 mt-1">
-						{isQualyBreak && (
+						{isQualyBreak ? (
 							<span className="text-[10px] font-black uppercase tracking-wider text-amber-400 font-mono">
 								{nextPartName} {language === "en" ? "STARTS IN:" : language === "pt" ? "COMEÇA EM:" : "EMPIEZA EN:"}
 							</span>
-						)}
-						<p className={clsx("text-xl md:text-2xl leading-none font-black font-mono", isQualyBreak ? "text-amber-400" : "text-white")}>
+						) : isPreQualy ? (
+							<span className="text-[10px] font-black uppercase tracking-wider text-amber-400 font-mono">
+								{language === "en" ? "QUALIFYING STARTS IN:" : language === "pt" ? "CLASSIFICAÇÃO COMEÇA EM:" : "CLASIFICACIÓN EMPIEZA EN:"}
+							</span>
+						) : isPreSession ? (
+							<span className="text-[10px] font-black uppercase tracking-wider text-amber-400 font-mono">
+								{translateSessionName(session?.Name, language).toUpperCase()} {language === "en" ? "STARTS IN:" : language === "pt" ? "COMEÇA EM:" : "EMPIEZA EN:"}
+							</span>
+						) : null}
+						<p className={clsx("text-xl md:text-2xl leading-none font-black font-mono", (isQualyBreak || isPreQualy || isPreSession) ? "text-amber-400" : "text-white")}>
 							{timeRemaining}
 						</p>
 					</div>

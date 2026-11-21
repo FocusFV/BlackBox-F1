@@ -7,7 +7,8 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { useDataStore } from "@/stores/useDataStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { getTrackStatusMessage } from "@/lib/getTrackStatusMessage";
-import { parseUtcMs, parseFomClockRemaining, formatMsToClock } from "@/lib/clockParser";
+import { parseUtcMs, parseFomClockRemaining, formatMsToClock, getScheduledSessionStartMs } from "@/lib/clockParser";
+import { translateSessionName } from "@/lib/f1Translations";
 
 export default function TrackInfo() {
 	const { t, language } = useTranslation();
@@ -99,13 +100,13 @@ export default function TrackInfo() {
 		)
 	);
 
-	// Consideramos la pista activa solo si la sesión NO ha finalizado y hay actividad en pista o reloj
+	// Consideramos la pista activa si hay sesión en vivo o sesión conectada sin finalizar
 	const isTrackLive = Boolean(
 		!isRaceFinished &&
 		!isSessionTerminated &&
 		(hasActiveTiming ||
 			Boolean(clock?.Remaining) ||
-			(session && isSessionStarted))
+			Boolean(session))
 	);
 
 	// Si la carrera o sesión terminó de verdad (no en pausa entre tandas de Qualy)
@@ -180,18 +181,56 @@ export default function TrackInfo() {
 		elapsedSinceChequered <= breakDurationMs + 60_000
 	);
 
+	const scheduledStartMs = getScheduledSessionStartMs(session);
+
+	const hasCarsOnTrack = Boolean(
+		timingData?.Lines &&
+		Object.values(timingData.Lines).some((l: any) => !l.InPit && !l.Retired && !l.Stopped)
+	);
+
+	const hasPartStarted = Boolean(
+		hasActiveTiming ||
+		hasCarsOnTrack ||
+		(lastGreenMs && (!scheduledStartMs || lastGreenMs >= scheduledStartMs - 10 * 60 * 1000))
+	);
+
+	// 🛑 Pausa entre tandas de Qualy: SOLO si hubo bandera a cuadros real en la tanda anterior
 	const isQualyBreak = Boolean(
 		isQualy &&
 		sessionPart < 3 &&
 		!isRedFlag &&
 		session?.ArchiveStatus?.Status !== "Complete" &&
-		(isChequeredActive || sessionStatus === "Finished" || allInPit)
+		isChequeredActive
 	);
 	const nextPartName = sessionPart === 1 ? "Q2" : "Q3";
 
+	// ⏳ Previa de Clasificación
+	const isPreQualy = Boolean(
+		isQualy &&
+		sessionPart === 1 &&
+		!isQualyBreak &&
+		!hasPartStarted &&
+		!isSessionTerminated
+	);
+
+	const isPreSession = Boolean(
+		!isQualy &&
+		!hasPartStarted &&
+		!isSessionTerminated &&
+		scheduledStartMs &&
+		currentTime > 0 &&
+		currentTime < scheduledStartMs &&
+		!hasCarsOnTrack
+	);
+
+	const preRemainingMs = scheduledStartMs ? Math.max(0, scheduledStartMs - (currentTime || scheduledStartMs)) : 0;
+	const preCountdownStr = preRemainingMs > 0 ? formatMsToClock(preRemainingMs, true) : "00:00";
+
 	let formattedTime: string | undefined;
 
-	if (isQualyBreak) {
+	if (isPreQualy || isPreSession) {
+		formattedTime = preCountdownStr;
+	} else if (isQualyBreak) {
 		// ⏱️ PANTALLA OFICIAL ESTILO F1 TV DURANTE LA PAUSA ENTRE TANDAS
 		const breakRemainingMs = Math.min(breakDurationMs, Math.max(0, breakDurationMs - elapsedSinceChequered));
 		formattedTime = formatMsToClock(breakRemainingMs, true);
@@ -288,6 +327,38 @@ export default function TrackInfo() {
 						</span>
 						<span className="text-xl sm:text-2xl font-black text-white tracking-widest tabular-nums">
 							{formattedTime}
+						</span>
+					</div>
+				</div>
+			) : isPreQualy ? (
+				/* 🏎️ BADGE ESTILO OFICIAL F1 TV PRE-QUALY: "Q1 · LAS VEGAS / CLASIFICACIÓN EMPIEZA EN: 10:59" */
+				<div className="flex flex-col items-end justify-center rounded-xl border border-red-500/40 bg-zinc-950/95 px-3.5 py-1.5 shadow-2xl backdrop-blur-md font-mono">
+					<div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-300">
+						<span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
+						<span>Q1 · {session?.Meeting?.Location || session?.Meeting?.Name?.replace("Grand Prix", "").trim() || "F1"}</span>
+					</div>
+					<div className="flex items-baseline gap-2 mt-0.5">
+						<span className="text-[10px] font-black uppercase tracking-wider text-amber-400">
+							{language === "en" ? "QUALIFYING STARTS IN" : language === "pt" ? "CLASSIF. COMEÇA EM" : "CLASIFICACIÓN EMPIEZA EN"}
+						</span>
+						<span className="text-xl sm:text-2xl font-black text-white tracking-widest tabular-nums">
+							{preCountdownStr}
+						</span>
+					</div>
+				</div>
+			) : isPreSession ? (
+				/* 🏎️ BADGE PRE-SESIÓN OFICIAL */
+				<div className="flex flex-col items-end justify-center rounded-xl border border-amber-500/40 bg-zinc-950/95 px-3.5 py-1.5 shadow-2xl backdrop-blur-md font-mono">
+					<div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-300">
+						<span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+						<span>{translateSessionName(session?.Name, language).toUpperCase()}</span>
+					</div>
+					<div className="flex items-baseline gap-2 mt-0.5">
+						<span className="text-[10px] font-black uppercase tracking-wider text-amber-400">
+							{language === "en" ? "STARTS IN" : language === "pt" ? "COMEÇA EM" : "EMPIEZA EN"}
+						</span>
+						<span className="text-xl sm:text-2xl font-black text-white tracking-widest tabular-nums">
+							{preCountdownStr}
 						</span>
 					</div>
 				</div>
