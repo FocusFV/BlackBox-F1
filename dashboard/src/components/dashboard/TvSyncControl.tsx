@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useDataStore } from "@/stores/useDataStore";
 import { Tv, Zap, ChevronDown, ChevronUp, Plus, Minus } from "lucide-react";
 
 export function TvSyncControl() {
@@ -10,6 +11,9 @@ export function TvSyncControl() {
 	const delay = useSettingsStore((s) => s.delay);
 	const setDelay = useSettingsStore((s) => s.setDelay);
 	const isPaused = useSettingsStore((s) => s.delayIsPaused);
+	const maxDelay = useDataStore((s) => s.maxDelay);
+
+	const isBuffering = delay > 0 && delay > maxDelay;
 
 	const [isExpanded, setIsExpanded] = useState(false);
 	const [manualVal, setManualVal] = useState<string>("");
@@ -35,9 +39,13 @@ export function TvSyncControl() {
 					className="flex items-center gap-1.5 px-2 py-1 text-zinc-300 hover:text-white transition-colors"
 					title={t("tv_sync.title", "Sincronizar con la TV")}
 				>
-					<Tv className="h-3.5 w-3.5 text-amber-400" />
-					<span className="font-semibold">
-						{delay === 0 ? t("tv_sync.live_zero", "En Vivo (0s)") : `TV Sync: +${delay}s`}
+					<Tv className={`h-3.5 w-3.5 ${isBuffering ? "text-amber-400 animate-pulse" : "text-amber-400"}`} />
+					<span className={`font-semibold ${isBuffering ? "text-amber-300" : ""}`}>
+						{delay === 0
+							? t("tv_sync.live_zero", "En Vivo (0s)")
+							: isBuffering
+								? `TV Sync: +${delay}s (${maxDelay}s/${delay}s)`
+								: `TV Sync: +${delay}s`}
 					</span>
 					{isExpanded ? (
 						<ChevronUp className="h-3 w-3 text-zinc-500" />

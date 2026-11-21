@@ -13,6 +13,7 @@ import { useDataStore } from "@/stores/useDataStore";
 
 import { useBuffer } from "@/hooks/useBuffer";
 import { useStatefulBuffer } from "@/hooks/useStatefulBuffer";
+import { saveBuffersToStorage, restoreBuffersFromStorage, clearBufferStorage } from "@/lib/bufferStorage";
 
 const UPDATE_MS = 200;
 
@@ -61,6 +62,35 @@ export const useDataEngine = ({ updateState, updatePosition, updateCarData }: Pr
 
 	const intervalRef = useRef<NodeJS.Timeout | null>(null);
 	const sessionKeyRef = useRef<string | number | null>(null);
+
+	// 🛰️ Intentar restaurar búfer persistido al montar (para que F5 no empiece en 0s)
+	useEffect(() => {
+		const restored = restoreBuffersFromStorage(buffers, carBuffer, posBuffer, sessionKeyRef.current);
+		if (restored) {
+			const delays = Object.values(buffers).map((b) => b.maxDelay()).filter((d) => d > 0);
+			const initialMax = delays.length > 0 ? Math.min(...delays) : 0;
+			if (initialMax > 0) {
+				setMaxDelay(initialMax);
+				useDataStore.getState().setMaxDelay(initialMax);
+			}
+		}
+
+		const handleSave = () => {
+			saveBuffersToStorage(buffers, carBuffer, posBuffer, sessionKeyRef.current);
+		};
+
+		window.addEventListener("pagehide", handleSave);
+		window.addEventListener("beforeunload", handleSave);
+
+		const saveTimer = setInterval(handleSave, 3000);
+
+		return () => {
+			window.removeEventListener("pagehide", handleSave);
+			window.removeEventListener("beforeunload", handleSave);
+			clearInterval(saveTimer);
+		};
+	}, []);
+
 
 	const handleInitial = (payload: any) => {
 		// 🛠️ Mapeo inteligente para capturar CarData.z o CarDataZ indistintamente
@@ -117,6 +147,7 @@ export const useDataEngine = ({ updateState, updatePosition, updateCarData }: Pr
 					`[DataEngine] 🔄 Cambio de sesión detectado (${sessionKeyRef.current} -> ${newKey}). Purgando sesión anterior...`
 				);
 				sessionKeyRef.current = newKey;
+				clearBufferStorage();
 				Object.values(buffers).forEach((b) => b.reset());
 				useDataStore.getState().resetSession();
 			} else if (newKey && !sessionKeyRef.current) {
@@ -214,13 +245,13 @@ export const useDataEngine = ({ updateState, updatePosition, updateCarData }: Pr
         }
     }
 
-    const maxDelay = Math.min(
-        ...Object.values(buffers)
-            .map((buffer) => buffer.maxDelay())
-            .filter((delay) => delay > 0),
-    );
+    const delays = Object.values(buffers)
+        .map((buffer) => buffer.maxDelay())
+        .filter((delay) => delay > 0);
+    const calculatedMax = delays.length > 0 ? Math.min(...delays) : 0;
 
-    setMaxDelay(maxDelay);
+    setMaxDelay(calculatedMax);
+    useDataStore.getState().setMaxDelay(calculatedMax);
 };
 
 	useEffect(() => {

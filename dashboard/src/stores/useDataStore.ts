@@ -5,10 +5,12 @@ type DataStore = {
 	state: State | null;
 	carsData: CarsData | null;
 	positions: Positions | null;
+	maxDelay: number;
 
 	setState: (state: Partial<State> | null) => void;
 	setCarsData: (carsData: CarsData | null) => void;
 	setPositions: (positions: Positions | null) => void;
+	setMaxDelay: (maxDelay: number) => void;
 	resetSession: () => void;
 };
 
@@ -16,12 +18,14 @@ export const useDataStore = create<DataStore>((set) => ({
 	state: null,
 	carsData: null,
 	positions: null,
+	maxDelay: 0,
 
 	resetSession: () =>
 		set({
 			state: null,
 			carsData: null,
 			positions: null,
+			maxDelay: 0,
 		}),
 
 	setState: (partialState) =>
@@ -43,4 +47,5 @@ export const useDataStore = create<DataStore>((set) => ({
 
 	setCarsData: (carsData) => set({ carsData }),
 	setPositions: (positions) => set({ positions }),
+	setMaxDelay: (maxDelay) => set({ maxDelay }),
 }));

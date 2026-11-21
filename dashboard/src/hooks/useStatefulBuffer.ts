@@ -21,6 +21,14 @@ export const useStatefulBuffer = <T>() => {
 		if (val) buffer.push(val);
 	};
 
+	const getFrames = buffer.getFrames;
+
+	const loadFrames = (frames: any[]) => {
+		buffer.loadFrames(frames);
+		const latest = buffer.latest();
+		if (latest) currentRef.current = latest;
+	};
+
 	return {
 		push,
 		reset,
@@ -28,5 +36,7 @@ export const useStatefulBuffer = <T>() => {
 		delayed: buffer.delayed,
 		cleanup: buffer.cleanup,
 		maxDelay: buffer.maxDelay,
+		getFrames,
+		loadFrames,
 	};
 };

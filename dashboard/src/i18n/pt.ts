@@ -102,6 +102,7 @@ export const pt: TranslationDictionary = {
 		total_laps_session: "Voltas Totais na Sessão",
 		laps_unit: "Voltas",
 		live_direct: "Ver ao vivo direto (0s de espera)",
+		continue_to_dashboard: "Continuar para o Painel (Sincronizar de fundo)",
 		current_gear: "Marcha atual",
 	},
 	parc_ferme: {

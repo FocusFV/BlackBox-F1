@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { useDataEngine } from '@/hooks/useDataEngine';
@@ -25,6 +25,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import AdSlot from '@/components/ads/AdSlot';
 import { env } from '@/env';
 import { Radio } from 'lucide-react';
+import { isSyncModalDismissed, setSyncModalDismissed } from '@/lib/bufferStorage';
 
 type Props = {
 	children: ReactNode;
@@ -38,7 +39,16 @@ export default function DashboardLayout({ children }: Props) {
 
 	const delay = useSettingsStore((state) => state.delay);
 	const setDelay = useSettingsStore((state) => state.setDelay);
-	const syncing = delay > maxDelay;
+
+	const [isDismissed, setIsDismissed] = useState<boolean>(false);
+
+	useEffect(() => {
+		setIsDismissed(isSyncModalDismissed());
+	}, []);
+
+	// Sincronizando con TV: solo bloquea si el búfer aún no alcanzó el retraso Y el usuario no pidió explícitamente continuar
+	const isBufferSyncing = delay > maxDelay;
+	const syncing = isBufferSyncing && !isDismissed;
 
 	useWakeLock();
 
@@ -97,16 +107,37 @@ export default function DashboardLayout({ children }: Props) {
 						</div>
 
 						<div className="flex flex-col w-full gap-2.5">
+							{/* 🚀 BOTÓN PRINCIPAL: Continuar al dashboard de inmediato SIN BORRAR el delay calibrado */}
 							<button
-								onClick={() => setDelay(0)}
-								className="w-full py-2.5 px-4 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/60 rounded-xl text-emerald-400 text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+								type="button"
+								onClick={() => {
+									setIsDismissed(true);
+									setSyncModalDismissed(true);
+								}}
+								className="w-full py-2.5 px-4 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 hover:border-amber-500/80 rounded-xl text-amber-300 text-xs font-black uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center gap-2 shadow-lg"
+							>
+								<span>{t("telemetry.continue_to_dashboard", "Continuar al Panel (Sincronizar de fondo)")}</span>
+								<span className="text-amber-400 font-bold">➔</span>
+							</button>
+
+							<button
+								onClick={() => {
+									setDelay(0);
+									setIsDismissed(false);
+									setSyncModalDismissed(false);
+								}}
+								className="w-full py-2 px-4 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 rounded-xl text-zinc-400 hover:text-zinc-200 text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center gap-2"
 							>
 								{t("telemetry.live_direct", "Ver en vivo directo (0s de espera)")}
 							</button>
 
 							{maxDelay > 0 && (
 								<button
-									onClick={() => setDelay(maxDelay)}
+									onClick={() => {
+										setDelay(maxDelay);
+										setIsDismissed(false);
+										setSyncModalDismissed(false);
+									}}
 									className="text-zinc-500 hover:text-zinc-300 text-[11px] font-sans underline transition-colors cursor-pointer py-1"
 								>
 									{t("tv_sync.use_available_buffer", "Usar retraso disponible de {maxDelay}s sin esperar").replace("{maxDelay}", String(maxDelay))}

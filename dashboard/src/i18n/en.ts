@@ -102,6 +102,7 @@ export const en: TranslationDictionary = {
 		total_laps_session: "Total Session Laps",
 		laps_unit: "Laps",
 		live_direct: "Watch direct live (0s buffer)",
+		continue_to_dashboard: "Continue to Dashboard (Sync in background)",
 		current_gear: "Current gear",
 	},
 	parc_ferme: {

@@ -88,6 +88,14 @@ export const useBuffer = <T>() => {
 		return bufferRef.current.length > 0 ? Math.floor((Date.now() - bufferRef.current[0].timestamp) / 1000) : 0;
 	};
 
+	const getFrames = (): Frame<T>[] => bufferRef.current;
+
+	const loadFrames = (frames: Frame<T>[]) => {
+		if (Array.isArray(frames) && frames.length > 0) {
+			bufferRef.current = frames;
+		}
+	};
+
 	return {
 		push,
 		pushTimed,
@@ -95,5 +103,7 @@ export const useBuffer = <T>() => {
 		delayed,
 		cleanup,
 		maxDelay,
+		getFrames,
+		loadFrames,
 	};
 };

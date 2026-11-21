@@ -79,6 +79,7 @@ export interface TranslationDictionary {
 		syncing_desc: string;
 		time_remaining: string;
 		live_direct: string;
+		continue_to_dashboard: string;
 		f1_qualifying: string;
 		time_label: string;
 		starts_in: string;
