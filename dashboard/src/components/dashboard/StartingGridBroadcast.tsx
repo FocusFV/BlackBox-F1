@@ -217,6 +217,17 @@ export const StartingGridBroadcast: React.FC<StartingGridBroadcastProps> = ({
 }) => {
 	const openDriverModal = useDriverModalStore((state) => state.open);
 
+	const handleDriverSelect = (driver: DriverResult) => {
+		openDriverModal({
+			driverCode: driver.code,
+			code: driver.code,
+			name: driver.name,
+			teamName: driver.team,
+			driverId: driver.code?.toLowerCase(),
+		});
+		triggerHaptic("light");
+	};
+
 	const sorted = [...gridResults].sort((a, b) => {
 		const posA = a.gridPos ?? parseInt(a.pos, 10) ?? 99;
 		const posB = b.gridPos ?? parseInt(b.pos, 10) ?? 99;
@@ -304,24 +315,26 @@ export const StartingGridBroadcast: React.FC<StartingGridBroadcastProps> = ({
 					</div>
 				</div>
 
-				{/* ================= 2 COLUMNAS ESCALONADAS (FORMATO F1 GRID) ================= */}
-				<div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5 md:gap-4 items-start">
+				{/* ================= VISTA MOBILE (< sm): LISTA SECUENCIAL 1, 2, 3, 4, 5... ================= */}
+				<div className="flex flex-col gap-2.5 sm:hidden">
+					{sorted.map((driver) => (
+						<BroadcastCard
+							key={`mobile-${driver.number}-${driver.pos}`}
+							driver={driver}
+							onSelect={() => handleDriverSelect(driver)}
+						/>
+					))}
+				</div>
+
+				{/* ================= VISTA DESKTOP / TABLET (>= sm): 2 COLUMNAS ESCALONADAS F1 ================= */}
+				<div className="hidden sm:grid sm:grid-cols-2 gap-3 sm:gap-3.5 md:gap-4 items-start">
 					{/* COLUMNA IZQUIERDA (P1, P3, P5, P7, P9, P11, P13, P15, P17, P19, P21) */}
 					<div className="flex flex-col gap-2.5 sm:gap-3">
 						{leftColumn.map((driver) => (
 							<BroadcastCard
 								key={`left-${driver.number}-${driver.pos}`}
 								driver={driver}
-								onSelect={() => {
-									openDriverModal({
-										driverCode: driver.code,
-										code: driver.code,
-										name: driver.name,
-										teamName: driver.team,
-										driverId: driver.code?.toLowerCase(),
-									});
-									triggerHaptic("light");
-								}}
+								onSelect={() => handleDriverSelect(driver)}
 							/>
 						))}
 					</div>
@@ -332,16 +345,7 @@ export const StartingGridBroadcast: React.FC<StartingGridBroadcastProps> = ({
 							<BroadcastCard
 								key={`right-${driver.number}-${driver.pos}`}
 								driver={driver}
-								onSelect={() => {
-									openDriverModal({
-										driverCode: driver.code,
-										code: driver.code,
-										name: driver.name,
-										teamName: driver.team,
-										driverId: driver.code?.toLowerCase(),
-									});
-									triggerHaptic("light");
-								}}
+								onSelect={() => handleDriverSelect(driver)}
 							/>
 						))}
 					</div>
