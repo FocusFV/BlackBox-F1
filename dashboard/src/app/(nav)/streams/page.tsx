@@ -572,7 +572,10 @@ export default function StreamsPage() {
 								}`}
 							>
 								<img src="/fox.png" alt="Fox Sports" className="h-10 w-auto max-w-[85%] object-contain" />
-								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">🇦🇷 Fox Sports AR</span>
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto flex items-center justify-center gap-1.5">
+									<img src="/country-flags/ar.png" alt="AR" className="w-3.5 h-auto rounded-xs object-cover shadow-xs shrink-0" />
+									<span>Fox Sports AR</span>
+								</span>
 							</button>
 
 							{/* CANAL DISNEY */}
@@ -585,7 +588,10 @@ export default function StreamsPage() {
 								}`}
 							>
 								<img src="/disney.png" alt="Disney+" className="h-10 w-auto max-w-[85%] object-contain" />
-								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">🇦🇷 Disney +</span>
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto flex items-center justify-center gap-1.5">
+									<img src="/country-flags/ar.png" alt="AR" className="w-3.5 h-auto rounded-xs object-cover shadow-xs shrink-0" />
+									<span>Disney +</span>
+								</span>
 							</button>
 
 							{/* CANAL DAZN F1 */}
@@ -598,7 +604,10 @@ export default function StreamsPage() {
 								}`}
 							>
 								<img src="/dazn.png" alt="DAZN F1" className="h-10 w-auto max-w-[85%] object-contain" />
-								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">🇪🇸 DAZN F1</span>
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto flex items-center justify-center gap-1.5">
+									<img src="/country-flags/es.png" alt="ES" className="w-3.5 h-auto rounded-xs object-cover shadow-xs shrink-0" />
+									<span>DAZN F1</span>
+								</span>
 							</button>
 
 							{/* CANAL F1 TV (OFICIAL 1080P) */}
@@ -611,7 +620,12 @@ export default function StreamsPage() {
 								}`}
 							>
 								<img src="/f1tv.png" alt="F1 TV" className="h-10 w-auto max-w-[85%] object-contain" />
-								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">🇬🇧 🇪🇸 F1 TV (1080p)</span>
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto flex items-center justify-center gap-1">
+									<img src="/country-flags/gb.png" alt="GB" className="w-3.5 h-auto rounded-xs object-cover shadow-xs shrink-0" />
+									<span className="text-zinc-500 font-normal">/</span>
+									<img src="/country-flags/es.png" alt="ES" className="w-3.5 h-auto rounded-xs object-cover shadow-xs shrink-0" />
+									<span>F1 TV (1080p)</span>
+								</span>
 							</button>
 
 							{/* ONBOARD COLAPINTO */}
@@ -624,7 +638,10 @@ export default function StreamsPage() {
 								}`}
 							>
 								<img src="/colapinto.png" alt="Colapinto" className="h-10 w-auto max-w-[85%] object-contain rounded-sm" />
-								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">🇦🇷 Onboard Colapinto</span>
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto flex items-center justify-center gap-1.5">
+									<img src="/country-flags/ar.png" alt="AR" className="w-3.5 h-auto rounded-xs object-cover shadow-xs shrink-0" />
+									<span>Onboard Colapinto</span>
+								</span>
 							</button>
 
 							{/* GENERAL */}
@@ -637,7 +654,10 @@ export default function StreamsPage() {
 								}`}
 							>
 								<img src="/onboard.png" alt="General" className="h-10 w-auto max-w-[85%] object-contain" />
-								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">🇦🇷 General</span>
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto flex items-center justify-center gap-1.5">
+									<img src="/country-flags/ar.png" alt="AR" className="w-3.5 h-auto rounded-xs object-cover shadow-xs shrink-0" />
+									<span>General</span>
+								</span>
 							</button>
 
 							{/* SPORTV 3 */}
@@ -650,7 +670,10 @@ export default function StreamsPage() {
 								}`}
 							>
 								<img src="/sportv.png" alt="SporTV" className="h-10 w-auto max-w-[85%] object-contain" />
-								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">🇧🇷 SporTV 3 (Portugués)</span>
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto flex items-center justify-center gap-1.5">
+									<img src="/country-flags/br.png" alt="BR" className="w-3.5 h-auto rounded-xs object-cover shadow-xs shrink-0" />
+									<span>SporTV 3</span>
+								</span>
 							</button>
 						</div>
 
