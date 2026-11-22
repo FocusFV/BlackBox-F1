@@ -207,14 +207,15 @@ export default function DriverProfileModal() {
 	const countryCode = officialData?.countryCode || driver?.countryCode || "br";
 	const avatarUrl = getDriverAvatarUrl(driverCode, driverId);
 
-	const standingPos = driver?.position || officialData?.pos || "1";
-	const standingPoints = officialData?.points || driver?.points || "0";
+	const standingPos = officialData?.pos || (driver?.sessionType === "standings" ? driver?.position : null) || null;
+	const standingPoints = officialData?.points || (driver?.sessionType === "standings" ? driver?.points : null) || "0";
 
 	const [activeTab, setActiveTab] = useState<"telemetry" | "season">("telemetry");
 
 	const driversList = useDataStore((state) => state.state?.DriverList);
 	const timingLines = useDataStore((state) => state.state?.TimingData?.Lines);
 	const appTimingLines = useDataStore((state) => state.state?.TimingAppData?.Lines);
+	const timingStats = useDataStore((state) => state.state?.TimingStats?.Lines);
 	const carsDataStore = useDataStore((state) => state.carsData);
 
 	// Buscar el número de carrera oficial del piloto por su código TLA
@@ -230,6 +231,7 @@ export default function DriverProfileModal() {
 
 	const timingDriver = resolvedRacingNumber && timingLines ? timingLines[resolvedRacingNumber] : null;
 	const appTiming = resolvedRacingNumber && appTimingLines ? appTimingLines[resolvedRacingNumber] : null;
+	const driverStats = resolvedRacingNumber && timingStats ? timingStats[resolvedRacingNumber] : null;
 	const carChannels = resolvedRacingNumber && carsDataStore ? carsDataStore[resolvedRacingNumber]?.Channels : null;
 
 	const sessionTotalLaps =
@@ -427,19 +429,56 @@ export default function DriverProfileModal() {
 		return null;
 	};
 
-	const rawS1 = timingDriver?.Sectors?.[0]?.Value;
-	const rawS2 = timingDriver?.Sectors?.[1]?.Value;
-	let rawS3 = timingDriver?.Sectors?.[2]?.Value;
+	// 5. Lectura robusta y validación física de Sectores
+	const rawS1 =
+		timingDriver?.Sectors?.[0]?.Value ||
+		timingDriver?.Sectors?.[0]?.PreviousValue ||
+		driverStats?.BestSectors?.[0]?.Value ||
+		"-";
 
-	if ((!rawS3 || rawS3 === "-" || rawS3.trim() === "") && rawS1 && rawS2) {
+	const rawS2 =
+		timingDriver?.Sectors?.[1]?.Value ||
+		timingDriver?.Sectors?.[1]?.PreviousValue ||
+		driverStats?.BestSectors?.[1]?.Value ||
+		"-";
+
+	let rawS3 =
+		timingDriver?.Sectors?.[2]?.Value ||
+		timingDriver?.Sectors?.[2]?.PreviousValue ||
+		driverStats?.BestSectors?.[2]?.Value ||
+		"-";
+
+	// Solo calcular S3 matemáticamente si no está disponible, S1 y S2 son válidos,
+	// y la vuelta de referencia es una vuelta rápida representativa (BestLapTime).
+	// NUNCA calcular sobre in-laps / vueltas lentas de enfriamiento.
+	if ((!rawS3 || rawS3 === "-" || rawS3.trim() === "") && rawS1 !== "-" && rawS2 !== "-") {
 		const s1Sec = parseTimeToSeconds(rawS1);
 		const s2Sec = parseTimeToSeconds(rawS2);
-		const refLapStr = timingDriver?.BestLapTime?.Value || timingDriver?.LastLapTime?.Value;
-		const lapSec = parseTimeToSeconds(refLapStr);
+		const bestLapSec = parseTimeToSeconds(timingDriver?.BestLapTime?.Value || driverStats?.PersonalBestLapTime?.Value);
+		const lastLapSec = parseTimeToSeconds(timingDriver?.LastLapTime?.Value);
 
-		if (s1Sec !== null && s2Sec !== null && lapSec !== null && lapSec > (s1Sec + s2Sec)) {
-			const s3Calc = lapSec - (s1Sec + s2Sec);
-			if (s3Calc > 5 && s3Calc < 80) {
+		// Priorizar siempre la mejor vuelta rápida (BestLapTime).
+		// Solo permitir LastLapTime si no hay BestLapTime y LastLapTime es una vuelta competitiva (< 115s).
+		let refLapSec: number | null = null;
+		if (bestLapSec !== null && bestLapSec >= 60 && bestLapSec <= 130) {
+			refLapSec = bestLapSec;
+		} else if (lastLapSec !== null && lastLapSec >= 60 && lastLapSec <= 115) {
+			refLapSec = lastLapSec;
+		}
+
+		if (
+			s1Sec !== null &&
+			s2Sec !== null &&
+			refLapSec !== null &&
+			s1Sec >= 15 && s1Sec <= 45 &&
+			s2Sec >= 15 && s2Sec <= 55 &&
+			refLapSec > (s1Sec + s2Sec)
+		) {
+			const s3Calc = refLapSec - (s1Sec + s2Sec);
+			// Verificación física estricta de F1:
+			// Un Sector 3 en circuitos modernos (y especialmente Las Vegas) debe estar entre 18.0s y 42.0s.
+			// Descarta cálculos absurdos como 11.5s o 57s.
+			if (s3Calc >= 18.0 && s3Calc <= 42.0) {
 				rawS3 = s3Calc.toFixed(3);
 			}
 		}
@@ -615,7 +654,7 @@ export default function DriverProfileModal() {
 						)}
 
 						{/* TIEMPOS DE VUELTA Y SECTORES */}
-						{timingDriver && (
+						{(timingDriver || driverStats) && (
 							<div className="p-3 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 flex flex-col gap-2 font-mono">
 								<span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-800/60 pb-1.5">
 									{t("modals.sectors_and_laps", "SECTORES & VUELTAS")}
@@ -638,11 +677,11 @@ export default function DriverProfileModal() {
 								<div className="grid grid-cols-2 gap-2 text-center pt-1">
 									<div className="p-2 rounded-xl bg-zinc-950/60 border border-zinc-900">
 										<span className="text-[9px] text-zinc-500 block uppercase">{t("modals.h2h_last_lap", "Última Vuelta")}</span>
-										<span className="text-sm font-black text-zinc-200">{timingDriver.LastLapTime?.Value || "-"}</span>
+										<span className="text-sm font-black text-zinc-200">{timingDriver?.LastLapTime?.Value || "-"}</span>
 									</div>
 									<div className="p-2 rounded-xl bg-zinc-950/60 border border-zinc-900">
 										<span className="text-[9px] text-zinc-500 block uppercase">{t("modals.h2h_best_lap", "Mejor Vuelta")}</span>
-										<span className="text-sm font-black text-purple-400">{timingDriver.BestLapTime?.Value || "-"}</span>
+										<span className="text-sm font-black text-purple-400">{timingDriver?.BestLapTime?.Value || driverStats?.PersonalBestLapTime?.Value || "-"}</span>
 									</div>
 								</div>
 							</div>
