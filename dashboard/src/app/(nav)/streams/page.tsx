@@ -135,9 +135,9 @@ export default function StreamsPage() {
 			{ label: "Servidor 6 (Respaldo)", token: "aHR0cHM6Ly9sYTE4aGQuc3Uvdml2by9jYW5hbGVzLnBocD9zdHJlYW09Zm94c3BvcnRz" },
 		],
 		DISNEY: [
-			{ label: "Servidor 1 (StreamXHD .sbs)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGlzbmV5MTA=" },
-			{ label: "Servidor 2 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXkxMA==" },
-			{ label: "Servidor 3 (StreamXHD .click)", token: "aHR0cHM6Ly9zdHJlYW14aGQuY2xpY2svbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXkxMA==" },
+			{ label: "Servidor 1 (StreamXHD .sbs)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGlzbmV5NA==" },
+			{ label: "Servidor 2 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXk0" },
+			{ label: "Servidor 3 (StreamXHD .click)", token: "aHR0cHM6Ly9zdHJlYW14aGQuY2xpY2svbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXk0" },
 			{ label: "Servidor 4 (StreamTP)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRpc25leTg=" },
 			{ label: "Servidor 5 (DaddyLive)", token: "aHR0cHM6Ly9kYWRkeWxpdmUubW92L3BsYXllci9lbWJlZC5waHA/aWQ9ZDM0Yjg=" },
 		],
@@ -153,15 +153,19 @@ export default function StreamsPage() {
 			{ label: "Servidor 2 (DaddyLive F1)", token: "aHR0cHM6Ly90aGVkYWRkeS5way9zdHJlYW0vc3RyZWFtLTc4Ny5waHA=" },
 		],
 		COLAPINTO: [
-			{ label: "Servidor Principal (StreamXHD)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGlzbmV5MjU=" },
+			{ label: "Servidor 1 (StreamXHD .sbs)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGlzbmV5Ng==" },
+			{ label: "Servidor 2 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXk2" },
+			{ label: "Servidor 3 (StreamXHD .click)", token: "aHR0cHM6Ly9zdHJlYW14aGQuY2xpY2svbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXk2" },
 		],
 		GENERAL: [
-			{ label: "Servidor 1 (StreamXHD .sbs)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZXNwbjI=" },
-			{ label: "Servidor 2 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1lc3BuMg==" },
-			{ label: "Servidor 3 (StreamXHD .click)", token: "aHR0cHM6Ly9zdHJlYW14aGQuY2xpY2svbGl2ZTEucGhwP3N0cmVhbT1lc3BuMg==" },
-			{ label: "Servidor 4 (StreamTP)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWVzcG4y" },
-			{ label: "Servidor 5 (HD)", token: "aHR0cHM6Ly90dmY5MC5jb20vaGQucGhwP3N0cmVhbT1lc3BuMg==" },
-			{ label: "Servidor 6 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/Y2hhbm5lbD1lc3BuMg==" },
+			{ label: "ESPN 2", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZXNwbjI=" },
+			{ label: "Race Hub", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGlzbmV5NQ==" },
+			{ label: "Cámara On Board", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGlzbmV5OA==" },
+		],
+		SPORTV: [
+			{ label: "Servidor 1 (StreamXHD .sbs)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09c3BvcnR0dmJyMw==" },
+			{ label: "Servidor 2 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1zcG9ydHR2YnIz" },
+			{ label: "Servidor 3 (StreamXHD .click)", token: "aHR0cHM6Ly9zdHJlYW14aGQuY2xpY2svbGl2ZTEucGhwP3N0cmVhbT1zcG9ydHR2YnIz" },
 		],
 	};
 
@@ -557,7 +561,7 @@ export default function StreamsPage() {
 						</div>
 
 						{/* PARRILLA DE CANALES (GRID DE ACCESO DIRECTO CON DISEÑO PREMIUM) */}
-						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-6">
+						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
 							{/* CANAL FOX */}
 							<button
 								onClick={() => handleTabSelect("FOX")}
@@ -568,7 +572,7 @@ export default function StreamsPage() {
 								}`}
 							>
 								<img src="/fox.png" alt="Fox Sports" className="h-10 w-auto max-w-[85%] object-contain" />
-								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">Fox Sports AR</span>
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">🇦🇷 Fox Sports AR</span>
 							</button>
 
 							{/* CANAL DISNEY */}
@@ -581,7 +585,7 @@ export default function StreamsPage() {
 								}`}
 							>
 								<img src="/disney.png" alt="Disney+" className="h-10 w-auto max-w-[85%] object-contain" />
-								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">Disney +</span>
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">🇦🇷 Disney +</span>
 							</button>
 
 							{/* CANAL DAZN F1 */}
@@ -594,7 +598,7 @@ export default function StreamsPage() {
 								}`}
 							>
 								<img src="/dazn.png" alt="DAZN F1" className="h-10 w-auto max-w-[85%] object-contain" />
-								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">DAZN F1</span>
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">🇪🇸 DAZN F1</span>
 							</button>
 
 							{/* CANAL F1 TV (OFICIAL 1080P) */}
@@ -607,7 +611,7 @@ export default function StreamsPage() {
 								}`}
 							>
 								<img src="/f1tv.png" alt="F1 TV" className="h-10 w-auto max-w-[85%] object-contain" />
-								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">F1 TV (1080p)</span>
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">🇬🇧 🇪🇸 F1 TV (1080p)</span>
 							</button>
 
 							{/* ONBOARD COLAPINTO */}
@@ -623,7 +627,7 @@ export default function StreamsPage() {
 								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">🇦🇷 Onboard Colapinto</span>
 							</button>
 
-							{/* GENERAL / ESPN 2 */}
+							{/* GENERAL */}
 							<button
 								onClick={() => handleTabSelect("GENERAL")}
 								className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 cursor-pointer ${
@@ -633,7 +637,20 @@ export default function StreamsPage() {
 								}`}
 							>
 								<img src="/onboard.png" alt="General" className="h-10 w-auto max-w-[85%] object-contain" />
-								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">ESPN 2 / General</span>
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">🇦🇷 General</span>
+							</button>
+
+							{/* SPORTV 3 */}
+							<button
+								onClick={() => handleTabSelect("SPORTV")}
+								className={`flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-300 h-28 gap-2 cursor-pointer ${
+									activeTab === "SPORTV"
+										? "text-white border-green-500 shadow-[0_10px_25px_rgba(34,197,94,0.3)] animate-pulse"
+										: "bg-zinc-950/60 text-zinc-400 border-zinc-900 hover:border-green-900"
+								}`}
+							>
+								<img src="/sportv.png" alt="SporTV" className="h-10 w-auto max-w-[85%] object-contain" />
+								<span className="font-black text-[10px] uppercase tracking-widest text-center mt-auto">🇧🇷 SporTV 3 (Portugués)</span>
 							</button>
 						</div>
 
