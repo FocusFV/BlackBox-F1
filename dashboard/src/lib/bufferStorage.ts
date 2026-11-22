@@ -53,20 +53,7 @@ export function saveBuffersToStorage(
 			}
 		}
 
-		// 2. Guardar posiciones y telemetría de coches (muestreado para no saturar los 5MB de sessionStorage)
-		if (typeof carBuffer?.getFrames === "function") {
-			const carFrames = carBuffer.getFrames();
-			if (Array.isArray(carFrames) && carFrames.length > 0) {
-				payload.carFrames = carFrames.filter((f) => f && f.timestamp >= cutoff);
-			}
-		}
-
-		if (typeof posBuffer?.getFrames === "function") {
-			const posFrames = posBuffer.getFrames();
-			if (Array.isArray(posFrames) && posFrames.length > 0) {
-				payload.posFrames = posFrames.filter((f) => f && f.timestamp >= cutoff);
-			}
-		}
+		// 2. Telemetría de coches y GPS se omiten de sessionStorage para evitar QuotaExceeded y bloqueos de CPU (se reconectan vía SSE de inmediato)
 
 		try {
 			sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));

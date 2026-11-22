@@ -131,13 +131,10 @@ export default function Map({ filter, circuitKey: propCircuitKey }: { filter?: s
 
 	useEffect(() => {
 		setCurrentTime(Date.now());
-		let animId: number;
-		const loop = () => {
+		const timer = setInterval(() => {
 			setCurrentTime(Date.now());
-			animId = requestAnimationFrame(loop);
-		};
-		animId = requestAnimationFrame(loop);
-		return () => cancelAnimationFrame(animId);
+		}, 1000);
+		return () => clearInterval(timer);
 	}, []);
 
 	const isRaceOrSprint = Boolean(

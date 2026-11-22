@@ -58,7 +58,7 @@ export default function DashboardLayout({ children }: Props) {
 		<div className="flex h-[calc(100dvh-4rem)] w-full md:pt-2 md:pr-2 md:pb-2">
 			<Sidebar key="sidebar" connected={connected} />
 
-			<motion.div layout="size" className="flex h-full w-full flex-1 flex-col md:gap-2">
+			<div className="flex h-full w-full flex-1 flex-col md:gap-2">
 				<DesktopStaticBar show={!syncing || ended} />
 				<MobileStaticBar show={!syncing || ended} connected={connected} />
 
@@ -146,7 +146,7 @@ export default function DashboardLayout({ children }: Props) {
 						</div>
 					</div>
 				</div>
-			</motion.div>
+			</div>
 
 			{/* 📢 Mobile Sticky Bottom Bar (320x50) - Con botón de cierre para no molestar */}
 			<div className="fixed bottom-0 inset-x-0 z-40 flex justify-center items-center md:hidden pb-1 pointer-events-none">

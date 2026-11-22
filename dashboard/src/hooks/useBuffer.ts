@@ -1,6 +1,7 @@
 import { useRef } from "react";
 
 const KEEP_BUFFER_SECS = 5;
+const MAX_BUFFER_FRAMES = 1200; // Máximo ~4-5 minutos de buffer rodante (evita fugas de memoria en carreras largas)
 
 type Frame<T> = {
 	data: T;
@@ -12,12 +13,18 @@ export const useBuffer = <T>() => {
 
 	const push = (update: T) => {
 		bufferRef.current.push({ data: update, timestamp: Date.now() });
+		if (bufferRef.current.length > MAX_BUFFER_FRAMES) {
+			bufferRef.current = bufferRef.current.slice(-MAX_BUFFER_FRAMES);
+		}
 	};
 
 	const pushTimed = (update: T, timestamp: number) => {
 		if (!Number.isFinite(timestamp) || timestamp < 0) return;
 
 		bufferRef.current.push({ data: update, timestamp });
+		if (bufferRef.current.length > MAX_BUFFER_FRAMES) {
+			bufferRef.current = bufferRef.current.slice(-MAX_BUFFER_FRAMES);
+		}
 	};
 
 	const latest = (): T | null => {

@@ -65,9 +65,25 @@ export function YouTubeFeed() {
 
 	if (loading) {
 		return (
-			<div className="h-36 flex flex-col items-center justify-center gap-2 text-zinc-500 font-mono text-xs uppercase tracking-widest animate-pulse w-full rounded-2xl bg-zinc-950/40 border border-zinc-900 mt-6">
-				<span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-				Cargando resúmenes oficiales de YouTube...
+			<div className="w-full px-1 mt-6 relative group/feed">
+				<div className="flex items-center justify-between mb-3 px-1 select-none">
+					<div className="flex items-center gap-2.5">
+						<span className="w-2.5 h-2.5 rounded-full bg-amber-500/40 animate-pulse" />
+						<div className="h-4 w-48 sm:w-64 rounded bg-zinc-800/60 animate-pulse" />
+					</div>
+					<div className="h-3 w-28 rounded bg-zinc-800/40 hidden sm:block animate-pulse" />
+				</div>
+				<div className="flex gap-4 overflow-hidden pb-3 w-full">
+					{[0, 1, 2].map((i) => (
+						<div
+							key={i}
+							className="flex-shrink-0 w-[calc(100%-2rem)] sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-0.75rem)] aspect-video rounded-xl bg-zinc-950/60 border border-zinc-900/80 p-4 flex flex-col justify-between animate-pulse"
+						>
+							<div className="w-24 h-5 rounded bg-zinc-900" />
+							<div className="w-3/4 h-4 rounded bg-zinc-900" />
+						</div>
+					))}
+				</div>
 			</div>
 		);
 	}

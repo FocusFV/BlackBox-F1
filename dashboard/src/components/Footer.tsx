@@ -63,6 +63,8 @@ export default function Footer() {
 						alt="FocusFV Desarrollador" 
 						width={380} 
 						height={110} 
+						loading="lazy"
+						decoding="async"
 						className="h-24 w-auto object-contain brightness-110 drop-shadow-[0_0_25px_rgba(245,158,11,0.15)] hover:brightness-125 hover:drop-shadow-[0_0_40px_rgba(245,158,11,0.4)] transition duration-300 select-none"
 					/>
 				</Link>

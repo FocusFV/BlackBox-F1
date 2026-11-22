@@ -82,7 +82,8 @@ export const useDataEngine = ({ updateState, updatePosition, updateCarData }: Pr
 		window.addEventListener("pagehide", handleSave);
 		window.addEventListener("beforeunload", handleSave);
 
-		const saveTimer = setInterval(handleSave, 3000);
+		// Guardado periódico ligero cada 20s (en lugar de cada 3s) para no bloquear el hilo de ejecución
+		const saveTimer = setInterval(handleSave, 20000);
 
 		return () => {
 			window.removeEventListener("pagehide", handleSave);
@@ -214,6 +215,12 @@ export const useDataEngine = ({ updateState, updatePosition, updateCarData }: Pr
 
         const posFrame = posBuffer.latest();
         if (posFrame) updatePosition(posFrame);
+
+        // 🛡️ En vivo (delay === 0): limpiar frames con más de 2 minutos para evitar saturación de memoria
+        const liveThreshold = Date.now() - 120_000;
+        Object.values(buffers).forEach((b) => b.cleanup(liveThreshold));
+        carBuffer.cleanup(liveThreshold);
+        posBuffer.cleanup(liveThreshold);
     } else {
         const delayedTimestamp = Date.now() - delay * 1000;
         const newStateFrame: Record<string, State[keyof State]> = {};
