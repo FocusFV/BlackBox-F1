@@ -215,12 +215,21 @@ export const StartingGridTrack: React.FC<StartingGridTrackProps> = ({
 										driver={left}
 										isPole={left.gridPos === 1 || left.pos === "1"}
 										onSelect={() => {
+											const posNum = left.gridPos ?? parseInt(left.pos, 10);
 											openDriverModal({
 												driverCode: left.code,
 												code: left.code,
 												name: left.name,
 												teamName: left.team,
 												driverId: left.code?.toLowerCase(),
+												position: posNum,
+												gridPos: posNum,
+												qualyPos: left.qualyPos,
+												gapTime: left.gapTime,
+												delta: left.delta,
+												penaltyNote: left.penaltyNote,
+												sessionType: "grid",
+												sessionName: "Grilla de Salida",
 											});
 											triggerHaptic("light");
 										}}
@@ -236,12 +245,21 @@ export const StartingGridTrack: React.FC<StartingGridTrackProps> = ({
 											driver={right}
 											isPole={false}
 											onSelect={() => {
+												const posNum = right.gridPos ?? parseInt(right.pos, 10);
 												openDriverModal({
 													driverCode: right.code,
 													code: right.code,
 													name: right.name,
 													teamName: right.team,
 													driverId: right.code?.toLowerCase(),
+													position: posNum,
+													gridPos: posNum,
+													qualyPos: right.qualyPos,
+													gapTime: right.gapTime,
+													delta: right.delta,
+													penaltyNote: right.penaltyNote,
+													sessionType: "grid",
+													sessionName: "Grilla de Salida",
 												});
 												triggerHaptic("light");
 											}}

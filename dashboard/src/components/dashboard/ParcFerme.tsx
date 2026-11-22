@@ -1192,6 +1192,8 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 											transition={{ delay: index * 0.015 }}
 											onClick={() => {
 												triggerHaptic("medium");
+												const isQualyTab = activeTab === "QUALY" || activeTab === "SQ";
+												const isRaceTab = activeTab === "RACE";
 												useDriverModalStore.getState().open({
 													driverCode: row.code,
 													code: row.code,
@@ -1199,6 +1201,11 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 													teamName: row.team,
 													driverId: row.code?.toLowerCase(),
 													laps: row.laps,
+													position: row.pos,
+													qualyPos: isQualyTab ? row.pos : undefined,
+													gapTime: row.gapTime,
+													sessionType: isQualyTab ? "qualy" : isRaceTab ? "race" : "practice",
+													sessionName: isQualyTab ? "Clasificación" : isRaceTab ? "Carrera" : activeTab,
 												});
 											}}
 											className={`group/row relative flex items-center justify-between p-2.5 rounded-xl border transition-all duration-200 ${

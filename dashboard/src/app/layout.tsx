@@ -35,7 +35,7 @@ export default function RootLayout({ children }: Props) {
 				)}
 
 				{/* 📢 Google AdSense - Carga asíncrona sin bloquear telemetría/WebSockets */}
-				{env.NEXT_PUBLIC_ADS_ENABLED === "true" && env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (
+				{process.env.NODE_ENV !== "development" && env.NEXT_PUBLIC_ADS_ENABLED === "true" && env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (
 					<Script
 						id="google-adsense"
 						strategy="afterInteractive"
@@ -67,11 +67,13 @@ export default function RootLayout({ children }: Props) {
 				</OledModeProvider>
 
 				{/* 📊 Cloudflare Web Analytics (Cookieless, 100% Ilimitado y Preciso para SPA) */}
-				<Script
-					strategy="afterInteractive"
-					src="https://static.cloudflareinsights.com/beacon.min.js"
-					data-cf-beacon={JSON.stringify({ token: "1719a9cfc7d848418fbb58f3bbc4f7f3" })}
-				/>
+				{process.env.NODE_ENV !== "development" && (
+					<Script
+						strategy="afterInteractive"
+						src="https://static.cloudflareinsights.com/beacon.min.js"
+						data-cf-beacon={JSON.stringify({ token: "1719a9cfc7d848418fbb58f3bbc4f7f3" })}
+					/>
+				)}
 				<PwaRegister />
 			</body>
 		</html>

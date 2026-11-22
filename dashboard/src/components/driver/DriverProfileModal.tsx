@@ -238,7 +238,7 @@ export default function DriverProfileModal() {
 		driver?.laps ||
 		null;
 
-	const hasLiveTelemetry = Boolean(timingDriver || carChannels || sessionTotalLaps);
+	const hasLiveTelemetry = Boolean(timingDriver || carChannels || sessionTotalLaps || driver?.sessionType);
 
 	useEffect(() => {
 		if (isOpen) {
@@ -311,6 +311,139 @@ export default function DriverProfileModal() {
 
 	// Carreras restantes por disputar de la temporada 2026
 	const upcoming = (calendar2026 as any[]).filter((c: any) => parseInt(c.round, 10) > 20);
+
+	// 🧠 Cálculos Inteligentes y Contextuales según de dónde viene el click
+	const isGridSession = driver?.sessionType === "grid";
+	const isQualySession = driver?.sessionType === "qualy";
+	const isPracticeSession = driver?.sessionType === "practice";
+	const isRaceSession = driver?.sessionType === "race";
+
+	// 1. Etiqueta y Valor de Posición
+	let posLabel = t("telemetry.current_position", "Posición Actual");
+	let posValue: string | number = "-";
+
+	if (isGridSession) {
+		posLabel = "Puesto de Salida";
+		posValue = driver.gridPos ?? driver.position ?? "-";
+	} else if (isQualySession) {
+		posLabel = "Posición Clasificación";
+		posValue = driver.qualyPos ?? driver.position ?? timingDriver?.Position ?? "-";
+	} else if (isPracticeSession) {
+		posLabel = `Posición ${driver.sessionName || "Práctica"}`;
+		posValue = driver.position ?? timingDriver?.Position ?? "-";
+	} else {
+		posLabel = isRaceSession ? "Posición en Pista" : t("telemetry.current_position", "Posición Actual");
+		posValue = timingDriver?.Position || driver.position || "-";
+	}
+
+	// 2. Etiqueta y Valor del Bloque Central (Brecha o Clasificación)
+	let middleLabel = t("telemetry.gap_to_leader", "Brecha Líder");
+	let middleValue: React.ReactNode = "-";
+
+	if (isGridSession) {
+		middleLabel = "Clasificación";
+		if (driver.qualyPos) {
+			middleValue = `P${driver.qualyPos}`;
+		} else if (driver.gapTime && driver.gapTime !== "0.000") {
+			middleValue = driver.gapTime;
+		} else {
+			middleValue = `P${posValue}`;
+		}
+	} else {
+		const posStr = String(posValue).replace("P", "").trim();
+		const isP1 = posStr === "1" || timingDriver?.Position === "1";
+		if (isP1) {
+			middleValue = t("telemetry.leader", "LÍDER");
+		} else {
+			const gap = driver.gapTime || timingDriver?.GapToLeader;
+			if (gap && gap !== "LÍDER" && gap !== "Líder" && gap !== "-") {
+				middleValue = gap.startsWith("+") ? gap : `+${gap}`;
+			} else {
+				middleValue = "-";
+			}
+		}
+	}
+
+	// 3. Etiqueta y Valor del Bloque Derecho (Variación de Grilla, Vueltas, o Intervalo)
+	let rightLabel = t("telemetry.interval_ahead", "Intervalo Auto Del.");
+	let rightValue: React.ReactNode = "-";
+	let rightColor = "text-zinc-400";
+
+	if (isGridSession) {
+		rightLabel = "Cambio en Grilla";
+		const delta = driver.delta ?? 0;
+		if (driver.penaltyNote) {
+			rightValue = driver.penaltyNote.includes("PEN") ? driver.penaltyNote : `PEN ${driver.penaltyNote}`;
+			rightColor = "text-red-400";
+		} else if (delta > 0) {
+			rightValue = `▲ +${delta} POS`;
+			rightColor = "text-emerald-400";
+		} else if (delta < 0) {
+			rightValue = `▼ ${Math.abs(delta)} POS`;
+			rightColor = "text-red-400";
+		} else {
+			rightValue = "SIN CAMBIOS";
+			rightColor = "text-zinc-400";
+		}
+	} else if (isQualySession || isPracticeSession) {
+		rightLabel = "Vueltas en Sesión";
+		const laps = driver.laps || sessionTotalLaps;
+		rightValue = laps ? `${laps} Vueltas` : "-";
+		rightColor = "text-amber-400";
+	} else {
+		// Carrera en vivo
+		const intervalVal = timingDriver?.IntervalToPositionAhead?.Value;
+		if (intervalVal && intervalVal !== "-") {
+			rightValue = intervalVal.startsWith("+") ? intervalVal : `+${intervalVal}`;
+			rightColor = "text-emerald-400";
+		} else {
+			rightValue = "-";
+			rightColor = "text-zinc-500";
+		}
+	}
+
+	// 4. Etiqueta de la Pestaña
+	const tabLabel = isGridSession
+		? "Parrilla de Salida"
+		: isQualySession
+		? "Clasificación"
+		: isPracticeSession
+		? (driver.sessionName || "Práctica")
+		: t("standings_page.driver_modal_telemetry_tab", "Telemetría en Pista");
+
+	// 5. Cálculo inteligente de Sector 3 si está vacío pero existen S1, S2 y tiempo de vuelta
+	const parseTimeToSeconds = (tStr?: string): number | null => {
+		if (!tStr) return null;
+		const clean = tStr.trim();
+		if (clean.includes(":")) {
+			const [minPart, secPart] = clean.split(":");
+			const m = parseFloat(minPart);
+			const s = parseFloat(secPart);
+			if (!isNaN(m) && !isNaN(s)) return m * 60 + s;
+		} else {
+			const s = parseFloat(clean);
+			if (!isNaN(s)) return s;
+		}
+		return null;
+	};
+
+	const rawS1 = timingDriver?.Sectors?.[0]?.Value;
+	const rawS2 = timingDriver?.Sectors?.[1]?.Value;
+	let rawS3 = timingDriver?.Sectors?.[2]?.Value;
+
+	if ((!rawS3 || rawS3 === "-" || rawS3.trim() === "") && rawS1 && rawS2) {
+		const s1Sec = parseTimeToSeconds(rawS1);
+		const s2Sec = parseTimeToSeconds(rawS2);
+		const refLapStr = timingDriver?.BestLapTime?.Value || timingDriver?.LastLapTime?.Value;
+		const lapSec = parseTimeToSeconds(refLapStr);
+
+		if (s1Sec !== null && s2Sec !== null && lapSec !== null && lapSec > (s1Sec + s2Sec)) {
+			const s3Calc = lapSec - (s1Sec + s2Sec);
+			if (s3Calc > 5 && s3Calc < 80) {
+				rawS3 = s3Calc.toFixed(3);
+			}
+		}
+	}
 
 	const modalContent = (
 		<div
@@ -392,7 +525,7 @@ export default function DriverProfileModal() {
 							)}
 						>
 							<Gauge className="w-3.5 h-3.5 text-amber-400" />
-							<span>{t("standings_page.driver_modal_telemetry_tab", "Telemetría en Vivo")}</span>
+							<span>{tabLabel}</span>
 						</button>
 					)}
 					<button
@@ -410,22 +543,22 @@ export default function DriverProfileModal() {
 					</button>
 				</div>
 
-				{/* VISTA 1: TELEMETRÍA EN VIVO */}
+				{/* VISTA 1: TELEMETRÍA / DATOS DE SESIÓN */}
 				{activeTab === "telemetry" && hasLiveTelemetry && (
 					<div className="flex flex-col gap-3 py-3 overflow-y-auto flex-1 custom-scrollbar">
-						{/* POSICIÓN Y BRECHAS EN PISTA */}
+						{/* POSICIÓN Y BRECHAS CONTEXTUALES INTELIGENTES */}
 						<div className="grid grid-cols-3 gap-2 text-center font-mono">
-							<div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
-								<span className="text-[10px] text-zinc-500 font-bold uppercase block">{t("telemetry.current_position", "Posición Actual")}</span>
-								<span className="text-xl font-black text-amber-400">P{timingDriver?.Position || "-"}</span>
+							<div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 flex flex-col justify-center">
+								<span className="text-[10px] text-zinc-500 font-bold uppercase block truncate">{posLabel}</span>
+								<span className="text-xl font-black text-amber-400">{String(posValue).startsWith("P") ? posValue : `P${posValue}`}</span>
 							</div>
-							<div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
-								<span className="text-[10px] text-zinc-500 font-bold uppercase block">{t("telemetry.gap_to_leader", "Brecha Líder")}</span>
-								<span className="text-sm font-black text-white">{timingDriver?.GapToLeader || t("telemetry.leader", "LÍDER")}</span>
+							<div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 flex flex-col justify-center">
+								<span className="text-[10px] text-zinc-500 font-bold uppercase block truncate">{middleLabel}</span>
+								<span className="text-sm font-black text-white truncate">{middleValue}</span>
 							</div>
-							<div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
-								<span className="text-[10px] text-zinc-500 font-bold uppercase block">{t("telemetry.interval_ahead", "Intervalo Auto Del.")}</span>
-								<span className="text-sm font-black text-emerald-400">{timingDriver?.IntervalToPositionAhead?.Value || "-"}</span>
+							<div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 flex flex-col justify-center">
+								<span className="text-[10px] text-zinc-500 font-bold uppercase block truncate">{rightLabel}</span>
+								<span className={clsx("text-sm font-black truncate", rightColor)}>{rightValue}</span>
 							</div>
 						</div>
 
@@ -490,15 +623,15 @@ export default function DriverProfileModal() {
 								<div className="grid grid-cols-3 gap-2 text-center text-xs">
 									<div className="p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-900">
 										<span className="text-[9px] text-zinc-500 block">SECTOR 1</span>
-										<span className="font-bold text-white">{timingDriver.Sectors?.[0]?.Value || "-"}</span>
+										<span className="font-bold text-white">{rawS1 || "-"}</span>
 									</div>
 									<div className="p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-900">
 										<span className="text-[9px] text-zinc-500 block">SECTOR 2</span>
-										<span className="font-bold text-white">{timingDriver.Sectors?.[1]?.Value || "-"}</span>
+										<span className="font-bold text-white">{rawS2 || "-"}</span>
 									</div>
 									<div className="p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-900">
 										<span className="text-[9px] text-zinc-500 block">SECTOR 3</span>
-										<span className="font-bold text-white">{timingDriver.Sectors?.[2]?.Value || "-"}</span>
+										<span className="font-bold text-white">{rawS3 || "-"}</span>
 									</div>
 								</div>
 

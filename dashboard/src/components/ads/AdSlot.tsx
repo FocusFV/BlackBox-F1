@@ -67,9 +67,11 @@ export default function AdSlot({
 	const adPushedRef = useRef(false);
 
 	const config = FORMAT_CONFIG[format];
+	const isLocalHost = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
 	const isAdsEnabled =
-		env.NEXT_PUBLIC_ADS_ENABLED === "true" ||
-		process.env.NEXT_PUBLIC_ADS_ENABLED === "true";
+		!isLocalHost &&
+		(env.NEXT_PUBLIC_ADS_ENABLED === "true" ||
+		process.env.NEXT_PUBLIC_ADS_ENABLED === "true");
 	const clientId =
 		env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ||
 		process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
@@ -92,8 +94,9 @@ export default function AdSlot({
 		// Intentamos inicializar el anuncio una única vez por ciclo de vida
 		try {
 			if (!adPushedRef.current && insRef.current) {
-				// Verificamos que el <ins> no tenga ya un iframe renderizado
-				if (!insRef.current.getAttribute("data-adsbygoogle-status")) {
+				// Verificamos que el <ins> tenga ancho disponible y no tenga ya un iframe renderizado
+				const hasWidth = (insRef.current.offsetWidth > 0) || (insRef.current.parentElement?.offsetWidth ?? 0) > 0;
+				if (hasWidth && !insRef.current.getAttribute("data-adsbygoogle-status")) {
 					(window.adsbygoogle = window.adsbygoogle || []).push({});
 					adPushedRef.current = true;
 				}

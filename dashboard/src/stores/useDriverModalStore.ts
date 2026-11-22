@@ -16,6 +16,13 @@ export type DriverModalData = {
 	Constructors?: any[];
 	Driver?: any;
 	laps?: number;
+	sessionType?: "grid" | "qualy" | "practice" | "race" | "standings";
+	sessionName?: string;
+	gridPos?: number | string;
+	qualyPos?: number | string;
+	gapTime?: string;
+	delta?: number;
+	penaltyNote?: string | null;
 };
 
 type DriverModalStore = {

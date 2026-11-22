@@ -218,12 +218,21 @@ export const StartingGridBroadcast: React.FC<StartingGridBroadcastProps> = ({
 	const openDriverModal = useDriverModalStore((state) => state.open);
 
 	const handleDriverSelect = (driver: DriverResult) => {
+		const posNum = driver.gridPos ?? parseInt(driver.pos, 10);
 		openDriverModal({
 			driverCode: driver.code,
 			code: driver.code,
 			name: driver.name,
 			teamName: driver.team,
 			driverId: driver.code?.toLowerCase(),
+			position: posNum,
+			gridPos: posNum,
+			qualyPos: driver.qualyPos,
+			gapTime: driver.gapTime,
+			delta: driver.delta,
+			penaltyNote: driver.penaltyNote,
+			sessionType: "grid",
+			sessionName: "Grilla de Salida",
 		});
 		triggerHaptic("light");
 	};
