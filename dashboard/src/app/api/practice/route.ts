@@ -2,33 +2,46 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-// 🏎️ Caché en memoria para evitar rate-limits de OpenF1 (3 req/segundo)
+// 🏎️ Caché en memoria + deduplicación en vuelo para evitar rate-limits de OpenF1 (3 req/segundo)
 const sessionResultsCache: Record<string, { timestamp: number; data: any }> = {};
 const sessionsListCache: Record<string, { timestamp: number; data: any[] }> = {};
+const inFlightRequests = new Map<string, Promise<{ status: number; body: any }>>();
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hora de validez en memoria
 const SESSIONS_CACHE_TTL_MS = 15 * 60 * 1000; // 15 min para lista de sesiones
 
+const EDGE_CACHE_HEADERS = {
+	"Cache-Control": "public, max-age=60, s-maxage=1800, stale-while-revalidate=3600",
+};
+const NO_STORE_HEADERS = {
+	"Cache-Control": "no-store",
+};
+
 async function fetchOpenF1(url: string, retries: number = 2): Promise<Response | null> {
 	for (let attempt = 0; attempt <= retries; attempt++) {
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), 6500);
 		try {
 			const res = await fetch(url, {
 				headers: {
 					"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) BlackboxF1/4.1",
 					"Accept": "application/json",
 				},
+				signal: controller.signal,
 				next: { revalidate: 1800 },
 			});
+			clearTimeout(timeoutId);
 			if (res.ok) return res;
 			if (res.status === 429 || res.status >= 500) {
 				if (attempt < retries) {
-					await new Promise((r) => setTimeout(r, 450 * (attempt + 1)));
+					await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
 					continue;
 				}
 			}
 			return res;
 		} catch (e) {
+			clearTimeout(timeoutId);
 			if (attempt < retries) {
-				await new Promise((r) => setTimeout(r, 450 * (attempt + 1)));
+				await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
 				continue;
 			}
 			console.warn("[API Practice] Error en fetchOpenF1:", url, e);
@@ -46,16 +59,28 @@ export async function GET(request: Request) {
 
 	const cacheKey = `${meetingKey}_${raceDate}_${sessionName}`;
 
-	// 1. Si ya tenemos los resultados reales en caché de memoria reciente, devolver inmediatamente
+	// 1. Si ya tenemos los resultados reales en caché de memoria reciente, devolver inmediatamente con caché Edge
 	if (
 		sessionResultsCache[cacheKey] &&
 		Date.now() - sessionResultsCache[cacheKey].timestamp < CACHE_TTL_MS &&
 		Array.isArray(sessionResultsCache[cacheKey].data?.results) &&
 		sessionResultsCache[cacheKey].data.results.length > 0
 	) {
-		return NextResponse.json(sessionResultsCache[cacheKey].data);
+		return NextResponse.json(sessionResultsCache[cacheKey].data, { headers: EDGE_CACHE_HEADERS });
 	}
 
+	// 1.B Si ya hay una consulta idéntica en vuelo, reutilizarla para no duplicar pedidos a OpenF1
+	const existingInFlight = inFlightRequests.get(cacheKey);
+	if (existingInFlight) {
+		const shared = await existingInFlight;
+		const hasRows = Array.isArray(shared.body?.results) && shared.body.results.length > 0;
+		return NextResponse.json(shared.body, {
+			status: shared.status,
+			headers: hasRows ? EDGE_CACHE_HEADERS : NO_STORE_HEADERS,
+		});
+	}
+
+	const workPromise = (async (): Promise<{ status: number; body: any }> => {
 	try {
 		// 2. Obtener sesiones de OpenF1 para el fin de semana objetivo (con caché para ahorrar requests)
 		const sessionsCacheKey = `${meetingKey}_${raceDate}`;
@@ -111,10 +136,10 @@ export async function GET(request: Request) {
 			: null;
 
 		if (!matchingSession) {
-			return NextResponse.json(
-				{ session: sessionName, circuit: null, total: 0, results: [] },
-				{ status: 200 }
-			);
+			return {
+				status: 200,
+				body: { session: sessionName, circuit: null, total: 0, results: [] },
+			};
 		}
 
 		const sessionKey = matchingSession.session_key;
@@ -126,7 +151,7 @@ export async function GET(request: Request) {
 			const intRes = await fetchOpenF1(`https://api.openf1.org/v1/intervals?session_key=${sessionKey}`);
 
 			if (!driversRes?.ok || !posRes?.ok) {
-				return NextResponse.json({ error: "Error obteniendo posiciones de OpenF1" }, { status: 502 });
+				return { status: 502, body: { error: "Error obteniendo posiciones de OpenF1" } };
 			}
 
 			const drivers: any[] = await driversRes.json();
@@ -188,7 +213,7 @@ export async function GET(request: Request) {
 			if (results.length > 0) {
 				sessionResultsCache[cacheKey] = { timestamp: Date.now(), data: payload };
 			}
-			return NextResponse.json(payload);
+			return { status: 200, body: payload };
 		}
 
 		// 4. Para PRÁCTICAS y CLASIFICACIÓN (FP1, FP2, FP3, QUALY, SQ), calculamos mejor vuelta por piloto
@@ -197,13 +222,13 @@ export async function GET(request: Request) {
 		const lapsRes = await fetchOpenF1(`https://api.openf1.org/v1/laps?session_key=${sessionKey}&is_pit_out_lap=false`);
 
 		if (!driversRes?.ok || !lapsRes?.ok) {
-			return NextResponse.json({ error: "Error obteniendo datos de vueltas de OpenF1" }, { status: 502 });
+			return { status: 502, body: { error: "Error obteniendo datos de vueltas de OpenF1" } };
 		}
 
 		const [drivers, laps] = await Promise.all([driversRes.json(), lapsRes.json()]);
 
 		if (!Array.isArray(drivers) || !Array.isArray(laps)) {
-			return NextResponse.json({ error: "Respuesta inválida de OpenF1" }, { status: 502 });
+			return { status: 502, body: { error: "Respuesta inválida de OpenF1" } };
 		}
 
 		const bestLaps: Record<string, number> = {};
@@ -302,9 +327,22 @@ export async function GET(request: Request) {
 		if (finalResults.length > 0) {
 			sessionResultsCache[cacheKey] = { timestamp: Date.now(), data: payload };
 		}
-		return NextResponse.json(payload);
+		return { status: 200, body: payload };
 	} catch (error: any) {
 		console.error("Error en API practice/session:", error);
-		return NextResponse.json({ error: error.message }, { status: 500 });
+		return { status: 500, body: { error: error.message } };
+	}
+	})();
+
+	inFlightRequests.set(cacheKey, workPromise);
+	try {
+		const outcome = await workPromise;
+		const hasRows = Array.isArray(outcome.body?.results) && outcome.body.results.length > 0;
+		return NextResponse.json(outcome.body, {
+			status: outcome.status,
+			headers: hasRows ? EDGE_CACHE_HEADERS : NO_STORE_HEADERS,
+		});
+	} finally {
+		inFlightRequests.delete(cacheKey);
 	}
 }

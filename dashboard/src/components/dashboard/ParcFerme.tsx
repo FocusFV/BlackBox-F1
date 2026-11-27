@@ -155,6 +155,67 @@ const TeamLogo: React.FC<{ teamName: string }> = ({ teamName }) => {
 	);
 };
 
+const PERSISTED_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 horas por ronda/sesión
+
+function readPersistedSessionCache(round: number | string, tab: string): DriverResult[] | null {
+	if (typeof window === "undefined") return null;
+	try {
+		const raw = sessionStorage.getItem(`bb_pf_v1_${round}_${tab}`);
+		if (!raw) return null;
+		const parsed = JSON.parse(raw);
+		if (
+			parsed &&
+			typeof parsed.ts === "number" &&
+			Date.now() - parsed.ts < PERSISTED_CACHE_TTL_MS &&
+			Array.isArray(parsed.rows) &&
+			parsed.rows.length > 0
+		) {
+			return parsed.rows as DriverResult[];
+		}
+	} catch {
+		// Ignorar errores de storage
+	}
+	return null;
+}
+
+function writePersistedSessionCache(round: number | string, tab: string, rows: DriverResult[]) {
+	if (typeof window === "undefined" || !Array.isArray(rows) || rows.length === 0) return;
+	try {
+		sessionStorage.setItem(
+			`bb_pf_v1_${round}_${tab}`,
+			JSON.stringify({ ts: Date.now(), rows })
+		);
+	} catch {
+		// Ignorar cuota excedida
+	}
+}
+
+async function fetchWithTimeout(
+	url: string,
+	init: RequestInit = {},
+	timeoutMs: number = 8500,
+	externalSignal?: AbortSignal
+): Promise<Response> {
+	const controller = new AbortController();
+	const onExternalAbort = () => controller.abort();
+	if (externalSignal) {
+		if (externalSignal.aborted) {
+			controller.abort();
+		} else {
+			externalSignal.addEventListener("abort", onExternalAbort, { once: true });
+		}
+	}
+	const timer = setTimeout(() => controller.abort(), timeoutMs);
+	try {
+		return await fetch(url, { ...init, signal: controller.signal });
+	} finally {
+		clearTimeout(timer);
+		if (externalSignal) {
+			externalSignal.removeEventListener("abort", onExternalAbort);
+		}
+	}
+}
+
 interface ParcFermeProps {
 	onOpenCircuit?: (gpName?: string, countryCode?: string) => void;
 	onGpLoaded?: (gpName: string, countryCode: string) => void;
@@ -418,15 +479,25 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 	}, [liveSession?.Meeting?.Name, liveSession?.StartDate]);
 
 	useEffect(() => {
+		const controller = new AbortController();
+		let isActiveEffect = true;
+
 		async function fetchSessionData() {
 			const isPractice = activeTab === "FP1" || activeTab === "FP2" || activeTab === "FP3";
 			const dateParam = raceDate ? `&date=${raceDate}` : (liveSession?.StartDate ? `&date=${liveSession.StartDate.split("T")[0]}` : "");
 
-			// 🛡️ Si ya tenemos resultados para esta sesión en memoria, mostrarlos al instante (0ms) sin parpadeo
-			if (sessionResultsCache.current[activeTab] && sessionResultsCache.current[activeTab].length > 0) {
-				setResults(sessionResultsCache.current[activeTab]);
+			// 🛡️ Si ya tenemos resultados para esta sesión en memoria o en sessionStorage, mostrarlos al instante (0ms) sin parpadeo
+			const memCached = sessionResultsCache.current[activeTab];
+			const persistedCached =
+				(!memCached || memCached.length === 0)
+					? readPersistedSessionCache(effectiveRound, activeTab)
+					: null;
+			const cachedRows = (memCached && memCached.length > 0) ? memCached : persistedCached;
+
+			if (cachedRows && cachedRows.length > 0) {
+				sessionResultsCache.current[activeTab] = cachedRows;
+				setResults(cachedRows);
 				setLoading(false);
-				// Para sesiones ya concluidas, evitar saturar la API en cada paquete del websocket y evitar parpadeo de brechas
 				return;
 			} else {
 				setLoading(true);
@@ -447,7 +518,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 							process.env.NEXT_PUBLIC_LIVE_URL ||
 							"";
 						if (liveBase) {
-							const liveRes = await fetch(`${liveBase}/api/current`, { cache: "no-store" });
+							const liveRes = await fetchWithTimeout(`${liveBase}/api/current`, { cache: "no-store" }, 5000, controller.signal);
 							if (liveRes.ok) {
 								const liveData = await liveRes.json();
 								if (liveData?.TimingData?.Lines && Object.keys(liveData.TimingData.Lines).length > 0) {
@@ -460,9 +531,12 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 							}
 						}
 					} catch (err) {
-						console.warn("[ParcFerme] Error obteniendo /api/current de respaldo:", err);
+						if (!controller.signal.aborted) {
+							console.warn("[ParcFerme] Error obteniendo /api/current de respaldo:", err);
+						}
 					}
 				}
+				if (!isActiveEffect) return;
 
 				const sessionName = (currentSession?.Name || "").toLowerCase();
 				const sessionType = (currentSession?.Type || "").toLowerCase();
@@ -661,23 +735,29 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 				if (activeTab === "FP1" || activeTab === "FP2" || activeTab === "FP3") {
 					try {
 						const meetingParam = currentSession?.Meeting?.Key ? `&meeting_key=${currentSession.Meeting.Key}` : "";
-						const res = await fetch(`/api/practice?session=${activeTab}${dateParam}${meetingParam}`);
+						const res = await fetchWithTimeout(`/api/practice?session=${activeTab}${dateParam}${meetingParam}`, {}, 8500, controller.signal);
+						if (!isActiveEffect) return;
 						if (res.ok) {
 							const data = await res.json();
+							if (!isActiveEffect) return;
 							if (Array.isArray(data.results) && data.results.length > 0) {
 								if (currentGpName) {
 									setGpName(translateGpName(currentGpName));
 									setCountryCode(getCountryCodeForGp(currentGpName, currentCountryName) || initialCountry);
 								}
 								sessionResultsCache.current[activeTab] = data.results;
+								writePersistedSessionCache(effectiveRound, activeTab, data.results);
 								setResults(data.results);
 								setLoading(false);
 								return;
 							}
 						}
 					} catch (e) {
-						console.error("Error obteniendo prácticas libres:", e);
+						if (!controller.signal.aborted) {
+							console.error("Error obteniendo prácticas libres:", e);
+						}
 					}
+					if (!isActiveEffect) return;
 					if (sessionResultsCache.current[activeTab] && sessionResultsCache.current[activeTab].length > 0) {
 						setResults(sessionResultsCache.current[activeTab]);
 						setLoading(false);
@@ -711,8 +791,9 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 
 				let data: any = null;
 				for (const url of endpoints) {
+					if (!isActiveEffect) return;
 					try {
-						const res = await fetch(url);
+						const res = await fetchWithTimeout(url, {}, 7000, controller.signal);
 						if (res.ok) {
 							const json = await res.json();
 							const races = json?.MRData?.RaceTable?.Races;
@@ -902,19 +983,28 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 				}
 
 				// Si ninguna fuente tiene resultados aún para esta sesión, mantener caché de la sesión o estado vacío limpio
+				if (!isActiveEffect) return;
 				if (sessionResultsCache.current[activeTab] && sessionResultsCache.current[activeTab].length > 0) {
 					setResults(sessionResultsCache.current[activeTab]);
 				} else {
 					setResults([]);
 				}
 			} catch (error) {
-				console.error("Error al obtener resultados oficiales:", error);
+				if (!controller.signal.aborted) {
+					console.error("Error al obtener resultados oficiales:", error);
+				}
 			} finally {
-				setLoading(false);
+				if (isActiveEffect) {
+					setLoading(false);
+				}
 			}
 		}
 
 		fetchSessionData();
+		return () => {
+			isActiveEffect = false;
+			controller.abort();
+		};
 	}, [activeTab, raceDate, effectiveRound, smartContext, liveSession, liveTiming, liveStats, liveDrivers, liveLapCount, liveSessionStatus]);
 
 	return (
@@ -986,8 +1076,11 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 										onClick={() => {
 											setTabManuallySelected(true);
 											setActiveTab(tab.id);
-											const cached = sessionResultsCache.current[tab.id];
+											const cached =
+												sessionResultsCache.current[tab.id] ||
+												readPersistedSessionCache(effectiveRound, tab.id);
 											if (Array.isArray(cached) && cached.length > 0) {
+												sessionResultsCache.current[tab.id] = cached;
 												setResults(cached);
 												setLoading(false);
 											} else {
