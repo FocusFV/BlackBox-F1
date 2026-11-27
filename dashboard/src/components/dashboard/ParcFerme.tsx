@@ -1,8 +1,6 @@
 "use client";
 import { useHeadToHeadStore } from "@/stores/useHeadToHeadStore";
 import { useDriverModalStore } from "@/stores/useDriverModalStore";
-import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
-import lasVegasFallbackData from "@/lib/lasvegas2026_fallback.json";
 import StartingGridTrack from "./StartingGridTrack";
 import StartingGridBroadcast from "./StartingGridBroadcast";
 
@@ -13,7 +11,7 @@ import { translateGpName, getCountryCodeForGp, translateStatus } from "@/lib/f1T
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useDataStore } from "@/stores/useDataStore";
 import { triggerHaptic } from "@/lib/haptics";
-import { getSmartGpContext, type SmartGpContext } from "@/lib/sessionSchedule";
+import { getCalendarGpContextSync, getSmartGpContext, type SmartGpContext } from "@/lib/sessionSchedule";
 import { simulator } from "@/lib/simulatorFeed";
 import { useTranslation } from "@/hooks/useTranslation";
 
@@ -193,8 +191,13 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 		}
 	}, []);
 	const effectiveSim = isSimActive || isSimMounted;
-	const initialCountry = effectiveSim ? "mex" : ((currentGpName ? getCountryCodeForGp(currentGpName, currentCountryName) : null) || "usa");
-	const initialGpName = effectiveSim ? "Gran Premio de la Ciudad de México" : (currentGpName ? translateGpName(currentGpName) : "Gran Premio de Las Vegas");
+	const initialCalendarCtx = useMemo(() => getCalendarGpContextSync(), []);
+	const initialCountry = effectiveSim
+		? "mex"
+		: ((currentGpName ? getCountryCodeForGp(currentGpName, currentCountryName) : null) || initialCalendarCtx.countryCode || "");
+	const initialGpName = effectiveSim
+		? "Gran Premio de la Ciudad de México"
+		: translateGpName(currentGpName || initialCalendarCtx.raceName);
 
 	const getInitialTab = (): SessionTab => {
 		if (typeof window !== "undefined") {
@@ -228,8 +231,8 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 		return "RACE";
 	};
 
-	const [smartContext, setSmartContext] = useState<SmartGpContext | null>(null);
-	const effectiveRound = smartContext?.round || roundNumber || 20;
+	const [smartContext, setSmartContext] = useState<SmartGpContext | null>(initialCalendarCtx);
+	const effectiveRound = smartContext?.round || roundNumber || initialCalendarCtx.round;
 	const [activeTab, setActiveTab] = useState<SessionTab>(getInitialTab);
 	const [tabManuallySelected, setTabManuallySelected] = useState<boolean>(() => {
 		if (typeof window !== "undefined") {
@@ -239,11 +242,19 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 	});
 	const [results, setResults] = useState<DriverResult[]>([]);
 	const sessionResultsCache = useRef<Record<string, DriverResult[]>>({});
+	const cachedRoundRef = useRef<number>(effectiveRound);
 	const [gpName, setGpName] = useState(initialGpName);
 	const [countryCode, setCountryCode] = useState<string>(initialCountry);
-	const [raceDate, setRaceDate] = useState<string>(() => (liveSession?.StartDate ? liveSession.StartDate.split("T")[0] : ""));
+	const [raceDate, setRaceDate] = useState<string>(() => (liveSession?.StartDate ? liveSession.StartDate.split("T")[0] : initialCalendarCtx.raceDate));
 	const [loading, setLoading] = useState(true);
-	const [hasSprint, setHasSprint] = useState(false);
+	const [hasSprint, setHasSprint] = useState(initialCalendarCtx.hasSprint);
+
+	useEffect(() => {
+		if (cachedRoundRef.current !== effectiveRound) {
+			sessionResultsCache.current = {};
+			cachedRoundRef.current = effectiveRound;
+		}
+	}, [effectiveRound]);
 
 	// 🏎️ Pestañas inteligentes según formato de fin de semana y sesiones ya disputadas
 	const sessionTabs = useMemo(() => {
@@ -431,16 +442,21 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 				// 🚀 Resiliencia instantánea: Si el store aún no terminó de hidratar desde el socket, consultamos /api/current directamente
 				if (!currentTiming?.Lines || Object.keys(currentTiming.Lines).length === 0) {
 					try {
-						const liveBase = process.env.NEXT_PUBLIC_LIVE_URL || "https://blackbox-f1-realtime-docker.onrender.com";
-						const liveRes = await fetch(`${liveBase}/api/current`, { cache: "no-store" });
-						if (liveRes.ok) {
-							const liveData = await liveRes.json();
-							if (liveData?.TimingData?.Lines && Object.keys(liveData.TimingData.Lines).length > 0) {
-								currentTiming = liveData.TimingData;
-								currentSession = liveData.SessionInfo || currentSession;
-								currentStats = liveData.TimingStats || currentStats;
-								currentDrivers = liveData.DriverList || currentDrivers;
-								currentLap = liveData.LapCount || currentLap;
+						const liveBase =
+							(typeof window !== "undefined" && (window as any).__ENV?.NEXT_PUBLIC_LIVE_URL) ||
+							process.env.NEXT_PUBLIC_LIVE_URL ||
+							"";
+						if (liveBase) {
+							const liveRes = await fetch(`${liveBase}/api/current`, { cache: "no-store" });
+							if (liveRes.ok) {
+								const liveData = await liveRes.json();
+								if (liveData?.TimingData?.Lines && Object.keys(liveData.TimingData.Lines).length > 0) {
+									currentTiming = liveData.TimingData;
+									currentSession = liveData.SessionInfo || currentSession;
+									currentStats = liveData.TimingStats || currentStats;
+									currentDrivers = liveData.DriverList || currentDrivers;
+									currentLap = liveData.LapCount || currentLap;
+								}
 							}
 						}
 					} catch (err) {
@@ -537,7 +553,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 
 							let gapTime = "";
 							if (posNum === 1) {
-								gapTime = best || (isQualySession ? "POLE" : "1:47.000");
+								gapTime = best || (isQualySession ? "POLE" : "S/T");
 							} else if (driverMs && p1Ms && driverMs >= p1Ms) {
 								gapTime = `+${((driverMs - p1Ms) / 1000).toFixed(3)}s`;
 							} else if (best) {
@@ -662,32 +678,12 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					} catch (e) {
 						console.error("Error obteniendo prácticas libres:", e);
 					}
-					// 🛡️ En fin de semana activo de Las Vegas, usar fallback específico de Las Vegas si la API externa falla
-					const isLasVegasActive = effectiveGpName?.toLowerCase().includes("vegas") || (!effectiveGpName && smartContext?.isWeekendActive);
-					if (isLasVegasActive && (lasVegasFallbackData as any)[activeTab]?.length > 0) {
-						const fbVegas = (lasVegasFallbackData as any)[activeTab];
-						sessionResultsCache.current[activeTab] = fbVegas;
-						setResults(fbVegas);
-						setLoading(false);
-						return;
-					}
-
-					// 🛡️ Solo recurrir al fallback de Brasil si NO estamos en un GP activo diferente
-					const isDifferentActiveGp = smartContext?.isWeekendActive && !effectiveGpName?.toLowerCase().includes("brazil") && !effectiveGpName?.toLowerCase().includes("são paulo");
-					if (!isDifferentActiveGp) {
-						const fbPractice = (brazilFallbackData as any)[activeTab];
-						if (Array.isArray(fbPractice) && fbPractice.length > 0) {
-							sessionResultsCache.current[activeTab] = fbPractice;
-							setResults(fbPractice);
-							setLoading(false);
-							return;
-						}
-					}
 					if (sessionResultsCache.current[activeTab] && sessionResultsCache.current[activeTab].length > 0) {
 						setResults(sessionResultsCache.current[activeTab]);
 						setLoading(false);
 						return;
 					}
+					setResults([]);
 					setLoading(false);
 					return;
 				}
@@ -762,15 +758,8 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 						isTimeBased = true;
 					}
 
-					// Si todos los tiempos de clasificación en Jolpica vienen vacíos, usar fallback oficial solo si corresponde al GP
+					// Si todos los tiempos de clasificación en Jolpica vienen vacíos, consultar OpenF1 automáticamente
 					const allTimesEmpty = isTimeBased && listSource.length > 0 && listSource.every((r: any) => !r.Q3 && !r.Q2 && !r.Q1);
-					const isBrazilGp = effectiveGpName?.toLowerCase().includes("brazil") || effectiveGpName?.toLowerCase().includes("são paulo");
-					if (allTimesEmpty && isBrazilGp && (brazilFallbackData as any).QUALY) {
-						sessionResultsCache.current[activeTab] = (brazilFallbackData as any).QUALY;
-						setResults((brazilFallbackData as any).QUALY);
-						setLoading(false);
-						return;
-					}
 					const openF1BestTimes: Record<string, number> = {};
 
 					if (allTimesEmpty) {
@@ -912,18 +901,9 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 					}
 				}
 
-				// Si ninguna fuente externa tiene resultados nuevos, verificar fallback oficial correspondiente
-				const isBrazilSession = effectiveGpName?.toLowerCase().includes("brazil") || effectiveGpName?.toLowerCase().includes("são paulo");
+				// Si ninguna fuente tiene resultados aún para esta sesión, mantener caché de la sesión o estado vacío limpio
 				if (sessionResultsCache.current[activeTab] && sessionResultsCache.current[activeTab].length > 0) {
 					setResults(sessionResultsCache.current[activeTab]);
-				} else if (effectiveGpName?.toLowerCase().includes("vegas") && (lasVegasFallbackData as any)[activeTab]?.length > 0) {
-					const fbData = (lasVegasFallbackData as any)[activeTab];
-					sessionResultsCache.current[activeTab] = fbData;
-					setResults(fbData);
-				} else if (isBrazilSession && (brazilFallbackData as any)[activeTab] && Array.isArray((brazilFallbackData as any)[activeTab])) {
-					const fbData = (brazilFallbackData as any)[activeTab];
-					sessionResultsCache.current[activeTab] = fbData;
-					setResults(fbData);
 				} else {
 					setResults([]);
 				}
@@ -1124,7 +1104,11 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 						</div>
 					) : results.length === 0 ? (
 						<div className="h-48 flex flex-col items-center justify-center gap-2 text-zinc-400 font-mono text-xs text-center p-6 bg-zinc-950/40 rounded-xl border border-zinc-900/80">
-							<span className="text-amber-400 font-bold text-xs uppercase tracking-wider">{t("parc_ferme.times_homologation_title", "⏱️ Tiempos en Homologación FIA")}</span>
+							<span className="text-amber-400 font-bold text-xs uppercase tracking-wider">
+								{smartContext?.stage === "PRE_WEEKEND"
+									? t("parc_ferme.session_scheduled_title", "🏁 Sesión programada · Esperando inicio oficial de pista")
+									: t("parc_ferme.times_homologation_title", "⏱️ Tiempos en Homologación FIA")}
+							</span>
 							<p className="max-w-md text-zinc-400 text-[11px] leading-relaxed">
 								{t("parc_ferme.times_homologation_desc", "Aguardando la publicación de registros oficiales para esta sesión del {gpName}. Los resultados se actualizarán automáticamente en la consola apenas estén disponibles.").replace("{gpName}", gpName)}
 							</p>

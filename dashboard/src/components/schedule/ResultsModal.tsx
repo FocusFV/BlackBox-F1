@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import { X, Trophy, Flag, Timer } from "lucide-react";
 import clsx from "clsx";
-import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
 import { translateGpName, translateStatus, translateCountry } from "@/lib/f1Translations";
 import { useTranslation } from "@/hooks/useTranslation";
 
@@ -144,19 +143,6 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 
 									let pointsStr = item.points ? `+${item.points} PTS` : "";
 
-									// 🇧🇷 Homologación oficial para Brasil (Ronda 20): P9 a P12 tienen sus gaps verificados (+1:24.427, +1:27.105, etc.)
-									if (isBrazil || String(targetRound) === "20") {
-										const fbMatch = (brazilFallbackData?.RACE as any[])?.find(
-											(fb) => String(fb.number) === String(item.number) || fb.code === code
-										);
-										if (fbMatch?.gapTime) {
-											gapTime = fbMatch.gapTime;
-										}
-										if (fbMatch?.points) {
-											pointsStr = fbMatch.points;
-										}
-									}
-
 									return {
 										position: parseInt(item.position, 10) || 99,
 										driver_number: item.number,
@@ -272,23 +258,7 @@ export default function ResultsModal({ meetingKey, roundNumber, raceName, countr
 			}
 
 			if (isMounted) {
-				const fb = (brazilFallbackData as any).RACE;
-				if (Array.isArray(fb) && fb.length > 0) {
-					const parsed = fb.map((r: any) => ({
-						position: parseInt(r.pos, 10) || 99,
-						driver_number: r.number,
-						driverName: r.name,
-						code: r.code,
-						flag: driverNationalityMap[r.code] || "fia",
-						teamName: r.team,
-						gapTime: r.gapTime,
-						points: r.points,
-						isDNF: r.isDNF,
-					}));
-					setResults(parsed);
-				} else {
-					setResults([]);
-				}
+				setResults([]);
 				setLoading(false);
 			}
 		}

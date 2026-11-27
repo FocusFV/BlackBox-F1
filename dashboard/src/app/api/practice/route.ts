@@ -1,32 +1,39 @@
 import { NextResponse } from "next/server";
-import brazilFallbackData from "@/lib/brazil2026_practice_fallback.json";
-import lasVegasFallbackData from "@/lib/lasvegas2026_fallback.json";
 
 export const dynamic = "force-dynamic";
 
 // 🏎️ Caché en memoria para evitar rate-limits de OpenF1 (3 req/segundo)
 const sessionResultsCache: Record<string, { timestamp: number; data: any }> = {};
+const sessionsListCache: Record<string, { timestamp: number; data: any[] }> = {};
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hora de validez en memoria
+const SESSIONS_CACHE_TTL_MS = 15 * 60 * 1000; // 15 min para lista de sesiones
 
-const brazilFallback = brazilFallbackData as Record<string, any[]>;
-const lasVegasFallback = lasVegasFallbackData as Record<string, any[]>;
-
-function getFallbackForSession(sessionName: string, circuitShortName?: string) {
-	if (lasVegasFallback[sessionName] && (!circuitShortName || circuitShortName.toLowerCase().includes("vegas") || circuitShortName === "Interlagos")) {
-		return {
-			session: sessionName,
-			circuit: "Las Vegas Strip Circuit",
-			total: lasVegasFallback[sessionName].length,
-			results: lasVegasFallback[sessionName],
-		};
-	}
-	if (brazilFallback[sessionName]) {
-		return {
-			session: sessionName,
-			circuit: circuitShortName || "Interlagos",
-			total: brazilFallback[sessionName].length,
-			results: brazilFallback[sessionName],
-		};
+async function fetchOpenF1(url: string, retries: number = 2): Promise<Response | null> {
+	for (let attempt = 0; attempt <= retries; attempt++) {
+		try {
+			const res = await fetch(url, {
+				headers: {
+					"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) BlackboxF1/4.1",
+					"Accept": "application/json",
+				},
+				next: { revalidate: 1800 },
+			});
+			if (res.ok) return res;
+			if (res.status === 429 || res.status >= 500) {
+				if (attempt < retries) {
+					await new Promise((r) => setTimeout(r, 450 * (attempt + 1)));
+					continue;
+				}
+			}
+			return res;
+		} catch (e) {
+			if (attempt < retries) {
+				await new Promise((r) => setTimeout(r, 450 * (attempt + 1)));
+				continue;
+			}
+			console.warn("[API Practice] Error en fetchOpenF1:", url, e);
+			return null;
+		}
 	}
 	return null;
 }
@@ -37,9 +44,9 @@ export async function GET(request: Request) {
 	const meetingKey = searchParams.get("meeting_key") || "latest";
 	const raceDate = searchParams.get("date") || new Date().toISOString().split("T")[0];
 
-	const cacheKey = `${meetingKey}_${sessionName}`;
+	const cacheKey = `${meetingKey}_${raceDate}_${sessionName}`;
 
-	// 1. Si ya tenemos los resultados en caché de memoria reciente, devolver inmediatamente
+	// 1. Si ya tenemos los resultados reales en caché de memoria reciente, devolver inmediatamente
 	if (
 		sessionResultsCache[cacheKey] &&
 		Date.now() - sessionResultsCache[cacheKey].timestamp < CACHE_TTL_MS &&
@@ -50,49 +57,41 @@ export async function GET(request: Request) {
 	}
 
 	try {
-		// 2. Obtener sesiones de OpenF1 para el fin de semana objetivo
+		// 2. Obtener sesiones de OpenF1 para el fin de semana objetivo (con caché para ahorrar requests)
+		const sessionsCacheKey = `${meetingKey}_${raceDate}`;
 		let sessionsData: any[] = [];
-		try {
-			const sessionsRes = await fetch(
-				`https://api.openf1.org/v1/sessions?meeting_key=${meetingKey}`,
-				{
-					headers: {
-						"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) BlackboxF1/4.1",
-						"Accept": "application/json",
-					},
-					next: { revalidate: 1800 },
-				}
+		if (
+			sessionsListCache[sessionsCacheKey] &&
+			Date.now() - sessionsListCache[sessionsCacheKey].timestamp < SESSIONS_CACHE_TTL_MS
+		) {
+			sessionsData = sessionsListCache[sessionsCacheKey].data;
+		} else {
+			const sessionsRes = await fetchOpenF1(
+				`https://api.openf1.org/v1/sessions?meeting_key=${meetingKey}`
 			);
-			if (sessionsRes.ok) {
+			if (sessionsRes?.ok) {
 				const json = await sessionsRes.json();
 				if (Array.isArray(json)) sessionsData = json;
 			}
-		} catch (e) {
-			console.warn("[API Practice] Error con meeting_key:", e);
-		}
 
-		// Fallback por rango de fechas si meeting_key no arrojó resultados
-		if (!Array.isArray(sessionsData) || sessionsData.length === 0) {
-			try {
+			// Búsqueda por rango de fechas si meeting_key no arrojó resultados
+			if (!Array.isArray(sessionsData) || sessionsData.length === 0) {
 				const targetDate = new Date(raceDate);
-				const minDate = new Date(targetDate.getTime() - 7 * 86400000).toISOString().split("T")[0];
-				const maxDate = new Date(targetDate.getTime() + 4 * 86400000).toISOString().split("T")[0];
-				const dateRes = await fetch(
-					`https://api.openf1.org/v1/sessions?date_start>=${minDate}&date_start<=${maxDate}`,
-					{
-						headers: {
-							"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) BlackboxF1/4.1",
-							"Accept": "application/json",
-						},
-						next: { revalidate: 1800 },
+				if (!isNaN(targetDate.getTime())) {
+					const minDate = new Date(targetDate.getTime() - 7 * 86400000).toISOString().split("T")[0];
+					const maxDate = new Date(targetDate.getTime() + 4 * 86400000).toISOString().split("T")[0];
+					const dateRes = await fetchOpenF1(
+						`https://api.openf1.org/v1/sessions?date_start>=${minDate}&date_start<=${maxDate}`
+					);
+					if (dateRes?.ok) {
+						const json = await dateRes.json();
+						if (Array.isArray(json)) sessionsData = json;
 					}
-				);
-				if (dateRes.ok) {
-					const json = await dateRes.json();
-					if (Array.isArray(json)) sessionsData = json;
 				}
-			} catch (e) {
-				console.warn("[API Practice] Error con date range:", e);
+			}
+
+			if (sessionsData.length > 0) {
+				sessionsListCache[sessionsCacheKey] = { timestamp: Date.now(), data: sessionsData };
 			}
 		}
 
@@ -112,39 +111,21 @@ export async function GET(request: Request) {
 			: null;
 
 		if (!matchingSession) {
-			const fb = getFallbackForSession(sessionName);
-			if (fb) {
-				sessionResultsCache[cacheKey] = { timestamp: Date.now(), data: fb };
-				return NextResponse.json(fb);
-			}
-			return NextResponse.json({ error: `Sesión ${sessionName} no encontrada` }, { status: 404 });
+			return NextResponse.json(
+				{ session: sessionName, circuit: null, total: 0, results: [] },
+				{ status: 200 }
+			);
 		}
 
 		const sessionKey = matchingSession.session_key;
 
 		// 3. Si es CARRERA o SPRINT, procesamos por posiciones finales e intervalos
 		if (sessionName === "RACE" || sessionName === "SPRINT") {
-			const [driversRes, posRes, intRes] = await Promise.all([
-				fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`, {
-					headers: { "User-Agent": "BlackboxF1/4.1" },
-					next: { revalidate: 1800 },
-				}).catch(() => null),
-				fetch(`https://api.openf1.org/v1/position?session_key=${sessionKey}`, {
-					headers: { "User-Agent": "BlackboxF1/4.1" },
-					next: { revalidate: 1800 },
-				}).catch(() => null),
-				fetch(`https://api.openf1.org/v1/intervals?session_key=${sessionKey}`, {
-					headers: { "User-Agent": "BlackboxF1/4.1" },
-					next: { revalidate: 1800 },
-				}).catch(() => null),
-			]);
+			const driversRes = await fetchOpenF1(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`);
+			const posRes = await fetchOpenF1(`https://api.openf1.org/v1/position?session_key=${sessionKey}`);
+			const intRes = await fetchOpenF1(`https://api.openf1.org/v1/intervals?session_key=${sessionKey}`);
 
 			if (!driversRes?.ok || !posRes?.ok) {
-				const fb = getFallbackForSession(sessionName, matchingSession.circuit_short_name);
-				if (fb) {
-					sessionResultsCache[cacheKey] = { timestamp: Date.now(), data: fb };
-					return NextResponse.json(fb);
-				}
 				return NextResponse.json({ error: "Error obteniendo posiciones de OpenF1" }, { status: 502 });
 			}
 
@@ -199,44 +180,29 @@ export async function GET(request: Request) {
 
 			const payload = {
 				session: sessionName,
-				circuit: matchingSession.circuit_short_name,
+				circuit: matchingSession.circuit_short_name || null,
 				total: results.length,
 				results,
 			};
 
-			sessionResultsCache[cacheKey] = { timestamp: Date.now(), data: payload };
+			if (results.length > 0) {
+				sessionResultsCache[cacheKey] = { timestamp: Date.now(), data: payload };
+			}
 			return NextResponse.json(payload);
 		}
 
 		// 4. Para PRÁCTICAS y CLASIFICACIÓN (FP1, FP2, FP3, QUALY, SQ), calculamos mejor vuelta por piloto
-		const [driversRes, lapsRes] = await Promise.all([
-			fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`, {
-				headers: { "User-Agent": "BlackboxF1/4.1" },
-				next: { revalidate: 1800 },
-			}).catch(() => null),
-			fetch(`https://api.openf1.org/v1/laps?session_key=${sessionKey}&is_pit_out_lap=false`, {
-				headers: { "User-Agent": "BlackboxF1/4.1" },
-				next: { revalidate: 1800 },
-			}).catch(() => null),
-		]);
+		// Consultamos secuencialmente con retry automático para respetar el rate-limit de OpenF1 (3 req/s)
+		const driversRes = await fetchOpenF1(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`);
+		const lapsRes = await fetchOpenF1(`https://api.openf1.org/v1/laps?session_key=${sessionKey}&is_pit_out_lap=false`);
 
 		if (!driversRes?.ok || !lapsRes?.ok) {
-			const fb = getFallbackForSession(sessionName, matchingSession.circuit_short_name);
-			if (fb) {
-				sessionResultsCache[cacheKey] = { timestamp: Date.now(), data: fb };
-				return NextResponse.json(fb);
-			}
 			return NextResponse.json({ error: "Error obteniendo datos de vueltas de OpenF1" }, { status: 502 });
 		}
 
 		const [drivers, laps] = await Promise.all([driversRes.json(), lapsRes.json()]);
 
 		if (!Array.isArray(drivers) || !Array.isArray(laps)) {
-			const fb = getFallbackForSession(sessionName, matchingSession.circuit_short_name);
-			if (fb) {
-				sessionResultsCache[cacheKey] = { timestamp: Date.now(), data: fb };
-				return NextResponse.json(fb);
-			}
 			return NextResponse.json({ error: "Respuesta inválida de OpenF1" }, { status: 502 });
 		}
 
@@ -290,77 +256,55 @@ export async function GET(request: Request) {
 		if (results.length > 0) {
 			finalResults = results;
 		} else if (Array.isArray(drivers) && drivers.length > 0) {
-			// 🌧️ Sesión con lluvia / bandera roja o sin tiempos cronometrados completos:
-			// Obtenemos el orden oficial por última posición registrada en pista en OpenF1 (ej: Checo Pérez P1)
+			// Sesión sin tiempos cronometrados (lluvia intensa / bandera roja): ordenar por última posición real en OpenF1
 			let posData: any[] = [];
-			try {
-				const posRes = await fetch(`https://api.openf1.org/v1/position?session_key=${sessionKey}`, {
-					headers: { "User-Agent": "BlackboxF1/4.1" },
-				});
-				if (posRes.ok) {
-					posData = await posRes.json();
-				}
-			} catch (e) {
-				console.warn("[API Practice] Error obteniendo posiciones de lluvia:", e);
+			const posRes = await fetchOpenF1(`https://api.openf1.org/v1/position?session_key=${sessionKey}`);
+			if (posRes?.ok) {
+				posData = await posRes.json();
 			}
 
-			const lastPosMap: Record<string, any> = {};
-			if (Array.isArray(posData)) {
+			if (Array.isArray(posData) && posData.length > 0) {
+				const lastPosMap: Record<string, any> = {};
 				for (const p of posData) {
 					lastPosMap[String(p.driver_number)] = p;
 				}
-			}
 
-			finalResults = drivers
-				.slice()
-				.sort((a, b) => {
-					const posA = lastPosMap[String(a.driver_number)]?.position ?? 99;
-					const posB = lastPosMap[String(b.driver_number)]?.position ?? 99;
-					if (posA !== posB) return posA - posB;
-					return Number(a.driver_number) - Number(b.driver_number);
-				})
-				.map((d, idx) => {
-					let gapTime = "S/T · SIN TIEMPO";
-					if (idx === 0) {
-						gapTime = "P1 · SIN TIEMPO (LLUVIA)";
-					} else if (idx < 4) {
-						gapTime = "S/T (INSTALACIÓN)";
-					} else {
-						gapTime = "S/T · SIN TIEMPO";
-					}
-
-					return {
+				finalResults = drivers
+					.slice()
+					.sort((a, b) => {
+						const posA = lastPosMap[String(a.driver_number)]?.position ?? 99;
+						const posB = lastPosMap[String(b.driver_number)]?.position ?? 99;
+						if (posA !== posB) return posA - posB;
+						return Number(a.driver_number) - Number(b.driver_number);
+					})
+					.map((d, idx) => ({
 						pos: String(idx + 1),
 						number: String(d.driver_number),
 						code: d.name_acronym || `P${d.driver_number}`,
 						name: d.full_name || `Piloto #${d.driver_number}`,
 						team: d.team_name || "Equipo",
 						constructorId: (d.team_name || "").toLowerCase().replaceAll(" ", "-"),
-						gapTime,
+						gapTime: "S/T",
 						points: "",
 						isDNF: false,
 						laps: totalLapsMap[String(d.driver_number)] || 0,
-					};
-				});
-		} else {
-			finalResults = getFallbackForSession(sessionName, matchingSession.circuit_short_name)?.results || [];
+					}));
+			}
 		}
 
 		const payload = {
 			session: sessionName,
-			circuit: matchingSession.circuit_short_name || "Las Vegas Strip Circuit",
+			circuit: matchingSession.circuit_short_name || null,
 			total: finalResults.length,
 			results: finalResults,
 		};
 
-		sessionResultsCache[cacheKey] = { timestamp: Date.now(), data: payload };
+		if (finalResults.length > 0) {
+			sessionResultsCache[cacheKey] = { timestamp: Date.now(), data: payload };
+		}
 		return NextResponse.json(payload);
 	} catch (error: any) {
 		console.error("Error en API practice/session:", error);
-		const fb = getFallbackForSession(sessionName);
-		if (fb) {
-			return NextResponse.json(fb);
-		}
 		return NextResponse.json({ error: error.message }, { status: 500 });
 	}
 }

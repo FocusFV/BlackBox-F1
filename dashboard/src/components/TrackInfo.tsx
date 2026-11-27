@@ -37,7 +37,10 @@ export default function TrackInfo() {
 		Math.abs(currentTime - new Date(heartbeatUtc).getTime()) < 3 * 60 * 1000
 	);
 
-	const isSessionStarted = sessionStatus === "Started" || sessionStatus === "Running";
+	const isSessionStarted =
+		sessionStatus === "Started" ||
+		sessionStatus === "Running" ||
+		sessionStatus === "StartedOnTime";
 
 	const isQualy = session?.Name?.toLowerCase().includes("qual") || Boolean(timingData?.SessionPart);
 	const sessionPart = timingData?.SessionPart || 1;
@@ -78,7 +81,7 @@ export default function TrackInfo() {
 		? chequeredMessages[chequeredMessages.length - 1]
 		: null;
 	const lastChequeredMs = parseUtcMs(lastChequered?.Utc);
-	const effectiveSessionEndMs = lastChequeredMs || (session?.EndDate ? parseUtcMs(session.EndDate) : null);
+	const effectiveSessionEndMs = lastChequeredMs || (session?.EndDate ? parseUtcMs(session.EndDate, session?.GmtOffset) : null);
 
 	const isPostSession = Boolean(
 		isSessionTerminated &&
@@ -189,6 +192,7 @@ export default function TrackInfo() {
 	);
 
 	const hasPartStarted = Boolean(
+		isSessionStarted ||
 		hasActiveTiming ||
 		hasCarsOnTrack ||
 		(lastGreenMs && (!scheduledStartMs || lastGreenMs >= scheduledStartMs - 10 * 60 * 1000))
@@ -263,7 +267,7 @@ export default function TrackInfo() {
 				if (lastGreen?.Utc) {
 					partStartMs = parseUtcMs(lastGreen.Utc);
 				} else if (session?.StartDate) {
-					partStartMs = parseUtcMs(session.StartDate);
+					partStartMs = parseUtcMs(session.StartDate, session?.GmtOffset);
 				}
 
 				if (partStartMs && lastRedMs && lastRedMs > partStartMs) {
@@ -290,7 +294,7 @@ export default function TrackInfo() {
 			if (lastGreen?.Utc) {
 				partStartMs = parseUtcMs(lastGreen.Utc);
 			} else if (session?.StartDate) {
-				partStartMs = parseUtcMs(session.StartDate);
+				partStartMs = parseUtcMs(session.StartDate, session?.GmtOffset);
 			}
 
 			if (partStartMs) {

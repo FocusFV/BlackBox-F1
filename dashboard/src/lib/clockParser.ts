@@ -4,14 +4,26 @@
 
 import calendar2026 from "@/data/calendar2026.json";
 
-export function parseUtcMs(utcStr?: string): number | null {
+export function normalizeGmtOffset(gmtOffset?: string): string | null {
+	if (!gmtOffset) return null;
+	const clean = gmtOffset.trim();
+	const match = clean.match(/^([+-]?)(\d{1,2}):(\d{2})(?::\d{2})?$/);
+	if (!match) return null;
+	const sign = match[1] || "+";
+	const hours = match[2].padStart(2, "0");
+	const mins = match[3];
+	return `${sign}${hours}:${mins}`;
+}
+
+export function parseUtcMs(utcStr?: string, gmtOffset?: string): number | null {
 	if (!utcStr) return null;
 	const clean = utcStr.trim();
 	if (clean.endsWith("Z") || /[+-]\d{2}:\d{2}$/.test(clean)) {
 		const ms = new Date(clean).getTime();
 		return isNaN(ms) ? null : ms;
 	}
-	const ms = new Date(`${clean}Z`).getTime();
+	const offset = normalizeGmtOffset(gmtOffset);
+	const ms = new Date(`${clean}${offset || "Z"}`).getTime();
 	return isNaN(ms) ? null : ms;
 }
 
@@ -84,7 +96,7 @@ export function formatMsToCountdownParts(ms: number): {
 
 export function getScheduledSessionStartMs(session?: any): number | null {
 	if (session?.StartDate) {
-		const ms = parseUtcMs(session.StartDate);
+		const ms = parseUtcMs(session.StartDate, session.GmtOffset);
 		if (ms && !isNaN(ms)) return ms;
 	}
 	if (session?.Name) {

@@ -8,6 +8,7 @@ import { useSettingsStore } from "@/stores/useSettingsStore";
 import Flag from "@/components/Flag";
 import { translateGpName, getCountryCodeForGp } from "@/lib/f1Translations";
 import { parseUtcMs, parseFomClockRemaining, formatMsToClock, getScheduledSessionStartMs } from "@/lib/clockParser";
+import { getNextCalendarSessionSync } from "@/lib/sessionSchedule";
 import { simulator } from "@/lib/simulatorFeed";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useCircuitStore } from "@/stores/useCircuitStore";
@@ -108,7 +109,7 @@ export default function SessionInfo() {
 		? chequeredMessages[chequeredMessages.length - 1]
 		: null;
 	const lastChequeredMs = parseUtcMs(lastChequered?.Utc);
-	const effectiveSessionEndMs = lastChequeredMs || (session?.EndDate ? parseUtcMs(session.EndDate) : null);
+	const effectiveSessionEndMs = lastChequeredMs || (session?.EndDate ? parseUtcMs(session.EndDate, session?.GmtOffset) : null);
 
 	// Detectar ventana de 15 minutos post-sesión tras la bandera a cuadros real
 	const isPostSession = Boolean(
@@ -167,10 +168,12 @@ export default function SessionInfo() {
 
 	const isOfflineOrFinished = !isLive && !effectiveSimActive;
 
-	const [nextGpName, setNextGpName] = useState("Gran Premio de Las Vegas");
-	const [nextSessionName, setNextSessionName] = useState("Práctica 1");
+	const initialNextSession = getNextCalendarSessionSync();
+	const [nextGpName, setNextGpName] = useState(() => translateGpName(initialNextSession.raceName));
+	const [nextSessionName, setNextSessionName] = useState(() => initialNextSession.sessionName);
 	const [countdown, setCountdown] = useState(() => {
-		const target = new Date("2026-11-20T00:30:00Z");
+		const target = initialNextSession.targetDate;
+		if (!target) return "00:00:00";
 		const difference = target.getTime() - Date.now();
 		if (difference <= 0) return "00:00:00";
 		const days = Math.floor(difference / (1000 * 60 * 60 * 24));
@@ -182,7 +185,7 @@ export default function SessionInfo() {
 			? `${days}D ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
 			: `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 	});
-	const [countryCode, setCountryCode] = useState<string | undefined>("usa");
+	const [countryCode, setCountryCode] = useState<string | undefined>(() => initialNextSession.countryCode || undefined);
 
 	const calcCountdown = (target: Date) => {
 		const difference = target.getTime() - Date.now();
@@ -430,7 +433,13 @@ export default function SessionInfo() {
 		Object.values(timingData.Lines).some((l: any) => !l.InPit && !l.Retired && !l.Stopped)
 	);
 
+	const isSessionStarted =
+		sessionStatus === "Started" ||
+		sessionStatus === "Running" ||
+		sessionStatus === "StartedOnTime";
+
 	const hasPartStarted = Boolean(
+		isSessionStarted ||
 		hasActiveTiming ||
 		hasCarsOnTrack ||
 		(lastGreenMs && (!scheduledStartMs || lastGreenMs >= scheduledStartMs - 10 * 60 * 1000))
@@ -507,7 +516,7 @@ export default function SessionInfo() {
 				if (lastGreen?.Utc) {
 					partStartMs = parseUtcMs(lastGreen.Utc);
 				} else if (session?.StartDate) {
-					partStartMs = parseUtcMs(session.StartDate);
+					partStartMs = parseUtcMs(session.StartDate, session?.GmtOffset);
 				}
 
 				if (partStartMs && lastRedMs && lastRedMs > partStartMs) {
@@ -534,7 +543,7 @@ export default function SessionInfo() {
 			if (lastGreen?.Utc) {
 				partStartMs = parseUtcMs(lastGreen.Utc);
 			} else if (session?.StartDate) {
-				partStartMs = parseUtcMs(session.StartDate);
+				partStartMs = parseUtcMs(session.StartDate, session?.GmtOffset);
 			}
 
 			if (partStartMs) {
