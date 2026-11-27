@@ -128,44 +128,53 @@ export default function StreamsPage() {
 	const STREAMS_CONFIG_RAW: Record<string, { label: string; token: string }[]> = {
 		FOX: [
 			{ label: "Servidor 1 (StreamXHD .sbs)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09Zm94MWFy" },
-			{ label: "Servidor 2 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1mb3gxYXI=" },
-			{ label: "Servidor 3 (StreamXHD .click)", token: "aHR0cHM6Ly9zdHJlYW14aGQuY2xpY2svbGl2ZTEucGhwP3N0cmVhbT1mb3gxYXI=" },
-			{ label: "Servidor 4 (StreamTP)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWZveDFhcg==" },
-			{ label: "Servidor 5 (DaddyLive)", token: "aHR0cHM6Ly90aGVkYWRkeS5way9zdHJlYW0vc3RyZWFtLTc4Ny5waHA=" },
-			{ label: "Servidor 6 (Respaldo)", token: "aHR0cHM6Ly9sYTE4aGQuc3Uvdml2by9jYW5hbGVzLnBocD9zdHJlYW09Zm94c3BvcnRz" },
+			// [TEMPORAL] Deshabilitados temporalmente
+			// { label: "Servidor 2 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1mb3gxYXI=" },
+			// { label: "Servidor 3 (StreamXHD .click)", token: "aHR0cHM6Ly9zdHJlYW14aGQuY2xpY2svbGl2ZTEucGhwP3N0cmVhbT1mb3gxYXI=" },
+			// { label: "Servidor 4 (StreamTP)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWZveDFhcg==" },
+			{ label: "Servidor 2 (DaddyLive)", token: "aHR0cHM6Ly90aGVkYWRkeS5way9zdHJlYW0vc3RyZWFtLTc4Ny5waHA=" },
+			// { label: "Servidor 6 (Respaldo)", token: "aHR0cHM6Ly9sYTE4aGQuc3Uvdml2by9jYW5hbGVzLnBocD9zdHJlYW09Zm94c3BvcnRz" },
 		],
 		DISNEY: [
-			{ label: "Servidor 1 (StreamXHD .sbs)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGlzbmV5NA==" },
-			{ label: "Servidor 2 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXk0" },
-			{ label: "Servidor 3 (StreamXHD .click)", token: "aHR0cHM6Ly9zdHJlYW14aGQuY2xpY2svbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXk0" },
-			{ label: "Servidor 4 (StreamTP)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRpc25leTg=" },
-			{ label: "Servidor 5 (DaddyLive)", token: "aHR0cHM6Ly9kYWRkeWxpdmUubW92L3BsYXllci9lbWJlZC5waHA/aWQ9ZDM0Yjg=" },
+			// [TEMPORAL] Race Hub movido desde GENERAL mientras se deshabilitan los servidores anteriores
+			{ label: "Race Hub", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGlzbmV5NQ==" },
+			// [TEMPORAL] Deshabilitados temporalmente
+			// { label: "Servidor 1 (StreamXHD .sbs)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGlzbmV5NA==" },
+			// { label: "Servidor 2 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXk0" },
+			// { label: "Servidor 3 (StreamXHD .click)", token: "aHR0cHM6Ly9zdHJlYW14aGQuY2xpY2svbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXk0" },
+			// { label: "Servidor 4 (StreamTP)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRpc25leTg=" },
+			// { label: "Servidor 5 (DaddyLive)", token: "aHR0cHM6Ly9kYWRkeWxpdmUubW92L3BsYXllci9lbWJlZC5waHA/aWQ9ZDM0Yjg=" },
 		],
 		DAZN: [
 			{ label: "Servidor 1 (StreamXHD .sbs)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGF6bmYx" },
-			{ label: "Servidor 2 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1kYXpuZjE=" },
-			{ label: "Servidor 3 (StreamXHD .click)", token: "aHR0cHM6Ly9zdHJlYW14aGQuY2xpY2svbGl2ZTEucGhwP3N0cmVhbT1kYXpuZjE=" },
-			{ label: "Servidor 4 (StreamTP)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRhem5mMQ==" },
-			{ label: "Servidor 5 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/Y2hhbm5lbD1kYXpuZjE=" },
+			// [TEMPORAL] Deshabilitados temporalmente
+			// { label: "Servidor 2 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1kYXpuZjE=" },
+			// { label: "Servidor 3 (StreamXHD .click)", token: "aHR0cHM6Ly9zdHJlYW14aGQuY2xpY2svbGl2ZTEucGhwP3N0cmVhbT1kYXpuZjE=" },
+			// { label: "Servidor 4 (StreamTP)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/c3RyZWFtPWRhem5mMQ==" },
+			// { label: "Servidor 5 (Respaldo)", token: "aHR0cHM6Ly9zdHJlYW10cDk5YS5zYnMvZ2xvYmFsMS5waHA/Y2hhbm5lbD1kYXpuZjE=" },
 		],
 		F1TV: [
 			{ label: "Servidor 1 (F1 Oficial HD 1080p)", token: "aHR0cHM6Ly93ZWVsbHoubGl2ZS9iZXRhP3N0cmVhbT1nZWJkYWNlZmdmYWNpZWVl" },
-			{ label: "Servidor 2 (DaddyLive F1)", token: "aHR0cHM6Ly90aGVkYWRkeS5way9zdHJlYW0vc3RyZWFtLTc4Ny5waHA=" },
+			// [TEMPORAL] Deshabilitado temporalmente
+			// { label: "Servidor 2 (DaddyLive F1)", token: "aHR0cHM6Ly90aGVkYWRkeS5way9zdHJlYW0vc3RyZWFtLTc4Ny5waHA=" },
 		],
 		COLAPINTO: [
 			{ label: "Servidor 1 (StreamXHD .sbs)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGlzbmV5Ng==" },
-			{ label: "Servidor 2 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXk2" },
-			{ label: "Servidor 3 (StreamXHD .click)", token: "aHR0cHM6Ly9zdHJlYW14aGQuY2xpY2svbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXk2" },
+			// [TEMPORAL] Deshabilitados temporalmente
+			// { label: "Servidor 2 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXk2" },
+			// { label: "Servidor 3 (StreamXHD .click)", token: "aHR0cHM6Ly9zdHJlYW14aGQuY2xpY2svbGl2ZTEucGhwP3N0cmVhbT1kaXNuZXk2" },
 		],
 		GENERAL: [
-			{ label: "ESPN 2", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZXNwbjI=" },
-			{ label: "Race Hub", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGlzbmV5NQ==" },
+			// [TEMPORAL] Deshabilitados / movido temporalmente
+			// { label: "ESPN 2", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZXNwbjI=" },
+			// { label: "Race Hub", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGlzbmV5NQ==" },
 			{ label: "Cámara On Board", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09ZGlzbmV5OA==" },
 		],
 		SPORTV: [
 			{ label: "Servidor 1 (StreamXHD .sbs)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc2JzL2xpdmUxLnBocD9zdHJlYW09c3BvcnR0dmJyMw==" },
-			{ label: "Servidor 2 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1zcG9ydHR2YnIz" },
-			{ label: "Servidor 3 (StreamXHD .click)", token: "aHR0cHM6Ly9zdHJlYW14aGQuY2xpY2svbGl2ZTEucGhwP3N0cmVhbT1zcG9ydHR2YnIz" },
+			// [TEMPORAL] Deshabilitados temporalmente
+			// { label: "Servidor 2 (StreamXHD .st)", token: "aHR0cHM6Ly9zdHJlYW14aGQuc3QvbGl2ZTEucGhwP3N0cmVhbT1zcG9ydHR2YnIz" },
+			// { label: "Servidor 3 (StreamXHD .click)", token: "aHR0cHM6Ly9zdHJlYW14aGQuY2xpY2svbGl2ZTEucGhwP3N0cmVhbT1zcG9ydHR2YnIz" },
 		],
 	};
 
