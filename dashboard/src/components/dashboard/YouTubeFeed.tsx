@@ -97,11 +97,11 @@ export function YouTubeFeed() {
 						<span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
 					</span>
 					<h2 className="text-xs md:text-sm font-bold uppercase tracking-wider font-mono text-zinc-200">
-						Sesiones Oficiales en Video · {displayGpName}
+						{t("youtube.official_sessions_video", "Sesiones Oficiales en Video")} · {displayGpName}
 					</h2>
 				</div>
 				<span className="text-[10px] font-mono text-zinc-500 hidden sm:inline-block uppercase tracking-wider">
-					Fórmula 1 Oficial • YouTube
+					{t("youtube.official_badge", "Fórmula 1 Oficial")} • YouTube
 				</span>
 			</div>
 

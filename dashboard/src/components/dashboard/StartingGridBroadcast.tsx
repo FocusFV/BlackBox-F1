@@ -8,6 +8,7 @@ import { isFavoriteDriver, DRIVER_NUMBER_TO_TLA } from "@/lib/favoriteDriver";
 import { getCountryCodeForGp } from "@/lib/f1Translations";
 import Flag from "@/components/Flag";
 import { triggerHaptic } from "@/lib/haptics";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface DriverResult {
 	pos: string;
@@ -212,9 +213,10 @@ const carbonFiberStyle: React.CSSProperties = {
 
 export const StartingGridBroadcast: React.FC<StartingGridBroadcastProps> = ({
 	gridResults,
-	gpName = "Gran Premio de Las Vegas",
+	gpName = "",
 	countryCode,
 }) => {
+	const { t } = useTranslation();
 	const openDriverModal = useDriverModalStore((state) => state.open);
 
 	const handleDriverSelect = (driver: DriverResult) => {
@@ -314,7 +316,7 @@ export const StartingGridBroadcast: React.FC<StartingGridBroadcastProps> = ({
 									{gpName}
 								</h3>
 								<p className="text-[9.5px] sm:text-[11px] font-bold text-amber-400 tracking-widest uppercase leading-tight mt-0.5">
-									PARRILLA OFICIAL DE SALIDA · STARTING GRID
+									{t("parc_ferme.broadcast_grid_subtitle", "PARRILLA OFICIAL DE SALIDA · STARTING GRID")}
 								</p>
 							</div>
 						</div>

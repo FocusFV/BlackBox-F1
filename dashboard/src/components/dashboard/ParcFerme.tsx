@@ -695,9 +695,9 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 
 							let gapTime = "";
 							if (posNum === 1) {
-								gapTime = `${line.NumberOfLaps || currentLap?.TotalLaps || 71} VUELTAS`;
+								gapTime = `${line.NumberOfLaps || currentLap?.TotalLaps || 71} ${t("parc_ferme.laps_upper", "VUELTAS")}`;
 							} else if (isDNF) {
-								gapTime = line.NumberOfLaps ? `DNF (Vta ${line.NumberOfLaps})` : "DNF · RETIRADO";
+								gapTime = line.NumberOfLaps ? `DNF (${t("telemetry.lap_badge", "VTA")} ${line.NumberOfLaps})` : t("parc_ferme.dnf_retired", "DNF · RETIRADO");
 							} else {
 								gapTime = line.GapToLeader || line.IntervalToPositionAhead?.Value || "INTERVAL";
 							}
@@ -928,13 +928,13 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 								gapTime = "S/T";
 							}
 						} else if (isDNF) {
-							gapTime = `DNF · ${translateStatus(r.status) || "RETIRADO"}`;
+							gapTime = translateStatus(r.status) ? `DNF · ${translateStatus(r.status)}` : t("parc_ferme.dnf_retired", "DNF · RETIRADO");
 						} else if (r.position === "1" || String(r.position) === "1") {
-							gapTime = r.Time?.time || `${leaderLaps || 71} VUELTAS`;
+							gapTime = r.Time?.time || `${leaderLaps || 71} ${t("parc_ferme.laps_upper", "VUELTAS")}`;
 							const ptsNum = Number(r.points || 0);
 							pointsStr = ptsNum > 0 ? `+${ptsNum} PTS` : "";
 						} else if (isLapped) {
-							gapTime = lapsDiff <= 1 ? "+1 VUELTA" : `+${lapsDiff} VUELTAS`;
+							gapTime = lapsDiff <= 1 ? t("parc_ferme.plus_one_lap", "+1 VUELTA") : t("parc_ferme.plus_laps", "+{n} VUELTAS").replace("{n}", String(lapsDiff));
 							const ptsNum = Number(r.points || 0);
 							pointsStr = ptsNum > 0 ? `+${ptsNum} PTS` : "";
 						} else {
@@ -1168,7 +1168,7 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 							)}
 							<span className="text-[10px] font-mono text-amber-400/80 font-bold uppercase tracking-wider hidden sm:inline-block">
 								{activeTab === "QUALY" && qualyViewMode === "grid"
-									? "Gráfica Oficial F1 TV · F1 Grid"
+									? t("parc_ferme.broadcast_graphics_label", "Gráfica Oficial F1 TV · F1 Grid")
 									: "Blackbox Timing Console"}
 							</span>
 						</div>
@@ -1384,9 +1384,9 @@ export const ParcFerme: React.FC<ParcFermeProps> = ({ onOpenCircuit, onGpLoaded 
 														{typeof row.laps === "number" && row.laps > 0 && (
 															<span
 																className="text-[10px] sm:text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 shrink-0"
-																title={`${row.laps} vueltas completadas`}
+																title={t("parc_ferme.laps_completed_tooltip", "{n} vueltas completadas").replace("{n}", String(row.laps))}
 															>
-																{row.laps} <span className="text-[9px] text-zinc-500 font-semibold">VTS</span>
+																{row.laps} <span className="text-[9px] text-zinc-500 font-semibold">{t("telemetry.laps_short", "VTS")}</span>
 															</span>
 														)}
 													</div>

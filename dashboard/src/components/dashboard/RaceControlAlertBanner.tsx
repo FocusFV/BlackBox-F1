@@ -222,8 +222,8 @@ export function RaceControlAlertBanner() {
 				id: alertId,
 				type: "GREEN_FLAG",
 				title: isStart
-					? "¡LARGARON! · BANDERA VERDE EN PISTA"
-					: "PISTA HABILITADA · BANDERA VERDE",
+					? t("race_control.green_flag_title", "¡LARGARON! · BANDERA VERDE EN PISTA")
+					: t("race_control.restart_green_title", "PISTA HABILITADA · BANDERA VERDE"),
 				subtitle: translateFiaMessage(latest.Message, language),
 				badgeBg: "bg-emerald-400 text-black",
 				textColor: "text-emerald-200",

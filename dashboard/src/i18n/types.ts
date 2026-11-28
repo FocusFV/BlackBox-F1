@@ -104,6 +104,21 @@ export interface TranslationDictionary {
 		total_laps_session: string;
 		laps_unit: string;
 		current_gear: string;
+		sector_1: string;
+		sector_2: string;
+		sector_3: string;
+		in_pit_title: string;
+		on_track_title: string;
+		speed_trap_st: string;
+		finish_line_speed: string;
+		live: string;
+		grid_position: string;
+		qualy_position: string;
+		track_position: string;
+		grid_change: string;
+		no_changes: string;
+		session_laps: string;
+		laps_short: string;
 	};
 	parc_ferme: {
 		last_official_round: string;
@@ -129,6 +144,19 @@ export interface TranslationDictionary {
 		times_homologation_title: string;
 		times_homologation_desc: string;
 		tap_to_view_circuit: string;
+		session_scheduled_title: string;
+		official_grid_fia: string;
+		main_straight: string;
+		front_row: string;
+		starting_line_banner: string;
+		row_label: string;
+		broadcast_grid_subtitle: string;
+		broadcast_graphics_label: string;
+		dnf_retired: string;
+		plus_one_lap: string;
+		plus_laps: string;
+		laps_upper: string;
+		laps_completed_tooltip: string;
 	};
 	race_control: {
 		yellow_flag: string;
@@ -292,6 +320,9 @@ export interface TranslationDictionary {
 		seconds_short: string;
 		buffer: string;
 		simulation: string;
+		live_telemetry: string;
+		live_badge: string;
+		paused_badge: string;
 	};
 	home: {
 		hero_title_1: string;
@@ -439,6 +470,10 @@ export interface TranslationDictionary {
 		select_season: string;
 		red_bull_transfer_note: string;
 		rb_transfer_note: string;
+		sprint_season_desc: string;
+		sprint_points_breakdown: string;
+		no_driver_results: string;
+		team_fallback: string;
 	};
 	streams_page: {
 		engines_off_title: string;
@@ -730,6 +765,7 @@ export interface TranslationDictionary {
 		watch_on_yt: string;
 		loading: string;
 		official_recap: string;
+		official_sessions_video: string;
 	};
 	track_status: {
 		track_clear: string;

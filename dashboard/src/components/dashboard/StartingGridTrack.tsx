@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import F1CarTopDown from "./F1CarTopDown";
 import { useDriverModalStore } from "@/stores/useDriverModalStore";
 import { triggerHaptic } from "@/lib/haptics";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface DriverResult {
 	pos: string;
@@ -92,8 +93,9 @@ const TeamLogoMini: React.FC<{ teamName: string }> = ({ teamName }) => {
 
 export const StartingGridTrack: React.FC<StartingGridTrackProps> = ({
 	gridResults,
-	gpName = "Gran Premio de Las Vegas",
+	gpName = "",
 }) => {
+	const { t } = useTranslation();
 	const openDriverModal = useDriverModalStore((state) => state.open);
 
 	// Separar en filas de 2 monoplazas (Cajón impar izquierda, Cajón par derecha)
@@ -125,11 +127,11 @@ export const StartingGridTrack: React.FC<StartingGridTrackProps> = ({
 						<div className="flex items-center gap-2">
 							<span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
 							<span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-amber-400">
-								Parrilla Oficial de Salida · FIA
+								{t("parc_ferme.official_grid_fia", "Parrilla Oficial de Salida · FIA")}
 							</span>
 						</div>
 						<h3 className="text-xs sm:text-sm font-black text-white tracking-tight mt-0.5">
-							{gpName} · Recta Principal
+							{gpName} · {t("parc_ferme.main_straight", "Recta Principal")}
 						</h3>
 					</div>
 
@@ -156,7 +158,7 @@ export const StartingGridTrack: React.FC<StartingGridTrackProps> = ({
 							</span>
 						</div>
 						<div className="text-[10px] sm:text-[11px] text-zinc-400">
-							Primera Fila: <strong className="text-zinc-200">{sorted[0].code}</strong> &{" "}
+							{t("parc_ferme.front_row", "Primera Fila")}: <strong className="text-zinc-200">{sorted[0].code}</strong> &{" "}
 							<strong className="text-zinc-200">{sorted[1].code}</strong>
 						</div>
 					</div>
@@ -194,7 +196,7 @@ export const StartingGridTrack: React.FC<StartingGridTrackProps> = ({
 				<div className="relative z-20 pt-6 pb-4 px-6 flex flex-col items-center">
 					<div className="w-full flex items-center justify-center gap-2 py-1.5 px-4 bg-zinc-950/80 border-y-2 border-white/80 shadow-md">
 						<span className="text-[10px] font-black tracking-widest text-zinc-300 uppercase">
-							🏁 LÍNEA DE SALIDA / STARTING LINE · DIRECCIÓN DE CARRERA 🏁
+							{t("parc_ferme.starting_line_banner", "🏁 LÍNEA DE SALIDA · DIRECCIÓN DE CARRERA 🏁")}
 						</span>
 					</div>
 				</div>
@@ -205,7 +207,7 @@ export const StartingGridTrack: React.FC<StartingGridTrackProps> = ({
 						<div key={rowNum} className="relative">
 							{/* Etiqueta de Fila en el asfalto */}
 							<div className="absolute -left-1 sm:-left-3 top-1/2 -translate-y-1/2 -rotate-90 text-[8px] sm:text-[9px] font-black tracking-widest text-zinc-600 uppercase pointer-events-none">
-								FILA {rowNum}
+								{t("parc_ferme.row_label", "FILA")} {rowNum}
 							</div>
 
 							<div className="grid grid-cols-2 gap-3 sm:gap-6 items-start">

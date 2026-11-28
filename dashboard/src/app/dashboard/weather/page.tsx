@@ -201,7 +201,7 @@ export default function WeatherPage() {
 					<div className="border-b border-zinc-900 pb-2.5 flex flex-wrap items-center justify-between gap-2">
 						<span className="text-[#00A19B] font-bold tracking-wider text-xs shrink-0">{t("weather.weather_control", "// CONTROL METEOROLÓGICO")}</span>
 						<span className="text-[10px] sm:text-[11px] text-zinc-400 font-bold px-2 py-0.5 rounded bg-zinc-900/90 border border-zinc-800 shrink-0">
-							{isLiveSessionRunning ? "● EN VIVO" : "● PISTA EN PAUSA"}
+							{isLiveSessionRunning ? t("common.live_badge", "● EN VIVO") : t("common.paused_badge", "● PISTA EN PAUSA")}
 						</span>
 					</div>
 

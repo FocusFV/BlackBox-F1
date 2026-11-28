@@ -325,16 +325,16 @@ export default function DriverProfileModal() {
 	let posValue: string | number = "-";
 
 	if (isGridSession) {
-		posLabel = "Puesto de Salida";
+		posLabel = t("telemetry.grid_position", "Puesto de Salida");
 		posValue = driver.gridPos ?? driver.position ?? "-";
 	} else if (isQualySession) {
-		posLabel = "Posición Clasificación";
+		posLabel = t("telemetry.qualy_position", "Posición Clasificación");
 		posValue = driver.qualyPos ?? driver.position ?? timingDriver?.Position ?? "-";
 	} else if (isPracticeSession) {
-		posLabel = `Posición ${driver.sessionName || "Práctica"}`;
+		posLabel = `${t("standings_page.position_prefix", "Posición")} ${driver.sessionName || t("sessions.practice", "Práctica")}`;
 		posValue = driver.position ?? timingDriver?.Position ?? "-";
 	} else {
-		posLabel = isRaceSession ? "Posición en Pista" : t("telemetry.current_position", "Posición Actual");
+		posLabel = isRaceSession ? t("telemetry.track_position", "Posición en Pista") : t("telemetry.current_position", "Posición Actual");
 		posValue = timingDriver?.Position || driver.position || "-";
 	}
 
@@ -343,7 +343,7 @@ export default function DriverProfileModal() {
 	let middleValue: React.ReactNode = "-";
 
 	if (isGridSession) {
-		middleLabel = "Clasificación";
+		middleLabel = t("sessions.qualifying", "Clasificación");
 		if (driver.qualyPos) {
 			middleValue = `P${driver.qualyPos}`;
 		} else if (driver.gapTime && driver.gapTime !== "0.000") {
@@ -372,7 +372,7 @@ export default function DriverProfileModal() {
 	let rightColor = "text-zinc-400";
 
 	if (isGridSession) {
-		rightLabel = "Cambio en Grilla";
+		rightLabel = t("telemetry.grid_change", "Cambio en Grilla");
 		const delta = driver.delta ?? 0;
 		if (driver.penaltyNote) {
 			rightValue = driver.penaltyNote.includes("PEN") ? driver.penaltyNote : `PEN ${driver.penaltyNote}`;
@@ -384,13 +384,13 @@ export default function DriverProfileModal() {
 			rightValue = `▼ ${Math.abs(delta)} POS`;
 			rightColor = "text-red-400";
 		} else {
-			rightValue = "SIN CAMBIOS";
+			rightValue = t("telemetry.no_changes", "SIN CAMBIOS");
 			rightColor = "text-zinc-400";
 		}
 	} else if (isQualySession || isPracticeSession) {
-		rightLabel = "Vueltas en Sesión";
+		rightLabel = t("telemetry.session_laps", "Vueltas en Sesión");
 		const laps = driver.laps || sessionTotalLaps;
-		rightValue = laps ? `${laps} Vueltas` : "-";
+		rightValue = laps ? `${laps} ${t("telemetry.laps_unit", "Vueltas")}` : "-";
 		rightColor = "text-amber-400";
 	} else {
 		// Carrera en vivo
@@ -406,11 +406,11 @@ export default function DriverProfileModal() {
 
 	// 4. Etiqueta de la Pestaña
 	const tabLabel = isGridSession
-		? "Parrilla de Salida"
+		? t("parc_ferme.starting_grid", "Grilla de Salida")
 		: isQualySession
-		? "Clasificación"
+		? t("sessions.qualifying", "Clasificación")
 		: isPracticeSession
-		? (driver.sessionName || "Práctica")
+		? (driver.sessionName || t("sessions.practice", "Práctica"))
 		: t("standings_page.driver_modal_telemetry_tab", "Telemetría en Pista");
 
 	// 5. Cálculo inteligente de Sector 3 si está vacío pero existen S1, S2 y tiempo de vuelta
@@ -661,15 +661,15 @@ export default function DriverProfileModal() {
 								</span>
 								<div className="grid grid-cols-3 gap-2 text-center text-xs">
 									<div className="p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-900">
-										<span className="text-[9px] text-zinc-500 block">SECTOR 1</span>
+										<span className="text-[9px] text-zinc-500 block uppercase">{t("telemetry.sector_1", "Sector 1")}</span>
 										<span className="font-bold text-white">{rawS1 || "-"}</span>
 									</div>
 									<div className="p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-900">
-										<span className="text-[9px] text-zinc-500 block">SECTOR 2</span>
+										<span className="text-[9px] text-zinc-500 block uppercase">{t("telemetry.sector_2", "Sector 2")}</span>
 										<span className="font-bold text-white">{rawS2 || "-"}</span>
 									</div>
 									<div className="p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-900">
-										<span className="text-[9px] text-zinc-500 block">SECTOR 3</span>
+										<span className="text-[9px] text-zinc-500 block uppercase">{t("telemetry.sector_3", "Sector 3")}</span>
 										<span className="font-bold text-white">{rawS3 || "-"}</span>
 									</div>
 								</div>
@@ -775,13 +775,16 @@ export default function DriverProfileModal() {
 											{t("standings_page.driver_modal_sprint_points", "PUNTOS SPRINT")}
 										</span>
 										<span className="text-zinc-300 text-[11px] font-medium">
-											Carreras Sprint oficiales de la temporada
+											{t("standings_page.sprint_season_desc", "Carreras Sprint oficiales de la temporada")}
 										</span>
 									</div>
 									<div className="text-right">
 										<span className="text-amber-400 font-black">+{sprintPoints} PTS</span>
 										<span className="text-[9px] text-zinc-500 ml-1.5 hidden sm:inline">
-											({racePointsSum} en GP + {sprintPoints} Sprint = {officialTotalPoints} PTS)
+											{t("standings_page.sprint_points_breakdown", "({race} en GP + {sprint} Sprint = {total} PTS)")
+												.replace("{race}", String(racePointsSum))
+												.replace("{sprint}", String(sprintPoints))
+												.replace("{total}", String(officialTotalPoints))}
 										</span>
 									</div>
 								</div>

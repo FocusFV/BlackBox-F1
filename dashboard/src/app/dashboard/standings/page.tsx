@@ -1155,7 +1155,7 @@ export default function Standings() {
 								{teamsListSource && teamsListSource.map((team: any, index: number) => {
 									const cId = team.Constructor?.constructorId?.toLowerCase() || team.constructorId?.toLowerCase() || "";
 									const teamBorderColor = constructorColorMap[cId] || "#3f3f46";
-									const teamName = team.Constructor?.name || team.name || "Escudería";
+									const teamName = team.Constructor?.name || team.name || t("standings_page.team_fallback", "Escudería");
 
 									const posNum = parseInt(team.position, 10);
 									const isP1 = posNum === 1;
@@ -1353,16 +1353,19 @@ export default function Standings() {
 											<div className="flex items-center justify-between p-2.5 px-3 mb-2 rounded-xl bg-amber-500/10 border border-amber-500/30 font-mono text-xs shadow-xs">
 												<div className="flex items-center gap-2">
 													<span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-widest">
-														PUNTOS SPRINT
+														{t("standings_page.driver_modal_sprint_points", "PUNTOS SPRINT")}
 													</span>
 													<span className="text-zinc-300 text-[11px] font-medium">
-														Carreras Sprint oficiales de la temporada
+														{t("standings_page.sprint_season_desc", "Carreras Sprint oficiales de la temporada")}
 													</span>
 												</div>
 												<div className="text-right">
 													<span className="text-amber-400 font-black">+{sprintPoints} PTS</span>
 													<span className="text-[9px] text-zinc-500 ml-1.5 hidden sm:inline">
-														({racePointsSum} en GP + {sprintPoints} Sprint = {officialTotalPoints} PTS)
+														{t("standings_page.sprint_points_breakdown", "({race} en GP + {sprint} Sprint = {total} PTS)")
+															.replace("{race}", String(racePointsSum))
+															.replace("{sprint}", String(sprintPoints))
+															.replace("{total}", String(officialTotalPoints))}
 													</span>
 												</div>
 											</div>
@@ -1375,7 +1378,7 @@ export default function Standings() {
 										</div>
 									) : driverSeasonResults.length === 0 ? (
 										<div className="h-48 flex items-center justify-center text-zinc-500 text-xs text-center p-4">
-											Sin resultados de carrera registrados para este piloto en esta temporada.
+											{t("standings_page.no_driver_results", "Sin resultados de carrera registrados para este piloto en esta temporada.")}
 										</div>
 									) : (
 										<div className="flex flex-col gap-1.5 overflow-y-auto pr-1 no-scrollbar flex-1">
