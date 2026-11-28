@@ -90,14 +90,29 @@ const PILOTOS_CONFIG: Record<
 	},
 };
 
-function formatRemainingTime(ms: number): string {
-	if (ms <= 0) return "00:00:00";
+interface CountdownParts {
+	days: number;
+	hours: string;
+	minutes: string;
+	seconds: string;
+}
+
+function splitRemainingTime(ms: number): CountdownParts {
+	if (ms <= 0) {
+		return { days: 0, hours: "00", minutes: "00", seconds: "00" };
+	}
 	const totalSecs = Math.floor(ms / 1000);
-	const hours = Math.floor(totalSecs / 3600);
+	const days = Math.floor(totalSecs / 86400);
+	const hours = Math.floor((totalSecs % 86400) / 3600);
 	const minutes = Math.floor((totalSecs % 3600) / 60);
 	const seconds = totalSecs % 60;
 	const pad = (n: number) => n.toString().padStart(2, "0");
-	return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+	return {
+		days,
+		hours: pad(hours),
+		minutes: pad(minutes),
+		seconds: pad(seconds),
+	};
 }
 
 export default function StreamsPage() {
@@ -258,7 +273,7 @@ export default function StreamsPage() {
 	const [isLive, setIsLive] = useState<boolean>(false);
 	const [activeSessionName, setActiveSessionName] = useState<string | null>(null);
 	const [nextSessionName, setNextSessionName] = useState<string | null>(null);
-	const [countdownText, setCountdownText] = useState<string>("");
+	const [countdownParts, setCountdownParts] = useState<CountdownParts | null>(null);
 
 	// 📡 Verificación directa contra el backend en tiempo real de F1 (lluvia, banderas rojas, retrasos)
 	const [isBackendSessionLive, setIsBackendSessionLive] = useState<boolean>(false);
@@ -372,7 +387,7 @@ export default function StreamsPage() {
 					// En modo simulación o bypass manual, desbloquear DE INMEDIATO sin bloquear en pantalla de motores apagados
 					setIsLive(true);
 					setActiveSessionName(translateSessionName(displayTitle, language));
-					setCountdownText("");
+					setCountdownParts(null);
 				} else if (!isLiveRef.current && !isUnlockingRef.current) {
 					// 🚀 Secuencia animada de desbloqueo al llegar a los 15 min antes o por F1 en vivo
 					setIsUnlocking(true);
@@ -380,14 +395,14 @@ export default function StreamsPage() {
 					setTimeout(() => {
 						setIsLive(true);
 						setActiveSessionName(translateSessionName(displayTitle, language));
-						setCountdownText("");
+						setCountdownParts(null);
 						setTimeout(() => {
 							setIsUnlocking(false);
 						}, 200);
 					}, 950);
 				} else if (isLiveRef.current) {
 					setActiveSessionName(translateSessionName(displayTitle, language));
-					setCountdownText("");
+					setCountdownParts(null);
 				}
 			} else {
 				if (!bypassRef.current && !isUnlockingRef.current) {
@@ -397,9 +412,9 @@ export default function StreamsPage() {
 					setNextSessionName(rawNext ? translateSessionName(rawNext, language) : null);
 					if (status.nextSessionStart) {
 						const diff = Math.max(0, status.nextSessionStart - Date.now());
-						setCountdownText(formatRemainingTime(diff));
+						setCountdownParts(splitRemainingTime(diff));
 					} else {
-						setCountdownText("");
+						setCountdownParts(null);
 					}
 				}
 			}
@@ -508,18 +523,56 @@ export default function StreamsPage() {
 										<div className="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full w-full animate-pulse" />
 									</div>
 								</div>
-							) : nextSessionName && countdownText ? (
-								<div className="my-5 w-full px-4 py-3 rounded-2xl bg-zinc-950/80 border border-zinc-800/80 flex flex-col items-center">
+							) : nextSessionName && countdownParts ? (
+								<div className="my-5 w-full px-4 py-3.5 rounded-2xl bg-zinc-950/80 border border-zinc-800/80 flex flex-col items-center">
 									<span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
 										{t("streams_page.next_session_label", "Próxima Sesión:")}{" "}
 										<span className="text-amber-400 font-black">
 											{translateSessionName(nextSessionName, language)}
 										</span>
 									</span>
-									<span className="text-3xl font-black text-white font-mono mt-1 tracking-widest text-emerald-400 tabular-nums">
-										{countdownText}
-									</span>
-									<span className="text-[9px] text-zinc-500 mt-1">
+									<div className="flex items-center justify-center gap-2 sm:gap-3 mt-2.5 mb-1 font-mono">
+										{countdownParts.days > 0 && (
+											<>
+												<div className="flex flex-col items-center min-w-[44px]">
+													<span className="text-2xl sm:text-3xl font-black text-amber-400 tabular-nums leading-none">
+														{String(countdownParts.days).padStart(2, "0")}
+													</span>
+													<span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mt-1">
+														{language === "en" ? (countdownParts.days === 1 ? "DAY" : "DAYS") : language === "pt" ? (countdownParts.days === 1 ? "DIA" : "DIAS") : (countdownParts.days === 1 ? "DÍA" : "DÍAS")}
+													</span>
+												</div>
+												<span className="text-xl sm:text-2xl font-black text-zinc-600 -mt-3.5">:</span>
+											</>
+										)}
+										<div className="flex flex-col items-center min-w-[44px]">
+											<span className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-none">
+												{countdownParts.hours}
+											</span>
+											<span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mt-1">
+												{language === "en" ? "HRS" : "HS"}
+											</span>
+										</div>
+										<span className="text-xl sm:text-2xl font-black text-zinc-600 -mt-3.5">:</span>
+										<div className="flex flex-col items-center min-w-[44px]">
+											<span className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-none">
+												{countdownParts.minutes}
+											</span>
+											<span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mt-1">
+												MIN
+											</span>
+										</div>
+										<span className="text-xl sm:text-2xl font-black text-zinc-600 -mt-3.5">:</span>
+										<div className="flex flex-col items-center min-w-[44px]">
+											<span className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-none">
+												{countdownParts.seconds}
+											</span>
+											<span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mt-1">
+												{language === "en" ? "SEC" : "SEG"}
+											</span>
+										</div>
+									</div>
+									<span className="text-[9px] text-zinc-500 mt-1.5">
 										{t("streams_page.lock_notice", "El candado se abre automáticamente 15 minutos antes")}
 									</span>
 								</div>
